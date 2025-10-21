@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 export default function Navbar({
   theme,
   setTheme,
@@ -9,6 +11,8 @@ export default function Navbar({
   mallaSeleccionada,
   onAprobarHastaSemestre,
 }) {
+  const [colapsado, setColapsado] = useState(true);
+
   const themes = [
     { id: "aurora", name: "Aurora Blue" },
     { id: "sunset", name: "Sunset Pink" },
@@ -18,19 +22,23 @@ export default function Navbar({
   ];
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
+  const handleAprobar = (num) => onAprobarHastaSemestre(num);
 
-  const handleAprobar = (num) => {
-    onAprobarHastaSemestre(num);
-  };
+  useEffect(() => {
+    document.body.style.overflowX = "hidden";
+    document.body.style.overscrollBehaviorY = "contain";
+  }, []);
 
   return (
-    <nav className="w-full border-b border-borderColor bg-bgSecondary/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-        {/* Título de carrera */}
-        <div className="flex flex-col leading-tight">
+    <nav className="w-full border-b border-borderColor bg-bgSecondary/70 backdrop-blur-md sticky top-0 z-50 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col items-center gap-3">
+        {/* Encabezado principal */}
+        <div className="text-center">
           {mallaSeleccionada && (
             <>
-              <h1 className="font-bold text-lg">{mallaSeleccionada.nombre}</h1>
+              <h1 className="font-bold text-lg text-textPrimary tracking-tight">
+                {mallaSeleccionada.nombre}
+              </h1>
               <span className="text-sm text-textSecondary">
                 {mallaSeleccionada.url.includes("uch")
                   ? "Universidad de Chile"
@@ -39,16 +47,35 @@ export default function Navbar({
             </>
           )}
         </div>
-        <div>
-          <span className="text-sm text-textSecondary">
-            {" "}
-            CTRL + CLIC para marcar asignanturas cursadas actualmente
-          </span>
+
+        {/* Línea divisoria con flecha */}
+        <div className="relative w-full border-t border-borderColor mt-2 mb-1 flex justify-center">
+          <button
+            onClick={() => setColapsado(!colapsado)}
+            className="absolute -top-3 bg-bgSecondary px-2 rounded-full border border-borderColor shadow-sm 
+                       transition-all duration-300 hover:scale-110 focus:outline-none"
+            title={colapsado ? "Mostrar controles" : "Ocultar controles"}
+          >
+            <span
+              className={`block text-xl transition-transform duration-300 ${
+                colapsado
+                  ? "rotate-0 text-primary"
+                  : "rotate-180 text-yellow-400"
+              }`}
+            >
+              ▼
+            </span>
+          </button>
         </div>
-        {/* Controles */}
-        <div className="flex items-center space-x-4">
-          {/* 📘 Marcar hasta semestre */}
-          <div className="relative group">
+
+        {/* Controles colapsables */}
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-in-out w-full ${
+            colapsado ? "max-h-0 opacity-0" : "max-h-[600px] opacity-100"
+          }`}
+        >
+          <div className="flex flex-col lg:flex-row flex-wrap items-center justify-between gap-4 pt-4">
+            {/* 📘 Marcar hasta semestre */}
             <select
               onChange={(e) => handleAprobar(Number(e.target.value))}
               defaultValue=""
@@ -67,41 +94,30 @@ export default function Navbar({
                 </option>
               ))}
             </select>
-            <span className="absolute right-3 top-2.5 text-white text-sm pointer-events-none">
-              ▼
-            </span>
 
-            {/* Tooltip */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-[110%] w-56 bg-bgSecondary text-textPrimary border border-borderColor text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 pointer-events-none shadow-md transition-all duration-300">
-              Marca todos los ramos desde el primer semestre hasta el
-              seleccionado como aprobados.
-            </div>
-          </div>
+            {/* Selector de tema */}
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className="rounded-md px-3 py-2 border border-borderColor bg-bgPrimary text-textPrimary hover:shadow focus:ring-2 focus:ring-primary transition-all"
+            >
+              {themes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
 
-          {/* Selector de tema */}
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            className="rounded-md px-3 py-2 border border-borderColor bg-bgPrimary text-textPrimary hover:shadow focus:ring-2 focus:ring-primary transition-all"
-          >
-            {themes.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
+            {/* Modo oscuro */}
+            <button
+              onClick={toggleDarkMode}
+              className="w-10 h-10 rounded-full bg-bgPrimary border border-borderColor flex items-center justify-center text-xl transition-all hover:scale-110"
+              title="Cambiar modo"
+            >
+              {darkMode ? "🌙" : "🌞"}
+            </button>
 
-          {/* Modo oscuro */}
-          <button
-            onClick={toggleDarkMode}
-            className="w-10 h-10 rounded-full bg-bgPrimary border border-borderColor flex items-center justify-center text-xl transition-all hover:scale-110"
-            title="Cambiar modo"
-          >
-            {darkMode ? "🌙" : "🌞"}
-          </button>
-
-          {/* Botón de modo excepcional */}
-          <div className="relative group">
+            {/* Botón modo excepcional */}
             <button
               onClick={() => setModoExcepcional(!modoExcepcional)}
               className={`px-4 py-2 rounded-md font-medium transition-all relative ${
@@ -118,14 +134,14 @@ export default function Navbar({
               )}
             </button>
 
-            {/* Tooltip */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-[110%] w-64 bg-bgSecondary text-textPrimary border border-borderColor text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 pointer-events-none shadow-md transition-all duration-300">
-              <p className="font-semibold mb-1">Modo Excepcional</p>
-              <p className="text-textSecondary text-xs leading-tight">
-                Permite marcar un ramo como <b>aprobado extraordinariamente</b>,
-                incluso si no cumple los prerrequisitos. Haz clic nuevamente
-                para desmarcarlo.
-              </p>
+            {/* Texto de ayuda */}
+            <div className="text-center w-full pt-2">
+              <span className="hidden sm:inline text-sm text-textSecondary">
+                CTRL + CLIC para marcar asignaturas cursadas actualmente
+              </span>
+              <span className="inline sm:hidden text-sm text-textSecondary">
+                Mantén presionado para marcar asignaturas cursadas
+              </span>
             </div>
           </div>
         </div>

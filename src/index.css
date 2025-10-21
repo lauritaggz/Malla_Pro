@@ -95,6 +95,11 @@
   --golden-shadow: rgba(217, 119, 6, 0.1);
 }
 
+html,
+body {
+  overscroll-behavior-y: contain; /* evita el salto de scroll en iOS */
+}
+
 /* ===== Temas claros ===== */
 .aurora.light {
   --primary: var(--aurora-primary);
