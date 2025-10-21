@@ -14,14 +14,6 @@
           "area": "quimica"
         },
         {
-          "id": 2,
-          "codigo": "TLQ",
-          "nombre": "Técnicas de Laboratorio Químico",
-          "sct": 4,
-          "prerrequisitos": [],
-          "area": "quimica"
-        },
-        {
           "id": 3,
           "codigo": "IAC",
           "nombre": "Introducción al Álgebra y Cálculo",
@@ -30,12 +22,12 @@
           "area": "matematica"
         },
         {
-          "id": 4,
-          "codigo": "OF",
-          "nombre": "Orientación Farmacéutica",
-          "sct": 3,
+          "id": 2,
+          "codigo": "TLQ",
+          "nombre": "Técnicas de Laboratorio Químico",
+          "sct": 4,
           "prerrequisitos": [],
-          "area": "farmacia"
+          "area": "quimica"
         },
         {
           "id": 5,
@@ -44,6 +36,14 @@
           "sct": 4,
           "prerrequisitos": [],
           "area": "formacion"
+        },
+        {
+          "id": 4,
+          "codigo": "OF",
+          "nombre": "Orientación Farmacéutica",
+          "sct": 3,
+          "prerrequisitos": [],
+          "area": "farmacia"
         },
         {
           "id": 6,
@@ -59,19 +59,19 @@
       "numero": 2,
       "cursos": [
         {
+          "id": 10,
+          "codigo": "CDI",
+          "nombre": "Cálculo Diferencial e Integral",
+          "sct": 6,
+          "prerrequisitos": [3],
+          "area": "matematica"
+        },
+        {
           "id": 7,
           "codigo": "QG2",
           "nombre": "Química General II",
           "sct": 5,
           "prerrequisitos": [1],
-          "area": "quimica"
-        },
-        {
-          "id": 8,
-          "codigo": "LQG",
-          "nombre": "Laboratorio de Química General",
-          "sct": 3,
-          "prerrequisitos": [1, 2],
           "area": "quimica"
         },
         {
@@ -83,12 +83,20 @@
           "area": "fisica"
         },
         {
-          "id": 10,
-          "codigo": "CDI",
-          "nombre": "Cálculo Diferencial e Integral",
-          "sct": 6,
-          "prerrequisitos": [3],
-          "area": "matematica"
+          "id": 12,
+          "codigo": "BC",
+          "nombre": "Biología Celular",
+          "sct": 5,
+          "prerrequisitos": [2],
+          "area": "biologia"
+        },
+        {
+          "id": 8,
+          "codigo": "LQG",
+          "nombre": "Laboratorio de Química General",
+          "sct": 3,
+          "prerrequisitos": [1, 2],
+          "area": "quimica"
         },
         {
           "id": 11,
@@ -99,27 +107,11 @@
           "area": "quimica"
         },
         {
-          "id": 12,
-          "codigo": "BC",
-          "nombre": "Biología Celular",
-          "sct": 5,
-          "prerrequisitos": [2],
-          "area": "biologia"
-        },
-        {
           "id": 13,
           "codigo": "ING2",
           "nombre": "Inglés II",
           "sct": 3,
           "prerrequisitos": [6],
-          "area": "formacion"
-        },
-        {
-          "id": 14,
-          "codigo": "CFG2",
-          "nombre": "Curso de Formación General",
-          "sct": 2,
-          "prerrequisitos": [],
           "area": "formacion"
         }
       ]
@@ -128,12 +120,12 @@
       "numero": 3,
       "cursos": [
         {
-          "id": 15,
-          "codigo": "ING3",
-          "nombre": "Inglés III",
-          "sct": 3,
-          "prerrequisitos": [13],
-          "area": "formacion"
+          "id": 21,
+          "codigo": "FISIOCEL",
+          "nombre": "Fisiología Celular",
+          "sct": 5,
+          "prerrequisitos": [9, 12],
+          "area": "biologia"
         },
         {
           "id": 16,
@@ -168,6 +160,14 @@
           "area": "matematica"
         },
         {
+          "id": 15,
+          "codigo": "ING3",
+          "nombre": "Inglés III",
+          "sct": 3,
+          "prerrequisitos": [13],
+          "area": "formacion"
+        },
+        {
           "id": 20,
           "codigo": "FCF",
           "nombre": "Fundamentos de Ciencias Farmacéuticas",
@@ -176,12 +176,12 @@
           "area": "farmacia"
         },
         {
-          "id": 21,
-          "codigo": "FISIOCEL",
-          "nombre": "Fisiología Celular",
-          "sct": 5,
-          "prerrequisitos": [9, 12],
-          "area": "biologia"
+          "id": 14,
+          "codigo": "CFG2",
+          "nombre": "Curso de Formación General",
+          "sct": 2,
+          "prerrequisitos": [],
+          "area": "formacion"
         }
       ]
     },
@@ -189,19 +189,19 @@
       "numero": 4,
       "cursos": [
         {
+          "id": 25,
+          "codigo": "FQ1",
+          "nombre": "Fisicoquímica I",
+          "sct": 6,
+          "prerrequisitos": [9, 10, 16],
+          "area": "quimica"
+        },
+        {
           "id": 22,
           "codigo": "QO2",
           "nombre": "Química Orgánica II",
           "sct": 5,
           "prerrequisitos": [16],
-          "area": "quimica"
-        },
-        {
-          "id": 23,
-          "codigo": "LAQ",
-          "nombre": "Laboratorio de Análisis Químico",
-          "sct": 4,
-          "prerrequisitos": [8, 17, 19],
           "area": "quimica"
         },
         {
@@ -213,20 +213,20 @@
           "area": "quimica"
         },
         {
-          "id": 25,
-          "codigo": "FQ1",
-          "nombre": "Fisicoquímica I",
-          "sct": 6,
-          "prerrequisitos": [9, 10, 16],
-          "area": "quimica"
-        },
-        {
           "id": 26,
           "codigo": "FS",
           "nombre": "Fisiología de Sistemas",
           "sct": 4,
           "prerrequisitos": [21],
           "area": "biologia"
+        },
+        {
+          "id": 23,
+          "codigo": "LAQ",
+          "nombre": "Laboratorio de Análisis Químico",
+          "sct": 4,
+          "prerrequisitos": [8, 17, 19],
+          "area": "quimica"
         },
         {
           "id": 27,
@@ -242,20 +242,20 @@
       "numero": 5,
       "cursos": [
         {
-          "id": 28,
-          "codigo": "LAI",
-          "nombre": "Laboratorio de Análisis Instrumental",
-          "sct": 4,
-          "prerrequisitos": [23, 24],
-          "area": "quimica"
-        },
-        {
           "id": 29,
           "codigo": "BF",
           "nombre": "Botánica y Farmacognosia",
           "sct": 7,
           "prerrequisitos": [22, 24],
           "area": "biologia"
+        },
+        {
+          "id": 32,
+          "codigo": "FARMG",
+          "nombre": "Farmacología General",
+          "sct": 6,
+          "prerrequisitos": [23, 26],
+          "area": "farmacia"
         },
         {
           "id": 30,
@@ -274,12 +274,12 @@
           "area": "biologia"
         },
         {
-          "id": 32,
-          "codigo": "FARMG",
-          "nombre": "Farmacología General",
-          "sct": 6,
-          "prerrequisitos": [23, 26],
-          "area": "farmacia"
+          "id": 28,
+          "codigo": "LAI",
+          "nombre": "Laboratorio de Análisis Instrumental",
+          "sct": 4,
+          "prerrequisitos": [23, 24],
+          "area": "quimica"
         },
         {
           "id": 33,
@@ -295,20 +295,20 @@
       "numero": 6,
       "cursos": [
         {
-          "id": 34,
-          "codigo": "MICRO",
-          "nombre": "Microbiología",
-          "sct": 5,
-          "prerrequisitos": [32],
-          "area": "biologia"
-        },
-        {
           "id": 35,
           "codigo": "FQF",
           "nombre": "Fisicoquímica Farmacéutica",
           "sct": 6,
           "prerrequisitos": [25],
           "area": "quimica"
+        },
+        {
+          "id": 34,
+          "codigo": "MICRO",
+          "nombre": "Microbiología",
+          "sct": 5,
+          "prerrequisitos": [32],
+          "area": "biologia"
         },
         {
           "id": 36,
@@ -319,26 +319,34 @@
           "area": "biologia"
         },
         {
-          "id": 37,
-          "codigo": "LEG",
-          "nombre": "Legislación Farmacéutica",
-          "sct": 4,
-          "prerrequisitos": [27, 34],
-          "area": "formacion"
-        },
-        {
           "id": 38,
           "codigo": "FSY",
           "nombre": "Fisiopatología y Semiología",
           "sct": 5,
           "prerrequisitos": [36],
           "area": "biologia"
+        },
+        {
+          "id": 37,
+          "codigo": "LEG",
+          "nombre": "Legislación Farmacéutica",
+          "sct": 4,
+          "prerrequisitos": [27, 34],
+          "area": "formacion"
         }
       ]
     },
     {
       "numero": 7,
       "cursos": [
+        {
+          "id": 41,
+          "codigo": "TF1",
+          "nombre": "Tecnología Farmacéutica I",
+          "sct": 6,
+          "prerrequisitos": [39, 40],
+          "area": "farmacia"
+        },
         {
           "id": 39,
           "codigo": "FQ1",
@@ -353,14 +361,6 @@
           "nombre": "Farmacología de Sistemas I",
           "sct": 5,
           "prerrequisitos": [33],
-          "area": "farmacia"
-        },
-        {
-          "id": 41,
-          "codigo": "TF1",
-          "nombre": "Tecnología Farmacéutica I",
-          "sct": 6,
-          "prerrequisitos": [39, 40],
           "area": "farmacia"
         },
         {
@@ -409,6 +409,30 @@
           "area": "farmacia"
         },
         {
+          "id": 49,
+          "codigo": "FC",
+          "nombre": "Farmacología Clínica",
+          "sct": 6,
+          "prerrequisitos": [43, 49, 50],
+          "area": "farmacia"
+        },
+        {
+          "id": 51,
+          "codigo": "TOX",
+          "nombre": "Toxicología",
+          "sct": 5,
+          "prerrequisitos": [43, 49],
+          "area": "farmacia"
+        },
+        {
+          "id": 50,
+          "codigo": "BROM",
+          "nombre": "Bromatología",
+          "sct": 4,
+          "prerrequisitos": [29, 48],
+          "area": "quimica"
+        },
+        {
           "id": 47,
           "codigo": "AGF",
           "nombre": "Administración y Gestión Farmacéutica",
@@ -423,36 +447,36 @@
           "sct": 3,
           "prerrequisitos": [17, 44],
           "area": "matematica"
-        },
-        {
-          "id": 49,
-          "codigo": "FC",
-          "nombre": "Farmacología Clínica",
-          "sct": 6,
-          "prerrequisitos": [43, 49, 50],
-          "area": "farmacia"
-        },
-        {
-          "id": 50,
-          "codigo": "BROM",
-          "nombre": "Bromatología",
-          "sct": 4,
-          "prerrequisitos": [29, 48],
-          "area": "quimica"
-        },
-        {
-          "id": 51,
-          "codigo": "TOX",
-          "nombre": "Toxicología",
-          "sct": 5,
-          "prerrequisitos": [43, 49],
-          "area": "farmacia"
         }
       ]
     },
     {
       "numero": 9,
       "cursos": [
+        {
+          "id": 56,
+          "codigo": "PPFC",
+          "nombre": "Práctica Profesional en Farmacia Comunitaria",
+          "sct": 7,
+          "prerrequisitos": [52, 54, 56],
+          "area": "otros"
+        },
+        {
+          "id": 55,
+          "codigo": "FC2",
+          "nombre": "Farmacia Clínica",
+          "sct": 5,
+          "prerrequisitos": [54],
+          "area": "farmacia"
+        },
+        {
+          "id": 54,
+          "codigo": "EE1",
+          "nombre": "Electivo Especializado",
+          "sct": 7,
+          "prerrequisitos": [],
+          "area": "otros"
+        },
         {
           "id": 52,
           "codigo": "FA",
@@ -468,36 +492,20 @@
           "sct": 4,
           "prerrequisitos": [51],
           "area": "farmacia"
-        },
-        {
-          "id": 54,
-          "codigo": "EE1",
-          "nombre": "Electivo Especializado",
-          "sct": 7,
-          "prerrequisitos": [],
-          "area": "otros"
-        },
-        {
-          "id": 55,
-          "codigo": "FC2",
-          "nombre": "Farmacia Clínica",
-          "sct": 5,
-          "prerrequisitos": [54],
-          "area": "farmacia"
-        },
-        {
-          "id": 56,
-          "codigo": "PPFC",
-          "nombre": "Práctica Profesional en Farmacia Comunitaria",
-          "sct": 7,
-          "prerrequisitos": [52, 54, 56],
-          "area": "otros"
         }
       ]
     },
     {
       "numero": 10,
       "cursos": [
+        {
+          "id": 60,
+          "codigo": "EE2",
+          "nombre": "Electivos Especializados",
+          "sct": 8,
+          "prerrequisitos": [],
+          "area": "otros"
+        },
         {
           "id": 57,
           "codigo": "BIOF",
@@ -521,14 +529,6 @@
           "sct": 3,
           "prerrequisitos": [53],
           "area": "formacion"
-        },
-        {
-          "id": 60,
-          "codigo": "EE2",
-          "nombre": "Electivos Especializados",
-          "sct": 8,
-          "prerrequisitos": [],
-          "area": "otros"
         }
       ]
     },
