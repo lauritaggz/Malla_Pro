@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Variables de color por tema ===== */
+:root {
+  --aurora-primary: #2563eb;
+  --aurora-bgPrimary: #f1f5f9;
+  --aurora-bgSecondary: #e2e8f0;
+  --aurora-textPrimary: #0f172a;
+  --aurora-textSecondary: #475569;
+  --aurora-border: #cbd5e1;
+
+  --sunset-primary: #f43f5e;
+  --sunset-bgPrimary: #fff1f2;
+  --sunset-bgSecondary: #ffe4e6;
+  --sunset-textPrimary: #881337;
+  --sunset-textSecondary: #be123c;
+  --sunset-border: #fecdd3;
+
+  --emerald-primary: #059669;
+  --emerald-bgPrimary: #f0fdf4;
+  --emerald-bgSecondary: #dcfce7;
+  --emerald-textPrimary: #064e3b;
+  --emerald-textSecondary: #15803d;
+  --emerald-border: #bbf7d0;
+
+  --midnight-primary: #7c3aed;
+  --midnight-bgPrimary: #ede9fe;
+  --midnight-bgSecondary: #ddd6fe;
+  --midnight-textPrimary: #2e1065;
+  --midnight-textSecondary: #4c1d95;
+  --midnight-border: #c4b5fd;
+
+  --golden-primary: #d97706;
+  --golden-bgPrimary: #fefce8;
+  --golden-bgSecondary: #fef9c3;
+  --golden-textPrimary: #713f12;
+  --golden-textSecondary: #b45309;
+  --golden-border: #fde68a;
+}
+
+/* ===== Temas claros ===== */
+.aurora.light {
+  --primary: var(--aurora-primary);
+  --bgPrimary: var(--aurora-bgPrimary);
+  --bgSecondary: var(--aurora-bgSecondary);
+  --textPrimary: var(--aurora-textPrimary);
+  --textSecondary: var(--aurora-textSecondary);
+  --borderColor: var(--aurora-border);
+}
+
+.sunset.light {
+  --primary: var(--sunset-primary);
+  --bgPrimary: var(--sunset-bgPrimary);
+  --bgSecondary: var(--sunset-bgSecondary);
+  --textPrimary: var(--sunset-textPrimary);
+  --textSecondary: var(--sunset-textSecondary);
+  --borderColor: var(--sunset-border);
+}
+
+.emerald.light {
+  --primary: var(--emerald-primary);
+  --bgPrimary: var(--emerald-bgPrimary);
+  --bgSecondary: var(--emerald-bgSecondary);
+  --textPrimary: var(--emerald-textPrimary);
+  --textSecondary: var(--emerald-textSecondary);
+  --borderColor: var(--emerald-border);
+}
+
+.midnight.light {
+  --primary: var(--midnight-primary);
+  --bgPrimary: var(--midnight-bgPrimary);
+  --bgSecondary: var(--midnight-bgSecondary);
+  --textPrimary: var(--midnight-textPrimary);
+  --textSecondary: var(--midnight-textSecondary);
+  --borderColor: var(--midnight-border);
+}
+
+.golden.light {
+  --primary: var(--golden-primary);
+  --bgPrimary: var(--golden-bgPrimary);
+  --bgSecondary: var(--golden-bgSecondary);
+  --textPrimary: var(--golden-textPrimary);
+  --textSecondary: var(--golden-textSecondary);
+  --borderColor: var(--golden-border);
+}
+
+/* ===== Modo oscuro ===== */
+.aurora.dark {
+  --primary: #60a5fa;
+  --bgPrimary: #0f172a;
+  --bgSecondary: #1e293b;
+  --textPrimary: #f8fafc;
+  --textSecondary: #94a3b8;
+  --borderColor: #334155;
+}
+
+.sunset.dark {
+  --primary: #fb7185;
+  --bgPrimary: #111827;
+  --bgSecondary: #1f2937;
+  --textPrimary: #f9fafb;
+  --textSecondary: #fca5a5;
+  --borderColor: #374151;
+}
+
+.emerald.dark {
+  --primary: #34d399;
+  --bgPrimary: #064e3b;
+  --bgSecondary: #065f46;
+  --textPrimary: #ecfdf5;
+  --textSecondary: #6ee7b7;
+  --borderColor: #047857;
+}
+
+.midnight.dark {
+  --primary: #a78bfa;
+  --bgPrimary: #1e1b4b;
+  --bgSecondary: #312e81;
+  --textPrimary: #f5f3ff;
+  --textSecondary: #c4b5fd;
+  --borderColor: #4338ca;
+}
+
+.golden.dark {
+  --primary: #fbbf24;
+  --bgPrimary: #1c1917;
+  --bgSecondary: #292524;
+  --textPrimary: #fafaf9;
+  --textSecondary: #eab308;
+  --borderColor: #44403c;
+}
+
+/* ===== Colores globales ===== */
+body {
+  background-color: var(--bgPrimary);
+  color: var(--textPrimary);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+.text-primary {
+  color: var(--primary);
+}
+.bg-bgPrimary {
+  background-color: var(--bgPrimary);
+}
+.bg-bgSecondary {
+  background-color: var(--bgSecondary);
+}
+.text-textPrimary {
+  color: var(--textPrimary);
+}
+.text-textSecondary {
+  color: var(--textSecondary);
+}
+.border-borderColor {
+  border-color: var(--borderColor);
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* ===== Scroll suave tipo dashboard ===== */
+::-webkit-scrollbar {
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--borderColor);
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+  opacity: 0.8;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ===== Animaciones suaves ===== */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* ===== Scroll horizontal profesional ===== */
+.scroll-container {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borderColor) transparent;
+}
+
+/* Chrome / Edge / Safari */
+.scroll-container::-webkit-scrollbar {
+  height: 10px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: var(--borderColor);
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* Suaviza el scroll y estiliza la barra horizontal */
+.scroll-container {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borderColor) transparent;
+}
+.scroll-container::-webkit-scrollbar {
+  height: 10px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: var(--borderColor);
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+
+/* Mejora UX mientras arrastras */
+.dragging {
+  cursor: grabbing !important;
+  user-select: none;
+}
+/* ===== Scroll horizontal profesional ===== */
+.scroll-container {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borderColor) transparent;
+}
+.scroll-container::-webkit-scrollbar {
+  height: 10px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: var(--borderColor);
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ===== Efecto mientras arrastras ===== */
+.dragging {
+  cursor: grabbing !important;
+  user-select: none;
+}
+/* ===== Scroll horizontal profesional ===== */
+.scroll-container {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borderColor) transparent;
+}
+.scroll-container::-webkit-scrollbar {
+  height: 10px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background-color: var(--borderColor);
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ===== Efecto durante arrastre ===== */
+.dragging {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+/* ===== Responsividad avanzada ===== */
+@media (max-width: 768px) {
+  .scroll-container {
+    padding-bottom: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .min-w-\[460px\] {
+    min-width: 380px !important;
+  }
+  .min-w-\[210px\] {
+    min-width: 180px !important;
+  }
+}
+@media (max-width: 480px) {
+  .min-w-\[460px\] {
+    min-width: 320px !important;
+  }
+  .min-w-\[210px\] {
+    min-width: 150px !important;
+  }
+}
