@@ -30,7 +30,7 @@ export default function Navbar({
   }, []);
 
   return (
-    <nav className="w-full border-b border-borderColor bg-bgSecondary/70 backdrop-blur-md sticky top-0 z-50 overflow-x-hidden">
+    <nav className="w-full border-b border-borderColor bg-bgSecondary/70 backdrop-blur-md sticky top-0 z-50 overflow-hidden touch-pan-y">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col items-center gap-3">
         {/* Encabezado principal */}
         <div className="text-center">

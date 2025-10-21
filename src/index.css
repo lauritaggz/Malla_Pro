@@ -97,7 +97,18 @@
 
 html,
 body {
-  overscroll-behavior-y: contain; /* evita el salto de scroll en iOS */
+  width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: contain;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+* {
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 
 /* ===== Temas claros ===== */
