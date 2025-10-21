@@ -24,10 +24,10 @@ export default function Navbar({
   };
 
   return (
-    <nav className="w-full border-b border-borderColor sticky top-0 z-50 glass-effect-strong">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-2 md:gap-0">
+    <nav className="w-full border-b border-borderColor bg-bgSecondary/80 backdrop-blur-md sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* Título de carrera */}
-        <div className="flex flex-col leading-tight text-center md:text-left w-full md:w-auto">
+        <div className="flex flex-col leading-tight">
           {mallaSeleccionada && (
             <>
               <h1 className="font-bold text-lg">{mallaSeleccionada.nombre}</h1>
@@ -39,21 +39,21 @@ export default function Navbar({
             </>
           )}
         </div>
-        <div className="hidden md:block">
+        <div>
           <span className="text-sm text-textSecondary">
             {" "}
-            CTRL + CLIC para marcar asignaturas cursadas actualmente
+            CTRL + CLIC para marcar asignanturas cursadas actualmente
           </span>
         </div>
         {/* Controles */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 w-full md:w-auto">
+        <div className="flex items-center space-x-4">
           {/* 📘 Marcar hasta semestre */}
           <div className="relative group">
             <select
               onChange={(e) => handleAprobar(Number(e.target.value))}
               defaultValue=""
-              className="appearance-none bg-primary text-white px-3 sm:px-4 py-2 pr-8 sm:pr-10 rounded-md cursor-pointer 
-                         text-sm sm:text-base shadow hover:shadow-lg hover:scale-105 transition-all outline-none border-none"
+              className="appearance-none bg-primary text-white px-4 py-2 pr-10 rounded-md cursor-pointer 
+                         shadow hover:shadow-lg hover:scale-105 transition-all outline-none border-none"
               title="Marcar todos los ramos hasta un semestre como aprobados"
             >
               <option value="">📘 Marcar hasta</option>
@@ -67,12 +67,12 @@ export default function Navbar({
                 </option>
               ))}
             </select>
-            <span className="absolute right-2 sm:right-3 top-2.5 text-white text-sm pointer-events-none">
+            <span className="absolute right-3 top-2.5 text-white text-sm pointer-events-none">
               ▼
             </span>
 
-            {/* Tooltip - Solo visible en desktop */}
-            <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-[110%] w-56 bg-bgSecondary text-textPrimary border border-borderColor text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 pointer-events-none shadow-md transition-all duration-300">
+            {/* Tooltip */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-[110%] w-56 bg-bgSecondary text-textPrimary border border-borderColor text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 pointer-events-none shadow-md transition-all duration-300">
               Marca todos los ramos desde el primer semestre hasta el
               seleccionado como aprobados.
             </div>
@@ -82,7 +82,7 @@ export default function Navbar({
           <select
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            className="rounded-md px-2 sm:px-3 py-2 border border-borderColor bg-bgPrimary text-textPrimary text-sm sm:text-base hover:shadow focus:ring-2 focus:ring-primary transition-all"
+            className="rounded-md px-3 py-2 border border-borderColor bg-bgPrimary text-textPrimary hover:shadow focus:ring-2 focus:ring-primary transition-all"
           >
             {themes.map((t) => (
               <option key={t.id} value={t.id}>
@@ -104,7 +104,7 @@ export default function Navbar({
           <div className="relative group">
             <button
               onClick={() => setModoExcepcional(!modoExcepcional)}
-              className={`px-3 sm:px-4 py-2 rounded-md font-medium text-sm sm:text-base transition-all relative ${
+              className={`px-4 py-2 rounded-md font-medium transition-all relative ${
                 modoExcepcional
                   ? "bg-yellow-400 text-yellow-900 shadow-lg scale-105"
                   : "bg-primary text-white hover:shadow-lg hover:scale-105"
@@ -118,8 +118,8 @@ export default function Navbar({
               )}
             </button>
 
-            {/* Tooltip - Solo visible en desktop */}
-            <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-[110%] w-64 bg-bgSecondary text-textPrimary border border-borderColor text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 pointer-events-none shadow-md transition-all duration-300">
+            {/* Tooltip */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-[110%] w-64 bg-bgSecondary text-textPrimary border border-borderColor text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 pointer-events-none shadow-md transition-all duration-300">
               <p className="font-semibold mb-1">Modo Excepcional</p>
               <p className="text-textSecondary text-xs leading-tight">
                 Permite marcar un ramo como <b>aprobado extraordinariamente</b>,
@@ -127,13 +127,6 @@ export default function Navbar({
                 para desmarcarlo.
               </p>
             </div>
-          </div>
-
-          {/* Instrucción para móvil */}
-          <div className="w-full text-center md:hidden">
-            <span className="text-xs text-textSecondary">
-              Mantén presionado para marcar asignaturas cursadas
-            </span>
           </div>
         </div>
       </div>
