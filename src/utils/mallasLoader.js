@@ -2,20 +2,7 @@
 export async function listarMallas() {
   const universidades = [
     {
-      universidad: "UCH",
-      mallas: [
-        {
-          nombre: "Química y Farmacia",
-          url: "/mallas/uch/QyF.json",
-        },
-        {
-          nombre: "Bioquímica",
-          url: "/mallas/uch/BQ.json",
-        },
-      ],
-    },
-    {
-      universidad: "UNAB",
+      universidad: "Universidad Andrés Bello",
       mallas: [
         {
           nombre: "Ingeniería Civil Industrial",
@@ -24,6 +11,10 @@ export async function listarMallas() {
         {
           nombre: "Ingeniería en Computación e Informática",
           url: "/mallas/unab/Comp.json",
+        },
+        {
+          nombre: "Geología",
+          url: "/mallas/unab/Geo.json",
         },
       ],
     },
