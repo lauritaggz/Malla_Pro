@@ -6,6 +6,8 @@ export default function MallaViewer({
   mallaSeleccionada,
   modoExcepcional,
   setExcepcionesActivas,
+  onTotalCursosChange,
+  onSemestresLoaded,
 }) {
   const [malla, setMalla] = useState(null);
   const [aprobados, setAprobados] = useState(
@@ -18,7 +20,7 @@ export default function MallaViewer({
     JSON.parse(localStorage.getItem("malla-cursando")) || []
   );
 
-  // 🔹 Ref y estados para drag
+  // 🔹 Ref y estados para drag horizontal
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragMoved, setDragMoved] = useState(0);
@@ -30,16 +32,19 @@ export default function MallaViewer({
         const res = await fetch(mallaSeleccionada.url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        const totalSemestres = data.semestres?.length || 0;
         setMalla({
           nombre: data.carrera || "Malla sin nombre",
           semestres: data.semestres || [],
+          totalSemestres,
         });
+        onSemestresLoaded?.(totalSemestres);
       } catch (err) {
         console.error("Error al cargar malla:", err);
       }
     }
     cargar();
-  }, [mallaSeleccionada]);
+  }, [mallaSeleccionada, onSemestresLoaded]);
 
   // ✅ Guardar en localStorage
   useEffect(() => {
@@ -48,6 +53,20 @@ export default function MallaViewer({
     localStorage.setItem("malla-excepciones", JSON.stringify(excepciones));
     localStorage.setItem("malla-cursando", JSON.stringify(cursando));
   }, [aprobados, excepciones, cursando, setExcepcionesActivas]);
+
+  // ✅ Calcular progreso cada vez que cambia el estado
+  useEffect(() => {
+    if (!malla?.semestres || !onTotalCursosChange) return;
+
+    const total = malla.semestres.reduce(
+      (acc, sem) => acc + sem.cursos.length,
+      0
+    );
+
+    const aprobadosCount = aprobados.length;
+
+    onTotalCursosChange({ total, aprobados: aprobadosCount });
+  }, [malla, aprobados, excepciones, onTotalCursosChange]);
 
   // ✅ Aprobar o desmarcar ramo
   const aprobar = (id) => {
@@ -78,7 +97,7 @@ export default function MallaViewer({
     }
   };
 
-  // ✅ Aprobar hasta semestre
+  // ✅ Aprobar hasta semestre (evento global desde Navbar)
   const aprobarHastaSemestre = (semestreLimite) => {
     if (!malla) return;
     const nuevosAprobados = [];
@@ -99,7 +118,7 @@ export default function MallaViewer({
     );
   };
 
-  // ✅ Escucha evento global (Navbar)
+  // ✅ Escucha evento global (desde Navbar)
   useEffect(() => {
     const handler = (e) => {
       aprobarHastaSemestre(e.detail);

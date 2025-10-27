@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar({
   theme,
@@ -9,7 +9,7 @@ export default function Navbar({
   setModoExcepcional,
   excepcionesActivas = 0,
   mallaSeleccionada,
-  onAprobarHastaSemestre,
+  cantidadSemestres,
 }) {
   const [mostrarControles, setMostrarControles] = useState(true);
 
@@ -22,7 +22,6 @@ export default function Navbar({
   ];
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
-  const handleAprobar = (num) => onAprobarHastaSemestre(num);
 
   return (
     <nav className="w-full border-b border-borderColor bg-bgSecondary/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-500">
@@ -64,7 +63,7 @@ export default function Navbar({
         {/* Línea divisoria */}
         <div className="w-full border-t border-borderColor mt-3 mb-4 relative" />
 
-        {/* Controles con animación */}
+        {/* Controles */}
         <div
           className={`transition-all duration-500 ease-in-out ${
             mostrarControles
@@ -76,20 +75,23 @@ export default function Navbar({
             {/* 📘 Marcar hasta semestre */}
             <div className="relative group w-full sm:w-auto">
               <select
-                onChange={(e) => handleAprobar(Number(e.target.value))}
-                defaultValue=""
-                className="appearance-none bg-primary text-white px-4 py-2 pr-10 rounded-md cursor-pointer 
-                           shadow hover:shadow-lg hover:scale-105 transition-transform duration-300 
-                           outline-none border-none w-full sm:w-auto"
+                className="rounded-md px-3 py-2 border border-borderColor bg-bgPrimary text-textPrimary 
+                           hover:shadow focus:ring-2 focus:ring-primary transition-all duration-300 w-full sm:w-auto cursor-pointer"
+                value=""
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (value) {
+                    window.dispatchEvent(
+                      new CustomEvent("aprobarHastaSemestre", { detail: value })
+                    );
+                    e.target.value = ""; // 🔹 vuelve a placeholder
+                  }
+                }}
               >
                 <option value="">📘 Marcar hasta</option>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                  <option
-                    key={n}
-                    value={n}
-                    className="text-textPrimary bg-bgSecondary"
-                  >
-                    Semestre {n}
+                {Array.from({ length: cantidadSemestres }).map((_, i) => (
+                  <option key={i} value={i + 1}>
+                    Semestre {i + 1}
                   </option>
                 ))}
               </select>
@@ -107,7 +109,7 @@ export default function Navbar({
 
               {/* Texto móvil */}
               <p className="sm:hidden mt-1 text-xs text-textSecondary text-center">
-                Manten presionado para marcar asignaturas cursadas
+                Mantén presionado para marcar asignaturas cursadas
               </p>
             </div>
 

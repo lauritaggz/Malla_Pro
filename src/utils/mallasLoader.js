@@ -6,15 +6,15 @@ export async function listarMallas() {
       mallas: [
         {
           nombre: "Ingeniería Civil Industrial",
-          url: "/mallas/unab/Industrial.json",
+          url: "/mallas/Industrial.json",
         },
         {
           nombre: "Ingeniería en Computación e Informática",
-          url: "/mallas/unab/Comp.json",
+          url: "/mallas/Comp.json",
         },
         {
           nombre: "Geología",
-          url: "/mallas/unab/Geo.json",
+          url: "/mallas/Geo.json",
         },
       ],
     },

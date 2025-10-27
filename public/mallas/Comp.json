@@ -1,6 +1,7 @@
 {
   "carrera": "Ingeniería en Computación e Informática (UNAB)",
   "total_creditos": 0,
+  "totalSemestres": 8,
   "semestres": [
     {
       "numero": 1,

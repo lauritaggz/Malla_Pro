@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import { listarMallas } from "./utils/mallasLoader";
 import MallaViewer from "./components/MallaViewer";
+import ProgressBar from "./components/ProgressBar";
 
 export default function App() {
   const [theme, setTheme] = useState(
@@ -12,13 +13,19 @@ export default function App() {
     if (saved !== null) return saved === "true";
     return true; // 👈 oscuro por defecto si no hay valor guardado
   });
-
+  const [progreso, setProgreso] = useState({ total: 0, aprobados: 0 });
   const [modoExcepcional, setModoExcepcional] = useState(false);
   const [mallasDisponibles, setMallasDisponibles] = useState([]);
   const [mallaSeleccionada, setMallaSeleccionada] = useState(
     JSON.parse(localStorage.getItem("malla-seleccionada")) || null
   );
   const [excepcionesActivas, setExcepcionesActivas] = useState(0);
+  const [cantidadSemestres, setCantidadSemestres] = useState(0);
+
+  // Memoizar el callback para evitar cambios en las dependencias
+  const handleSemestresLoaded = useCallback((total) => {
+    setCantidadSemestres(total);
+  }, []);
 
   useEffect(() => {
     document.documentElement.className = `${theme} ${
@@ -48,12 +55,14 @@ export default function App() {
         setModoExcepcional={setModoExcepcional}
         excepcionesActivas={excepcionesActivas}
         mallaSeleccionada={mallaSeleccionada}
-        onAprobarHastaSemestre={(num) =>
-          window.dispatchEvent(
-            new CustomEvent("aprobarHastaSemestre", { detail: num })
-          )
-        }
+        cantidadSemestres={cantidadSemestres}
       />
+      {mallaSeleccionada && (
+        <ProgressBar
+          totalCursos={progreso.total}
+          cursosAprobados={progreso.aprobados}
+        />
+      )}
 
       {!mallaSeleccionada ? (
         <div className="flex items-center justify-center h-[80vh]">
@@ -94,6 +103,8 @@ export default function App() {
             mallaSeleccionada={mallaSeleccionada}
             modoExcepcional={modoExcepcional}
             setExcepcionesActivas={setExcepcionesActivas}
+            onTotalCursosChange={setProgreso}
+            onSemestresLoaded={handleSemestresLoaded}
           />
         </main>
       )}
