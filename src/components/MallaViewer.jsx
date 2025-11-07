@@ -8,6 +8,7 @@ export default function MallaViewer({
   setExcepcionesActivas,
   onTotalCursosChange,
   onSemestresLoaded,
+  onCursandoChange,
 }) {
   const [malla, setMalla] = useState(null);
   const [aprobados, setAprobados] = useState(
@@ -52,7 +53,16 @@ export default function MallaViewer({
     localStorage.setItem("malla-aprobados", JSON.stringify(aprobados));
     localStorage.setItem("malla-excepciones", JSON.stringify(excepciones));
     localStorage.setItem("malla-cursando", JSON.stringify(cursando));
-  }, [aprobados, excepciones, cursando, setExcepcionesActivas]);
+
+    // Notificar cambio en cursos cursando
+    onCursandoChange?.(cursando.length);
+  }, [
+    aprobados,
+    excepciones,
+    cursando,
+    setExcepcionesActivas,
+    onCursandoChange,
+  ]);
 
   // ✅ Calcular progreso cada vez que cambia el estado
   useEffect(() => {
@@ -182,9 +192,23 @@ export default function MallaViewer({
   // ✅ Render principal
   return (
     <div className="pb-10 px-2 sm:px-4 md:px-6">
+      {/* Instrucción desktop: marcar "en curso" */}
+      <div className="hidden md:flex items-center justify-center mb-4">
+        <span
+          className="text-sm text-textSecondary px-4 py-2 rounded-lg bg-bgSecondary/50 
+                       border border-borderColor shadow-sm"
+        >
+          💡 <strong>Ctrl + clic</strong> para marcar como cursando
+        </span>
+      </div>
+
       {/* Instrucciones de scroll para móvil */}
       <div className="md:hidden text-center text-textSecondary text-xs mb-3">
         ← Desliza horizontalmente para ver más semestres →
+        <br />
+        <span className="text-xs mt-1 inline-block">
+          Mantén presionado para marcar como cursando
+        </span>
       </div>
 
       {/* Scroll horizontal arrastrable */}

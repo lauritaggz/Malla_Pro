@@ -28,17 +28,28 @@ export default function Navbar({
       <div className="max-w-7xl mx-auto px-6 py-4">
         {/* Encabezado */}
         <div className="flex items-center justify-between">
-          <div className="flex flex-col leading-tight">
+          <div className="flex flex-col gap-1">
             {mallaSeleccionada && (
               <>
-                <h1 className="font-bold text-lg">
+                <h1
+                  className="font-bold text-2xl md:text-3xl text-primary 
+                               transition-all duration-300 hover:scale-105 transform-gpu
+                               drop-shadow-sm"
+                >
                   {mallaSeleccionada.nombre}
                 </h1>
-                <span className="text-sm text-textSecondary">
-                  {mallaSeleccionada.url.includes("uch")
-                    ? "Universidad de Chile"
-                    : "UNAB"}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-xs md:text-sm font-medium text-textSecondary 
+                                 px-3 py-1 rounded-full bg-bgTertiary border border-borderColor 
+                                 shadow-sm"
+                  >
+                    🎓{" "}
+                    {mallaSeleccionada.url.includes("uch")
+                      ? "Universidad de Chile"
+                      : "UNAB"}
+                  </span>
+                </div>
               </>
             )}
           </div>
@@ -58,13 +69,6 @@ export default function Navbar({
               ▼
             </span>
           </button>
-        </div>
-
-        {/* Instrucción desktop: marcar "en curso" */}
-        <div className="hidden md:flex items-center justify-center mt-2">
-          <span className="text-sm text-textSecondary">
-            <strong>Ctrl + clic para marcar como cursando</strong>
-          </span>
         </div>
 
         {/* Línea divisoria */}
@@ -105,7 +109,7 @@ export default function Navbar({
 
               {/* Tooltip PC */}
               <div
-                className="hidden sm:block absolute left-1/2 -translate-x-1/2 top-[110%] w-56 z-50
+                className="hidden sm:block absolute left-0 top-[110%] w-56 max-w-[90vw] z-50
                               bg-bgSecondary text-textPrimary border border-borderColor 
                               text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 
                               pointer-events-none shadow-md transition-all duration-300"
@@ -165,7 +169,7 @@ export default function Navbar({
 
               {/* Tooltip PC */}
               <div
-                className="hidden sm:block absolute left-1/2 -translate-x-1/2 top-[110%] w-64 z-50
+                className="hidden sm:block absolute right-0 top-[110%] w-64 max-w-[90vw] z-50
                               bg-bgSecondary text-textPrimary border border-borderColor 
                               text-sm rounded-lg p-3 opacity-0 group-hover:opacity-100 
                               pointer-events-none shadow-md transition-all duration-300"

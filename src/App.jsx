@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import { listarMallas } from "./utils/mallasLoader";
 import MallaViewer from "./components/MallaViewer";
 import ProgressBar from "./components/ProgressBar";
+import StatsDisplay from "./components/StatsDisplay";
 
 export default function App() {
   const [theme, setTheme] = useState(
@@ -14,6 +15,7 @@ export default function App() {
     return true; // 👈 oscuro por defecto si no hay valor guardado
   });
   const [progreso, setProgreso] = useState({ total: 0, aprobados: 0 });
+  const [cursosCursando, setCursosCursando] = useState(0);
   const [modoExcepcional, setModoExcepcional] = useState(false);
   const [mallasDisponibles, setMallasDisponibles] = useState([]);
   const [mallaSeleccionada, setMallaSeleccionada] = useState(
@@ -58,10 +60,17 @@ export default function App() {
         cantidadSemestres={cantidadSemestres}
       />
       {mallaSeleccionada && (
-        <ProgressBar
-          totalCursos={progreso.total}
-          cursosAprobados={progreso.aprobados}
-        />
+        <>
+          <ProgressBar
+            totalCursos={progreso.total}
+            cursosAprobados={progreso.aprobados}
+          />
+          <StatsDisplay
+            totalCursos={progreso.total}
+            cursosAprobados={progreso.aprobados}
+            cursosCursando={cursosCursando}
+          />
+        </>
       )}
 
       {!mallaSeleccionada ? (
@@ -105,6 +114,7 @@ export default function App() {
             setExcepcionesActivas={setExcepcionesActivas}
             onTotalCursosChange={setProgreso}
             onSemestresLoaded={handleSemestresLoaded}
+            onCursandoChange={setCursosCursando}
           />
         </main>
       )}
