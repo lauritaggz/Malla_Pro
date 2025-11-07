@@ -73,7 +73,11 @@ export default function MallaViewer({
     if (aprobados.includes(id)) {
       setAprobados(aprobados.filter((a) => a !== id));
     } else {
+      // Al aprobar, limpiamos el estado "en curso" si estaba activo
       setAprobados([...aprobados, id]);
+      if (cursando.includes(id)) {
+        setCursando(cursando.filter((c) => c !== id));
+      }
     }
   };
 
@@ -84,7 +88,13 @@ export default function MallaViewer({
       setAprobados(aprobados.filter((a) => a !== id));
     } else {
       setExcepciones([...excepciones, id]);
-      if (!aprobados.includes(id)) setAprobados([...aprobados, id]);
+      if (!aprobados.includes(id)) {
+        setAprobados([...aprobados, id]);
+      }
+      // Si queda aprobado por excepcional, quitamos "en curso" si existía
+      if (cursando.includes(id)) {
+        setCursando(cursando.filter((c) => c !== id));
+      }
     }
   };
 
@@ -106,8 +116,11 @@ export default function MallaViewer({
         sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
       }
     });
-    setAprobados([...new Set(nuevosAprobados)]);
+    const aprobadosSet = new Set(nuevosAprobados);
+    setAprobados([...aprobadosSet]);
     setExcepciones([]);
+    // Todos los que pasan a aprobados dejan de estar "en curso"
+    setCursando((prev) => prev.filter((id) => !aprobadosSet.has(id)));
   };
 
   // ✅ Cumple prerrequisitos

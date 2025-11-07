@@ -87,7 +87,7 @@ export default function Curso({
       onTouchCancel={handleTouchEnd}
       title="Mantén presionado para marcar como en curso"
       className={`cursor-pointer select-none p-3 text-[13px] rounded-md transition-all duration-300
-      shadow-sm text-left relative ${shake ? "shake" : ""} ${
+      shadow-sm text-left relative group ${shake ? "shake" : ""} ${
         isLongPressing ? "scale-95" : ""
       }
       ${
@@ -108,6 +108,34 @@ export default function Curso({
       <div className="absolute bottom-1 right-2 text-[9px] opacity-70">
         {curso.sct} SCT
       </div>
+
+      {/* Badge y tooltip de estado "En curso" (solo desktop) */}
+      {enCurso && (
+        <>
+          {/* Badge */}
+          <span
+            className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium 
+                         bg-white/10 border border-white/20 backdrop-blur-sm shadow-theme 
+                         text-white absolute -top-2 -left-2"
+          >
+            ⏳ En curso
+          </span>
+
+          {/* Tooltip en hover */}
+          <div
+            className="hidden md:block absolute -top-10 right-0 opacity-0 translate-y-1 
+                              group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 
+                              pointer-events-none z-20"
+          >
+            <div
+              className="px-2 py-1 rounded-md text-xs bg-bgSecondary text-textPrimary 
+                            border border-borderColor shadow-theme whitespace-nowrap"
+            >
+              ⏳ En curso — Ctrl + clic para quitar
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

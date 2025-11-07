@@ -60,6 +60,13 @@ export default function Navbar({
           </button>
         </div>
 
+        {/* Instrucción desktop: marcar "en curso" */}
+        <div className="hidden md:flex items-center justify-center mt-2">
+          <span className="text-sm text-textSecondary">
+            <strong>Ctrl + clic para marcar como cursando</strong>
+          </span>
+        </div>
+
         {/* Línea divisoria */}
         <div className="w-full border-t border-borderColor mt-3 mb-4 relative" />
 
@@ -109,7 +116,7 @@ export default function Navbar({
 
               {/* Texto móvil */}
               <p className="sm:hidden mt-1 text-xs text-textSecondary text-center">
-                Mantén presionado para marcar asignaturas cursadas
+                Mantén presionado para marcar como cursando
               </p>
             </div>
 
