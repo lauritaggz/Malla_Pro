@@ -1,610 +1,358 @@
-import { useEffect, useState } from "react";
-import { motion, useScroll, useTransform, animate } from "framer-motion";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Sun,
-  Moon,
-  Map,
-  Calculator,
-  BarChart3,
-  ShieldCheck,
-} from "lucide-react";
-import NodeNetwork from "./NodeNetwork.jsx";
+import { LayoutGrid, NotebookText, BarChart3 } from "lucide-react";
 
 export default function LandingPage() {
+  const canvasRef = useRef(null);
   const navigate = useNavigate();
-  const { scrollYProgress } = useScroll();
-  const parallaxY1 = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const parallaxY2 = useTransform(scrollYProgress, [0, 1], [0, -120]);
 
-  // Dark/Light + Theme sync (mirrors App.jsx behavior)
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("malla-darkmode");
-    if (saved !== null) return saved === "true";
-    return (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
-  });
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem("malla-theme") || "aurora"
-  );
-
+  // ===========================
+  // 🎨 FONDO ANIMADO
+  // ===========================
   useEffect(() => {
-    document.documentElement.className = `${theme} ${
-      darkMode ? "dark" : "light"
-    }`;
-    localStorage.setItem("malla-darkmode", darkMode);
-    localStorage.setItem("malla-theme", theme);
-  }, [darkMode, theme]);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
 
-  const features = [
-    {
-      icon: "📊",
-      title: "Visualización Intuitiva",
-      description:
-        "Explora tu malla curricular de forma clara y organizada por semestres.",
-    },
-    {
-      icon: "✅",
-      title: "Seguimiento de Progreso",
-      description:
-        "Marca cursos aprobados y visualiza tu avance en tiempo real.",
-    },
-    {
-      icon: "📓",
-      title: "Gestión de Notas",
-      description:
-        "Registra evaluaciones, calcula promedios y simula resultados.",
-    },
-    {
-      icon: "📈",
-      title: "Dashboard Completo",
-      description:
-        "Analiza créditos, promedios y estadísticas con gráficos interactivos.",
-    },
-    {
-      icon: "🎨",
-      title: "Temas Personalizables",
-      description: "Elige entre 5 temas de color y modo claro/oscuro.",
-    },
-    {
-      icon: "📱",
-      title: "Diseño Responsivo",
-      description: "Experiencia optimizada para desktop, tablet y móvil.",
-    },
-  ];
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
 
+    const nodes = [];
+    const nodeCount = 60;
+    const maxDistance = 140;
+
+    class Node {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.radius = Math.random() * 2 + 1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(139, 92, 246, 0.7)";
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < nodeCount; i++) nodes.push(new Node());
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, "#0f172a");
+      gradient.addColorStop(0.5, "#1e1b4b");
+      gradient.addColorStop(1, "#0f172a");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      nodes.forEach((node) => {
+        node.update();
+        node.draw();
+      });
+
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < maxDistance) {
+            const opacity = (1 - distance / maxDistance) * 0.35;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(96, 165, 250, ${opacity})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    const resize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", resize);
+
+    return () => {
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  // ===========================
+  // RENDER PRINCIPAL
+  // ===========================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-bgPrimary via-bgSecondary to-bgPrimary overflow-x-hidden">
-      {/* Header with brand + dark toggle */}
-      <header className="absolute top-0 inset-x-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <button
-            className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary"
-            aria-label="Ir a inicio"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          >
-            Malla Pro
-          </button>
-          <div className="flex items-center gap-2">
-            <button
-              aria-label="Cambiar modo de color"
-              onClick={() => setDarkMode((d) => !d)}
-              className="w-10 h-10 rounded-full glass-card border border-borderColor flex items-center justify-center hover:bg-white/10 transition-colors"
-            >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-yellow-400" />
-              ) : (
-                <Moon className="w-5 h-5 text-blue-600" />
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto text-white">
+      {/* FONDO ANIMADO */}
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 w-full h-full -z-10 pointer-events-none"
+      />
 
-      {/* Hero Section */}
-      <section className="relative min-h-[100svh] flex items-center justify-center px-4 py-24">
-        {/* Dynamic aurora background with parallax */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            style={{ y: parallaxY1 }}
-            animate={{
-              scale: [1, 1.15, 1],
-              opacity: [0.12, 0.2, 0.12],
-            }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-20 -left-20 w-[28rem] h-[28rem] rounded-full bg-primary blur-[100px]"
-          />
-          <motion.div
-            style={{ y: parallaxY2 }}
-            animate={{
-              scale: [1.1, 0.95, 1.1],
-              opacity: [0.1, 0.18, 0.1],
-            }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-24 -right-24 w-[34rem] h-[34rem] rounded-full bg-secondary blur-[120px]"
-          />
-        </div>
+      {/* =========================== */}
+      {/*            HERO             */}
+      {/* =========================== */}
+      <section className="min-h-screen flex items-center justify-center text-center px-6 fade-in">
+        <div className="max-w-5xl">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text">
+            Tu carrera, visualizada.
+          </h1>
 
-        <div className="relative z-10 max-w-6xl mx-auto text-center">
-          {/* Copy */}
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="[font-size:clamp(2.5rem,5vw,5rem)] font-black mb-4 leading-tight">
-              <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
-                Tu carrera, visualizada.
-              </span>
-            </h1>
-            <p className="[font-size:clamp(1.05rem,2.3vw,1.6rem)] text-textSecondary mb-8 font-light">
-              Planifica, mide y alcanza tus metas con Malla Pro.
-            </p>
-          </motion.div>
+          <p className="text-xl md:text-2xl text-gray-300 mb-12 font-light">
+            Planifica, mide y alcanza tus metas con Malla Pro.
+          </p>
 
-          {/* 3D Interactive Node Network */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mx-auto mb-10 sm:mb-14 max-w-5xl"
-          >
-            <div className="relative rounded-2xl border border-borderColor glass-card overflow-hidden shadow-theme-xl">
-              <NodeNetwork height={500} />
-            </div>
-            <p className="text-center text-textSecondary text-sm mt-3 opacity-75">
-              Mueve el cursor sobre los nodos para ver las conexiones
-            </p>
-          </motion.div>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-          >
+          <div className="flex flex-col sm:flex-row justify-center gap-6">
             <button
               onClick={() => navigate("/app")}
-              className="group relative px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full text-base sm:text-lg shadow-theme-xl hover:shadow-theme-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
-              aria-label="Empezar ahora"
+              className="btn-primary px-8 py-4 rounded-full text-lg font-semibold"
             >
-              <span className="relative z-10">Empezar ahora</span>
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              Empezar ahora
             </button>
-            <button
-              onClick={() =>
-                document
-                  .getElementById("why")
-                  .scrollIntoView({ behavior: "smooth" })
-              }
-              className="px-8 py-4 glass-card border border-borderColor text-textPrimary font-semibold rounded-full text-base sm:text-lg hover:bg-primary/10 transition-all duration-300 hover:scale-105"
-              aria-label="Ver más"
+
+            <a
+              href="#why"
+              className="btn-secondary px-8 py-4 rounded-full text-lg font-semibold"
             >
               Ver más
-            </button>
-          </motion.div>
-
-          {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 text-textSecondary"
-            aria-hidden="true"
-          >
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <svg
-                className="w-6 h-6 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                />
-              </svg>
-            </motion.div>
-          </motion.div>
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* Why Malla Pro? */}
-      <section id="why" className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-3xl md:text-4xl font-bold text-textPrimary mb-10"
-          >
+      {/* =========================== */}
+      {/*       ¿POR QUÉ MALLA PRO?   */}
+      {/* =========================== */}
+      <section id="why" className="py-24 px-6 fade-in">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
             ¿Por qué Malla Pro?
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                Icon: Map,
-                title: "Planifica tu avance académico.",
-                desc: "Organiza ramos por semestre y visualiza prerrequisitos al instante.",
-              },
-              {
-                Icon: Calculator,
-                title: "Registra tus notas y simula tu promedio final.",
-                desc: "Gestiona evaluaciones, pesos y promedios ponderados.",
-              },
-              {
-                Icon: ShieldCheck,
-                title: "Evita sorpresas y controla tu progreso.",
-                desc: "Monitorea tu avance durante todo el año con claridad.",
-              },
-            ].map(({ Icon, title, desc }, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="relative p-6 rounded-2xl border border-borderColor glass-card hover:shadow-theme-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-semibold text-textPrimary mb-2">
-                  {title}
-                </h3>
-                <p className="text-textSecondary">{desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Simulated Dashboard Showcase */}
-      <section className="py-20 px-4 bg-bgSecondary/40">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-textPrimary">
-              Visualiza tu progreso real
-            </h2>
-            <p className="text-textSecondary mt-3">
-              Sigue tu avance académico como nunca antes.
-            </p>
-          </motion.div>
-
-          <DashboardShowcase />
-        </div>
-      </section>
-
-      {/* Features Overview */}
-      <section id="features" className="py-20 px-4 bg-bgSecondary/50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-textPrimary mb-4">
-              Características
-            </h2>
-            <p className="text-lg text-textSecondary max-w-2xl mx-auto">
-              Todo lo que necesitas para gestionar tu carrera universitaria de
-              forma efectiva
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Mock malla */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="rounded-2xl border border-borderColor glass-card overflow-hidden"
-            >
-              <div className="p-4 border-b border-borderColor flex items-center justify-between">
-                <h3 className="font-semibold text-textPrimary">
-                  Malla interactiva
-                </h3>
-                <span className="text-textSecondary text-sm">
-                  Vista por semestres
-                </span>
-              </div>
-              <div className="p-4 grid grid-cols-3 gap-2">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-16 rounded-md border border-borderColor bg-bgPrimary/70"
-                  />
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Notas modal */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="rounded-2xl border border-borderColor glass-card overflow-hidden"
-            >
-              <div className="p-4 border-b border-borderColor flex items-center justify-between">
-                <h3 className="font-semibold text-textPrimary">
-                  Gestión de notas
-                </h3>
-                <Calculator className="w-5 h-5 text-primary" />
-              </div>
-              <div className="p-4 space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 p-3 rounded-md border border-borderColor bg-bgPrimary/70"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm text-textPrimary">
-                        Evaluación {i + 1}
-                      </p>
-                      <p className="text-xs text-textSecondary">25%</p>
-                    </div>
-                    <div className="w-16 h-8 rounded bg-bgSecondary border border-borderColor" />
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Dashboard */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="rounded-2xl border border-borderColor glass-card overflow-hidden"
-            >
-              <div className="p-4 border-b border-borderColor flex items-center justify-between">
-                <h3 className="font-semibold text-textPrimary">Dashboard</h3>
-                <BarChart3 className="w-5 h-5 text-primary" />
-              </div>
-              <div className="p-4 grid grid-cols-3 gap-3">
-                <div className="col-span-3 h-24 rounded-md bg-gradient-to-r from-green-500/30 to-blue-500/30 border border-borderColor" />
-                <div className="col-span-1 h-24 rounded-md border border-borderColor bg-bgPrimary/70" />
-                <div className="col-span-2 h-24 rounded-md border border-borderColor bg-bgPrimary/70" />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quote / Testimonials */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.blockquote
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="italic text-textSecondary text-lg md:text-xl"
-          >
-            “Hecha por estudiantes, para estudiantes.”
-          </motion.blockquote>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-4xl mx-auto text-center glass-card p-12 rounded-3xl border border-borderColor"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold text-textPrimary mb-6">
-            Empieza a planificar tu futuro académico hoy.
           </h2>
-          <p className="text-lg text-textSecondary mb-8 max-w-2xl mx-auto">
-            Únete a estudiantes que ya están usando Malla Pro para planificar su
-            carrera universitaria de forma inteligente.
-          </p>
-          <button
-            onClick={() => navigate("/app")}
-            className="group relative px-10 py-5 bg-gradient-to-r from-primary to-secondary 
-                     text-white font-bold rounded-full text-xl shadow-theme-xl
-                     hover:shadow-theme-2xl transition-all duration-300 hover:scale-105
-                     overflow-hidden"
-            aria-label="Explorar mallas"
-          >
-            <span className="relative z-10">Explorar mallas →</span>
-            <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-          </button>
-        </motion.div>
-      </section>
 
-      {/* Footer */}
-      <footer className="py-10 px-4 border-t border-borderColor">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-textSecondary">
-          <p className="text-sm">
-            Malla Pro © 2025 — Todos los derechos reservados.
-          </p>
-          <nav className="flex items-center gap-4 text-sm">
-            <a
-              href="#privacy"
-              className="hover:text-textPrimary transition-colors"
-            >
-              Política de privacidad
-            </a>
-            <a
-              href="#contact"
-              className="hover:text-textPrimary transition-colors"
-            >
-              Contacto
-            </a>
-          </nav>
-        </div>
-      </footer>
-    </div>
-  );
-}
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* 1 */}
+            <div className="glass p-8 rounded-2xl card-hover">
+              <div className="w-16 h-16 mb-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <LayoutGrid className="w-10 h-10 text-white" strokeWidth={2} />
+              </div>
 
-// --- Helpers & components: Dashboard Showcase ---
-function DashboardShowcase() {
-  const stats = {
-    progreso: 68,
-    promedio: 5.4,
-    creditos: 280,
-    totalCreditos: 400,
-  };
-  const [counterProm, setCounterProm] = useState(0);
-  const [counterProg, setCounterProg] = useState(0);
+              <h3 className="text-2xl font-semibold mb-4">
+                Visualización Clara
+              </h3>
+              <p className="text-gray-300">
+                Explora tu malla curricular con una vista moderna e intuitiva.
+              </p>
+            </div>
 
-  // animate numbers when in view using IntersectionObserver pattern
-  const [inView, setInView] = useState(false);
-  const onRef = (node) => {
-    if (!node) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setInView(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.4 }
-    );
-    obs.observe(node);
-  };
+            {/* 2 */}
+            <div className="glass p-8 rounded-2xl card-hover">
+              <div className="w-16 h-16 mb-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                <NotebookText
+                  className="w-10 h-10 text-white"
+                  strokeWidth={2}
+                />
+              </div>
 
-  useEffect(() => {
-    if (!inView) return;
-    const controls1 = animate(0, stats.promedio, {
-      duration: 1.2,
-      onUpdate: (v) => setCounterProm(Number(v.toFixed(2))),
-      ease: "easeOut",
-    });
-    const controls2 = animate(0, stats.progreso, {
-      duration: 1.2,
-      onUpdate: (v) => setCounterProg(Math.round(v)),
-      ease: "easeOut",
-      delay: 0.15,
-    });
-    return () => {
-      controls1.stop();
-      controls2.stop();
-    };
-  }, [inView]);
+              <h3 className="text-2xl font-semibold mb-4">
+                Gestión Inteligente
+              </h3>
+              <p className="text-gray-300">
+                Registra notas, evalúa tu rendimiento y simula escenarios.
+              </p>
+            </div>
 
-  const porcentajeCred = Math.round(
-    (stats.creditos / stats.totalCreditos) * 100
-  );
+            {/* 3 */}
+            <div className="glass p-8 rounded-2xl card-hover">
+              <div className="w-16 h-16 mb-6 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+                <BarChart3 className="w-10 h-10 text-white" strokeWidth={2} />
+              </div>
 
-  return (
-    <div ref={onRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Progreso de carrera (circular) */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="p-6 rounded-2xl border border-borderColor glass-card flex flex-col items-center justify-center"
-      >
-        <div className="relative w-36 h-36">
-          <svg viewBox="0 0 120 120" className="w-full h-full">
-            <defs>
-              <linearGradient id="gradCircle" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="var(--primary)" />
-                <stop offset="100%" stopColor="var(--secondary)" />
-              </linearGradient>
-            </defs>
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke="var(--borderColor)"
-              strokeWidth="10"
-            />
-            <motion.circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke="url(#gradCircle)"
-              strokeWidth="10"
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 52}
-              strokeDashoffset={2 * Math.PI * 52 * (1 - counterProg / 100)}
-              initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
-              animate={{
-                strokeDashoffset: 2 * Math.PI * 52 * (1 - counterProg / 100),
-              }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold text-textPrimary">
-              {counterProg}%
-            </span>
+              <h3 className="text-2xl font-semibold mb-4">Seguridad Total</h3>
+              <p className="text-gray-300">
+                Tus datos están protegidos con estándares modernos.
+              </p>
+            </div>
           </div>
         </div>
-        <p className="mt-3 text-sm text-textSecondary">Progreso de carrera</p>
-      </motion.div>
+      </section>
 
-      {/* Promedio general */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.55, delay: 0.05 }}
-        className="p-6 rounded-2xl border border-borderColor glass-card flex flex-col items-center justify-center"
-      >
-        <div className="text-5xl font-bold text-primary">
-          {counterProm.toFixed(2)}
-        </div>
-        <p className="mt-2 text-sm text-textSecondary">Promedio acumulado</p>
-      </motion.div>
+      {/* =========================== */}
+      {/*    PROGRESO & DASHBOARD     */}
+      {/* =========================== */}
+      <section className="py-24 px-6 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent fade-in">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
+            Tu progreso en tiempo real
+          </h2>
 
-      {/* Créditos aprobados */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="p-6 rounded-2xl border border-borderColor glass-card"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-textPrimary font-medium">
-            Créditos aprobados
-          </span>
-          <span className="text-textSecondary text-sm">
-            {stats.creditos}/{stats.totalCreditos}
-          </span>
+          <div className="glass rounded-3xl p-10 glow-pulse">
+            <div className="grid md:grid-cols-3 gap-10">
+              {/* Progress Circle */}
+              <div className="flex flex-col items-center">
+                <div className="relative w-40 h-40">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="rgba(255,255,255,0.1)"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="url(#grad1)"
+                      strokeWidth="8"
+                      strokeDasharray="283"
+                      strokeDashoffset="70"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                    <defs>
+                      <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#8b5cf6" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-3xl font-bold gradient-text">
+                    75%
+                  </span>
+                </div>
+                <p className="mt-4 text-gray-300 text-center">
+                  Carrera completada
+                </p>
+              </div>
+
+              {/* Créditos */}
+              <div className="flex flex-col justify-center">
+                <p className="text-sm text-gray-400 mb-1">Créditos aprobados</p>
+                <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                    style={{ width: "75%" }}
+                  />
+                </div>
+                <p className="mt-2 text-purple-400 font-semibold">180 / 240</p>
+              </div>
+
+              {/* Promedio */}
+              <div className="flex flex-col items-center glass rounded-2xl p-6">
+                <svg
+                  className="w-12 h-12 text-yellow-400 mb-3"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <div className="text-5xl font-bold gradient-text mb-2">5.8</div>
+                <p className="text-gray-300">Promedio general</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="relative w-full h-4 rounded-full bg-bgSecondary overflow-hidden border border-borderColor">
-          <motion.div
-            initial={{ width: 0 }}
-            whileInView={{ width: `${porcentajeCred}%` }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.1, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-green-500 to-blue-500"
-          />
+      </section>
+
+      {/* =========================== */}
+      {/*   CARACTERÍSTICAS PRINCIPALES */}
+      {/* =========================== */}
+      <section className="py-24 px-6 fade-in">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
+            Características principales
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-20">
+            {/* 1 */}
+            <div className="glass p-8 rounded-2xl card-hover">
+              <div className="w-14 h-14 mb-6 mx-auto rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <LayoutGrid
+                  className="w-10 h-10 text-blue-400"
+                  strokeWidth={2}
+                />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Malla Interactiva</h3>
+              <p className="text-gray-300">
+                Explora tu plan de estudios con claridad visual.
+              </p>
+            </div>
+
+            {/* 2 */}
+            <div className="glass p-8 rounded-2xl card-hover">
+              <div className="w-14 h-14 mb-6 mx-auto rounded-xl bg-purple-500/20 flex items-center justify-center">
+                <NotebookText
+                  className="w-10 h-10 text-purple-400"
+                  strokeWidth={2}
+                />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Gestión de Notas</h3>
+              <p className="text-gray-300">
+                Registra tus calificaciones y simula escenarios.
+              </p>
+            </div>
+
+            {/* 3 */}
+            <div className="glass p-8 rounded-2xl card-hover">
+              <div className="w-14 h-14 mb-6 mx-auto rounded-xl bg-green-500/20 flex items-center justify-center">
+                <BarChart3
+                  className="w-10 h-10 text-green-400"
+                  strokeWidth={2}
+                />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">
+                Dashboard Analítico
+              </h3>
+              <p className="text-gray-300">
+                Información clara de tu avance académico.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-center text-3xl italic text-gray-200">
+            “Hecha por estudiantes, para estudiantes.”
+          </p>
         </div>
-        <div className="mt-2 text-right text-sm text-textSecondary">
-          {porcentajeCred}%
-        </div>
-      </motion.div>
+      </section>
+
+      {/* =========================== */}
+      {/*          CTA FINAL          */}
+      {/* =========================== */}
+      <section className="py-32 px-6 text-center fade-in">
+        <h2 className="text-4xl md:text-6xl font-bold mb-8 gradient-text">
+          Empieza a planificar tu futuro académico hoy.
+        </h2>
+
+        <button
+          onClick={() => navigate("/app")}
+          className="btn-primary px-10 py-5 rounded-full text-xl font-semibold"
+        >
+          Explorar mallas →
+        </button>
+      </section>
+
+      {/* =========================== */}
+      {/*            FOOTER           */}
+      {/* =========================== */}
+      <footer className="py-12 text-center text-gray-400 text-sm border-t border-white/10">
+        © 2025 Malla Pro — Todos los derechos reservados.
+      </footer>
     </div>
   );
 }

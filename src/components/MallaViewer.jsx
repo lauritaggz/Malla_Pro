@@ -257,10 +257,10 @@ export default function MallaViewer({
                 <motion.div
                   key={year}
                   className="min-w-[320px] sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
-                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  viewport={{ once: true, amount: 0.1 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="text-xs uppercase tracking-wide text-textSecondary/80">
@@ -281,10 +281,10 @@ export default function MallaViewer({
                                        bg-gradient-to-br from-bgSecondary/60 to-bgTertiary/30 
                                        rounded-xl p-3 sm:p-4 border border-borderColor/50 
                                        shadow-theme hover:shadow-theme-lg transition-shadow"
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 8 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.15 }}
-                            transition={{ duration: 0.35, ease: "easeOut" }}
+                            viewport={{ once: true, amount: 0.1 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
                           >
                             {sem.cursos.map((curso) => (
                               <Curso

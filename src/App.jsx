@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import { listarMallas } from "./utils/mallasLoader";
 import MallaViewer from "./components/MallaViewer";
-import ProgressBar from "./components/ProgressBar";
 import StatsDisplay from "./components/StatsDisplay";
 import ResumenProgreso from "./components/ResumenProgreso";
 import NotasModal from "./components/NotasModal";
@@ -10,13 +9,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 
 export default function App() {
+  const [navbarHeight, setNavbarHeight] = useState(180);
+
   const [theme, setTheme] = useState(
     localStorage.getItem("malla-theme") || "aurora"
   );
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("malla-darkmode");
-    if (saved !== null) return saved === "true";
-    return true;
+    return saved ? saved === "true" : true;
   });
 
   const [progreso, setProgreso] = useState({ total: 0, aprobados: 0 });
@@ -26,6 +26,7 @@ export default function App() {
   const [mallaSeleccionada, setMallaSeleccionada] = useState(
     JSON.parse(localStorage.getItem("malla-seleccionada")) || null
   );
+
   const [excepcionesActivas, setExcepcionesActivas] = useState(0);
   const [cantidadSemestres, setCantidadSemestres] = useState(0);
   const [mostrarResumen, setMostrarResumen] = useState(false);
@@ -36,15 +37,14 @@ export default function App() {
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
   const [mostrarNotas, setMostrarNotas] = useState(false);
 
-  const handleSemestresLoaded = useCallback((total) => {
-    setCantidadSemestres(total);
+  // ---------------- NAVBAR HEIGHT LISTENER ----------------
+  useEffect(() => {
+    const handler = (e) => setNavbarHeight(e.detail);
+    window.addEventListener("navbarHeightChange", handler);
+    return () => window.removeEventListener("navbarHeightChange", handler);
   }, []);
 
-  const handleAbrirNotas = useCallback((curso) => {
-    setCursoSeleccionado(curso);
-    setMostrarNotas(true);
-  }, []);
-
+  // ---------------- THEME & DARKMODE ----------------
   useEffect(() => {
     document.documentElement.className = `${theme} ${
       darkMode ? "dark" : "light"
@@ -57,20 +57,24 @@ export default function App() {
     listarMallas().then(setMallasDisponibles);
   }, []);
 
-  function seleccionarMalla(malla) {
+  const seleccionarMalla = (malla) => {
     setMallaSeleccionada(malla);
     localStorage.setItem("malla-seleccionada", JSON.stringify(malla));
-  }
+  };
 
-  // Debugging logs
-  useEffect(() => {
-    console.log("mallaData:", mallaData);
-    console.log("mostrarResumen:", mostrarResumen);
-  }, [mallaData, mostrarResumen]);
+  const handleSemestresLoaded = useCallback(
+    (total) => setCantidadSemestres(total),
+    []
+  );
+
+  const handleAbrirNotas = useCallback((curso) => {
+    setCursoSeleccionado(curso);
+    setMostrarNotas(true);
+  }, []);
 
   return (
-    <div className="min-h-screen transition-all duration-500 bg-bgPrimary text-textPrimary overflow-x-hidden relative">
-      {/* 🔹 NAVBAR — siempre arriba */}
+    <div className="min-h-screen bg-bgPrimary text-textPrimary overflow-x-hidden relative">
+      {/* NAVBAR */}
       <Navbar
         theme={theme}
         setTheme={setTheme}
@@ -84,31 +88,24 @@ export default function App() {
         onVerProgreso={() => setMostrarResumen(true)}
       />
 
-      {/* 🔹 Fade visual entre navbar y contenido */}
-      <div className="absolute top-[100px] left-0 right-0 h-[80px] bg-gradient-to-b from-bgSecondary/40 via-bgPrimary/10 to-transparent z-[20] pointer-events-none" />
-
-      {/* 🔹 Contenedor principal (debajo del navbar) */}
-      <div className="relative z-[10] pt-[180px] sm:pt-[190px] md:pt-[200px] transition-all duration-500">
+      {/* CONTENIDO PRINCIPAL CON PADDING DINÁMICO */}
+      <div
+        className="relative z-[10] transition-all duration-300"
+        style={{ paddingTop: navbarHeight + 20 }}
+      >
         {mallaSeleccionada && (
-          <>
-            <ProgressBar
-              totalCursos={progreso.total}
-              cursosAprobados={progreso.aprobados}
-            />
-            <StatsDisplay
-              totalCursos={progreso.total}
-              cursosAprobados={progreso.aprobados}
-              cursosCursando={cursosCursando}
-            />
-          </>
+          <StatsDisplay
+            totalCursos={progreso.total}
+            cursosAprobados={progreso.aprobados}
+            cursosCursando={cursosCursando}
+          />
         )}
 
-        {/* 🔹 Selección de malla */}
         {!mallaSeleccionada ? (
           <div className="flex items-center justify-center h-[80vh]">
             <div className="bg-bgSecondary p-8 rounded-xl shadow-lg max-w-md w-full">
               <h2 className="text-xl font-semibold mb-4 text-center">
-                <GraduationCap className="inline-block w-6 h-6 mr-2" />{" "}
+                <GraduationCap className="inline-block w-6 h-6 mr-2" />
                 Selecciona una malla para comenzar
               </h2>
 
@@ -146,7 +143,7 @@ export default function App() {
               setExcepcionesActivas={setExcepcionesActivas}
               onTotalCursosChange={setProgreso}
               onSemestresLoaded={handleSemestresLoaded}
-              onCursandoChange={setCursosCursando}
+              onCursandoChange={setCursando}
               onMallaDataLoaded={setMallaData}
               onAprobadosChange={setAprobados}
               onExcepcionesChange={setExcepciones}
@@ -157,29 +154,20 @@ export default function App() {
         )}
       </div>
 
-      {/* 🔹 Modal de resumen */}
+      {/* MODAL RESUMEN */}
       <AnimatePresence>
         {mostrarResumen && mallaData && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] overflow-y-auto"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
             onClick={() => setMostrarResumen(false)}
           >
-            <div
-              className="min-h-screen py-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setMostrarResumen(false)}
-                className="fixed top-4 right-4 z-[70] w-10 h-10 rounded-full bg-bgSecondary 
-                           hover:bg-bgTertiary border border-borderColor shadow-theme
-                           flex items-center justify-center text-textPrimary transition-all"
-              >
-                ✕
-              </button>
+            <div onClick={(e) => e.stopPropagation()}>
               <ResumenProgreso
+                isOpen={mostrarResumen}
+                onClose={() => setMostrarResumen(false)}
                 mallaData={mallaData}
                 aprobados={aprobados}
                 excepciones={excepciones}
@@ -190,7 +178,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* 🔹 Modal de notas */}
+      {/* MODAL NOTAS */}
       {mostrarNotas && cursoSeleccionado && (
         <NotasModal
           curso={cursoSeleccionado}

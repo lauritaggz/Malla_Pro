@@ -1,18 +1,14 @@
+// src/main.jsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
+import AnimatedRoutes from "./components/AnimatedRoutes.jsx";
 import "./index.css";
-import App from "./App.jsx";
-import LandingPage from "./components/LandingPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/app" element={<App />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AnimatedRoutes />
     </BrowserRouter>
   </StrictMode>
 );

@@ -40,13 +40,13 @@ export default function NotasModal({ curso, onClose, isOpen }) {
       return;
     }
     if (isNaN(peso) || peso <= 0 || peso > 100) {
-      setError("El peso debe ser entre 1 y 100");
+      setError("El porcentaje debe ser entre 1 y 100");
       return;
     }
 
     const pesoTotal = evaluaciones.reduce((sum, e) => sum + e.peso, 0) + peso;
     if (pesoTotal > 100) {
-      setError(`El peso total excede 100% (actual: ${pesoTotal}%)`);
+      setError(`El porcentaje total excede 100% (actual: ${pesoTotal}%)`);
       return;
     }
 
@@ -173,7 +173,7 @@ export default function NotasModal({ curso, onClose, isOpen }) {
                 </div>
                 <div className="bg-bgSecondary rounded-lg p-4 border border-borderColor">
                   <p className="text-xs text-textSecondary mb-1">
-                    Peso Cubierto
+                    Porcentaje Cubierto
                   </p>
                   <p className="text-2xl font-bold text-textPrimary">
                     {pesoTotal}%
@@ -310,7 +310,7 @@ export default function NotasModal({ curso, onClose, isOpen }) {
                 </button>
                 {pesoRestante === 0 && (
                   <p className="text-xs text-textSecondary mt-2 text-center">
-                    Ya has asignado el 100% del peso
+                    Ya has asignado el 100% del porcentaje
                   </p>
                 )}
               </div>
