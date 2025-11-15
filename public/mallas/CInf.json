@@ -1,0 +1,441 @@
+{
+  "carrera": "Ingeniería Civil Informática (UNAB)",
+  "total_creditos": 631,
+  "totalSemestres": 10,
+  "semestres": [
+    {
+      "numero": 1,
+      "cursos": [
+        {
+          "id": 1,
+          "codigo": "TDFI102",
+          "nombre": "Introducción a la Programación",
+          "sct": 18,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 2,
+          "codigo": "TDFI101",
+          "nombre": "Introducción a la Ingeniería",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 3,
+          "codigo": "FMMP012",
+          "nombre": "Introducción a las Matemáticas",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 4,
+          "codigo": "CFIS310",
+          "nombre": "Física General",
+          "sct": 18,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 2,
+      "cursos": [
+        {
+          "id": 5,
+          "codigo": "TDFI103",
+          "nombre": "Base de Datos",
+          "sct": 15,
+          "prerrequisitos": [1],
+          "prereq_expr": "TDFI102"
+        },
+        {
+          "id": 6,
+          "codigo": "FMMP112",
+          "nombre": "Cálculo Diferencial",
+          "sct": 16,
+          "prerrequisitos": [3],
+          "prereq_expr": "FMMP012"
+        },
+        {
+          "id": 7,
+          "codigo": "CFIS328",
+          "nombre": "Física Experimental",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 8,
+          "codigo": "QUIM090",
+          "nombre": "Química y Ambiente",
+          "sct": 10,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 9,
+          "codigo": "CEGHC11",
+          "nombre": "Habilidades Comunicativas",
+          "sct": 8,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 3,
+      "cursos": [
+        {
+          "id": 10,
+          "codigo": "TDFI104",
+          "nombre": "Compliance & Accountability",
+          "sct": 10,
+          "prerrequisitos": [2],
+          "prereq_expr": "TDFI101"
+        },
+        {
+          "id": 11,
+          "codigo": "PTEC101",
+          "nombre": "Algoritmos y Estructuras de Datos",
+          "sct": 12,
+          "prerrequisitos": [1],
+          "prereq_expr": "TDFI102"
+        },
+        {
+          "id": 12,
+          "codigo": "FMMP212",
+          "nombre": "Cálculo Integral",
+          "sct": 16,
+          "prerrequisitos": [6],
+          "prereq_expr": "FMMP112"
+        },
+        {
+          "id": 13,
+          "codigo": "CFIS332",
+          "nombre": "Mecánica",
+          "sct": 18,
+          "prerrequisitos": [4, 7],
+          "prereq_expr": "CFIS310"
+        },
+        {
+          "id": 14,
+          "codigo": "ACAD101",
+          "nombre": "Taller de Innovación y Emprendimiento I",
+          "sct": 10,
+          "prerrequisitos": [2],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 4,
+      "cursos": [
+        {
+          "id": 15,
+          "codigo": "FMMP312",
+          "nombre": "Sistemas y Ecuaciones Diferenciales Lineales",
+          "sct": 16,
+          "prerrequisitos": [12],
+          "prereq_expr": "FMMP212"
+        },
+        {
+          "id": 16,
+          "codigo": "CFIS344",
+          "nombre": "Electricidad y Magnetismo",
+          "sct": 14,
+          "prerrequisitos": [13, 12],
+          "prereq_expr": "CFIS332 & FMMP212"
+        },
+        {
+          "id": 17,
+          "codigo": "INSW220",
+          "nombre": "Práctica I",
+          "sct": 16,
+          "prerrequisitos": [1, 2, 3, 4, 5, 7, 6, 10, 11, 12, 14],
+          "prereq_expr": ""
+        },
+        {
+          "id": 18,
+          "codigo": "ACAD102",
+          "nombre": "Taller de Innovación y Emprendimiento II",
+          "sct": 10,
+          "prerrequisitos": [14],
+          "prereq_expr": "ACAD101"
+        },
+        {
+          "id": 19,
+          "codigo": "ING119",
+          "nombre": "Inglés I",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 5,
+      "cursos": [
+        {
+          "id": 20,
+          "codigo": "FMSP316",
+          "nombre": "Métodos Cuantitativos",
+          "sct": 20,
+          "prerrequisitos": [12],
+          "prereq_expr": ""
+        },
+        {
+          "id": 21,
+          "codigo": "PTEC102",
+          "nombre": "Paradigmas de Programación",
+          "sct": 8,
+          "prerrequisitos": [11],
+          "prereq_expr": "PTEC101"
+        },
+        {
+          "id": 22,
+          "codigo": "ICF201",
+          "nombre": "Fundamentos de Computación de Alto Desempeño",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 23,
+          "codigo": "ICF202",
+          "nombre": "Análisis y Diseño de Algoritmos",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 24,
+          "codigo": "ING129",
+          "nombre": "Inglés II",
+          "sct": 12,
+          "prerrequisitos": [19],
+          "prereq_expr": "ING119"
+        }
+      ]
+    },
+    {
+      "numero": 6,
+      "cursos": [
+        {
+          "id": 25,
+          "codigo": "TDFI105",
+          "nombre": "Minería de Datos",
+          "sct": 12,
+          "prerrequisitos": [20, 5],
+          "prereq_expr": "FMSP316 & TDFI103"
+        },
+        {
+          "id": 26,
+          "codigo": "PTEC103",
+          "nombre": "Desarrollo Web y Móvil",
+          "sct": 14,
+          "prerrequisitos": [21],
+          "prereq_expr": "PTEC102"
+        },
+        {
+          "id": 27,
+          "codigo": "PTEC104",
+          "nombre": "Infraestructura TI",
+          "sct": 12,
+          "prerrequisitos": [21],
+          "prereq_expr": "PTEC102"
+        },
+        {
+          "id": 28,
+          "codigo": "ICF203",
+          "nombre": "Fundamentos de Inteligencia Artificial",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 29,
+          "codigo": "ING239",
+          "nombre": "Inglés III",
+          "sct": 12,
+          "prerrequisitos": [24],
+          "prereq_expr": "ING129"
+        }
+      ]
+    },
+    {
+      "numero": 7,
+      "cursos": [
+        {
+          "id": 30,
+          "codigo": "PTEC105",
+          "nombre": "Ingeniería de Software I",
+          "sct": 15,
+          "prerrequisitos": [12],
+          "prereq_expr": ""
+        },
+        {
+          "id": 31,
+          "codigo": "ICF204",
+          "nombre": "Aprendizaje de Máquina",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 32,
+          "codigo": "ICF205",
+          "nombre": "Optimización",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 33,
+          "codigo": "ACAD103",
+          "nombre": "Taller de Innovación y Emprendimiento III",
+          "sct": 10,
+          "prerrequisitos": [18],
+          "prereq_expr": "ACAD102"
+        },
+        {
+          "id": 34,
+          "codigo": "ING249",
+          "nombre": "Inglés IV",
+          "sct": 12,
+          "prerrequisitos": [29],
+          "prereq_expr": "ING239"
+        }
+      ]
+    },
+    {
+      "numero": 8,
+      "cursos": [
+        {
+          "id": 35,
+          "codigo": "TDFI106",
+          "nombre": "Gestión de la Transformación Digital",
+          "sct": 12,
+          "prerrequisitos": [10],
+          "prereq_expr": "TDFI104"
+        },
+        {
+          "id": 36,
+          "codigo": "PTEC106",
+          "nombre": "Ingeniería de Software II",
+          "sct": 15,
+          "prerrequisitos": [30, 26],
+          "prereq_expr": "PTEC105 & PTEC103"
+        },
+        {
+          "id": 37,
+          "codigo": "PTEC107",
+          "nombre": "Ciberseguridad",
+          "sct": 14,
+          "prerrequisitos": [27],
+          "prereq_expr": "PTEC104"
+        },
+        {
+          "id": 38,
+          "codigo": "INSW411",
+          "nombre": "Tópicos de Especialidad I",
+          "sct": 10,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 39,
+          "codigo": "INSW421",
+          "nombre": "Seminario de Licenciatura en Ingeniería",
+          "sct": 14,
+          "prerrequisitos": [36, 41],
+          "prereq_expr": "PTEC106 & INSW410"
+        },
+        {
+          "id": 40,
+          "codigo": "CEGRS14",
+          "nombre": "Responsabilidad Social",
+          "sct": 6,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 9,
+      "cursos": [
+        {
+          "id": 41,
+          "codigo": "INSW410",
+          "nombre": "Portafolio de Proyectos",
+          "sct": 10,
+          "prerrequisitos": [26, 30],
+          "prereq_expr": "PTEC103 & PTEC105"
+        },
+        {
+          "id": 42,
+          "codigo": "ICF206",
+          "nombre": "Administración Financiera de Proyectos I+D+i",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 43,
+          "codigo": "ICF207",
+          "nombre": "Ciencia de Datos",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 44,
+          "codigo": "INSW412",
+          "nombre": "Tópicos de Especialidad II",
+          "sct": 10,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 45,
+          "codigo": "INSW413",
+          "nombre": "Tópicos de Especialidad III",
+          "sct": 10,
+          "prerrequisitos": [38, 44],
+          "prereq_expr": "INSW411 & INSW412"
+        }
+      ]
+    },
+    {
+      "numero": 10,
+      "cursos": [
+        {
+          "id": 46,
+          "codigo": "INSW422",
+          "nombre": "Proyecto de Título",
+          "sct": 14,
+          "prerrequisitos": [41],
+          "prereq_expr": "INSW410"
+        },
+        {
+          "id": 47,
+          "codigo": "ICF208",
+          "nombre": "Taller de Transferencia Tecnológica",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 48,
+          "codigo": "INSW420",
+          "nombre": "Práctica II",
+          "sct": 26,
+          "prerrequisitos": [17],
+          "prereq_expr": "INSW220"
+        }
+      ]
+    }
+  ]
+}

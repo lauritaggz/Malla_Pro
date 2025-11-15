@@ -98,6 +98,11 @@ export default function App() {
             totalCursos={progreso.total}
             cursosAprobados={progreso.aprobados}
             cursosCursando={cursosCursando}
+            cursosEnCursoData={
+              mallaData?.semestres?.flatMap((s) =>
+                s.cursos.filter((c) => cursando.includes(c.id))
+              ) || []
+            }
           />
         )}
 
@@ -143,11 +148,11 @@ export default function App() {
               setExcepcionesActivas={setExcepcionesActivas}
               onTotalCursosChange={setProgreso}
               onSemestresLoaded={handleSemestresLoaded}
-              onCursandoChange={setCursando}
+              onCursandoChange={setCursosCursando} // ← guarda el número
+              onCursandoArrayChange={setCursando} // ← guarda el array real
               onMallaDataLoaded={setMallaData}
               onAprobadosChange={setAprobados}
               onExcepcionesChange={setExcepciones}
-              onCursandoArrayChange={setCursando}
               onAbrirNotas={handleAbrirNotas}
             />
           </main>
