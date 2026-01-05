@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import Curso from "./Curso";
 
@@ -9,6 +10,11 @@ export default function MallaViewer({
   onTotalCursosChange,
   onSemestresLoaded,
   onCursandoChange,
+  onMallaDataLoaded,
+  onAprobadosChange,
+  onExcepcionesChange,
+  onCursandoArrayChange,
+  onAbrirNotas,
 }) {
   const [malla, setMalla] = useState(null);
   const [aprobados, setAprobados] = useState(
@@ -34,18 +40,26 @@ export default function MallaViewer({
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const totalSemestres = data.semestres?.length || 0;
-        setMalla({
+        const mallaData = {
           nombre: data.carrera || "Malla sin nombre",
           semestres: data.semestres || [],
           totalSemestres,
-        });
+        };
+        setMalla(mallaData);
         onSemestresLoaded?.(totalSemestres);
+        onMallaDataLoaded?.(mallaData);
       } catch (err) {
         console.error("Error al cargar malla:", err);
       }
     }
     cargar();
-  }, [mallaSeleccionada, onSemestresLoaded]);
+  }, [mallaSeleccionada, onSemestresLoaded, onMallaDataLoaded]);
+
+  // Debugging logs to verify malla loading
+  useEffect(() => {
+    console.log("Fetching malla from:", mallaSeleccionada.url);
+    console.log("Loaded malla:", malla);
+  }, [mallaSeleccionada, malla]);
 
   // ✅ Guardar en localStorage
   useEffect(() => {
@@ -56,12 +70,20 @@ export default function MallaViewer({
 
     // Notificar cambio en cursos cursando
     onCursandoChange?.(cursando.length);
+
+    // Notificar arrays completos para el dashboard
+    onAprobadosChange?.(aprobados);
+    onExcepcionesChange?.(excepciones);
+    onCursandoArrayChange?.(cursando);
   }, [
     aprobados,
     excepciones,
     cursando,
     setExcepcionesActivas,
     onCursandoChange,
+    onAprobadosChange,
+    onExcepcionesChange,
+    onCursandoArrayChange,
   ]);
 
   // ✅ Calcular progreso cada vez que cambia el estado
@@ -216,12 +238,15 @@ export default function MallaViewer({
         ref={scrollRef}
         {...bind()}
         onClickCapture={handleClickCapture}
-        className={`overflow-x-auto scroll-container overscroll-x-contain glass-effect rounded-lg p-4 ${
-          isDragging ? "dragging" : "cursor-grab"
-        } active:cursor-grabbing`}
+        className={`overflow-x-auto scroll-container overscroll-x-contain rounded-xl p-6 
+              glass-effect-strong shadow-theme-lg backdrop-blur-xl
+              bg-gradient-to-br from-bgSecondary/80 to-bgTertiary/50 
+              ${
+                isDragging ? "dragging" : "cursor-grab"
+              } active:cursor-grabbing`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        <div className="flex gap-3 sm:gap-6 md:gap-8 min-w-max py-2 sm:py-3 md:py-4">
+        <div className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4">
           {Array.from({ length: Math.ceil(malla.semestres.length / 2) }).map(
             (_, i) => {
               const year = i + 1;
@@ -229,21 +254,37 @@ export default function MallaViewer({
               const semB = malla.semestres[i * 2 + 1];
 
               return (
-                <div
+                <motion.div
                   key={year}
                   className="min-w-[320px] sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.1 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
-                  <div className="text-center text-textSecondary font-semibold mb-3 sm:mb-4">
-                    Año {year}
+                  <div className="text-center mb-3 sm:mb-4">
+                    <span className="text-xs uppercase tracking-wide text-textSecondary/80">
+                      Año
+                    </span>
+                    <div className="text-xl sm:text-2xl font-bold text-primary drop-shadow-[0_1px_0_rgba(255,255,255,0.04)]">
+                      {year}
+                    </div>
                   </div>
 
                   <div className="flex gap-4 sm:gap-8">
                     {[semA, semB].map(
                       (sem, idx) =>
                         sem && (
-                          <div
+                          <motion.div
                             key={idx}
-                            className="flex flex-col gap-2 sm:gap-3 min-w-[160px] sm:min-w-[210px]"
+                            className="flex flex-col gap-2 sm:gap-3 min-w-[160px] sm:min-w-[210px] 
+                                       bg-gradient-to-br from-bgSecondary/60 to-bgTertiary/30 
+                                       rounded-xl p-3 sm:p-4 border border-borderColor/50 
+                                       shadow-theme hover:shadow-theme-lg transition-shadow"
+                            initial={{ opacity: 0, y: 8 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.1 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
                           >
                             {sem.cursos.map((curso) => (
                               <Curso
@@ -259,13 +300,14 @@ export default function MallaViewer({
                                 }
                                 enCurso={cursando.includes(curso.id)}
                                 toggleCursando={() => toggleCursando(curso.id)}
+                                onAbrirNotas={onAbrirNotas}
                               />
                             ))}
-                          </div>
+                          </motion.div>
                         )
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             }
           )}

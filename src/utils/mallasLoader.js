@@ -16,6 +16,18 @@ export async function listarMallas() {
           nombre: "Geología",
           url: "/mallas/Geo.json",
         },
+        {
+          nombre: "Ingeniería en Marina Mercante",
+          url: "/mallas/MM.json",
+        },
+        {
+          nombre: "Ingenería Civil Informática",
+          url: "/mallas/CInf.json",
+        },
+        {
+          nombre: "Ingeniería Civil en Minas",
+          url: "/mallas/Minas.json",
+        },
       ],
     },
   ];

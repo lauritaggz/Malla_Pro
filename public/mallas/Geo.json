@@ -1,0 +1,497 @@
+{
+  "carrera": "Geología (UNAB)",
+  "total_creditos": 0,
+  "totalSemestres": 10,
+  "semestres": [
+    {
+      "numero": 1,
+      "cursos": [
+        {
+          "id": 1,
+          "codigo": "CEGHC11",
+          "nombre": "Habilidades comunicativas",
+          "sct": 8,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 2,
+          "codigo": "CFIS310",
+          "nombre": "Física general",
+          "sct": 18,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 3,
+          "codigo": "FMMP012",
+          "nombre": "Introducción a las matemáticas",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 4,
+          "codigo": "GEOL101",
+          "nombre": "Sistema tierra",
+          "sct": 11,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 5,
+          "codigo": "QUIM090",
+          "nombre": "Química y ambiente",
+          "sct": 10,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 2,
+      "cursos": [
+        {
+          "id": 6,
+          "codigo": "CFIS328",
+          "nombre": "Física experimental",
+          "sct": 16,
+          "prerrequisitos": [2, 3],
+          "prereq_expr": "(CFIS310 o FMF023 o FMF010 o FMF024) y (FMMP012 o FMM013 o FMM012 o FMM035)"
+        },
+        {
+          "id": 7,
+          "codigo": "FMMP112",
+          "nombre": "Cálculo diferencial",
+          "sct": 16,
+          "prerrequisitos": [3],
+          "prereq_expr": "FMMP012 o FMM013 o FMM010 o FMM035 o FMM012"
+        },
+        {
+          "id": 8,
+          "codigo": "GEOL201",
+          "nombre": "Mineralogía y cristalografía",
+          "sct": 11,
+          "prerrequisitos": [4, 5],
+          "prereq_expr": "(GEOL101 o GEO101) y (QUIM090 o QUI104)"
+        },
+        {
+          "id": 9,
+          "codigo": "GEOL202",
+          "nombre": "Paleontología y evolución",
+          "sct": 9,
+          "prerrequisitos": [4],
+          "prereq_expr": "GEOL101 o GEO101"
+        },
+        {
+          "id": 10,
+          "codigo": "GEOL203",
+          "nombre": "Fundamentos de geología",
+          "sct": 14,
+          "prerrequisitos": [4],
+          "prereq_expr": "GEOL101 o GEO101"
+        }
+      ]
+    },
+    {
+      "numero": 3,
+      "cursos": [
+        {
+          "id": 11,
+          "codigo": "ACAD101",
+          "nombre": "Taller de innovación y emprendimiento i",
+          "sct": 10,
+          "prerrequisitos": [4],
+          "prereq_expr": "TDFI101 o AUT1301 o INN1201 o ICF121 o INS122 o ICI1201 o IMIN101 o GEOL101 o GEO101 o BIOQ388 o BIOQ398 o LCEBB110 o LCEBB100"
+        },
+        {
+          "id": 12,
+          "codigo": "CFIS332",
+          "nombre": "Mecánica",
+          "sct": 18,
+          "prerrequisitos": [6, 7],
+          "prereq_expr": "(CFIS328 o FMF023 o FMF066) y (FMMP112 o FMM033 o FMM112)"
+        },
+        {
+          "id": 13,
+          "codigo": "FMMP212",
+          "nombre": "Cálculo integral",
+          "sct": 16,
+          "prerrequisitos": [7],
+          "prereq_expr": "FMMP112 o FMM040 o FMM010 o FMM033 o FMM112"
+        },
+        {
+          "id": 14,
+          "codigo": "GEOL301",
+          "nombre": "Geoquímica endógena",
+          "sct": 12,
+          "prerrequisitos": [5, 10],
+          "prereq_expr": "(QUIM090 o QUI104) y (GEOL203 o GEO102)"
+        },
+        {
+          "id": 15,
+          "codigo": "GEOL302",
+          "nombre": "Métodos analíticos i: microscopía óptica",
+          "sct": 12,
+          "prerrequisitos": [14, 10],
+          "prereq_expr": "(GEOL301 o GEO201) y (GEOL203 o GEO102)"
+        }
+      ]
+    },
+    {
+      "numero": 4,
+      "cursos": [
+        {
+          "id": 16,
+          "codigo": "ACAD102",
+          "nombre": "Taller de innovación y emprendimiento ii",
+          "sct": 10,
+          "prerrequisitos": [11],
+          "prereq_expr": "ACAD101 o INN1201 o ICI1201 o CEGP01"
+        },
+        {
+          "id": 17,
+          "codigo": "CFIS344",
+          "nombre": "Electricidad y magnetismo",
+          "sct": 14,
+          "prerrequisitos": [12, 13],
+          "prereq_expr": "(CFIS332 o FMF122 o FMF025) y (FMMP212 o FMM133 o FMM212)"
+        },
+        {
+          "id": 18,
+          "codigo": "FMMP312",
+          "nombre": "Sistemas y ecuaciones diferenciales lineales",
+          "sct": 16,
+          "prerrequisitos": [13],
+          "prereq_expr": "FMMP212 o FMM133 o FMM130 o FMM212"
+        },
+        {
+          "id": 19,
+          "codigo": "GEOL401",
+          "nombre": "Integrador i: práctica i",
+          "sct": 10,
+          "prerrequisitos": [14, 15],
+          "prereq_expr": "(GEOL301 o GEO302) y (GEOL304 o GEO304) y (GEOL302 o GEO305)"
+        },
+        {
+          "id": 20,
+          "codigo": "ING119",
+          "nombre": "Inglés i",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 5,
+      "cursos": [
+        {
+          "id": 21,
+          "codigo": "GEOL501",
+          "nombre": "Petrología endógena",
+          "sct": 14,
+          "prerrequisitos": [19],
+          "prereq_expr": "GEOL401 o GEO499"
+        },
+        {
+          "id": 22,
+          "codigo": "GEOL502",
+          "nombre": "Sedimentología y estratigrafía",
+          "sct": 14,
+          "prerrequisitos": [19],
+          "prereq_expr": "GEOL401 o GEO499"
+        },
+        {
+          "id": 23,
+          "codigo": "GEOL503",
+          "nombre": "Métodos analíticos ii: sig y teledetección",
+          "sct": 7,
+          "prerrequisitos": [15],
+          "prereq_expr": "GEOL302 o GEO305"
+        },
+        {
+          "id": 24,
+          "codigo": "GEOL504",
+          "nombre": "Geoquímica exógena y ambiental",
+          "sct": 9,
+          "prerrequisitos": [14],
+          "prereq_expr": "GEOL301 o GEO302 y GEO304"
+        },
+        {
+          "id": 25,
+          "codigo": "GEOL505",
+          "nombre": "Bases de geología de campo",
+          "sct": 11,
+          "prerrequisitos": [19],
+          "prereq_expr": "GEOL401 o GEO499"
+        },
+        {
+          "id": 26,
+          "codigo": "ING129",
+          "nombre": "Inglés ii",
+          "sct": 12,
+          "prerrequisitos": [20],
+          "prereq_expr": "ING119 o ING111 o ING110 o ING116 o ING117 o CNT021 o ING050 o ING051 o FLG301"
+        }
+      ]
+    },
+    {
+      "numero": 6,
+      "cursos": [
+        {
+          "id": 27,
+          "codigo": "ACAD103",
+          "nombre": "Taller de innovación y emprendimiento iii",
+          "sct": 10,
+          "prerrequisitos": [16],
+          "prereq_expr": "ACAD102 o INB1202 o FIC168"
+        },
+        {
+          "id": 28,
+          "codigo": "GEOL601",
+          "nombre": "Fundamentos de programación y análisis numérico",
+          "sct": 10,
+          "prerrequisitos": [18, 23],
+          "prereq_expr": "(FMMP312 o FMM254) y (GEOL503 o GEO406)"
+        },
+        {
+          "id": 29,
+          "codigo": "GEOL602",
+          "nombre": "Deformación de la corteza",
+          "sct": 14,
+          "prerrequisitos": [21, 22],
+          "prereq_expr": "(GEOL501 o GEO403) y (GEOL502 o GEO301)"
+        },
+        {
+          "id": 30,
+          "codigo": "GEOL603",
+          "nombre": "Geología de campo i",
+          "sct": 19,
+          "prerrequisitos": [25, 23],
+          "prereq_expr": "(GEOL505 o GEO307) y (GEOL503 o GEO406)"
+        },
+        {
+          "id": 31,
+          "codigo": "ING239",
+          "nombre": "Inglés iii",
+          "sct": 12,
+          "prerrequisitos": [26],
+          "prereq_expr": "ING129 o ING121 o ING120 o ING216 o ING126 o ING134 o ING127 o CNT026 o ETU181 y ETU182"
+        }
+      ]
+    },
+    {
+      "numero": 7,
+      "cursos": [
+        {
+          "id": 32,
+          "codigo": "CEGRS14",
+          "nombre": "Responsabilidad social",
+          "sct": 6,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 33,
+          "codigo": "GEOL701",
+          "nombre": "Depósitos minerales y metalogénesis andina",
+          "sct": 12,
+          "prerrequisitos": [30, 29],
+          "prereq_expr": "(GEOL603 o GEO403) y (GEOL602 o GEO307)"
+        },
+        {
+          "id": 34,
+          "codigo": "GEOL702",
+          "nombre": "Geomorfología",
+          "sct": 10,
+          "prerrequisitos": [29, 24],
+          "prereq_expr": "(GEOL602 o GEO307) y (GEOL504 o GEO506)"
+        },
+        {
+          "id": 35,
+          "codigo": "GEOL703",
+          "nombre": "Paleoclima y ambiente",
+          "sct": 8,
+          "prerrequisitos": [24],
+          "prereq_expr": "GEOL504 o GEO506"
+        },
+        {
+          "id": 36,
+          "codigo": "GEOL704",
+          "nombre": "Geología de campo ii",
+          "sct": 18,
+          "prerrequisitos": [30, 29],
+          "prereq_expr": "(GEOL603 o GEO403) y (GEOL602 o GEO307). Correquisitos: GEOL703 y GEOL702"
+        },
+        {
+          "id": 37,
+          "codigo": "ING249",
+          "nombre": "Inglés iv",
+          "sct": 12,
+          "prerrequisitos": [31],
+          "prereq_expr": "ING239 o ING210 o ING216 o ING224 o ING126 o ING134 o otros equivalentes"
+        }
+      ]
+    },
+    {
+      "numero": 8,
+      "cursos": [
+        {
+          "id": 38,
+          "codigo": "GEOL801",
+          "nombre": "Recursos energéticos",
+          "sct": 7,
+          "prerrequisitos": [33],
+          "prereq_expr": "GEOL701 o GEO407 y GEO402"
+        },
+        {
+          "id": 39,
+          "codigo": "GEOL802",
+          "nombre": "Geología de chile",
+          "sct": 8,
+          "prerrequisitos": [36, 33],
+          "prereq_expr": "(GEOL704 o GEO407) y (GEOL701 o GEO407 y GEO402)"
+        },
+        {
+          "id": 40,
+          "codigo": "GEOL803",
+          "nombre": "Hidrogeología",
+          "sct": 8,
+          "prerrequisitos": [34],
+          "prereq_expr": "GEOL702 o GEO306. Correquisitos: GEOL804 y GEOL801"
+        },
+        {
+          "id": 41,
+          "codigo": "GEOL804",
+          "nombre": "Métodos de exploración geofísica",
+          "sct": 8,
+          "prerrequisitos": [33, 28],
+          "prereq_expr": "GEOL701 o GEO407 y GEO402 y GEOL601"
+        },
+        {
+          "id": 42,
+          "codigo": "GEOL805",
+          "nombre": "Integrador ii: seminario licenciatura en ciencias geológicas",
+          "sct": 19,
+          "prerrequisitos": [36, 33],
+          "prereq_expr": "(GEOL704 o GEO407) y (GEOL701 o GEO407 y GEO402). Correquisitos: GEOL804 y GEOL803"
+        },
+        {
+          "id": 43,
+          "codigo": "GEOL806",
+          "nombre": "Práctica ii",
+          "sct": 18,
+          "prerrequisitos": [36],
+          "prereq_expr": "GEOL704 o GEO407"
+        }
+      ]
+    },
+    {
+      "numero": 9,
+      "cursos": [
+        {
+          "id": 44,
+          "codigo": "GEOL901",
+          "nombre": "Geología de minas",
+          "sct": 10,
+          "prerrequisitos": [41, 38],
+          "prereq_expr": "(GEOL804 o GEO308) y (GEOL801 o GEO408)"
+        },
+        {
+          "id": 45,
+          "codigo": "GEOL902",
+          "nombre": "Geoestadística y modelamiento geológico",
+          "sct": 9,
+          "prerrequisitos": [41],
+          "prereq_expr": "GEOL804 o GEO308"
+        },
+        {
+          "id": 46,
+          "codigo": "GEOL903",
+          "nombre": "Geología de campo iii",
+          "sct": 19,
+          "prerrequisitos": [42],
+          "prereq_expr": "GEOL805 o GEO405. Correquisitos: GEOL901 y GEOL904"
+        },
+        {
+          "id": 47,
+          "codigo": "GEOL904",
+          "nombre": "Peligros geológicos y planificación territorial",
+          "sct": 8,
+          "prerrequisitos": [40],
+          "prereq_expr": "GEOL803 o GEO502"
+        },
+        {
+          "id": 48,
+          "codigo": "GEOL905",
+          "nombre": "Tópicos de especialidad i",
+          "sct": 9,
+          "prerrequisitos": [39],
+          "prereq_expr": "GEOL802 o GEO411"
+        },
+        {
+          "id": 49,
+          "codigo": "GEOL906",
+          "nombre": "Portafolio de proyectos",
+          "sct": 9,
+          "prerrequisitos": [42],
+          "prereq_expr": "GEOL805 o GEO405. Correquisito: GEOL903"
+        }
+      ]
+    },
+    {
+      "numero": 10,
+      "cursos": [
+        {
+          "id": 50,
+          "codigo": "GEOL001",
+          "nombre": "Tópicos de especialidad ii",
+          "sct": 5,
+          "prerrequisitos": [48],
+          "prereq_expr": "GEOL905 o GEOLP001 o GEOLP002 o GEOLP003 o GEOLP004 o GEOLP005 o GEOLP006 o GEOLP007 o GEOLP008"
+        },
+        {
+          "id": 51,
+          "codigo": "GEOL002",
+          "nombre": "Economía y evaluación de proyectos geológicos",
+          "sct": 5,
+          "prerrequisitos": [44, 46],
+          "prereq_expr": "(GEOL901 o GEO412 y GEO501) y (GEOL903 o GEO410)"
+        },
+        {
+          "id": 52,
+          "codigo": "GEOL003",
+          "nombre": "Tópicos de especialidad iii",
+          "sct": 5,
+          "prerrequisitos": [48],
+          "prereq_expr": "GEOL905 o GEOLP001 o GEOLP002 o GEOLP003 o GEOLP004 o GEOLP005 o GEOLP006 o GEOLP007 o GEOLP008"
+        },
+        {
+          "id": 53,
+          "codigo": "GEOL004",
+          "nombre": "Geoética y geopatrimonio",
+          "sct": 4,
+          "prerrequisitos": [48],
+          "prereq_expr": "GEOL905 o GEOLP001 o GEOLP002 o GEOLP003 o GEOLP004 o GEOLP005 o GEOLP006 o GEOLP007 o GEOLP008"
+        },
+        {
+          "id": 54,
+          "codigo": "GEOL005",
+          "nombre": "Integrador iii: proyecto de título",
+          "sct": 45,
+          "prerrequisitos": [49],
+          "prereq_expr": "(GEOL906 o GEO505) y (GEOL906 o GEO599)"
+        },
+        {
+          "id": 55,
+          "codigo": "GEOL006",
+          "nombre": "Geología andina e interpretación avanzada",
+          "sct": 5,
+          "prerrequisitos": [46],
+          "prereq_expr": "GEOL903 o GEO410. Correquisitos: (GEOL001 o GEOLP014) y GEOL003"
+        }
+      ]
+    }
+  ]
+}
