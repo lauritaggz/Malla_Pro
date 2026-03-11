@@ -134,8 +134,7 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .bg-primary {
@@ -320,8 +319,9 @@ body {
   padding: 16px 32px;
   border-radius: 9999px;
   font-weight: 600;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  will-change: transform;
 }
 
 .btn-primary:hover {
@@ -336,19 +336,19 @@ body {
   padding: 16px 32px;
   border-radius: 9999px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 /* Efecto de fade-in para elementos */
 .fade-in {
   opacity: 0;
-  transform: translateY(20px);
-  animation: fadeIn 1s ease-out forwards;
+  transform: translateY(8px);
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 @keyframes fadeIn {
@@ -364,25 +364,23 @@ body {
   font-weight: 700;
   letter-spacing: -0.01em;
 }
+/* Only animate bg/color for theme switching — NOT every property */
 :root,
 .dark,
 .light {
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              fill 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-              stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05),
               inset 0 1px 0 rgba(255, 255, 255, 0.4);
   border-radius: 1.25rem;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
 }
 
 .dark .glass-card {
@@ -394,6 +392,6 @@ body {
 
 .glass-card:hover {
   transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08),
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08),
               inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }

@@ -15,6 +15,8 @@ export default function MallaViewer({
   onExcepcionesChange,
   onCursandoArrayChange,
   onAbrirNotas,
+  ocultarCompletados,
+  setOcultarCompletados
 }) {
   const [malla, setMalla] = useState(null);
   const [mencionActiva, setMencionActiva] = useState(null);
@@ -28,13 +30,11 @@ export default function MallaViewer({
   const [cursando, setCursando] = useState(
     JSON.parse(localStorage.getItem("malla-cursando")) || []
   );
-  
-  const [ocultarCompletados, setOcultarCompletados] = useState(false);
 
   // 🔹 Ref y estados para drag horizontal
   const scrollRef = useRef(null);
+  const dragMovedRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragMoved, setDragMoved] = useState(0);
 
   // ✅ Cargar malla seleccionada
   useEffect(() => {
@@ -119,6 +119,22 @@ export default function MallaViewer({
     }
   }, [mencionActiva, malla]);
 
+  // ✅ Persistencia del Scroll
+  const handleScroll = () => {
+    if (scrollRef.current && malla) {
+      localStorage.setItem(`malla-scroll-${malla.nombre}`, scrollRef.current.scrollLeft);
+    }
+  };
+
+  useEffect(() => {
+    if (malla && scrollRef.current) {
+      const savedScroll = localStorage.getItem(`malla-scroll-${malla.nombre}`);
+      if (savedScroll) {
+        scrollRef.current.scrollLeft = parseFloat(savedScroll);
+      }
+    }
+  }, [malla]);
+
   // Debugging logs to verify malla loading
   useEffect(() => {
     console.log("Fetching malla from:", mallaSeleccionada.url);
@@ -181,43 +197,87 @@ export default function MallaViewer({
     onTotalCursosChange({ total, aprobados: aprobadosCount });
   }, [malla, aprobados, excepciones, mencionActiva, onTotalCursosChange]);
 
+  // ✅ Obtener todos los hijos (ramos que dependen de este) de forma recursiva
+  const getDescendientes = (id, todasLasMallas) => {
+    const hijos = todasLasMallas.filter(c => c.prerrequisitos?.includes(id));
+    let descendientes = [...hijos.map(h => h.id)];
+    hijos.forEach(h => {
+      descendientes = [...descendientes, ...getDescendientes(h.id, todasLasMallas)];
+    });
+    return Array.from(new Set(descendientes));
+  };
+
   // ✅ Aprobar o desmarcar ramo
   const aprobar = (id) => {
-    if (aprobados.includes(id)) {
-      setAprobados(aprobados.filter((a) => a !== id));
-    } else {
-      // Al aprobar, limpiamos el estado "en curso" si estaba activo
-      setAprobados([...aprobados, id]);
-      if (cursando.includes(id)) {
-        setCursando(cursando.filter((c) => c !== id));
+    setAprobados((prevAprobados) => {
+      if (prevAprobados.includes(id)) {
+        // Si estamos desmarcando, buscamos todos los que dependen de este
+        const todosLosCursos = [];
+        if (!malla.isMencion) {
+          malla.semestres.forEach(s => todosLosCursos.push(...s.cursos));
+        } else {
+          malla.semestresComunes.forEach(s => todosLosCursos.push(...s.cursos));
+          Object.values(malla.menciones).forEach(m => {
+            m.semestres.forEach(s => todosLosCursos.push(...s.cursos));
+          });
+        }
+        
+        const aEliminar = getDescendientes(id, todosLosCursos);
+        return prevAprobados.filter((a) => a !== id && !aEliminar.includes(a));
+      } else {
+        return [...prevAprobados, id];
       }
-    }
+    });
+    
+    // Al aprobar, limpiamos el estado "en curso" si estaba activo
+    setCursando((prevCursando) => {
+      if (prevCursando.includes(id)) {
+        return prevCursando.filter((c) => c !== id);
+      }
+      return prevCursando;
+    });
   };
 
   // ✅ Marcar / desmarcar como excepcional
   const marcarExcepcional = (id) => {
-    if (excepciones.includes(id)) {
-      setExcepciones(excepciones.filter((e) => e !== id));
-      setAprobados(aprobados.filter((a) => a !== id));
-    } else {
-      setExcepciones([...excepciones, id]);
-      if (!aprobados.includes(id)) {
-        setAprobados([...aprobados, id]);
+    setExcepciones((prevExcepciones) => {
+      if (prevExcepciones.includes(id)) {
+        return prevExcepciones.filter((e) => e !== id);
+      } else {
+        return [...prevExcepciones, id];
       }
-      // Si queda aprobado por excepcional, quitamos "en curso" si existía
-      if (cursando.includes(id)) {
-        setCursando(cursando.filter((c) => c !== id));
+    });
+
+    setAprobados((prevAprobados) => {
+      // Si estamos quitando la excepción, también quitamos de aprobados
+      if (excepciones.includes(id)) { // Usando estado actual de la closure para saber si estamos activando o desactivando
+        return prevAprobados.filter((a) => a !== id);
+      } 
+      // Si estamos agregando excepción, lo agregamos a aprobados si no está
+      if (!prevAprobados.includes(id)) {
+        return [...prevAprobados, id];
       }
-    }
+      return prevAprobados;
+    });
+
+    // Si queda aprobado por excepcional, quitamos "en curso" si existía
+    setCursando((prevCursando) => {
+      if (!excepciones.includes(id) && prevCursando.includes(id)) {
+        return prevCursando.filter((c) => c !== id);
+      }
+      return prevCursando;
+    });
   };
 
   // ✅ En curso (Ctrl + clic)
   const toggleCursando = (id) => {
-    if (cursando.includes(id)) {
-      setCursando(cursando.filter((c) => c !== id));
-    } else {
-      setCursando([...cursando, id]);
-    }
+    setCursando((prevCursando) => {
+      if (prevCursando.includes(id)) {
+        return prevCursando.filter((c) => c !== id);
+      } else {
+        return [...prevCursando, id];
+      }
+    });
   };
 
   // ✅ Aprobar hasta semestre (evento global desde Navbar)
@@ -278,12 +338,12 @@ export default function MallaViewer({
 
       if (first) {
         setIsDragging(true);
-        setDragMoved(0);
+        dragMovedRef.current = 0;
       }
 
       if (event?.deltaX) {
         el.scrollLeft -= event.deltaX;
-        setDragMoved((prev) => prev + Math.abs(event.deltaX));
+        dragMovedRef.current += Math.abs(event.deltaX);
       }
 
       if (last) {
@@ -298,9 +358,8 @@ export default function MallaViewer({
     }
   );
 
-  // ✅ Evita clics falsos tras arrastrar
   const handleClickCapture = (e) => {
-    if (dragMoved > 3) {
+    if (dragMovedRef.current > 3) {
       e.stopPropagation();
       e.preventDefault();
     }
@@ -390,7 +449,7 @@ export default function MallaViewer({
 
         <button
           onClick={() => setOcultarCompletados(!ocultarCompletados)}
-          className={`flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border
+          className={`hidden sm:flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border
             ${ocultarCompletados 
               ? "bg-primary text-white border-primary shadow-[0_0_12px_var(--primary)] opacity-90 scale-105" 
               : "bg-bgSecondary/80 backdrop-blur-md text-textSecondary border-borderColor/50 hover:text-primary hover:border-primary/50"}
@@ -407,8 +466,9 @@ export default function MallaViewer({
         <div
           ref={scrollRef}
           {...bind()}
+          onScroll={handleScroll}
           onClickCapture={handleClickCapture}
-          className={`overflow-x-auto scroll-container overscroll-x-contain px-8 sm:px-10 pb-4
+          className={`overflow-x-auto scroll-container overscroll-x-contain px-4 sm:px-10 pb-4 snap-x snap-mandatory sm:snap-none
                 ${
                   isDragging ? "dragging" : "cursor-grab"
                 } active:cursor-grabbing`}
@@ -418,7 +478,6 @@ export default function MallaViewer({
             className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
             style={{ transform: "scaleY(-1)" }}
           >
-            <AnimatePresence mode="popLayout">
             {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
             (_, i) => {
               const year = i + 1;
@@ -438,17 +497,10 @@ export default function MallaViewer({
               return (
                 <motion.div
                   key={year}
-                  layout="position"
-                  className="min-w-[320px] sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 350, 
-                    damping: 30, 
-                    mass: 0.8
-                  }}
+                  className="w-max sm:w-auto sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                 >
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="text-xs uppercase tracking-wide text-textSecondary/80">
@@ -460,7 +512,6 @@ export default function MallaViewer({
                   </div>
 
                   <div className="flex gap-4 sm:gap-8">
-                    <AnimatePresence mode="popLayout">
                     {[
                       { info: semAInfo, show: showA, key: `sem-${i * 2 + 1}` },
                       { info: semBInfo, show: showB, key: `sem-${i * 2 + 2}` }
@@ -468,36 +519,33 @@ export default function MallaViewer({
                       ({ info, show, key }) =>
                         show && info && (
                           <Fragment key={key}>
-                            {/* SEMESTRE COMÚN */}
+                                {/* SEMESTRE COMÚN */}
                             {info.tipo === "comun" && info.data && (
                                <motion.div
-                                 layout
-                                 className="flex flex-col gap-3 min-w-[180px] sm:min-w-[240px] 
-                                            bg-bgSecondary/70 backdrop-blur-md 
+                                 className="flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
+                                            bg-bgSecondary/70 
                                             rounded-2xl p-4 sm:p-5 border border-borderColor/40 
-                                            shadow-md hover:shadow-xl transition-shadow duration-300 transform-gpu z-10"
-                                 initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                 exit={{ opacity: 0, scale: 0.94 }}
-                                 transition={{ type: "spring", stiffness: 400, damping: 35, mass: 0.9 }}
+                                            shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10"
+                                 initial={{ opacity: 0, y: 8 }}
+                                 animate={{ opacity: 1, y: 0 }}
+                                 transition={{ duration: 0.2, ease: "easeOut" }}
                                >
+                                 <div className="text-center sm:hidden mb-1">
+                                    <span className="text-xs font-bold text-textSecondary uppercase">Semestre {info.data.numero}</span>
+                                 </div>
                                  {info.data.cursos.map((c) => renderCurso(c))}
                                </motion.div>
-                            )}
-
-                            {/* SEMESTRE MENCIONES (SIMPLE CARD) */}
+                            )}                             {/* SEMESTRE MENCIONES (SIMPLE CARD) */}
                             {info.tipo === "mencion" && info.opciones && info.opciones[mencionActiva] && (
                                <motion.div
-                                 layout
-                                 className="flex flex-col gap-3 min-w-[180px] sm:min-w-[240px] 
-                                            bg-primary/5 backdrop-blur-md 
+                                 className="flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
+                                            bg-primary/5 
                                             rounded-2xl p-4 sm:p-5 border border-primary/20 
-                                            shadow-[0_4px_24px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_8px_32px_rgba(var(--primary-rgb),0.2)] 
-                                            transition-shadow duration-300 transform-gpu z-10 relative"
-                                 initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                 exit={{ opacity: 0, scale: 0.94 }}
-                                 transition={{ type: "spring", stiffness: 400, damping: 35, mass: 0.9 }}
+                                            shadow-md hover:shadow-lg 
+                                            transition-shadow duration-200 transform-gpu z-10 relative"
+                                 initial={{ opacity: 0, y: 8 }}
+                                 animate={{ opacity: 1, y: 0 }}
+                                 transition={{ duration: 0.2, ease: "easeOut" }}
                                >
                                   {/* Header especialidad */}
                                   <div className="flex flex-col mb-1 pb-3 border-b border-primary/20">
@@ -509,6 +557,9 @@ export default function MallaViewer({
                                          {info.opciones[mencionActiva].nombreMencion}
                                        </span>
                                      </div>
+                                     <div className="text-center sm:hidden mt-2">
+                                        <span className="text-xs font-bold text-textSecondary uppercase">Semestre {info.opciones[mencionActiva].numero}</span>
+                                     </div>
                                   </div>
 
                                   {info.opciones[mencionActiva].cursos.map((c) => renderCurso(c))}
@@ -517,13 +568,11 @@ export default function MallaViewer({
                           </Fragment>
                         )
                     )}
-                    </AnimatePresence>
                   </div>
                 </motion.div>
               );
             }
           )}
-            </AnimatePresence>
           </div>
         </div>
       </div>
