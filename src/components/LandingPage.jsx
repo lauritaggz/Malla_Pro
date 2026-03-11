@@ -110,11 +110,11 @@ export default function LandingPage() {
       <section className="min-h-screen flex items-center justify-center text-center px-6 fade-in">
         <div className="max-w-5xl">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text">
-            Control académico<br/>basado en datos.
+            Organiza tu semestre<br/>sin estresarte.
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-300 mb-12 font-light leading-relaxed">
-            Dile adiós a las páginas externas de cálculo. Malla Pro automatiza tus promedios, estima qué nota exacta necesitas para salvar el ramo y visualiza tu avance integral con precisión matemática.
+            La forma más fácil de ver tu malla, guardar tus notas y saber exactamente qué nota necesitas en la próxima prueba para salvar el ramo.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-6">
@@ -141,7 +141,7 @@ export default function LandingPage() {
       <section id="why" className="py-24 px-6 fade-in">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
-            ¿Por qué Malla Pro?
+            Sobrevive a la U
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -152,10 +152,10 @@ export default function LandingPage() {
               </div>
 
               <h3 className="text-2xl font-semibold mb-4">
-                Cálculo Automático
+                La nota salvavidas
               </h3>
               <p className="text-gray-300">
-                El sistema detecta tus porcentajes y calcula automáticamente la nota que necesitas en tu próximo control para asegurar tu 4.0. ¡Todo en un solo lugar!
+                Olvídate de la calculadora. Malla Pro deduce tu promedio y te dice al instante qué nota necesitas sacarte para aprobar.
               </p>
             </div>
 
@@ -169,10 +169,10 @@ export default function LandingPage() {
               </div>
 
               <h3 className="text-2xl font-semibold mb-4">
-                Registro Histórico
+                Toda la malla a la vista
               </h3>
               <p className="text-gray-300">
-                Llevar el registro de tus notas es vital. Observa tu evolución, pondera evaluaciones complejas y jamás pierdas el hilo de tu rendimiento académico real.
+                Lleva la cuenta de los ramos que pasaste, los que estás cursando, y esconde los semestres limpios para enfocarte solo en lo que importa hoy.
               </p>
             </div>
 
@@ -182,9 +182,9 @@ export default function LandingPage() {
                 <BarChart3 className="w-10 h-10 text-white" strokeWidth={2} />
               </div>
 
-              <h3 className="text-2xl font-semibold mb-4">Datos Duros</h3>
+              <h3 className="text-2xl font-semibold mb-4">Eximición Automática</h3>
               <p className="text-gray-300">
-                Toma decisiones estratégicas. Basado 100% en métricas: suma de SCT completados, progreso de titulación exacto e históricos de aprobación.
+                Configura fácilmente los requisitos de tu carrera (Ponderación 70/30, Nota Eximición) y el sistema calculará solo tus notas de examen.
               </p>
             </div>
           </div>
@@ -270,73 +270,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* =========================== */}
-      {/*   CARACTERÍSTICAS PRINCIPALES */}
-      {/* =========================== */}
-      <section className="py-24 px-6 fade-in">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
-            Herramientas Innovadoras
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-20">
-            {/* 1 */}
-            <div className="glass p-8 rounded-2xl card-hover">
-              <div className="w-14 h-14 mb-6 mx-auto rounded-xl bg-blue-500/20 flex items-center justify-center">
-                <LayoutGrid
-                  className="w-10 h-10 text-blue-400"
-                  strokeWidth={2}
-                />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Motor Predictivo</h3>
-              <p className="text-gray-300 leading-relaxed">
-                El algoritmo deduce matemáticamente tu nota de salvación instantánea con cada cambio que hagas, despejando toda incertidumbre.
-              </p>
-            </div>
-
-            {/* 2 */}
-            <div className="glass p-8 rounded-2xl card-hover">
-              <div className="w-14 h-14 mb-6 mx-auto rounded-xl bg-purple-500/20 flex items-center justify-center">
-                <NotebookText
-                  className="w-10 h-10 text-purple-400"
-                  strokeWidth={2}
-                />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Simulador Instantáneo</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Juega con "notas hipotéticas" antes de enfrentar tus exámenes y observa el impacto exacto en tu estado de aprobación.
-              </p>
-            </div>
-
-            {/* 3 */}
-            <div className="glass p-8 rounded-2xl card-hover">
-              <div className="w-14 h-14 mb-6 mx-auto rounded-xl bg-green-500/20 flex items-center justify-center">
-                <BarChart3
-                  className="w-10 h-10 text-green-400"
-                  strokeWidth={2}
-                />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">
-                Trazabilidad Total
-              </h3>
-              <p className="text-gray-300 leading-relaxed">
-                No confíes tu semestre a la memoria. Controla tus progresiones al detalle, sin cálculos de ponderación manuales propensos a error.
-              </p>
-            </div>
-          </div>
-
-          <p className="text-center text-3xl italic text-gray-200">
-            “Hecha por estudiantes, para estudiantes.”
-          </p>
-        </div>
-      </section>
 
       {/* =========================== */}
       {/*          CTA FINAL          */}
       {/* =========================== */}
       <section className="py-32 px-6 text-center fade-in">
         <h2 className="text-4xl md:text-6xl font-bold mb-8 gradient-text">
-          Empieza a planificar tu futuro académico hoy.
+          Es momento de organizar tu semestre.
         </h2>
 
         <button
