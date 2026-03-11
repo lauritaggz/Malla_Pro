@@ -1,12 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  GraduationCap,
-  BarChart2,
-  ChevronDown,
-  Moon,
-  Sun,
-  FileText,
-} from "lucide-react";
+import { GraduationCap, ChevronDown, Moon, Sun, FileText, HelpCircle } from "lucide-react";
 
 export default function Navbar({
   theme,
@@ -18,7 +11,7 @@ export default function Navbar({
   excepcionesActivas = 0,
   mallaSeleccionada,
   cantidadSemestres,
-  onVerProgreso,
+  onShowTour,
 }) {
   const [mostrarControles, setMostrarControles] = useState(true);
 
@@ -55,8 +48,8 @@ export default function Navbar({
       ref={navRef}
       id="app-navbar"
       className="fixed top-0 left-0 right-0 z-[80]
-                 backdrop-blur-2xl bg-bgSecondary/70 border-b border-borderColor/40
-                 shadow-[0_8px_30px_rgba(0,0,0,0.25)]
+                 backdrop-blur-3xl bg-bgSecondary/60 border-b border-borderColor/20 dark:border-white/5
+                 shadow-[0_4px_30px_rgba(0,0,0,0.1)]
                  transition-all duration-500"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 relative select-none">
@@ -65,16 +58,16 @@ export default function Navbar({
           <div className="flex flex-col gap-1">
             {mallaSeleccionada && (
               <>
-                <h1 className="font-bold text-2xl md:text-3xl text-primary transition-transform duration-300 hover:scale-[1.03]">
+                <h1 className="font-bold text-2xl md:text-3xl text-primary tracking-tight transition-transform duration-300 hover:scale-[1.02] drop-shadow-sm">
                   {mallaSeleccionada.nombre}
                 </h1>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-1">
                   <span
-                    className="text-xs md:text-sm font-medium text-textSecondary 
-                                  px-3 py-1 rounded-full bg-bgTertiary/60 border border-borderColor"
+                    className="text-xs md:text-sm font-medium text-primary/80 
+                                  px-3 py-1 rounded-full bg-primary/10 border border-primary/20 shadow-inner"
                   >
-                    <GraduationCap className="w-4 h-4 text-primary" />
+                    <GraduationCap className="inline-block w-4 h-4 mr-1 text-primary" />
                     {mallaSeleccionada.url.includes("uch")
                       ? "Universidad de Chile"
                       : "UNAB"}
@@ -87,45 +80,34 @@ export default function Navbar({
           {/* BOTÓN COLAPSAR */}
           <button
             onClick={() => setMostrarControles(!mostrarControles)}
-            className="relative flex items-center justify-center w-8 h-8 rounded-full border border-borderColor 
-                       bg-bgPrimary hover:bg-bgTertiary transition-all duration-300 hover:scale-110"
+            className="relative flex items-center justify-center w-10 h-10 rounded-full border border-borderColor/50 
+                       bg-bgPrimary/50 backdrop-blur-md hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-all duration-300 hover:scale-110 shadow-sm"
           >
             <ChevronDown
-              className={`w-5 h-5 text-primary transition-transform duration-500 ${
-                mostrarControles ? "rotate-180" : ""
+              className={`w-5 h-5 transition-transform duration-500 ${
+                mostrarControles ? "rotate-180 text-primary" : "text-textSecondary"
               }`}
             />
           </button>
         </div>
 
-        <div className="w-full border-t border-borderColor mt-3 mb-4 opacity-60" />
+        <div className="w-full mt-4 mb-4" />
 
-        {/* ---------------- CONTROLES ---------------- */}
+        {/* ---------------- CONTROLES (Optimizado) ---------------- */}
         <div
-          className={`overflow-visible transition-all duration-500 ${
+          className={`grid transition-[grid-template-rows,opacity,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-template-rows,opacity,transform] ${
             mostrarControles
-              ? "max-h-[600px] opacity-100 mt-2"
-              : "max-h-0 opacity-0"
+              ? "grid-rows-[1fr] opacity-100 translate-y-0"
+              : "grid-rows-[0fr] opacity-0 -translate-y-2 pointer-events-none"
           }`}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative">
-            {/* BOTÓN VER PROGRESO */}
-            {mallaSeleccionada && onVerProgreso && (
-              <button
-                onClick={onVerProgreso}
-                className="px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white 
-                           font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300 
-                           flex items-center gap-2"
-              >
-                <BarChart2 className="w-5 h-5" /> Ver Progreso
-              </button>
-            )}
-
+          <div className="overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative pt-3 border-t border-borderColor/20 dark:border-white/5">
             {/* SELECT MARCAR HASTA */}
             <div className="relative group w-full sm:w-auto">
               <select
-                className="rounded-md px-3 py-2 border border-borderColor bg-bgPrimary text-textPrimary 
-                           hover:shadow focus:ring-2 focus:ring-primary transition-all w-full cursor-pointer"
+                className="appearance-none rounded-xl px-4 py-2.5 border border-borderColor/50 bg-black/5 dark:bg-white/10 backdrop-blur-sm text-textPrimary text-sm font-medium
+                           hover:shadow-md hover:border-primary/40 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all w-full cursor-pointer pr-10"
                 onChange={(e) => {
                   const value = Number(e.target.value);
                   if (value) {
@@ -136,20 +118,22 @@ export default function Navbar({
                   }
                 }}
               >
-                <option value="">📘 Marcar hasta</option>
+                <option value="" className="text-textSecondary bg-bgPrimary">📘 Marcar hasta</option>
                 {Array.from({ length: cantidadSemestres }).map((_, i) => (
-                  <option key={i} value={i + 1}>
+                  <option key={i} value={i + 1} className="text-textPrimary bg-bgPrimary">
                     Semestre {i + 1}
                   </option>
                 ))}
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textSecondary pointer-events-none" />
 
               {/* TOOLTIP */}
               <div
-                className="absolute left-0 top-[110%] w-60 bg-bgSecondary/90 border border-borderColor
-                           shadow-lg rounded-lg p-3 text-sm text-textSecondary
-                           opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                className="absolute left-0 top-full mt-3 w-64 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 border border-white/10 dark:border-black/10
+                           shadow-xl rounded-xl p-3 text-sm text-zinc-100 font-medium z-50
+                           opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none"
               >
+                <div className="absolute -top-1 left-4 w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45 border-t border-l border-white/10 dark:border-black/10"></div>
                 Marca todos los ramos hasta ese semestre como aprobados ✔
               </div>
             </div>
@@ -159,66 +143,86 @@ export default function Navbar({
               <select
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                className="rounded-md px-3 py-2 border border-borderColor bg-bgPrimary text-textPrimary 
-                           hover:shadow focus:ring-2 focus:ring-primary transition-all w-full"
+                className="appearance-none rounded-xl px-4 py-2.5 border border-borderColor/50 bg-black/5 dark:bg-white/10 backdrop-blur-sm text-textPrimary text-sm font-medium
+                           hover:shadow-md hover:border-primary/40 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all w-full cursor-pointer pr-10"
               >
                 {themes.map((t) => (
-                  <option key={t.id} value={t.id}>
+                  <option key={t.id} value={t.id} className="text-textPrimary bg-bgPrimary">
                     {t.name}
                   </option>
                 ))}
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textSecondary pointer-events-none" />
 
               <div
-                className="absolute left-0 top-[110%] w-60 bg-bgSecondary/90 border border-borderColor
-                           shadow-lg rounded-lg p-3 text-sm text-textSecondary
-                           opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                className="absolute left-0 top-full mt-3 w-64 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 border border-white/10 dark:border-black/10
+                           shadow-xl rounded-xl p-3 text-sm text-zinc-100 font-medium z-50
+                           opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none"
               >
+                 <div className="absolute -top-1 left-4 w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45 border-t border-l border-white/10 dark:border-black/10"></div>
                 Cambia el estilo visual de la plataforma 🎨
               </div>
             </div>
 
-            {/* MODO OSCURO */}
-            <button
-              onClick={toggleDarkMode}
-              className="w-10 h-10 rounded-full bg-bgPrimary border border-borderColor 
-                         flex items-center justify-center transition-all duration-300 
-                         hover:scale-110 hover:shadow-md text-primary"
-            >
-              {darkMode ? (
-                <Moon className="w-5 h-5" />
-              ) : (
-                <Sun className="w-5 h-5" />
-              )}
-            </button>
-
-            {/* EXCEPCIONAL */}
-            <div className="relative group w-full sm:w-auto">
+            {/* CONTROLES DERECHOS */}
+            <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+               {/* MODO OSCURO */}
               <button
-                onClick={() => setModoExcepcional(!modoExcepcional)}
-                className={`px-4 py-2 rounded-md font-medium transition-all duration-300 
-                            flex items-center gap-2
-                            ${
-                              modoExcepcional
-                                ? "bg-yellow-400 text-yellow-900 shadow-lg"
-                                : "bg-primary text-white hover:scale-105 hover:shadow-lg"
-                            }`}
+                onClick={toggleDarkMode}
+                className="flex-shrink-0 w-11 h-11 rounded-xl bg-bgPrimary/50 backdrop-blur-sm border border-borderColor/50 
+                           flex items-center justify-center transition-all duration-300 
+                           hover:scale-105 hover:bg-primary/10 hover:border-primary/40 hover:shadow-md text-primary"
+                aria-label="Alternar modo oscuro"
               >
-                <FileText className="w-4 h-4" /> Excepcional
-                {excepcionesActivas > 0 && (
-                  <span className="bg-red-500 text-white text-xs rounded-full px-2 py-[1px]">
-                    {excepcionesActivas}
-                  </span>
+                {darkMode ? (
+                  <Moon className="w-5 h-5 transition-transform duration-500 rotate-0 hover:rotate-12" />
+                ) : (
+                  <Sun className="w-5 h-5 transition-transform duration-500 rotate-0 hover:rotate-90" />
                 )}
               </button>
 
-              <div
-                className="absolute right-0 top-[110%] w-72 bg-bgSecondary/90 border border-borderColor
-                           shadow-lg rounded-lg p-3 text-sm text-textSecondary
-                           opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              {/* AYUDA / TOUR */}
+              <button
+                onClick={onShowTour}
+                className="flex-shrink-0 w-11 h-11 rounded-xl bg-bgPrimary/50 backdrop-blur-sm border border-borderColor/50 
+                           flex items-center justify-center transition-all duration-300 
+                           hover:scale-105 hover:bg-primary/10 hover:border-primary/40 hover:shadow-md text-primary"
+                aria-label="Ver Ayuda"
               >
-                Permite aprobar un ramo SIN prerrequisitos temporalmente ⚠️
+                <HelpCircle className="w-5 h-5" />
+              </button>
+
+              {/* EXCEPCIONAL */}
+              <div className="relative group flex-1 sm:flex-none">
+                <button
+                  onClick={() => setModoExcepcional(!modoExcepcional)}
+                  className={`w-full px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 
+                              flex items-center justify-center gap-2 border
+                              ${
+                                modoExcepcional
+                                  ? "bg-amber-400 text-amber-950 border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-pulse"
+                                  : "bg-primary text-white border-primary/80 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-lg shadow-primary/20"
+                              }`}
+                >
+                  <FileText className={`w-4 h-4 ${modoExcepcional ? 'animate-bounce' : ''}`} /> 
+                  Excepcional
+                  {excepcionesActivas > 0 && (
+                    <span className="flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full min-w[20px] h-5 px-1.5 shadow-sm border border-red-600/50">
+                      {excepcionesActivas}
+                    </span>
+                  )}
+                </button>
+
+                <div
+                  className="absolute right-0 top-full mt-3 w-72 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 border border-white/10 dark:border-black/10
+                             shadow-xl rounded-xl p-3 text-sm text-zinc-100 font-medium z-50
+                             opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none"
+                >
+                  <div className="absolute -top-1 right-6 w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45 border-t border-l border-white/10 dark:border-black/10"></div>
+                  Permite aprobar un ramo SIN prerrequisitos temporalmente ⚠️
+                </div>
               </div>
+            </div>
             </div>
           </div>
         </div>

@@ -110,11 +110,11 @@ export default function LandingPage() {
       <section className="min-h-screen flex items-center justify-center text-center px-6 fade-in">
         <div className="max-w-5xl">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text">
-            Tu carrera, visualizada.
+            Control académico<br/>basado en datos.
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 font-light">
-            Planifica, mide y alcanza tus metas con Malla Pro.
+          <p className="text-xl md:text-2xl text-gray-300 mb-12 font-light leading-relaxed">
+            Dile adiós a las páginas externas de cálculo. Malla Pro automatiza tus promedios, estima qué nota exacta necesitas para salvar el ramo y visualiza tu avance integral con precisión matemática.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-6">
@@ -152,10 +152,10 @@ export default function LandingPage() {
               </div>
 
               <h3 className="text-2xl font-semibold mb-4">
-                Visualización Clara
+                Cálculo Automático
               </h3>
               <p className="text-gray-300">
-                Explora tu malla curricular con una vista moderna e intuitiva.
+                El sistema detecta tus porcentajes y calcula automáticamente la nota que necesitas en tu próximo control para asegurar tu 4.0. ¡Todo en un solo lugar!
               </p>
             </div>
 
@@ -169,10 +169,10 @@ export default function LandingPage() {
               </div>
 
               <h3 className="text-2xl font-semibold mb-4">
-                Gestión Inteligente
+                Registro Histórico
               </h3>
               <p className="text-gray-300">
-                Registra notas, evalúa tu rendimiento y simula escenarios.
+                Llevar el registro de tus notas es vital. Observa tu evolución, pondera evaluaciones complejas y jamás pierdas el hilo de tu rendimiento académico real.
               </p>
             </div>
 
@@ -182,9 +182,9 @@ export default function LandingPage() {
                 <BarChart3 className="w-10 h-10 text-white" strokeWidth={2} />
               </div>
 
-              <h3 className="text-2xl font-semibold mb-4">Seguridad Total</h3>
+              <h3 className="text-2xl font-semibold mb-4">Datos Duros</h3>
               <p className="text-gray-300">
-                Tus datos están protegidos con estándares modernos.
+                Toma decisiones estratégicas. Basado 100% en métricas: suma de SCT completados, progreso de titulación exacto e históricos de aprobación.
               </p>
             </div>
           </div>
@@ -276,7 +276,7 @@ export default function LandingPage() {
       <section className="py-24 px-6 fade-in">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text">
-            Características principales
+            Herramientas Innovadoras
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8 mb-20">
@@ -288,9 +288,9 @@ export default function LandingPage() {
                   strokeWidth={2}
                 />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Malla Interactiva</h3>
-              <p className="text-gray-300">
-                Explora tu plan de estudios con claridad visual.
+              <h3 className="text-xl font-semibold mb-3">Motor Predictivo</h3>
+              <p className="text-gray-300 leading-relaxed">
+                El algoritmo deduce matemáticamente tu nota de salvación instantánea con cada cambio que hagas, despejando toda incertidumbre.
               </p>
             </div>
 
@@ -302,9 +302,9 @@ export default function LandingPage() {
                   strokeWidth={2}
                 />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Gestión de Notas</h3>
-              <p className="text-gray-300">
-                Registra tus calificaciones y simula escenarios.
+              <h3 className="text-xl font-semibold mb-3">Simulador Instantáneo</h3>
+              <p className="text-gray-300 leading-relaxed">
+                Juega con "notas hipotéticas" antes de enfrentar tus exámenes y observa el impacto exacto en tu estado de aprobación.
               </p>
             </div>
 
@@ -317,10 +317,10 @@ export default function LandingPage() {
                 />
               </div>
               <h3 className="text-xl font-semibold mb-3">
-                Dashboard Analítico
+                Trazabilidad Total
               </h3>
-              <p className="text-gray-300">
-                Información clara de tu avance académico.
+              <p className="text-gray-300 leading-relaxed">
+                No confíes tu semestre a la memoria. Controla tus progresiones al detalle, sin cálculos de ponderación manuales propensos a error.
               </p>
             </div>
           </div>
