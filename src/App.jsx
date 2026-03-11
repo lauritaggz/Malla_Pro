@@ -37,6 +37,7 @@ export default function App() {
   const [cursando, setCursando] = useState([]);
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
   const [cursoEsEnCurso, setCursoEsEnCurso] = useState(false);
+  const [cursoEsAprobado, setCursoEsAprobado] = useState(false);
   const [mostrarNotas, setMostrarNotas] = useState(false);
   const [mostrarTour, setMostrarTour] = useState(false);
   
@@ -44,14 +45,14 @@ export default function App() {
   const isMobile = typeof window !== 'undefined' && 
     ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
-  // Mostrar Tour la primera vez
+  // Mostrar Tour la primera vez, solo si hay una malla seleccionada
   useEffect(() => {
     const hasSeenTour = localStorage.getItem("malla-has-seen-tour");
-    if (!hasSeenTour) {
+    if (!hasSeenTour && mallaSeleccionada) {
       setMostrarTour(true);
       localStorage.setItem("malla-has-seen-tour", "true");
     }
-  }, []);
+  }, [mallaSeleccionada]);
 
   // ---------------- NAVBAR HEIGHT LISTENER ----------------
   useEffect(() => {
@@ -83,9 +84,10 @@ export default function App() {
     []
   );
 
-  const handleAbrirNotas = useCallback((curso, esEnCurso) => {
+  const handleAbrirNotas = useCallback((curso, esEnCurso, esAprobado) => {
     setCursoSeleccionado(curso);
     setCursoEsEnCurso(esEnCurso);
+    setCursoEsAprobado(esAprobado);
     setMostrarNotas(true);
   }, []);
 
@@ -254,11 +256,13 @@ export default function App() {
         <NotasModal
           curso={cursoSeleccionado}
           enCurso={cursoEsEnCurso}
+          aprobado={cursoEsAprobado}
           isOpen={mostrarNotas}
           onClose={() => {
             setMostrarNotas(false);
             setCursoSeleccionado(null);
             setCursoEsEnCurso(false);
+            setCursoEsAprobado(false);
           }}
         />
       )}

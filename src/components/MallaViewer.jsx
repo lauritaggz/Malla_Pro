@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import Curso from "./Curso";
@@ -17,6 +17,8 @@ export default function MallaViewer({
   onAbrirNotas,
 }) {
   const [malla, setMalla] = useState(null);
+  const [mencionActiva, setMencionActiva] = useState(null);
+
   const [aprobados, setAprobados] = useState(
     JSON.parse(localStorage.getItem("malla-aprobados")) || []
   );
@@ -41,13 +43,35 @@ export default function MallaViewer({
         const res = await fetch(mallaSeleccionada.url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const totalSemestres = data.semestres?.length || 0;
+        
+        const isMencion = !!data.menciones;
+        const mencionesDisponibles = data.menciones_disponibles || [];
+        const totalSemestres = data.totalSemestres || data.semestres?.length || 0;
+
         const mallaData = {
           nombre: data.carrera || "Malla sin nombre",
           semestres: data.semestres || [],
+          semestresComunes: data.semestres_comunes || [],
+          menciones: data.menciones || {},
+          isMencion,
+          mencionesDisponibles,
           totalSemestres,
         };
+        
         setMalla(mallaData);
+
+        // Inicializar mención activa si aplica
+        if (isMencion) {
+          const savedMencion = localStorage.getItem(`malla-mencion-${data.carrera}`);
+          if (savedMencion && mencionesDisponibles.some(m => m.codigo === savedMencion)) {
+            setMencionActiva(savedMencion);
+          } else if (mencionesDisponibles.length > 0) {
+            setMencionActiva(mencionesDisponibles[0].codigo);
+          }
+        } else {
+          setMencionActiva(null);
+        }
+
         onSemestresLoaded?.(totalSemestres);
         onMallaDataLoaded?.(mallaData);
 
@@ -57,14 +81,20 @@ export default function MallaViewer({
           const nombresConservados = JSON.parse(conservadosJson);
           const idsAprobados = [];
           
-          mallaData.semestres.forEach((sem) => {
-            sem.cursos.forEach((curso) => {
-              // Convertimos a minúsculas y comparamos nombres exactos
-              if (nombresConservados.includes(curso.nombre.trim().toLowerCase())) {
-                idsAprobados.push(curso.id);
-              }
+          const checkCurso = (curso) => {
+            if (nombresConservados.includes(curso.nombre.trim().toLowerCase())) {
+              idsAprobados.push(curso.id);
+            }
+          };
+
+          if (isMencion) {
+            mallaData.semestresComunes.forEach(sem => sem.cursos.forEach(checkCurso));
+            Object.values(mallaData.menciones).forEach(m => {
+              m.semestres.forEach(sem => sem.cursos.forEach(checkCurso));
             });
-          });
+          } else {
+            mallaData.semestres.forEach(sem => sem.cursos.forEach(checkCurso));
+          }
           
           if (idsAprobados.length > 0) {
             setAprobados((prev) => {
@@ -81,6 +111,13 @@ export default function MallaViewer({
     }
     cargar();
   }, [mallaSeleccionada, onSemestresLoaded, onMallaDataLoaded]);
+
+  // Guardar Mencion Activa
+  useEffect(() => {
+    if (mencionActiva && malla) {
+      localStorage.setItem(`malla-mencion-${malla.nombre}`, mencionActiva);
+    }
+  }, [mencionActiva, malla]);
 
   // Debugging logs to verify malla loading
   useEffect(() => {
@@ -115,17 +152,34 @@ export default function MallaViewer({
 
   // ✅ Calcular progreso cada vez que cambia el estado
   useEffect(() => {
-    if (!malla?.semestres || !onTotalCursosChange) return;
+    if (!malla || !onTotalCursosChange) return;
 
-    const total = malla.semestres.reduce(
-      (acc, sem) => acc + sem.cursos.length,
-      0
-    );
+    let total = 0;
+    const activeIds = new Set();
 
-    const aprobadosCount = aprobados.length;
+    if (!malla.isMencion) {
+      malla.semestres.forEach((sem) => {
+        total += sem.cursos.length;
+        sem.cursos.forEach((c) => activeIds.add(c.id));
+      });
+    } else {
+      malla.semestresComunes.forEach((sem) => {
+        total += sem.cursos.length;
+        sem.cursos.forEach((c) => activeIds.add(c.id));
+      });
+
+      if (mencionActiva && malla.menciones[mencionActiva]) {
+        malla.menciones[mencionActiva].semestres.forEach((sem) => {
+          total += sem.cursos.length;
+          sem.cursos.forEach((c) => activeIds.add(c.id));
+        });
+      }
+    }
+
+    const aprobadosCount = aprobados.filter((id) => activeIds.has(id)).length;
 
     onTotalCursosChange({ total, aprobados: aprobadosCount });
-  }, [malla, aprobados, excepciones, onTotalCursosChange]);
+  }, [malla, aprobados, excepciones, mencionActiva, onTotalCursosChange]);
 
   // ✅ Aprobar o desmarcar ramo
   const aprobar = (id) => {
@@ -170,11 +224,28 @@ export default function MallaViewer({
   const aprobarHastaSemestre = (semestreLimite) => {
     if (!malla) return;
     const nuevosAprobados = [];
-    malla.semestres.forEach((sem) => {
-      if (sem.numero <= semestreLimite) {
-        sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+    
+    if (!malla.isMencion) {
+      malla.semestres.forEach((sem) => {
+        if (sem.numero <= semestreLimite) {
+          sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+        }
+      });
+    } else {
+      malla.semestresComunes.forEach((sem) => {
+        if (sem.numero <= semestreLimite) {
+          sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+        }
+      });
+      if (mencionActiva && malla.menciones[mencionActiva]) {
+        malla.menciones[mencionActiva].semestres.forEach((sem) => {
+          if (sem.numero <= semestreLimite) {
+            sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+          }
+        });
       }
-    });
+    }
+
     const aprobadosSet = new Set(nuevosAprobados);
     setAprobados([...aprobadosSet]);
     setExcepciones([]);
@@ -197,7 +268,7 @@ export default function MallaViewer({
     };
     window.addEventListener("aprobarHastaSemestre", handler);
     return () => window.removeEventListener("aprobarHastaSemestre", handler);
-  }, [malla]);
+  }, [malla, mencionActiva]); // se agregó a las dependencias por si acaso
 
   // ✅ Drag horizontal tipo Trello
   const bind = useDrag(
@@ -235,6 +306,59 @@ export default function MallaViewer({
     }
   };
 
+  // ---------------- Lógica de renderizado ----------------
+  const getSemestreInfo = (num) => {
+    if (!malla) return null;
+    if (!malla.isMencion) {
+      return { tipo: "comun", data: malla.semestres.find(s => s.numero === num) };
+    }
+    
+    // Buscar en comunes
+    const comun = malla.semestresComunes.find(s => s.numero === num);
+    if (comun) return { tipo: "comun", data: comun };
+
+    // Buscar en menciones
+    const opciones = {};
+    let hasData = false;
+    malla.mencionesDisponibles.forEach(m => {
+      const semMencion = malla.menciones[m.codigo]?.semestres?.find(s => s.numero === num);
+      if (semMencion) {
+        opciones[m.codigo] = { ...semMencion, nombreMencion: m.nombre };
+        hasData = true;
+      }
+    });
+
+    return hasData ? { tipo: "mencion", opciones } : { tipo: "comun", data: null };
+  };
+
+  const isSemestreCompletado = (info) => {
+    if (!info) return true;
+    if (info.tipo === "comun") {
+      if (!info.data?.cursos.length) return true;
+      return info.data.cursos.every((c) => aprobados.includes(c.id));
+    } else {
+      const dataMencion = info.opciones[mencionActiva];
+      if (!dataMencion?.cursos?.length) return true;
+      return dataMencion.cursos.every((c) => aprobados.includes(c.id));
+    }
+  };
+
+  const renderCurso = (curso) => (
+    <Curso
+      key={curso.id}
+      curso={curso}
+      aprobado={aprobados.includes(curso.id)}
+      excepcional={excepciones.includes(curso.id)}
+      disponible={cumplePrereqs(curso)}
+      modoExcepcional={modoExcepcional}
+      aprobar={() => aprobar(curso.id)}
+      marcarExcepcional={() => marcarExcepcional(curso.id)}
+      enCurso={cursando.includes(curso.id)}
+      toggleCursando={() => toggleCursando(curso.id)}
+      onAbrirNotas={(c) => onAbrirNotas(c, cursando.includes(c.id), aprobados.includes(c.id))}
+    />
+  );
+
   if (!malla)
     return <p className="text-center text-textSecondary">Cargando malla...</p>;
 
@@ -243,7 +367,27 @@ export default function MallaViewer({
     <div className="pb-10 px-2 sm:px-4 md:px-6">
       
       {/* Controles Superiores de Visualización */}
-      <div className="flex justify-center sm:justify-end mb-4 pr-0 sm:pr-4">
+      <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-3 mb-4 pr-0 sm:pr-4">
+        
+        {/* Selector de Especialidad si existe */}
+        {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
+          <div className="flex bg-bgSecondary/80 backdrop-blur-md p-1 rounded-full border border-borderColor/50">
+            {malla.mencionesDisponibles.map((m) => (
+              <button
+                key={m.codigo}
+                onClick={() => setMencionActiva(m.codigo)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                  mencionActiva === m.codigo
+                    ? "bg-primary text-white shadow-md scale-105"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-bgSecondary"
+                }`}
+              >
+                {m.nombre}
+              </button>
+            ))}
+          </div>
+        )}
+
         <button
           onClick={() => setOcultarCompletados(!ocultarCompletados)}
           className={`flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border
@@ -275,20 +419,20 @@ export default function MallaViewer({
             style={{ transform: "scaleY(-1)" }}
           >
             <AnimatePresence mode="popLayout">
-            {Array.from({ length: Math.ceil(malla.semestres.length / 2) }).map(
+            {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
             (_, i) => {
               const year = i + 1;
-              const semA = malla.semestres[i * 2];
-              const semB = malla.semestres[i * 2 + 1];
+              const semAInfo = getSemestreInfo(i * 2 + 1);
+              const semBInfo = getSemestreInfo(i * 2 + 2);
 
-              const isSemACompletado = semA?.cursos.every((c) => aprobados.includes(c.id));
-              const isSemBCompletado = semB?.cursos.every((c) => aprobados.includes(c.id));
+              const isSemACompletado = isSemestreCompletado(semAInfo);
+              const isSemBCompletado = isSemestreCompletado(semBInfo);
 
               // Si ocultarCompletados está activo, determinamos qué mostrar
-              const showA = semA && (!ocultarCompletados || !isSemACompletado);
-              const showB = semB && (!ocultarCompletados || !isSemBCompletado);
+              const showA = semAInfo && (semAInfo.tipo !== "comun" || semAInfo.data) && (!ocultarCompletados || !isSemACompletado);
+              const showB = semBInfo && (semBInfo.tipo !== "comun" || semBInfo.data) && (!ocultarCompletados || !isSemBCompletado);
 
-              // Si ambos semestres de un año se ocultan, ocultar todo el contenedor del año
+              // Si ambos semestres de un año se ocultan (o no tienen datos), ocultar todo el contenedor del año
               if (!showA && !showB) return null;
 
               return (
@@ -318,46 +462,59 @@ export default function MallaViewer({
                   <div className="flex gap-4 sm:gap-8">
                     <AnimatePresence mode="popLayout">
                     {[
-                      { data: semA, show: showA, key: `sem-${i * 2}` },
-                      { data: semB, show: showB, key: `sem-${i * 2 + 1}` }
+                      { info: semAInfo, show: showA, key: `sem-${i * 2 + 1}` },
+                      { info: semBInfo, show: showB, key: `sem-${i * 2 + 2}` }
                     ].map(
-                      (semInfo) =>
-                        semInfo.show && semInfo.data && (
-                          <motion.div
-                            key={semInfo.key}
-                            layout
-                            className="flex flex-col gap-3 min-w-[180px] sm:min-w-[240px] 
-                                       bg-bgSecondary/70 backdrop-blur-md 
-                                       rounded-2xl p-4 sm:p-5 border border-borderColor/40 
-                                       shadow-md hover:shadow-xl transition-shadow duration-300 transform-gpu"
-                            initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.94 }}
-                            transition={{ 
-                              type: "spring", 
-                              stiffness: 400, 
-                              damping: 35,
-                              mass: 0.9
-                            }}
-                          >
-                            {semInfo.data.cursos.map((curso) => (
-                              <Curso
-                                key={curso.id}
-                                curso={curso}
-                                aprobado={aprobados.includes(curso.id)}
-                                excepcional={excepciones.includes(curso.id)}
-                                disponible={cumplePrereqs(curso)}
-                                modoExcepcional={modoExcepcional}
-                                aprobar={() => aprobar(curso.id)}
-                                marcarExcepcional={() =>
-                                  marcarExcepcional(curso.id)
-                                }
-                                enCurso={cursando.includes(curso.id)}
-                                toggleCursando={() => toggleCursando(curso.id)}
-                                onAbrirNotas={(c) => onAbrirNotas(c, cursando.includes(c.id))}
-                              />
-                            ))}
-                          </motion.div>
+                      ({ info, show, key }) =>
+                        show && info && (
+                          <Fragment key={key}>
+                            {/* SEMESTRE COMÚN */}
+                            {info.tipo === "comun" && info.data && (
+                               <motion.div
+                                 layout
+                                 className="flex flex-col gap-3 min-w-[180px] sm:min-w-[240px] 
+                                            bg-bgSecondary/70 backdrop-blur-md 
+                                            rounded-2xl p-4 sm:p-5 border border-borderColor/40 
+                                            shadow-md hover:shadow-xl transition-shadow duration-300 transform-gpu z-10"
+                                 initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                                 animate={{ opacity: 1, y: 0, scale: 1 }}
+                                 exit={{ opacity: 0, scale: 0.94 }}
+                                 transition={{ type: "spring", stiffness: 400, damping: 35, mass: 0.9 }}
+                               >
+                                 {info.data.cursos.map((c) => renderCurso(c))}
+                               </motion.div>
+                            )}
+
+                            {/* SEMESTRE MENCIONES (SIMPLE CARD) */}
+                            {info.tipo === "mencion" && info.opciones && info.opciones[mencionActiva] && (
+                               <motion.div
+                                 layout
+                                 className="flex flex-col gap-3 min-w-[180px] sm:min-w-[240px] 
+                                            bg-primary/5 backdrop-blur-md 
+                                            rounded-2xl p-4 sm:p-5 border border-primary/20 
+                                            shadow-[0_4px_24px_rgba(var(--primary-rgb),0.1)] hover:shadow-[0_8px_32px_rgba(var(--primary-rgb),0.2)] 
+                                            transition-shadow duration-300 transform-gpu z-10 relative"
+                                 initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                                 animate={{ opacity: 1, y: 0, scale: 1 }}
+                                 exit={{ opacity: 0, scale: 0.94 }}
+                                 transition={{ type: "spring", stiffness: 400, damping: 35, mass: 0.9 }}
+                               >
+                                  {/* Header especialidad */}
+                                  <div className="flex flex-col mb-1 pb-3 border-b border-primary/20">
+                                     <div className="flex justify-between items-center mb-1">
+                                       <span className="text-[10px] font-bold tracking-wider text-primary">
+                                          ESPECIALIDAD
+                                       </span>
+                                       <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full opacity-90">
+                                         {info.opciones[mencionActiva].nombreMencion}
+                                       </span>
+                                     </div>
+                                  </div>
+
+                                  {info.opciones[mencionActiva].cursos.map((c) => renderCurso(c))}
+                               </motion.div>
+                            )}
+                          </Fragment>
                         )
                     )}
                     </AnimatePresence>

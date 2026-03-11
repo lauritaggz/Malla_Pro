@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function NotasModal({ curso, enCurso, onClose, isOpen }) {
+export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }) {
   const [evaluaciones, setEvaluaciones] = useState([]);
   const [nuevaEval, setNuevaEval] = useState({
     nombre: "",
@@ -238,7 +238,7 @@ export default function NotasModal({ curso, enCurso, onClose, isOpen }) {
   let notaNecesariaPresentacion = null;
   let notaNecesariaExamen = null;
   let rindeExamen = false;
-  let estado = enCurso ? "Cursando" : "Pendiente";
+  let estado = aprobado ? "Aprobado" : enCurso ? "Cursando" : "Pendiente";
   let promedioFinal = promedioPresentacion;
 
   if (pesoTotal === 100) {
