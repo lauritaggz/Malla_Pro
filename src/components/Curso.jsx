@@ -123,7 +123,9 @@ const Curso = ({
       `}
       style={{
         backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden"
+        WebkitBackfaceVisibility: "hidden",
+        transform: "translateZ(0)",
+        contain: "layout"
       }}
     >
       {/* Badge de Promedio en el Top Right */}

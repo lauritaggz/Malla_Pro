@@ -459,8 +459,9 @@ const MallaViewer = ({
         </button>
       </div>
 
-      {/* Wrapper de Cristal Seguro */}
-      <div className="rounded-3xl border border-borderColor/30 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl bg-gradient-to-br from-bgSecondary/50 to-bgPrimary/80 pb-6 pt-4">
+      {/* Wrapper de Cristal Seguro - Optimizado para móvil (menos blur, más rendimiento) */}
+      <div className="rounded-3xl border border-borderColor/30 shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 pb-6 pt-4 overflow-hidden" 
+           style={{ contain: "content" }}>
         
         {/* Scroll horizontal arrastrable invertido verticalmente (scrollbar arriba) */}
         <div
@@ -474,14 +475,16 @@ const MallaViewer = ({
                 } active:cursor-grabbing`}
           style={{ 
             WebkitOverflowScrolling: "touch", 
-            willChange: "transform",
-            backfaceVisibility: "hidden"
+            willChange: "scroll-position",
+            backfaceVisibility: "hidden",
+            contain: "content"
           }}
         >
           <div 
             className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
             style={{ 
-               backfaceVisibility: "hidden" 
+               backfaceVisibility: "hidden",
+               transform: "translateZ(0)" /* Force layer for the whole flex container */
             }}
           >
             {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
