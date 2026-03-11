@@ -12,8 +12,16 @@ export default function Navbar({
   mallaSeleccionada,
   cantidadSemestres,
   onShowTour,
+  mostrarResumen,
 }) {
   const [mostrarControles, setMostrarControles] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // === MEDIR ALTURA REAL DEL NAVBAR ===
   const navRef = useRef(null);
@@ -47,22 +55,23 @@ export default function Navbar({
     <nav
       ref={navRef}
       id="app-navbar"
-      className="fixed top-0 left-0 right-0 z-[80]
-                 backdrop-blur-3xl bg-bgSecondary/60 border-b border-borderColor/20 dark:border-white/5
+      className={`fixed top-0 left-0 right-0 z-[80]
+                 backdrop-blur-xl bg-bgSecondary/70 border-b border-borderColor/20 dark:border-white/5
                  shadow-[0_4px_30px_rgba(0,0,0,0.1)]
-                 transition-all duration-500"
+                 transition-[opacity,transform] duration-300
+                 ${mostrarResumen ? "opacity-0 pointer-events-none translate-y-[-100%]" : "opacity-100 translate-y-0"}`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 relative select-none">
+      <div className={`max-w-7xl mx-auto px-6 relative select-none transition-all duration-300 ${isScrolled ? "py-2" : "py-4"}`}>
         {/* ---------------- HEADER SUPERIOR ---------------- */}
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
+           <div className="flex flex-col">
             {mallaSeleccionada && (
               <>
-                <h1 className="font-bold text-2xl md:text-3xl text-primary tracking-tight transition-transform duration-300 hover:scale-[1.02] drop-shadow-sm">
+                <h1 className={`font-bold text-primary tracking-tight transition-all duration-300 drop-shadow-sm ${isScrolled ? "text-lg md:text-xl" : "text-2xl md:text-3xl hover:scale-[1.02]"}`}>
                   {mallaSeleccionada.nombre}
                 </h1>
 
-                <div className="flex items-center gap-2 mt-1">
+                <div className={`flex items-center gap-2 transition-all duration-300 overflow-hidden ${isScrolled ? "max-h-0 opacity-0 mt-0" : "max-h-10 opacity-100 mt-1"}`}>
                   <span
                     className="text-xs md:text-sm font-medium text-primary/80 
                                   px-3 py-1 rounded-full bg-primary/10 border border-primary/20 shadow-inner"
@@ -80,7 +89,7 @@ export default function Navbar({
           {/* BOTÓN COLAPSAR */}
           <button
             onClick={() => setMostrarControles(!mostrarControles)}
-            className="relative flex items-center justify-center w-10 h-10 rounded-full border border-borderColor/50 
+            className="hidden sm:flex relative items-center justify-center w-10 h-10 rounded-full border border-borderColor/50 
                        bg-bgPrimary/50 backdrop-blur-md hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-all duration-300 hover:scale-110 shadow-sm"
           >
             <ChevronDown
@@ -95,7 +104,7 @@ export default function Navbar({
 
         {/* ---------------- CONTROLES (Optimizado) ---------------- */}
         <div
-          className={`grid transition-[grid-template-rows,opacity,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-template-rows,opacity,transform] ${
+          className={`hidden sm:grid transition-[grid-template-rows,opacity,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-template-rows,opacity,transform] ${
             mostrarControles
               ? "grid-rows-[1fr] opacity-100 translate-y-0"
               : "grid-rows-[0fr] opacity-0 -translate-y-2 pointer-events-none"
@@ -200,11 +209,11 @@ export default function Navbar({
                               flex items-center justify-center gap-2 border
                               ${
                                 modoExcepcional
-                                  ? "bg-amber-400 text-amber-950 border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-pulse"
+                                  ? "bg-amber-400 text-amber-950 border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.5)]"
                                   : "bg-primary text-white border-primary/80 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-lg shadow-primary/20"
                               }`}
                 >
-                  <FileText className={`w-4 h-4 ${modoExcepcional ? 'animate-bounce' : ''}`} /> 
+                  <FileText className="w-4 h-4" /> 
                   Excepcional
                   {excepcionesActivas > 0 && (
                     <span className="flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full min-w[20px] h-5 px-1.5 shadow-sm border border-red-600/50">

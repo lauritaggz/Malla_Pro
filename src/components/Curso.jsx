@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { NotebookPen, Check, BookOpen } from "lucide-react";
 
-export default function Curso({
+const Curso = ({
   curso,
   aprobado,
   excepcional,
@@ -12,7 +12,7 @@ export default function Curso({
   enCurso,
   toggleCursando,
   onAbrirNotas,
-}) {
+}) => {
   const [shake, setShake] = useState(false);
   const [promedio, setPromedio] = useState(null);
   
@@ -106,18 +106,19 @@ export default function Curso({
       onPointerUp={clearPressTimer}
       onPointerLeave={clearPressTimer}
       onPointerCancel={clearPressTimer}
-      className={`relative cursor-pointer select-none p-3 text-[13px] rounded-2xl transition-all duration-300 border shadow-sm text-left group
+      className={`relative cursor-pointer select-none p-3 text-[13px] rounded-2xl border shadow-sm text-left group
+        transition-[background-color,border-color,opacity,transform] duration-200 ease-out
         ${shake ? "shake" : ""}
         ${
           aprobado
-            ? "bg-emerald-500/90 text-white border-emerald-400/50 shadow-md backdrop-blur-md"
+            ? "bg-emerald-500/90 text-white border-emerald-400/50 shadow-md"
             : excepcional
-            ? "bg-amber-500/90 text-white border-amber-400/50 shadow-md backdrop-blur-md"
+            ? "bg-amber-500/90 text-white border-amber-400/50 shadow-md"
             : enCurso
-            ? "bg-primary text-white border-primary shadow-lg shadow-primary/30 transform scale-[1.02]"
+            ? "bg-primary text-white border-primary shadow-lg shadow-primary/30 scale-[1.02]"
             : !disponible
             ? "bg-bgSecondary/50 text-textSecondary opacity-70 border-dashed border-borderColor/80"
-            : "bg-primary/10 backdrop-blur-md text-textPrimary shadow-sm hover:bg-primary/20 hover:border-primary/50 hover:shadow-[0_8px_16px_rgba(var(--primary),0.15)] border-primary/30"
+            : "bg-primary/10 text-textPrimary shadow-sm hover:bg-primary/20 hover:border-primary/50 border-primary/30"
         }
       `}
     >
@@ -165,4 +166,15 @@ export default function Curso({
       </button>
     </div>
   );
-}
+};
+
+export default React.memo(Curso, (prevProps, nextProps) => {
+  return (
+    prevProps.curso.id === nextProps.curso.id &&
+    prevProps.aprobado === nextProps.aprobado &&
+    prevProps.excepcional === nextProps.excepcional &&
+    prevProps.disponible === nextProps.disponible &&
+    prevProps.modoExcepcional === nextProps.modoExcepcional &&
+    prevProps.enCurso === nextProps.enCurso
+  );
+});

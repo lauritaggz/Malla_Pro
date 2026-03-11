@@ -1,0 +1,451 @@
+{
+  "carrera": "Ingeniería Civil en Minas (UNAB)",
+  "total_creditos": 666,
+  "totalSemestres": 10,
+  "semestres": [
+    {
+      "numero": 1,
+      "cursos": [
+        {
+          "id": 1,
+          "codigo": "CFIS310",
+          "nombre": "Física General",
+          "sct": 18,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 2,
+          "codigo": "FMMP012",
+          "nombre": "Introducción a las Matemáticas",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 3,
+          "codigo": "TDFI101",
+          "nombre": "Introducción a la Ingeniería",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 4,
+          "codigo": "TDFI102",
+          "nombre": "Introducción a la Programación",
+          "sct": 18,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 2,
+      "cursos": [
+        {
+          "id": 5,
+          "codigo": "CEGHC11",
+          "nombre": "Habilidades Comunicativas",
+          "sct": 8,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 6,
+          "codigo": "CFIS328",
+          "nombre": "Física Experimental",
+          "sct": 16,
+          "prerrequisitos": [1, 2],
+          "prereq_expr": "(CFIS310 o equivalentes) y (FMMP012 o equivalentes)"
+        },
+        {
+          "id": 7,
+          "codigo": "FMMP112",
+          "nombre": "Cálculo Diferencial",
+          "sct": 16,
+          "prerrequisitos": [2],
+          "prereq_expr": "FMMP012 o equivalentes"
+        },
+        {
+          "id": 8,
+          "codigo": "ICMI121",
+          "nombre": "Geología I",
+          "sct": 11,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 9,
+          "codigo": "TDFI103",
+          "nombre": "Base de Datos",
+          "sct": 15,
+          "prerrequisitos": [4],
+          "prereq_expr": "TDFI102 o equivalentes"
+        }
+      ]
+    },
+    {
+      "numero": 3,
+      "cursos": [
+        {
+          "id": 10,
+          "codigo": "CFIS332",
+          "nombre": "Mecánica",
+          "sct": 18,
+          "prerrequisitos": [6, 7],
+          "prereq_expr": "(CFIS328 o equivalentes) y (FMMP112 o equivalentes)"
+        },
+        {
+          "id": 11,
+          "codigo": "FMMP212",
+          "nombre": "Cálculo Integral",
+          "sct": 16,
+          "prerrequisitos": [7],
+          "prereq_expr": "FMMP112 o equivalentes"
+        },
+        {
+          "id": 12,
+          "codigo": "ICMI211",
+          "nombre": "Geología II",
+          "sct": 11,
+          "prerrequisitos": [8],
+          "prereq_expr": "ICMI121"
+        },
+        {
+          "id": 13,
+          "codigo": "QUIM090",
+          "nombre": "Química y Ambiente",
+          "sct": 10,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 14,
+          "codigo": "TDFI104",
+          "nombre": "Compliance & Accountability",
+          "sct": 10,
+          "prerrequisitos": [3],
+          "prereq_expr": "TDFI101 o equivalentes"
+        }
+      ]
+    },
+    {
+      "numero": 4,
+      "cursos": [
+        {
+          "id": 15,
+          "codigo": "FMSP316",
+          "nombre": "Métodos Cuantitativos",
+          "sct": 20,
+          "prerrequisitos": [11],
+          "prereq_expr": "FMMP212 o equivalentes"
+        },
+        {
+          "id": 16,
+          "codigo": "ICMI221",
+          "nombre": "Integrador I: Práctica I",
+          "sct": 14,
+          "prerrequisitos": [10, 11, 12, 13, 14],
+          "prereq_expr": "CFIS332, FMMP212, TDFI104, QUIM090 e ICMI211"
+        },
+        {
+          "id": 17,
+          "codigo": "ICMI222",
+          "nombre": "Evaluación de Yacimientos",
+          "sct": 12,
+          "prerrequisitos": [12],
+          "prereq_expr": "ICMI211",
+          "correquisito_expr": "FMSP316"
+        },
+        {
+          "id": 18,
+          "codigo": "ICMI223",
+          "nombre": "Minería y Energía para Rajo Abierto y Subterránea",
+          "sct": 10,
+          "prerrequisitos": [10, 11],
+          "prereq_expr": "CFIS332 y FMMP212"
+        },
+        {
+          "id": 19,
+          "codigo": "ING119",
+          "nombre": "Inglés I",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 5,
+      "cursos": [
+        {
+          "id": 20,
+          "codigo": "FMMP312",
+          "nombre": "Sistemas y Ecuaciones Diferenciales Lineales",
+          "sct": 16,
+          "prerrequisitos": [11],
+          "prereq_expr": "FMMP212 o equivalentes"
+        },
+        {
+          "id": 21,
+          "codigo": "ICMI311",
+          "nombre": "Mecánica de Rocas",
+          "sct": 15,
+          "prerrequisitos": [16, 10],
+          "prereq_expr": "ICMI221 y CFIS332"
+        },
+        {
+          "id": 22,
+          "codigo": "ICMI312",
+          "nombre": "Conminución",
+          "sct": 10,
+          "prerrequisitos": [12],
+          "prereq_expr": "ICMI211",
+          "correquisito_expr": "ICMI313"
+        },
+        {
+          "id": 23,
+          "codigo": "ICMI313",
+          "nombre": "Operaciones Unitarias I: Perforación y Tronadura",
+          "sct": 13,
+          "prerrequisitos": [17],
+          "prereq_expr": "ICMI222"
+        },
+        {
+          "id": 24,
+          "codigo": "ING129",
+          "nombre": "Inglés II",
+          "sct": 12,
+          "prerrequisitos": [19],
+          "prereq_expr": "ING119 o equivalentes"
+        }
+      ]
+    },
+    {
+      "numero": 6,
+      "cursos": [
+        {
+          "id": 25,
+          "codigo": "ACAD101",
+          "nombre": "Taller de Innovación y Emprendimiento I",
+          "sct": 10,
+          "prerrequisitos": [3],
+          "prereq_expr": "TDFI101 o asignaturas base equivalentes"
+        },
+        {
+          "id": 26,
+          "codigo": "ICMI321",
+          "nombre": "Concentración de Minerales",
+          "sct": 15,
+          "prerrequisitos": [22],
+          "prereq_expr": "ICMI312"
+        },
+        {
+          "id": 27,
+          "codigo": "ICMI322",
+          "nombre": "Operaciones Unitarias II: Carguío y Transporte",
+          "sct": 18,
+          "prerrequisitos": [23],
+          "prereq_expr": "ICMI313"
+        },
+        {
+          "id": 28,
+          "codigo": "ING239",
+          "nombre": "Inglés III",
+          "sct": 12,
+          "prerrequisitos": [24],
+          "prereq_expr": "ING129 o equivalentes"
+        },
+        {
+          "id": 29,
+          "codigo": "TDFI105",
+          "nombre": "Minería de Datos",
+          "sct": 12,
+          "prerrequisitos": [15, 9],
+          "prereq_expr": "FMSP316 y TDFI103"
+        }
+      ]
+    },
+    {
+      "numero": 7,
+      "cursos": [
+        {
+          "id": 30,
+          "codigo": "ACAD102",
+          "nombre": "Taller de Innovación y Emprendimiento II",
+          "sct": 10,
+          "prerrequisitos": [25],
+          "prereq_expr": "ACAD101"
+        },
+        {
+          "id": 31,
+          "codigo": "ICMI411",
+          "nombre": "Pirometalurgia",
+          "sct": 13,
+          "prerrequisitos": [26],
+          "prereq_expr": "ICMI321"
+        },
+        {
+          "id": 32,
+          "codigo": "ICMI412",
+          "nombre": "Métodos de Explotación y Diseño Minero",
+          "sct": 21,
+          "prerrequisitos": [27],
+          "prereq_expr": "ICMI322"
+        },
+        {
+          "id": 33,
+          "codigo": "ING249",
+          "nombre": "Inglés IV",
+          "sct": 12,
+          "prerrequisitos": [28],
+          "prereq_expr": "ING239 o equivalentes"
+        },
+        {
+          "id": 34,
+          "codigo": "TDFI106",
+          "nombre": "Gestión de la Transformación Digital",
+          "sct": 12,
+          "prerrequisitos": [14],
+          "prereq_expr": "TDFI104"
+        }
+      ]
+    },
+    {
+      "numero": 8,
+      "cursos": [
+        {
+          "id": 35,
+          "codigo": "ACAD103",
+          "nombre": "Taller de Innovación y Emprendimiento III",
+          "sct": 10,
+          "prerrequisitos": [30],
+          "prereq_expr": "ACAD102"
+        },
+        {
+          "id": 36,
+          "codigo": "CEGRS14",
+          "nombre": "Responsabilidad Social",
+          "sct": 6,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 37,
+          "codigo": "ICMI421",
+          "nombre": "Hidrometalurgia",
+          "sct": 18,
+          "prerrequisitos": [26],
+          "prereq_expr": "ICMI321"
+        },
+        {
+          "id": 38,
+          "codigo": "ICMI422",
+          "nombre": "Planificación Minera",
+          "sct": 24,
+          "prerrequisitos": [32],
+          "prereq_expr": "ICMI412"
+        },
+        {
+          "id": 39,
+          "codigo": "ICMI423",
+          "nombre": "Integrador II: Seminario de Licenciatura en Ciencias de la Ingeniería",
+          "sct": 6,
+          "prerrequisitos": [31, 32],
+          "prereq_expr": "ICMI411 y ICMI412"
+        }
+      ]
+    },
+    {
+      "numero": 9,
+      "cursos": [
+        {
+          "id": 40,
+          "codigo": "ICMI511",
+          "nombre": "Ventilación",
+          "sct": 11,
+          "prerrequisitos": [32],
+          "prereq_expr": "ICMI412"
+        },
+        {
+          "id": 41,
+          "codigo": "ICMI512",
+          "nombre": "Portafolio de Proyectos",
+          "sct": 9,
+          "prerrequisitos": [32, 37],
+          "prereq_expr": "ICMI412 y ICMI421"
+        },
+        {
+          "id": 42,
+          "codigo": "ICMI513",
+          "nombre": "Economía, Dirección y Comercialización",
+          "sct": 12,
+          "prerrequisitos": [32],
+          "prereq_expr": "ICMI412"
+        },
+        {
+          "id": 43,
+          "codigo": "ICMI514",
+          "nombre": "Práctica II",
+          "sct": 26,
+          "prerrequisitos": [16],
+          "prereq_expr": "ICMI221"
+        },
+        {
+          "id": 44,
+          "codigo": "ICMI515",
+          "nombre": "Medio Ambiente y Legislación Minera",
+          "sct": 9,
+          "prerrequisitos": [27, 37],
+          "prereq_expr": "ICMI322 y ICMI421"
+        }
+      ]
+    },
+    {
+      "numero": 10,
+      "cursos": [
+        {
+          "id": 45,
+          "codigo": "ICMI521",
+          "nombre": "Tópico de Especialidad I: Control de Procesos Geo-Minero-Metalúrgicos",
+          "sct": 6,
+          "prerrequisitos": [38, 34],
+          "prereq_expr": "ICMI422 y TDFI106"
+        },
+        {
+          "id": 46,
+          "codigo": "ICMI522",
+          "nombre": "Tópico de Especialidad II: Economía Circular",
+          "sct": 7,
+          "prerrequisitos": [44],
+          "prereq_expr": "ICMI515"
+        },
+        {
+          "id": 47,
+          "codigo": "ICMI523",
+          "nombre": "Integrador III: Proyecto de Título",
+          "sct": 45,
+          "prerrequisitos": [41],
+          "prereq_expr": "ICMI512"
+        },
+        {
+          "id": 48,
+          "codigo": "ICMI524",
+          "nombre": "Tópico de Especialidad III: Evaluación de Proyectos + Excelencia Operacional",
+          "sct": 5,
+          "prerrequisitos": [42, 44],
+          "prereq_expr": "ICMI513 y ICMI515"
+        },
+        {
+          "id": 49,
+          "codigo": "ICMI525",
+          "nombre": "Seguridad y Salud Ocupacional",
+          "sct": 4,
+          "prerrequisitos": [44],
+          "prereq_expr": "ICMI515"
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import Curso from "./Curso";
@@ -15,8 +15,12 @@ export default function MallaViewer({
   onExcepcionesChange,
   onCursandoArrayChange,
   onAbrirNotas,
+  ocultarCompletados,
+  setOcultarCompletados
 }) {
   const [malla, setMalla] = useState(null);
+  const [mencionActiva, setMencionActiva] = useState(null);
+
   const [aprobados, setAprobados] = useState(
     JSON.parse(localStorage.getItem("malla-aprobados")) || []
   );
@@ -26,13 +30,11 @@ export default function MallaViewer({
   const [cursando, setCursando] = useState(
     JSON.parse(localStorage.getItem("malla-cursando")) || []
   );
-  
-  const [ocultarCompletados, setOcultarCompletados] = useState(false);
 
   // 🔹 Ref y estados para drag horizontal
   const scrollRef = useRef(null);
+  const dragMovedRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragMoved, setDragMoved] = useState(0);
 
   // ✅ Cargar malla seleccionada
   useEffect(() => {
@@ -41,13 +43,35 @@ export default function MallaViewer({
         const res = await fetch(mallaSeleccionada.url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const totalSemestres = data.semestres?.length || 0;
+        
+        const isMencion = !!data.menciones;
+        const mencionesDisponibles = data.menciones_disponibles || [];
+        const totalSemestres = data.totalSemestres || data.semestres?.length || 0;
+
         const mallaData = {
           nombre: data.carrera || "Malla sin nombre",
           semestres: data.semestres || [],
+          semestresComunes: data.semestres_comunes || [],
+          menciones: data.menciones || {},
+          isMencion,
+          mencionesDisponibles,
           totalSemestres,
         };
+        
         setMalla(mallaData);
+
+        // Inicializar mención activa si aplica
+        if (isMencion) {
+          const savedMencion = localStorage.getItem(`malla-mencion-${data.carrera}`);
+          if (savedMencion && mencionesDisponibles.some(m => m.codigo === savedMencion)) {
+            setMencionActiva(savedMencion);
+          } else if (mencionesDisponibles.length > 0) {
+            setMencionActiva(mencionesDisponibles[0].codigo);
+          }
+        } else {
+          setMencionActiva(null);
+        }
+
         onSemestresLoaded?.(totalSemestres);
         onMallaDataLoaded?.(mallaData);
 
@@ -57,14 +81,20 @@ export default function MallaViewer({
           const nombresConservados = JSON.parse(conservadosJson);
           const idsAprobados = [];
           
-          mallaData.semestres.forEach((sem) => {
-            sem.cursos.forEach((curso) => {
-              // Convertimos a minúsculas y comparamos nombres exactos
-              if (nombresConservados.includes(curso.nombre.trim().toLowerCase())) {
-                idsAprobados.push(curso.id);
-              }
+          const checkCurso = (curso) => {
+            if (nombresConservados.includes(curso.nombre.trim().toLowerCase())) {
+              idsAprobados.push(curso.id);
+            }
+          };
+
+          if (isMencion) {
+            mallaData.semestresComunes.forEach(sem => sem.cursos.forEach(checkCurso));
+            Object.values(mallaData.menciones).forEach(m => {
+              m.semestres.forEach(sem => sem.cursos.forEach(checkCurso));
             });
-          });
+          } else {
+            mallaData.semestres.forEach(sem => sem.cursos.forEach(checkCurso));
+          }
           
           if (idsAprobados.length > 0) {
             setAprobados((prev) => {
@@ -81,6 +111,29 @@ export default function MallaViewer({
     }
     cargar();
   }, [mallaSeleccionada, onSemestresLoaded, onMallaDataLoaded]);
+
+  // Guardar Mencion Activa
+  useEffect(() => {
+    if (mencionActiva && malla) {
+      localStorage.setItem(`malla-mencion-${malla.nombre}`, mencionActiva);
+    }
+  }, [mencionActiva, malla]);
+
+  // ✅ Persistencia del Scroll
+  const handleScroll = () => {
+    if (scrollRef.current && malla) {
+      localStorage.setItem(`malla-scroll-${malla.nombre}`, scrollRef.current.scrollLeft);
+    }
+  };
+
+  useEffect(() => {
+    if (malla && scrollRef.current) {
+      const savedScroll = localStorage.getItem(`malla-scroll-${malla.nombre}`);
+      if (savedScroll) {
+        scrollRef.current.scrollLeft = parseFloat(savedScroll);
+      }
+    }
+  }, [malla]);
 
   // Debugging logs to verify malla loading
   useEffect(() => {
@@ -115,66 +168,144 @@ export default function MallaViewer({
 
   // ✅ Calcular progreso cada vez que cambia el estado
   useEffect(() => {
-    if (!malla?.semestres || !onTotalCursosChange) return;
+    if (!malla || !onTotalCursosChange) return;
 
-    const total = malla.semestres.reduce(
-      (acc, sem) => acc + sem.cursos.length,
-      0
-    );
+    let total = 0;
+    const activeIds = new Set();
 
-    const aprobadosCount = aprobados.length;
+    if (!malla.isMencion) {
+      malla.semestres.forEach((sem) => {
+        total += sem.cursos.length;
+        sem.cursos.forEach((c) => activeIds.add(c.id));
+      });
+    } else {
+      malla.semestresComunes.forEach((sem) => {
+        total += sem.cursos.length;
+        sem.cursos.forEach((c) => activeIds.add(c.id));
+      });
+
+      if (mencionActiva && malla.menciones[mencionActiva]) {
+        malla.menciones[mencionActiva].semestres.forEach((sem) => {
+          total += sem.cursos.length;
+          sem.cursos.forEach((c) => activeIds.add(c.id));
+        });
+      }
+    }
+
+    const aprobadosCount = aprobados.filter((id) => activeIds.has(id)).length;
 
     onTotalCursosChange({ total, aprobados: aprobadosCount });
-  }, [malla, aprobados, excepciones, onTotalCursosChange]);
+  }, [malla, aprobados, excepciones, mencionActiva, onTotalCursosChange]);
+
+  // ✅ Obtener todos los hijos (ramos que dependen de este) de forma recursiva
+  const getDescendientes = (id, todasLasMallas) => {
+    const hijos = todasLasMallas.filter(c => c.prerrequisitos?.includes(id));
+    let descendientes = [...hijos.map(h => h.id)];
+    hijos.forEach(h => {
+      descendientes = [...descendientes, ...getDescendientes(h.id, todasLasMallas)];
+    });
+    return Array.from(new Set(descendientes));
+  };
 
   // ✅ Aprobar o desmarcar ramo
   const aprobar = (id) => {
-    if (aprobados.includes(id)) {
-      setAprobados(aprobados.filter((a) => a !== id));
-    } else {
-      // Al aprobar, limpiamos el estado "en curso" si estaba activo
-      setAprobados([...aprobados, id]);
-      if (cursando.includes(id)) {
-        setCursando(cursando.filter((c) => c !== id));
+    setAprobados((prevAprobados) => {
+      if (prevAprobados.includes(id)) {
+        // Si estamos desmarcando, buscamos todos los que dependen de este
+        const todosLosCursos = [];
+        if (!malla.isMencion) {
+          malla.semestres.forEach(s => todosLosCursos.push(...s.cursos));
+        } else {
+          malla.semestresComunes.forEach(s => todosLosCursos.push(...s.cursos));
+          Object.values(malla.menciones).forEach(m => {
+            m.semestres.forEach(s => todosLosCursos.push(...s.cursos));
+          });
+        }
+        
+        const aEliminar = getDescendientes(id, todosLosCursos);
+        return prevAprobados.filter((a) => a !== id && !aEliminar.includes(a));
+      } else {
+        return [...prevAprobados, id];
       }
-    }
+    });
+    
+    // Al aprobar, limpiamos el estado "en curso" si estaba activo
+    setCursando((prevCursando) => {
+      if (prevCursando.includes(id)) {
+        return prevCursando.filter((c) => c !== id);
+      }
+      return prevCursando;
+    });
   };
 
   // ✅ Marcar / desmarcar como excepcional
   const marcarExcepcional = (id) => {
-    if (excepciones.includes(id)) {
-      setExcepciones(excepciones.filter((e) => e !== id));
-      setAprobados(aprobados.filter((a) => a !== id));
-    } else {
-      setExcepciones([...excepciones, id]);
-      if (!aprobados.includes(id)) {
-        setAprobados([...aprobados, id]);
+    setExcepciones((prevExcepciones) => {
+      if (prevExcepciones.includes(id)) {
+        return prevExcepciones.filter((e) => e !== id);
+      } else {
+        return [...prevExcepciones, id];
       }
-      // Si queda aprobado por excepcional, quitamos "en curso" si existía
-      if (cursando.includes(id)) {
-        setCursando(cursando.filter((c) => c !== id));
+    });
+
+    setAprobados((prevAprobados) => {
+      // Si estamos quitando la excepción, también quitamos de aprobados
+      if (excepciones.includes(id)) { // Usando estado actual de la closure para saber si estamos activando o desactivando
+        return prevAprobados.filter((a) => a !== id);
+      } 
+      // Si estamos agregando excepción, lo agregamos a aprobados si no está
+      if (!prevAprobados.includes(id)) {
+        return [...prevAprobados, id];
       }
-    }
+      return prevAprobados;
+    });
+
+    // Si queda aprobado por excepcional, quitamos "en curso" si existía
+    setCursando((prevCursando) => {
+      if (!excepciones.includes(id) && prevCursando.includes(id)) {
+        return prevCursando.filter((c) => c !== id);
+      }
+      return prevCursando;
+    });
   };
 
   // ✅ En curso (Ctrl + clic)
   const toggleCursando = (id) => {
-    if (cursando.includes(id)) {
-      setCursando(cursando.filter((c) => c !== id));
-    } else {
-      setCursando([...cursando, id]);
-    }
+    setCursando((prevCursando) => {
+      if (prevCursando.includes(id)) {
+        return prevCursando.filter((c) => c !== id);
+      } else {
+        return [...prevCursando, id];
+      }
+    });
   };
 
   // ✅ Aprobar hasta semestre (evento global desde Navbar)
   const aprobarHastaSemestre = (semestreLimite) => {
     if (!malla) return;
     const nuevosAprobados = [];
-    malla.semestres.forEach((sem) => {
-      if (sem.numero <= semestreLimite) {
-        sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+    
+    if (!malla.isMencion) {
+      malla.semestres.forEach((sem) => {
+        if (sem.numero <= semestreLimite) {
+          sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+        }
+      });
+    } else {
+      malla.semestresComunes.forEach((sem) => {
+        if (sem.numero <= semestreLimite) {
+          sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+        }
+      });
+      if (mencionActiva && malla.menciones[mencionActiva]) {
+        malla.menciones[mencionActiva].semestres.forEach((sem) => {
+          if (sem.numero <= semestreLimite) {
+            sem.cursos.forEach((curso) => nuevosAprobados.push(curso.id));
+          }
+        });
       }
-    });
+    }
+
     const aprobadosSet = new Set(nuevosAprobados);
     setAprobados([...aprobadosSet]);
     setExcepciones([]);
@@ -197,7 +328,7 @@ export default function MallaViewer({
     };
     window.addEventListener("aprobarHastaSemestre", handler);
     return () => window.removeEventListener("aprobarHastaSemestre", handler);
-  }, [malla]);
+  }, [malla, mencionActiva]); // se agregó a las dependencias por si acaso
 
   // ✅ Drag horizontal tipo Trello
   const bind = useDrag(
@@ -207,12 +338,12 @@ export default function MallaViewer({
 
       if (first) {
         setIsDragging(true);
-        setDragMoved(0);
+        dragMovedRef.current = 0;
       }
 
       if (event?.deltaX) {
         el.scrollLeft -= event.deltaX;
-        setDragMoved((prev) => prev + Math.abs(event.deltaX));
+        dragMovedRef.current += Math.abs(event.deltaX);
       }
 
       if (last) {
@@ -227,13 +358,65 @@ export default function MallaViewer({
     }
   );
 
-  // ✅ Evita clics falsos tras arrastrar
   const handleClickCapture = (e) => {
-    if (dragMoved > 3) {
+    if (dragMovedRef.current > 3) {
       e.stopPropagation();
       e.preventDefault();
     }
   };
+
+  // ---------------- Lógica de renderizado ----------------
+  const getSemestreInfo = (num) => {
+    if (!malla) return null;
+    if (!malla.isMencion) {
+      return { tipo: "comun", data: malla.semestres.find(s => s.numero === num) };
+    }
+    
+    // Buscar en comunes
+    const comun = malla.semestresComunes.find(s => s.numero === num);
+    if (comun) return { tipo: "comun", data: comun };
+
+    // Buscar en menciones
+    const opciones = {};
+    let hasData = false;
+    malla.mencionesDisponibles.forEach(m => {
+      const semMencion = malla.menciones[m.codigo]?.semestres?.find(s => s.numero === num);
+      if (semMencion) {
+        opciones[m.codigo] = { ...semMencion, nombreMencion: m.nombre };
+        hasData = true;
+      }
+    });
+
+    return hasData ? { tipo: "mencion", opciones } : { tipo: "comun", data: null };
+  };
+
+  const isSemestreCompletado = (info) => {
+    if (!info) return true;
+    if (info.tipo === "comun") {
+      if (!info.data?.cursos.length) return true;
+      return info.data.cursos.every((c) => aprobados.includes(c.id));
+    } else {
+      const dataMencion = info.opciones[mencionActiva];
+      if (!dataMencion?.cursos?.length) return true;
+      return dataMencion.cursos.every((c) => aprobados.includes(c.id));
+    }
+  };
+
+  const renderCurso = (curso) => (
+    <Curso
+      key={curso.id}
+      curso={curso}
+      aprobado={aprobados.includes(curso.id)}
+      excepcional={excepciones.includes(curso.id)}
+      disponible={cumplePrereqs(curso)}
+      modoExcepcional={modoExcepcional}
+      aprobar={() => aprobar(curso.id)}
+      marcarExcepcional={() => marcarExcepcional(curso.id)}
+      enCurso={cursando.includes(curso.id)}
+      toggleCursando={() => toggleCursando(curso.id)}
+      onAbrirNotas={(c) => onAbrirNotas(c, cursando.includes(c.id), aprobados.includes(c.id))}
+    />
+  );
 
   if (!malla)
     return <p className="text-center text-textSecondary">Cargando malla...</p>;
@@ -243,10 +426,30 @@ export default function MallaViewer({
     <div className="pb-10 px-2 sm:px-4 md:px-6">
       
       {/* Controles Superiores de Visualización */}
-      <div className="flex justify-center sm:justify-end mb-4 pr-0 sm:pr-4">
+      <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-3 mb-4 pr-0 sm:pr-4">
+        
+        {/* Selector de Especialidad si existe */}
+        {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
+          <div className="flex bg-bgSecondary/80 backdrop-blur-md p-1 rounded-full border border-borderColor/50">
+            {malla.mencionesDisponibles.map((m) => (
+              <button
+                key={m.codigo}
+                onClick={() => setMencionActiva(m.codigo)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                  mencionActiva === m.codigo
+                    ? "bg-primary text-white shadow-md scale-105"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-bgSecondary"
+                }`}
+              >
+                {m.nombre}
+              </button>
+            ))}
+          </div>
+        )}
+
         <button
           onClick={() => setOcultarCompletados(!ocultarCompletados)}
-          className={`flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border
+          className={`hidden sm:flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border
             ${ocultarCompletados 
               ? "bg-primary text-white border-primary shadow-[0_0_12px_var(--primary)] opacity-90 scale-105" 
               : "bg-bgSecondary/80 backdrop-blur-md text-textSecondary border-borderColor/50 hover:text-primary hover:border-primary/50"}
@@ -263,8 +466,9 @@ export default function MallaViewer({
         <div
           ref={scrollRef}
           {...bind()}
+          onScroll={handleScroll}
           onClickCapture={handleClickCapture}
-          className={`overflow-x-auto scroll-container overscroll-x-contain px-8 sm:px-10 pb-4
+          className={`overflow-x-auto scroll-container overscroll-x-contain px-4 sm:px-10 pb-4 snap-x snap-mandatory sm:snap-none
                 ${
                   isDragging ? "dragging" : "cursor-grab"
                 } active:cursor-grabbing`}
@@ -274,37 +478,29 @@ export default function MallaViewer({
             className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
             style={{ transform: "scaleY(-1)" }}
           >
-            <AnimatePresence mode="popLayout">
-            {Array.from({ length: Math.ceil(malla.semestres.length / 2) }).map(
+            {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
             (_, i) => {
               const year = i + 1;
-              const semA = malla.semestres[i * 2];
-              const semB = malla.semestres[i * 2 + 1];
+              const semAInfo = getSemestreInfo(i * 2 + 1);
+              const semBInfo = getSemestreInfo(i * 2 + 2);
 
-              const isSemACompletado = semA?.cursos.every((c) => aprobados.includes(c.id));
-              const isSemBCompletado = semB?.cursos.every((c) => aprobados.includes(c.id));
+              const isSemACompletado = isSemestreCompletado(semAInfo);
+              const isSemBCompletado = isSemestreCompletado(semBInfo);
 
               // Si ocultarCompletados está activo, determinamos qué mostrar
-              const showA = semA && (!ocultarCompletados || !isSemACompletado);
-              const showB = semB && (!ocultarCompletados || !isSemBCompletado);
+              const showA = semAInfo && (semAInfo.tipo !== "comun" || semAInfo.data) && (!ocultarCompletados || !isSemACompletado);
+              const showB = semBInfo && (semBInfo.tipo !== "comun" || semBInfo.data) && (!ocultarCompletados || !isSemBCompletado);
 
-              // Si ambos semestres de un año se ocultan, ocultar todo el contenedor del año
+              // Si ambos semestres de un año se ocultan (o no tienen datos), ocultar todo el contenedor del año
               if (!showA && !showB) return null;
 
               return (
                 <motion.div
                   key={year}
-                  layout="position"
-                  className="min-w-[320px] sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 350, 
-                    damping: 30, 
-                    mass: 0.8
-                  }}
+                  className="w-max sm:w-auto sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                 >
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="text-xs uppercase tracking-wide text-textSecondary/80">
@@ -316,57 +512,67 @@ export default function MallaViewer({
                   </div>
 
                   <div className="flex gap-4 sm:gap-8">
-                    <AnimatePresence mode="popLayout">
                     {[
-                      { data: semA, show: showA, key: `sem-${i * 2}` },
-                      { data: semB, show: showB, key: `sem-${i * 2 + 1}` }
+                      { info: semAInfo, show: showA, key: `sem-${i * 2 + 1}` },
+                      { info: semBInfo, show: showB, key: `sem-${i * 2 + 2}` }
                     ].map(
-                      (semInfo) =>
-                        semInfo.show && semInfo.data && (
-                          <motion.div
-                            key={semInfo.key}
-                            layout
-                            className="flex flex-col gap-3 min-w-[180px] sm:min-w-[240px] 
-                                       bg-bgSecondary/70 backdrop-blur-md 
-                                       rounded-2xl p-4 sm:p-5 border border-borderColor/40 
-                                       shadow-md hover:shadow-xl transition-shadow duration-300 transform-gpu"
-                            initial={{ opacity: 0, y: 10, scale: 0.96 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.94 }}
-                            transition={{ 
-                              type: "spring", 
-                              stiffness: 400, 
-                              damping: 35,
-                              mass: 0.9
-                            }}
-                          >
-                            {semInfo.data.cursos.map((curso) => (
-                              <Curso
-                                key={curso.id}
-                                curso={curso}
-                                aprobado={aprobados.includes(curso.id)}
-                                excepcional={excepciones.includes(curso.id)}
-                                disponible={cumplePrereqs(curso)}
-                                modoExcepcional={modoExcepcional}
-                                aprobar={() => aprobar(curso.id)}
-                                marcarExcepcional={() =>
-                                  marcarExcepcional(curso.id)
-                                }
-                                enCurso={cursando.includes(curso.id)}
-                                toggleCursando={() => toggleCursando(curso.id)}
-                                onAbrirNotas={(c) => onAbrirNotas(c, cursando.includes(c.id))}
-                              />
-                            ))}
-                          </motion.div>
+                      ({ info, show, key }) =>
+                        show && info && (
+                          <Fragment key={key}>
+                                {/* SEMESTRE COMÚN */}
+                            {info.tipo === "comun" && info.data && (
+                               <motion.div
+                                 className="flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
+                                            bg-bgSecondary/70 
+                                            rounded-2xl p-4 sm:p-5 border border-borderColor/40 
+                                            shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10"
+                                 initial={{ opacity: 0, y: 8 }}
+                                 animate={{ opacity: 1, y: 0 }}
+                                 transition={{ duration: 0.2, ease: "easeOut" }}
+                               >
+                                 <div className="text-center sm:hidden mb-1">
+                                    <span className="text-xs font-bold text-textSecondary uppercase">Semestre {info.data.numero}</span>
+                                 </div>
+                                 {info.data.cursos.map((c) => renderCurso(c))}
+                               </motion.div>
+                            )}                             {/* SEMESTRE MENCIONES (SIMPLE CARD) */}
+                            {info.tipo === "mencion" && info.opciones && info.opciones[mencionActiva] && (
+                               <motion.div
+                                 className="flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
+                                            bg-primary/5 
+                                            rounded-2xl p-4 sm:p-5 border border-primary/20 
+                                            shadow-md hover:shadow-lg 
+                                            transition-shadow duration-200 transform-gpu z-10 relative"
+                                 initial={{ opacity: 0, y: 8 }}
+                                 animate={{ opacity: 1, y: 0 }}
+                                 transition={{ duration: 0.2, ease: "easeOut" }}
+                               >
+                                  {/* Header especialidad */}
+                                  <div className="flex flex-col mb-1 pb-3 border-b border-primary/20">
+                                     <div className="flex justify-between items-center mb-1">
+                                       <span className="text-[10px] font-bold tracking-wider text-primary">
+                                          ESPECIALIDAD
+                                       </span>
+                                       <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full opacity-90">
+                                         {info.opciones[mencionActiva].nombreMencion}
+                                       </span>
+                                     </div>
+                                     <div className="text-center sm:hidden mt-2">
+                                        <span className="text-xs font-bold text-textSecondary uppercase">Semestre {info.opciones[mencionActiva].numero}</span>
+                                     </div>
+                                  </div>
+
+                                  {info.opciones[mencionActiva].cursos.map((c) => renderCurso(c))}
+                               </motion.div>
+                            )}
+                          </Fragment>
                         )
                     )}
-                    </AnimatePresence>
                   </div>
                 </motion.div>
               );
             }
           )}
-            </AnimatePresence>
           </div>
         </div>
       </div>

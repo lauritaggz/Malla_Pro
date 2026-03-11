@@ -1,17 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from "recharts";
 
 import {
   CheckCircle2,
@@ -36,7 +24,6 @@ export default function ResumenProgreso({
   });
 
   const [promedioGlobal, setPromedioGlobal] = useState(null);
-  const [estadisticasPorSemestre, setEstadisticasPorSemestre] = useState([]);
 
   // =============================
   // CALCULOS
@@ -109,8 +96,6 @@ export default function ResumenProgreso({
     setPromedioGlobal(
       creditosConNota > 0 ? sumaNotasPonderadas / creditosConNota : null
     );
-
-    setEstadisticasPorSemestre(stats);
   };
 
   if (!isOpen) return null;
@@ -129,33 +114,21 @@ export default function ResumenProgreso({
       ? (creditosData.cursando / creditosData.totales) * 100
       : 0;
 
-  const pieData = [
-    { name: "Aprobados", value: creditosData.aprobados, color: "#10b981" },
-    { name: "En Curso", value: creditosData.cursando, color: "#3b82f6" },
-    {
-      name: "Pendientes",
-      value:
-        creditosData.totales - creditosData.aprobados - creditosData.cursando,
-      color: "#6b7280",
-    },
-  ];
-
-  const COLORS = pieData.map((d) => d.color);
-
   // =============================
   // RENDER
   // =============================
 
   return (
     <AnimatePresence>
-      <motion.div
-        key="modal"
-        exit={{ opacity: 0 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-md z-[200] flex items-center justify-center p-4"
-        onClick={onClose}
-      >
+      {isOpen && (
+        <motion.div
+          key="modal"
+          exit={{ opacity: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[80] flex items-center justify-center p-4 pb-[5rem] sm:pb-4"
+          onClick={onClose}
+        >
         {/* MODAL CONTENT */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 10 }}
@@ -163,7 +136,7 @@ export default function ResumenProgreso({
           exit={{ scale: 0.9, opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative bg-bgPrimary max-w-5xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-borderColor p-6"
+          className="relative bg-bgPrimary max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-borderColor p-6"
         >
           {/* BOTÓN CERRAR */}
           <button
@@ -183,7 +156,7 @@ export default function ResumenProgreso({
           </p>
 
           {/* CARDS GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {/* APROBADOS */}
             <div className="glass-card p-5 rounded-xl border border-borderColor">
               <p className="text-sm text-textSecondary mb-1">
@@ -209,60 +182,9 @@ export default function ResumenProgreso({
                 {creditosData.totales}
               </p>
             </div>
-
-            {/* PROMEDIO */}
-            <div className="glass-card p-5 rounded-xl border border-borderColor">
-              <p className="text-sm text-textSecondary mb-1">Promedio Global</p>
-              <p className="text-3xl font-bold text-primary">
-                {promedioGlobal ? promedioGlobal.toFixed(2) : "--"}
-              </p>
-            </div>
           </div>
 
-          {/* GRAFICOS */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* PIE */}
-            <div className="glass-card p-6 rounded-xl border border-borderColor">
-              <h3 className="text-xl font-bold text-textPrimary mb-4">
-                Distribución de Créditos
-              </h3>
 
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={85}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, idx) => (
-                      <Cell key={idx} fill={COLORS[idx]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* BARRAS */}
-            <div className="glass-card p-6 rounded-xl border border-borderColor">
-              <h3 className="text-xl font-bold text-textPrimary mb-4">
-                Progreso por Semestre
-              </h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={estadisticasPorSemestre}>
-                  <XAxis dataKey="semestre" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="aprobados" fill="#10b981" />
-                  <Bar dataKey="cursando" fill="#3b82f6" />
-                  <Bar dataKey="pendientes" fill="#6b7280" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
 
           {/* PROGRESO GENERAL */}
           <div className="mt-10 glass-card p-6 rounded-xl border border-borderColor">
@@ -289,7 +211,8 @@ export default function ResumenProgreso({
             </p>
           </div>
         </motion.div>
-      </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }
