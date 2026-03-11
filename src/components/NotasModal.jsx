@@ -23,6 +23,12 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   const [openSubNotas, setOpenSubNotas] = useState([]); // ids de evaluaciones abiertas
   const [subNotaInputs, setSubNotaInputs] = useState({}); // { [evalId]: "valor" }
 
+  // Helper para mostrar decimales sin crashear si el valor no es número
+  const safeToFixed = (val, dec = 2) => {
+    const num = typeof val === "string" ? parseFloat(val.replace(",", ".")) : val;
+    return typeof num === "number" && !isNaN(num) ? num.toFixed(dec) : "--";
+  };
+
   // Cargar evaluaciones del curso desde localStorage
   useEffect(() => {
     if (curso) {
@@ -427,13 +433,13 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                   <div className="bg-bgSecondary rounded-lg p-3 border border-borderColor flex flex-col justify-center items-center text-center">
                     <p className="text-[10px] sm:text-[11px] text-textSecondary uppercase tracking-wider mb-1">Nota Presentación</p>
                     <p className="text-2xl font-bold text-textPrimary">
-                       {pesoConNota > 0 ? promedioPresentacion.toFixed(2) : "--"}
+                       {pesoConNota > 0 ? safeToFixed(promedioPresentacion, 2) : "--"}
                     </p>
                   </div>
                   <div className={`bg-bgSecondary rounded-lg p-3 border flex flex-col justify-center items-center text-center ${rindeExamen ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/20" : "border-borderColor"}`}>
                     <p className={`text-[10px] sm:text-[11px] uppercase tracking-wider mb-1 ${rindeExamen ? "text-amber-600 font-bold" : "text-textSecondary"}`}>Nota Final</p>
                     <p className={`text-2xl font-bold ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
-                       {(pesoTotal === 100 || rindeExamen) ? promedioFinal.toFixed(2) : "--"}
+                       {(pesoTotal === 100 || rindeExamen) ? safeToFixed(promedioFinal, 2) : "--"}
                     </p>
                   </div>
                 </div>
@@ -447,9 +453,9 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                         Proyección para Eximición
                       </p>
                       <p className="text-textSecondary text-sm">
-                        Para eximirte ({config.notaEximicion.toFixed(1)}), necesitas mantener un promedio de{" "}
+                        Para eximirte ({safeToFixed(config.notaEximicion, 1)}), necesitas mantener un promedio de{" "}
                         <strong className="text-primary font-bold">
-                          {notaNecesariaPresentacion.toFixed(2)}
+                          {safeToFixed(notaNecesariaPresentacion, 2)}
                         </strong>{" "}
                         en el {pesoRestante}% restante.
                         {notaNecesariaPresentacion > 7.0 && (
@@ -475,7 +481,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                           Modo Examen Activado
                         </p>
                         <p className="text-textSecondary text-sm mb-3">
-                          Tu presentación (<strong className="text-textPrimary">{promedioPresentacion.toFixed(2)}</strong>) no alcanza para la eximición ({config.notaEximicion.toFixed(1)}).
+                          Tu presentación (<strong className="text-textPrimary">{safeToFixed(promedioPresentacion, 2)}</strong>) no alcanza para la eximición ({safeToFixed(config.notaEximicion, 1)}).
                           Tu nota calculada ahora equivale al <strong>{config.ponderacionPresentacion}%</strong> y el examen al <strong>{config.ponderacionExamen}%</strong>.
                         </p>
                         
@@ -485,7 +491,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                               Nota necesaria en el Examen para aprobar (4.0):
                             </p>
                             <p className={`text-2xl font-bold tracking-tight ${notaNecesariaExamen > 7.0 ? "text-red-500" : "text-amber-500"}`}>
-                              {notaNecesariaExamen.toFixed(2)}
+                              {safeToFixed(notaNecesariaExamen, 2)}
                               {notaNecesariaExamen > 7.0 && <span className="text-[10px] ml-2 uppercase text-red-500/80">(Ramo Irrecuperable)</span>}
                             </p>
                           </div>
@@ -629,7 +635,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                                                   key={sub.id}
                                                   className="flex items-center gap-1.5 bg-bgPrimary border border-borderColor/80 shadow-sm rounded px-2.5 py-1 text-xs"
                                                 >
-                                                  <span className="font-semibold text-textPrimary">{sub.nota.toFixed(1)}</span>
+                                                  <span className="font-semibold text-textPrimary">{safeToFixed(sub.nota, 1)}</span>
                                                   <button
                                                     onClick={() => eliminarSubNota(evaluacion.id, sub.id)}
                                                     className="text-textSecondary hover:text-red-500 border-l border-borderColor/50 pl-1.5"
