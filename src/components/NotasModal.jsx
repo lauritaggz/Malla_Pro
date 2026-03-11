@@ -273,20 +273,22 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   if (!isOpen || !curso) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
-        onClick={onClose}
-      >
-        <div className="w-full max-w-4xl">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/60 backdrop-blur-[4px] z-[100] flex items-center justify-center p-4"
+      onClick={onClose}
+      style={{ backfaceVisibility: "hidden" }}
+    >
+      <div className="w-full max-w-4xl" style={{ willChange: "transform, opacity" }}>
           <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            initial={{ scale: 0.96, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            exit={{ scale: 0.96, opacity: 0, y: 15 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
+            style={{ backfaceVisibility: "hidden", willChange: "transform, opacity" }}
             className="bg-bgPrimary rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-borderColor/40 flex flex-col max-h-[90vh]"
           >
             {/* Header */}
@@ -754,6 +756,5 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
           </motion.div>
         </div>
       </motion.div>
-    </AnimatePresence>
   );
 }

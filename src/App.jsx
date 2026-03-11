@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import { listarMallas } from "./utils/mallasLoader";
 import MallaViewer from "./components/MallaViewer";
-import StatsDisplay from "./components/StatsDisplay";
+import { MemoizedStatsDisplay as StatsDisplay } from "./components/StatsDisplay";
 import ResumenProgreso from "./components/ResumenProgreso";
 import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
@@ -104,10 +104,10 @@ export default function App() {
     listarMallas().then(setMallasDisponibles);
   }, []);
 
-  const seleccionarMalla = (malla) => {
+  const seleccionarMalla = useCallback((malla) => {
     setMallaSeleccionada(malla);
     localStorage.setItem("malla-seleccionada", JSON.stringify(malla));
-  };
+  }, []);
 
   const handleSemestresLoaded = useCallback(
     (total) => setCantidadSemestres(total),
@@ -120,6 +120,13 @@ export default function App() {
     setCursoEsAprobado(esAprobado);
     setMostrarNotas(true);
   }, []);
+
+  const handleSetProgreso = useCallback((val) => setProgreso(val), []);
+  const handleSetCursosCursando = useCallback((val) => setCursosCursando(val), []);
+  const handleSetCursando = useCallback((val) => setCursando(val), []);
+  const handleSetMallaData = useCallback((val) => setMallaData(val), []);
+  const handleSetAprobados = useCallback((val) => setAprobados(val), []);
+  const handleSetExcepciones = useCallback((val) => setExcepciones(val), []);
 
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary overflow-x-hidden relative">
@@ -237,13 +244,13 @@ export default function App() {
               mallaSeleccionada={mallaSeleccionada}
               modoExcepcional={modoExcepcional}
               setExcepcionesActivas={setExcepcionesActivas}
-              onTotalCursosChange={setProgreso}
+              onTotalCursosChange={handleSetProgreso}
               onSemestresLoaded={handleSemestresLoaded}
-              onCursandoChange={setCursosCursando} // ← guarda el número
-              onCursandoArrayChange={setCursando} // ← guarda el array real
-              onMallaDataLoaded={setMallaData}
-              onAprobadosChange={setAprobados}
-              onExcepcionesChange={setExcepciones}
+              onCursandoChange={handleSetCursosCursando}
+              onCursandoArrayChange={handleSetCursando}
+              onMallaDataLoaded={handleSetMallaData}
+              onAprobadosChange={handleSetAprobados}
+              onExcepcionesChange={handleSetExcepciones}
               onAbrirNotas={handleAbrirNotas}
               ocultarCompletados={ocultarCompletados}
               setOcultarCompletados={setOcultarCompletados}

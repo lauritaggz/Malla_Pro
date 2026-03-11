@@ -129,3 +129,6 @@ export default function StatsDisplay({
     </div>
   );
 }
+
+import React from "react";
+export const MemoizedStatsDisplay = React.memo(StatsDisplay);
