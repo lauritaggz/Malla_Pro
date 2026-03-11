@@ -121,6 +121,10 @@ const Curso = ({
             : "bg-primary/10 text-textPrimary shadow-sm hover:bg-primary/20 hover:border-primary/50 border-primary/30"
         }
       `}
+      style={{
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden"
+      }}
     >
       {/* Badge de Promedio en el Top Right */}
       {promedio !== null && (

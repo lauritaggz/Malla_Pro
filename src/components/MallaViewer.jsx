@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import Curso from "./Curso";
 
-export default function MallaViewer({
+const MallaViewer = ({
   mallaSeleccionada,
   modoExcepcional,
   setExcepcionesActivas,
@@ -17,7 +17,7 @@ export default function MallaViewer({
   onAbrirNotas,
   ocultarCompletados,
   setOcultarCompletados
-}) {
+}) => {
   const [malla, setMalla] = useState(null);
   const [mencionActiva, setMencionActiva] = useState(null);
 
@@ -460,7 +460,7 @@ export default function MallaViewer({
       </div>
 
       {/* Wrapper de Cristal Seguro */}
-      <div className="rounded-3xl border border-borderColor/30 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-2xl bg-gradient-to-br from-bgSecondary/50 to-bgPrimary/80 pb-6 pt-4">
+      <div className="rounded-3xl border border-borderColor/30 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl bg-gradient-to-br from-bgSecondary/50 to-bgPrimary/80 pb-6 pt-4">
         
         {/* Scroll horizontal arrastrable invertido verticalmente (scrollbar arriba) */}
         <div
@@ -468,15 +468,21 @@ export default function MallaViewer({
           {...bind()}
           onScroll={handleScroll}
           onClickCapture={handleClickCapture}
-          className={`overflow-x-auto scroll-container overscroll-x-contain px-4 sm:px-10 pb-4 snap-x snap-mandatory sm:snap-none
+          className={`overflow-x-auto scroll-container overscroll-x-contain px-4 sm:px-10 pb-6 snap-x snap-mandatory sm:snap-none
                 ${
                   isDragging ? "dragging" : "cursor-grab"
                 } active:cursor-grabbing`}
-          style={{ WebkitOverflowScrolling: "touch", transform: "scaleY(-1)" }}
+          style={{ 
+            WebkitOverflowScrolling: "touch", 
+            willChange: "transform",
+            backfaceVisibility: "hidden"
+          }}
         >
           <div 
             className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
-            style={{ transform: "scaleY(-1)" }}
+            style={{ 
+               backfaceVisibility: "hidden" 
+            }}
           >
             {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
             (_, i) => {
@@ -578,4 +584,12 @@ export default function MallaViewer({
       </div>
     </div>
   );
-}
+};
+
+export default React.memo(MallaViewer, (prev, next) => {
+  return (
+    prev.mallaSeleccionada?.nombre === next.mallaSeleccionada?.nombre &&
+    prev.modoExcepcional === next.modoExcepcional &&
+    prev.ocultarCompletados === next.ocultarCompletados
+  );
+});
