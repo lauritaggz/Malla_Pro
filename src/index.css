@@ -2,141 +2,140 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Variables de color por tema ===== */
+/* ===== Variables de color por tema (Estilo Apple / iOS) ===== */
 :root {
-  --aurora-primary: #2563eb;
-  --aurora-bgPrimary: #f1f5f9;
-  --aurora-bgSecondary: #e2e8f0;
-  --aurora-textPrimary: #0f172a;
-  --aurora-textSecondary: #475569;
-  --aurora-border: #cbd5e1;
+  /* Paleta iOS Light Base */
+  --ios-light-bg: #F2F2F7;
+  --ios-light-card: #FFFFFF;
+  --ios-light-text: #000000;
+  --ios-light-text-sec: #8A8A8E;
+  --ios-light-border: rgba(60, 60, 67, 0.15);
 
-  --sunset-primary: #f43f5e;
-  --sunset-bgPrimary: #fff1f2;
-  --sunset-bgSecondary: #ffe4e6;
-  --sunset-textPrimary: #881337;
-  --sunset-textSecondary: #be123c;
-  --sunset-border: #fecdd3;
+  /* Paleta iOS Dark Base */
+  --ios-dark-bg: #000000;
+  --ios-dark-card: #1C1C1E;
+  --ios-dark-text: #FFFFFF;
+  --ios-dark-text-sec: #98989D;
+  --ios-dark-border: rgba(84, 84, 88, 0.4);
 
-  --emerald-primary: #059669;
-  --emerald-bgPrimary: #f0fdf4;
-  --emerald-bgSecondary: #dcfce7;
-  --emerald-textPrimary: #064e3b;
-  --emerald-textSecondary: #15803d;
-  --emerald-border: #bbf7d0;
+  /* Acentos iOS (Light) */
+  --apple-blue-light: #007AFF;
+  --apple-pink-light: #FF2D55;
+  --apple-green-light: #34C759;
+  --apple-indigo-light: #5856D6;
+  --apple-orange-light: #FF9500;
 
-  --midnight-primary: #7c3aed;
-  --midnight-bgPrimary: #ede9fe;
-  --midnight-bgSecondary: #ddd6fe;
-  --midnight-textPrimary: #2e1065;
-  --midnight-textSecondary: #4c1d95;
-  --midnight-border: #c4b5fd;
-
-  --golden-primary: #d97706;
-  --golden-bgPrimary: #fefce8;
-  --golden-bgSecondary: #fef9c3;
-  --golden-textPrimary: #713f12;
-  --golden-textSecondary: #b45309;
-  --golden-border: #fde68a;
+  /* Acentos iOS (Dark) */
+  --apple-blue-dark: #0A84FF;
+  --apple-pink-dark: #FF375F;
+  --apple-green-dark: #32D74B;
+  --apple-indigo-dark: #5E5CE6;
+  --apple-orange-dark: #FF9F0A;
 }
 
 /* ===== Temas claros ===== */
 .aurora.light {
-  --primary: var(--aurora-primary);
-  --bgPrimary: var(--aurora-bgPrimary);
-  --bgSecondary: var(--aurora-bgSecondary);
-  --textPrimary: var(--aurora-textPrimary);
-  --textSecondary: var(--aurora-textSecondary);
-  --borderColor: var(--aurora-border);
+  --primary: var(--apple-blue-light);
+  --bgPrimary: #E0EFFF; /* Stronger Blue tint */
+  --bgSecondary: #F5FAFF;
+  --textPrimary: var(--ios-light-text);
+  --textSecondary: var(--ios-light-text-sec);
+  --borderColor: rgba(0, 122, 255, 0.25);
 }
 
 .sunset.light {
-  --primary: var(--sunset-primary);
-  --bgPrimary: var(--sunset-bgPrimary);
-  --bgSecondary: var(--sunset-bgSecondary);
-  --textPrimary: var(--sunset-textPrimary);
-  --textSecondary: var(--sunset-textSecondary);
-  --borderColor: var(--sunset-border);
+  --primary: #FF7597; /* Cozy Bubblegum/Hello Kitty Pink */
+  --bgPrimary: #FFF0F5; /* Lavender Blush / Baby Pink */
+  --bgSecondary: #FFFFFF;
+  --textPrimary: var(--ios-light-text);
+  --textSecondary: var(--ios-light-text-sec);
+  --borderColor: rgba(255, 117, 151, 0.25);
 }
 
 .emerald.light {
-  --primary: var(--emerald-primary);
-  --bgPrimary: var(--emerald-bgPrimary);
-  --bgSecondary: var(--emerald-bgSecondary);
-  --textPrimary: var(--emerald-textPrimary);
-  --textSecondary: var(--emerald-textSecondary);
-  --borderColor: var(--emerald-border);
+  --primary: var(--apple-green-light);
+  --bgPrimary: #E6F9EC; /* Stronger Green tint */
+  --bgSecondary: #F4FDF6;
+  --textPrimary: var(--ios-light-text);
+  --textSecondary: var(--ios-light-text-sec);
+  --borderColor: rgba(52, 199, 89, 0.25);
 }
 
 .midnight.light {
-  --primary: var(--midnight-primary);
-  --bgPrimary: var(--midnight-bgPrimary);
-  --bgSecondary: var(--midnight-bgSecondary);
-  --textPrimary: var(--midnight-textPrimary);
-  --textSecondary: var(--midnight-textSecondary);
-  --borderColor: var(--midnight-border);
+  --primary: var(--apple-indigo-light);
+  --bgPrimary: #EAE8FC; /* Stronger Indigo tint */
+  --bgSecondary: #F7F6FD;
+  --textPrimary: var(--ios-light-text);
+  --textSecondary: var(--ios-light-text-sec);
+  --borderColor: rgba(88, 86, 214, 0.25);
 }
 
 .golden.light {
-  --primary: var(--golden-primary);
-  --bgPrimary: var(--golden-bgPrimary);
-  --bgSecondary: var(--golden-bgSecondary);
-  --textPrimary: var(--golden-textPrimary);
-  --textSecondary: var(--golden-textSecondary);
-  --borderColor: var(--golden-border);
+  --primary: var(--apple-orange-light);
+  --bgPrimary: #FFF1DB; /* Stronger Orange tint */
+  --bgSecondary: #FFFAF2;
+  --textPrimary: var(--ios-light-text);
+  --textSecondary: var(--ios-light-text-sec);
+  --borderColor: rgba(255, 149, 0, 0.25);
 }
 
 /* ===== Modo oscuro ===== */
 .aurora.dark {
-  --primary: #60a5fa;
-  --bgPrimary: #0f172a;
-  --bgSecondary: #1e293b;
-  --textPrimary: #f8fafc;
-  --textSecondary: #94a3b8;
-  --borderColor: #334155;
+  --primary: var(--apple-blue-dark);
+  --bgPrimary: #01132C; /* Deep Neon Blue */
+  --bgSecondary: #051F41; 
+  --textPrimary: #E5F1FF;
+  --textSecondary: #90B3D6;
+  --borderColor: rgba(10, 132, 255, 0.5);
 }
 
 .sunset.dark {
-  --primary: #fb7185;
-  --bgPrimary: #111827;
-  --bgSecondary: #1f2937;
-  --textPrimary: #f9fafb;
-  --textSecondary: #fca5a5;
-  --borderColor: #374151;
+  --primary: #FF9EBB; /* Soft glowing cozy pink */
+  --bgPrimary: #2A171D; /* Deep warm chocolate-rose */
+  --bgSecondary: #3B2129; 
+  --textPrimary: #FFEFEF; /* Softer text */
+  --textSecondary: #DCAEBC;
+  --borderColor: rgba(255, 158, 187, 0.4);
 }
 
 .emerald.dark {
-  --primary: #34d399;
-  --bgPrimary: #064e3b;
-  --bgSecondary: #065f46;
-  --textPrimary: #ecfdf5;
-  --textSecondary: #6ee7b7;
-  --borderColor: #047857;
+  --primary: var(--apple-green-dark);
+  --bgPrimary: #03210C;
+  --bgSecondary: #0A3315;
+  --textPrimary: #E6F9EF;
+  --textSecondary: #8FCB9C;
+  --borderColor: rgba(50, 215, 75, 0.5);
 }
 
 .midnight.dark {
-  --primary: #a78bfa;
-  --bgPrimary: #1e1b4b;
-  --bgSecondary: #312e81;
-  --textPrimary: #f5f3ff;
-  --textSecondary: #c4b5fd;
-  --borderColor: #4338ca;
+  --primary: var(--apple-indigo-dark);
+  --bgPrimary: #11053B;
+  --bgSecondary: #1A0D4A;
+  --textPrimary: #EFEAFF;
+  --textSecondary: #A297D2;
+  --borderColor: rgba(94, 92, 230, 0.5);
 }
 
 .golden.dark {
-  --primary: #fbbf24;
-  --bgPrimary: #1c1917;
-  --bgSecondary: #292524;
-  --textPrimary: #fafaf9;
-  --textSecondary: #eab308;
-  --borderColor: #44403c;
+  --primary: var(--apple-orange-dark);
+  --bgPrimary: #2B1600;
+  --bgSecondary: #432200;
+  --textPrimary: #FFF1E0;
+  --textSecondary: #DDB78F;
+  --borderColor: rgba(255, 159, 10, 0.5);
 }
 
 /* ===== Colores globales ===== */
 body {
   background-color: var(--bgPrimary);
   color: var(--textPrimary);
-  transition: background-color 0.4s ease, color 0.4s ease;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Font features to make Inter look like SF Pro */
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bg-primary {
@@ -192,11 +191,8 @@ body {
   background: transparent;
 }
 
-/* ===== Animaciones suaves ===== */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease,
-    border-color 0.3s ease;
-}
+/* ===== Animaciones suaves (movidas a clases específicas para mejor rendimiento) ===== */
+
 
 /* ===== Scroll horizontal profesional ===== */
 .scroll-container {
@@ -319,16 +315,19 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: var(--primary);
+  color: white;
   padding: 16px 32px;
   border-radius: 9999px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .btn-primary:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+  transform: scale(1.02);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .btn-secondary {
@@ -359,32 +358,42 @@ body {
   }
 }
 
-/* Texto con gradiente */
+/* Texto destacado o con color principal */
 .gradient-text {
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 :root,
 .dark,
 .light {
-  transition: background-color 0.4s ease, color 0.4s ease,
-    border-color 0.4s ease, fill 0.4s ease, stroke 0.4s ease,
-    box-shadow 0.4s ease;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              fill 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .glass-card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 1rem;
-  transition: all 0.25s ease;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05),
+              inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-radius: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark .glass-card {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(30, 30, 32, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .glass-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }

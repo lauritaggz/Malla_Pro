@@ -10,8 +10,9 @@ export default function StatsDisplay({
 
   const porcentajeAprobados =
     totalCursos > 0 ? Math.round((cursosAprobados / totalCursos) * 100) : 0;
-  const porcentajeCursando =
-    totalCursos > 0 ? Math.round((cursosCursando / totalCursos) * 100) : 0;
+  
+  // Calcular SCT total de ramos en curso
+  const totalSctEnCurso = cursosEnCursoData.reduce((total, curso) => total + (curso.sct || 0), 0);
 
   // ==========================
   // 🔥 Calcular Promedio En Curso (Ponderado por SCT)
@@ -67,71 +68,59 @@ export default function StatsDisplay({
   return (
     <div className="w-full max-w-7xl mx-auto px-6 py-3">
       <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
-        {/* 🟢 Ramos Aprobados */}
+        {/* 🟢 Ramos Aprobados (Verde iOS) */}
         <div
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/90 backdrop-blur-sm 
-                        border border-emerald-400/30 shadow-theme transition-all hover:scale-105"
+          className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-emerald-500/95 backdrop-blur-md 
+                        border border-emerald-400/20 shadow-lg shadow-emerald-500/20 transition-all hover:scale-105"
         >
-          <div className="w-3 h-3 rounded-full bg-white/90"></div>
+          <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm"></div>
           <div className="flex flex-col">
-            <span className="text-white text-xs font-medium opacity-90">
+            <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">
               Aprobados
             </span>
-            <span className="text-white text-lg font-bold">
-              {cursosAprobados}{" "}
-              <span className="text-sm font-normal">
-                ({porcentajeAprobados}%)
+            <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
+              {cursosAprobados}
+              <span className="text-sm font-medium opacity-80">
+                ramos ({porcentajeAprobados}%)
               </span>
             </span>
           </div>
         </div>
 
-        {/* 🔵 Ramos Cursando */}
+        {/* 🔵 Ramos Cursando (Destacado con Tema Primario) */}
         <div
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/90 backdrop-blur-sm 
-                        border border-blue-400/30 shadow-theme transition-all hover:scale-105"
+          className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-primary backdrop-blur-md 
+                        border border-primary/20 shadow-lg shadow-primary/25 transition-all hover:scale-105"
         >
-          <div className="w-3 h-3 rounded-full bg-white/90"></div>
+          <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm"></div>
           <div className="flex flex-col">
-            <span className="text-white text-xs font-medium opacity-90">
+            <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">
               En Curso
             </span>
-            <span className="text-white text-lg font-bold">
-              {cursosCursando}{" "}
-              <span className="text-sm font-normal">
-                ({porcentajeCursando}%)
-              </span>
+            <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
+              {cursosCursando}
+              <span className="text-sm font-medium opacity-80">ramos</span>
+              {totalSctEnCurso > 0 && (
+                <>
+                  <span className="text-sm font-medium opacity-60 mx-1">•</span>
+                  <span className="text-sm font-medium opacity-90">{totalSctEnCurso} SCT</span>
+                </>
+              )}
             </span>
           </div>
         </div>
 
-        {/* 🟣 Promedio en curso (NUEVO pero MISMO DISEÑO) */}
+        {/* ⚪ Total Ramos (Base) */}
         <div
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/90 backdrop-blur-sm 
-                        border border-purple-400/30 shadow-theme transition-all hover:scale-105"
+          className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card 
+                        border border-borderColor/60 shadow-md transition-all hover:scale-105"
         >
-          <div className="w-3 h-3 rounded-full bg-white/90"></div>
+          <div className="w-3 h-3 rounded-full bg-primary shadow-sm"></div>
           <div className="flex flex-col">
-            <span className="text-white text-xs font-medium opacity-90">
-              Promedio Curso
+            <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">
+              Total Cursos
             </span>
-            <span className="text-white text-lg font-bold">
-              {promedioEnCurso !== null ? promedioEnCurso.toFixed(2) : "--"}
-            </span>
-          </div>
-        </div>
-
-        {/* ⚪ Total Ramos */}
-        <div
-          className="flex items-center gap-2 px-4 py-2 rounded-lg glass-card 
-                        border border-borderColor shadow-theme transition-all hover:scale-105"
-        >
-          <div className="w-3 h-3 rounded-full bg-primary"></div>
-          <div className="flex flex-col">
-            <span className="text-textSecondary text-xs font-medium">
-              Total
-            </span>
-            <span className="text-textPrimary text-lg font-bold">
+            <span className="text-textPrimary text-xl font-bold leading-tight">
               {totalCursos}
             </span>
           </div>

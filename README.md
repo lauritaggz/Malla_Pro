@@ -1,16 +1,27 @@
-# React + Vite
+# Malla Pro 🎓
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautifully crafted, iOS-inspired academic tracker to visually manage your university courses, grades, semesters, and overall degree progress.
 
-Currently, two official plugins are available:
+## ✨ Features
+- **Premium Apple-like UI/UX:** Built with frosted glass effects, smooth Framer Motion animations, and beautiful themes (from Deep Ocean to Cozy Pink).
+- **Interactive Degree Flow:** Visualize your entire major layout, check prerequisite trees, and collapse fully approved semesters to save space.
+- **Advanced Grade Tracking:** Input sub-notes, assignments, and exams. Let the engine calculate what exact grade you need automatically, factoring in exemptions (e.g., passing automatically with a 4.0 or 5.0) and custom Presentation/Exam weights (70/30).
+- **Projections and Stats:** View how close you are to finishing your degree, current approved SCT credits, and projected pass/fail statuses.
+- **Smart Configurations:** Preserves your approved courses across changing majors internally.
+- **Interactive Onboarding:** Features an animated guided tour to help users understand the platform immediately.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Running Locally
+This project was scaffolded with React + Vite and designed with TailwindCSS.
 
-## React Compiler
+1. Clone the repository: `git clone https://github.com/lauritaggz/Malla_Pro.git`
+2. Run `npm install` to download dependencies.
+3. Start the dev server with `npm run dev`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Stack
+- **React 18**
+- **Vite**
+- **TailwindCSS** for utility-first styling.
+- **Framer Motion** for polished layout transitions.
+- **Lucide Icons**
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+_Stay engaged with your academics, elegantly._

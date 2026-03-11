@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { NotebookPen, Check, AlertTriangle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { NotebookPen, Check, BookOpen } from "lucide-react";
 
 export default function Curso({
   curso,
@@ -14,18 +14,78 @@ export default function Curso({
   onAbrirNotas,
 }) {
   const [shake, setShake] = useState(false);
+  const [promedio, setPromedio] = useState(null);
+  
+  useEffect(() => {
+    const actualizarPromedio = () => {
+      try {
+        const notasGuardadas = JSON.parse(localStorage.getItem("malla-notas") || "{}");
+        const evals = notasGuardadas[curso.id] || [];
+        const conNota = evals.filter((e) => e.nota != null && !isNaN(e.nota));
+        const pesoTotal = conNota.reduce((sum, e) => sum + (e.peso || 0), 0);
+        if (pesoTotal > 0) {
+          const sumPonderada = conNota.reduce((sum, e) => sum + e.nota * e.peso, 0);
+          setPromedio(sumPonderada / pesoTotal);
+        } else {
+          setPromedio(null);
+        }
+      } catch (err) {
+        setPromedio(null);
+      }
+    };
+    
+    actualizarPromedio();
+    window.addEventListener("notasModificadas", actualizarPromedio);
+    return () => window.removeEventListener("notasModificadas", actualizarPromedio);
+  }, [curso.id]);
+  
+  // Custom Long Press Logic para móviles
+  const timerRef = useRef(null);
+  const isLongPressRef = useRef(false);
+
+  const startPressTimer = (e) => {
+    isLongPressRef.current = false;
+    // Si no está disponible y no está "en curso" (ej. para desmarcarlo), 
+    // y no estamos en modo excepcional, no dejamos hacer long press
+    if (!disponible && !modoExcepcional && !enCurso) return;
+    
+    timerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      // Vibración háptica en móviles si es compatible
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+      toggleCursando();
+    }, 500); // Medio segundo para activarse
+  };
+
+  const clearPressTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   const handleClick = (e) => {
-    // CTRL → marcar en curso
-    if (e.ctrlKey) {
-      toggleCursando();
+    // Si fue un long press exitoso, cancelamos el click normal
+    if (isLongPressRef.current) return;
+    // Si no está disponible y no estamos en modo excepcional
+    if (!disponible && !modoExcepcional) {
+      // Permitimos quitarlo de "en curso" si por algún motivo ya lo estaba
+      if (e.ctrlKey && enCurso) {
+        toggleCursando();
+        return;
+      }
+      
+      // De lo contrario, no se puede hacer nada, solo vibra
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
       return;
     }
 
-    // No disponible → vibración
-    if (!disponible && !modoExcepcional) {
-      setShake(true);
-      setTimeout(() => setShake(false), 400);
+    // CTRL → marcar en curso (ahora seguro porque sabemos que está disponible o en modo excepcional)
+    if (e.ctrlKey) {
+      toggleCursando();
       return;
     }
 
@@ -42,30 +102,49 @@ export default function Curso({
   return (
     <div
       onClick={handleClick}
-      className={`relative cursor-pointer select-none p-3 text-[13px] rounded-md transition-all duration-300 border shadow-sm text-left 
+      onPointerDown={startPressTimer}
+      onPointerUp={clearPressTimer}
+      onPointerLeave={clearPressTimer}
+      onPointerCancel={clearPressTimer}
+      className={`relative cursor-pointer select-none p-3 text-[13px] rounded-2xl transition-all duration-300 border shadow-sm text-left group
         ${shake ? "shake" : ""}
         ${
           aprobado
-            ? "bg-emerald-600 text-white border-emerald-500"
+            ? "bg-emerald-500/90 text-white border-emerald-400/50 shadow-md backdrop-blur-md"
             : excepcional
-            ? "bg-purple-600 text-white border-purple-500"
+            ? "bg-amber-500/90 text-white border-amber-400/50 shadow-md backdrop-blur-md"
             : enCurso
-            ? "bg-blue-500 text-white border-blue-400"
+            ? "bg-primary text-white border-primary shadow-lg shadow-primary/30 transform scale-[1.02]"
             : !disponible
-            ? "bg-gray-700/40 text-gray-500 border-gray-600"
-            : "bg-bgSecondary hover:bg-primary/10 border-borderColor/40"
+            ? "bg-bgSecondary/50 text-textSecondary opacity-70 border-dashed border-borderColor/80"
+            : "bg-primary/10 backdrop-blur-md text-textPrimary shadow-sm hover:bg-primary/20 hover:border-primary/50 hover:shadow-[0_8px_16px_rgba(var(--primary),0.15)] border-primary/30"
         }
       `}
     >
-      {/* Nombre */}
-      <div className="font-semibold leading-tight truncate">{curso.nombre}</div>
+      {/* Badge de Promedio en el Top Right */}
+      {promedio !== null && (
+        <div 
+          className={`absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-bold rounded-md border flex items-center justify-center min-w-[30px] shadow-sm transition-all
+            ${
+              aprobado || excepcional || enCurso
+                ? "bg-white/20 border-white/30 text-white" 
+                : "bg-primary/15 border-primary/30 text-primary"
+            }`}
+        >
+          {promedio.toFixed(1)}
+        </div>
+      )}
 
-      {/* Código */}
-      <div className="text-[10px] opacity-80">{curso.codigo}</div>
+      {/* Nombre (agregamos pr-8 si hay promedio para no chocar con el badge) */}
+      <div className={`font-semibold leading-tight mb-1.5 line-clamp-2 ${promedio !== null ? 'pr-8' : ''}`}>
+        {curso.nombre}
+      </div>
 
-      {/* SCT */}
-      <div className="absolute bottom-1 right-2 text-[9px] opacity-70">
-        {curso.sct} SCT
+      {/* Código y SCT juntos */}
+      <div className="text-[10.5px] font-medium opacity-75 flex items-center gap-1.5">
+        <span>{curso.codigo}</span>
+        <span className="opacity-50 text-[8px]">●</span>
+        <span>{curso.sct} SCT</span>
       </div>
 
       {/* BOTÓN DE NOTAS */}
@@ -74,11 +153,15 @@ export default function Curso({
           e.stopPropagation(); // Evita activar aprobar()
           onAbrirNotas(curso);
         }}
-        className="mt-2 w-full bg-black/20 hover:bg-black/30 
-                   text-white text-[11px] py-1 rounded flex items-center 
-                   justify-center gap-1 transition-all border border-white/20"
+        className={`mt-2 w-full py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[11px] font-medium border
+          ${
+            enCurso || aprobado || excepcional
+              ? "bg-black/15 hover:bg-black/25 text-white border-white/20"
+              : "bg-bgPrimary/50 hover:bg-primary/10 text-textSecondary hover:text-primary border-borderColor/30 hover:border-primary/30"
+          }
+        `}
       >
-        <NotebookPen className="w-3 h-3" /> Notas
+        <NotebookPen className="w-3.5 h-3.5" /> Notas
       </button>
     </div>
   );

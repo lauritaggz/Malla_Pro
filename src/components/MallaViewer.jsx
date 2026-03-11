@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import Curso from "./Curso";
 
@@ -26,6 +26,8 @@ export default function MallaViewer({
   const [cursando, setCursando] = useState(
     JSON.parse(localStorage.getItem("malla-cursando")) || []
   );
+  
+  const [ocultarCompletados, setOcultarCompletados] = useState(false);
 
   // 🔹 Ref y estados para drag horizontal
   const scrollRef = useRef(null);
@@ -48,6 +50,31 @@ export default function MallaViewer({
         setMalla(mallaData);
         onSemestresLoaded?.(totalSemestres);
         onMallaDataLoaded?.(mallaData);
+
+        // Auto-aprobar ramos conservados de la malla anterior al cambiar
+        const conservadosJson = localStorage.getItem("malla-nombres-conservados");
+        if (conservadosJson) {
+          const nombresConservados = JSON.parse(conservadosJson);
+          const idsAprobados = [];
+          
+          mallaData.semestres.forEach((sem) => {
+            sem.cursos.forEach((curso) => {
+              // Convertimos a minúsculas y comparamos nombres exactos
+              if (nombresConservados.includes(curso.nombre.trim().toLowerCase())) {
+                idsAprobados.push(curso.id);
+              }
+            });
+          });
+          
+          if (idsAprobados.length > 0) {
+            setAprobados((prev) => {
+              const nuevos = new Set([...prev, ...idsAprobados]);
+              return Array.from(nuevos);
+            });
+          }
+          // Limpiar el guardado temporal para no activarlo accidentalmente en otro momento
+          localStorage.removeItem("malla-nombres-conservados");
+        }
       } catch (err) {
         console.error("Error al cargar malla:", err);
       }
@@ -214,53 +241,70 @@ export default function MallaViewer({
   // ✅ Render principal
   return (
     <div className="pb-10 px-2 sm:px-4 md:px-6">
-      {/* Instrucción desktop: marcar "en curso" */}
-      <div className="hidden md:flex items-center justify-center mb-4">
-        <span
-          className="text-sm text-textSecondary px-4 py-2 rounded-lg bg-bgSecondary/50 
-                       border border-borderColor shadow-sm"
+      
+      {/* Controles Superiores de Visualización */}
+      <div className="flex justify-center sm:justify-end mb-4 pr-0 sm:pr-4">
+        <button
+          onClick={() => setOcultarCompletados(!ocultarCompletados)}
+          className={`flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border
+            ${ocultarCompletados 
+              ? "bg-primary text-white border-primary shadow-[0_0_12px_var(--primary)] opacity-90 scale-105" 
+              : "bg-bgSecondary/80 backdrop-blur-md text-textSecondary border-borderColor/50 hover:text-primary hover:border-primary/50"}
+          `}
         >
-          💡 <strong>Ctrl + clic</strong> para marcar como cursando
-        </span>
+          {ocultarCompletados ? "👁️ Mostrar todo" : "🫣 Ocultar semestres listos"}
+        </button>
       </div>
 
-      {/* Instrucciones de scroll para móvil */}
-      <div className="md:hidden text-center text-textSecondary text-xs mb-3">
-        ← Desliza horizontalmente para ver más semestres →
-        <br />
-        <span className="text-xs mt-1 inline-block">
-          Mantén presionado para marcar como cursando
-        </span>
-      </div>
-
-      {/* Scroll horizontal arrastrable */}
-      <div
-        ref={scrollRef}
-        {...bind()}
-        onClickCapture={handleClickCapture}
-        className={`overflow-x-auto scroll-container overscroll-x-contain rounded-xl p-6 
-              glass-effect-strong shadow-theme-lg backdrop-blur-xl
-              bg-gradient-to-br from-bgSecondary/80 to-bgTertiary/50 
-              ${
-                isDragging ? "dragging" : "cursor-grab"
-              } active:cursor-grabbing`}
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
-        <div className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4">
-          {Array.from({ length: Math.ceil(malla.semestres.length / 2) }).map(
+      {/* Wrapper de Cristal Seguro */}
+      <div className="rounded-3xl border border-borderColor/30 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-2xl bg-gradient-to-br from-bgSecondary/50 to-bgPrimary/80 pb-6 pt-4">
+        
+        {/* Scroll horizontal arrastrable invertido verticalmente (scrollbar arriba) */}
+        <div
+          ref={scrollRef}
+          {...bind()}
+          onClickCapture={handleClickCapture}
+          className={`overflow-x-auto scroll-container overscroll-x-contain px-8 sm:px-10 pb-4
+                ${
+                  isDragging ? "dragging" : "cursor-grab"
+                } active:cursor-grabbing`}
+          style={{ WebkitOverflowScrolling: "touch", transform: "scaleY(-1)" }}
+        >
+          <div 
+            className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
+            style={{ transform: "scaleY(-1)" }}
+          >
+            <AnimatePresence mode="popLayout">
+            {Array.from({ length: Math.ceil(malla.semestres.length / 2) }).map(
             (_, i) => {
               const year = i + 1;
               const semA = malla.semestres[i * 2];
               const semB = malla.semestres[i * 2 + 1];
 
+              const isSemACompletado = semA?.cursos.every((c) => aprobados.includes(c.id));
+              const isSemBCompletado = semB?.cursos.every((c) => aprobados.includes(c.id));
+
+              // Si ocultarCompletados está activo, determinamos qué mostrar
+              const showA = semA && (!ocultarCompletados || !isSemACompletado);
+              const showB = semB && (!ocultarCompletados || !isSemBCompletado);
+
+              // Si ambos semestres de un año se ocultan, ocultar todo el contenedor del año
+              if (!showA && !showB) return null;
+
               return (
                 <motion.div
                   key={year}
+                  layout="position"
                   className="min-w-[320px] sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, amount: 0.1 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 350, 
+                    damping: 30, 
+                    mass: 0.8
+                  }}
                 >
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="text-xs uppercase tracking-wide text-textSecondary/80">
@@ -272,21 +316,31 @@ export default function MallaViewer({
                   </div>
 
                   <div className="flex gap-4 sm:gap-8">
-                    {[semA, semB].map(
-                      (sem, idx) =>
-                        sem && (
+                    <AnimatePresence mode="popLayout">
+                    {[
+                      { data: semA, show: showA, key: `sem-${i * 2}` },
+                      { data: semB, show: showB, key: `sem-${i * 2 + 1}` }
+                    ].map(
+                      (semInfo) =>
+                        semInfo.show && semInfo.data && (
                           <motion.div
-                            key={idx}
-                            className="flex flex-col gap-2 sm:gap-3 min-w-[160px] sm:min-w-[210px] 
-                                       bg-gradient-to-br from-bgSecondary/60 to-bgTertiary/30 
-                                       rounded-xl p-3 sm:p-4 border border-borderColor/50 
-                                       shadow-theme hover:shadow-theme-lg transition-shadow"
-                            initial={{ opacity: 0, y: 8 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.1 }}
-                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            key={semInfo.key}
+                            layout
+                            className="flex flex-col gap-3 min-w-[180px] sm:min-w-[240px] 
+                                       bg-bgSecondary/70 backdrop-blur-md 
+                                       rounded-2xl p-4 sm:p-5 border border-borderColor/40 
+                                       shadow-md hover:shadow-xl transition-shadow duration-300 transform-gpu"
+                            initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.94 }}
+                            transition={{ 
+                              type: "spring", 
+                              stiffness: 400, 
+                              damping: 35,
+                              mass: 0.9
+                            }}
                           >
-                            {sem.cursos.map((curso) => (
+                            {semInfo.data.cursos.map((curso) => (
                               <Curso
                                 key={curso.id}
                                 curso={curso}
@@ -300,17 +354,20 @@ export default function MallaViewer({
                                 }
                                 enCurso={cursando.includes(curso.id)}
                                 toggleCursando={() => toggleCursando(curso.id)}
-                                onAbrirNotas={onAbrirNotas}
+                                onAbrirNotas={(c) => onAbrirNotas(c, cursando.includes(c.id))}
                               />
                             ))}
                           </motion.div>
                         )
                     )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               );
             }
           )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
