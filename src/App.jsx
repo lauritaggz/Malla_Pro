@@ -45,7 +45,7 @@ export default function App() {
   
   // Detectar si es dispositivo touch
   const isMobile = typeof window !== 'undefined' && 
-    ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    (('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024);
 
   // ---------------- LÓGICA CAMBIAR MALLA ----------------
   const handleCambiarMalla = () => {
@@ -186,8 +186,8 @@ export default function App() {
         )}
 
         {!mallaSeleccionada ? (
-          <div className="flex items-center justify-center h-[80vh]">
-            <div className="bg-bgSecondary p-8 rounded-xl shadow-lg max-w-md w-full">
+          <div className="flex items-center justify-center min-h-[80vh] py-10">
+            <div className="bg-bgSecondary p-6 sm:p-10 rounded-2xl shadow-xl max-w-2xl w-full mx-4 border border-borderColor/50">
               <h2 className="text-xl font-semibold mb-4 text-center">
                 <GraduationCap className="inline-block w-6 h-6 mr-2" />
                 Selecciona una malla para comenzar
@@ -203,12 +203,12 @@ export default function App() {
                     <h3 className="font-semibold text-primary mb-2">
                       {uni.universidad}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {uni.mallas.map((m) => (
                         <button
                           key={m.nombre}
                           onClick={() => seleccionarMalla(m)}
-                          className="p-3 rounded-lg border border-borderColor bg-bgPrimary hover:bg-primary hover:text-white transition-all"
+                          className="p-4 rounded-xl border border-borderColor bg-bgPrimary hover:bg-primary hover:text-white transition-all text-sm font-medium shadow-sm hover:shadow-md active:scale-[0.98] text-left sm:text-center leading-snug"
                         >
                           {m.nombre}
                         </button>

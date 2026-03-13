@@ -506,7 +506,11 @@ const MallaViewer = ({
               return (
                 <motion.div
                   key={year}
-                  className="w-max sm:w-auto sm:min-w-[380px] md:min-w-[460px] flex-shrink-0"
+                  className={`w-max sm:w-auto flex-shrink-0 transition-all duration-300 ${
+                    showA && showB 
+                      ? "sm:min-w-[592px] md:min-w-[680px]" 
+                      : "sm:min-w-[280px] md:min-w-[320px]"
+                  }`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}

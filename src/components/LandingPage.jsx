@@ -38,7 +38,7 @@ export default function LandingPage() {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(139, 92, 246, 0.7)";
+        ctx.fillStyle = "rgba(168, 85, 247, 0.9)"; // More saturated purple
         ctx.fill();
       }
     }
@@ -49,9 +49,9 @@ export default function LandingPage() {
       ctx.clearRect(0, 0, width, height);
 
       const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, "#0f172a");
-      gradient.addColorStop(0.5, "#1e1b4b");
-      gradient.addColorStop(1, "#0f172a");
+      gradient.addColorStop(0, "#050b2b"); // Deep saturated navy
+      gradient.addColorStop(0.5, "#150b45"); // Saturated dark purple
+      gradient.addColorStop(1, "#050b2b");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
 
@@ -113,11 +113,12 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto text-white">
+    <div className="aurora dark">
+      <div className="relative min-h-screen overflow-x-hidden overflow-y-auto text-white">
       {/* FONDO ANIMADO */}
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 w-full h-full -z-10 pointer-events-none opacity-80"
+        className="fixed inset-0 w-full h-full -z-10 pointer-events-none"
       />
 
       {/* =========================== */}
@@ -135,7 +136,7 @@ export default function LandingPage() {
             <span className="gradient-text text-6xl md:text-8xl block mt-3 tracking-tight">Malla Pro</span>
           </motion.h1>
 
-          <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-gray-300 mb-12 font-light leading-relaxed max-w-3xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-indigo-100/80 mb-12 font-light leading-relaxed max-w-3xl mx-auto">
             La forma más fácil de ver tu malla, guardar tus notas y saber exactamente qué nota necesitas en la próxima prueba para salvar el ramo.
           </motion.p>
 
@@ -180,7 +181,7 @@ export default function LandingPage() {
             className="grid md:grid-cols-3 gap-8"
           >
             {/* 1 */}
-            <motion.div variants={fadeInUp} className="glass p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 border border-white/5 bg-white/5 backdrop-blur-xl">
+            <motion.div variants={fadeInUp} className="glass p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
               <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <LayoutGrid className="w-8 h-8 text-white" strokeWidth={2.5} />
               </div>
@@ -191,7 +192,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* 2 */}
-            <motion.div variants={fadeInUp} className="glass p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 border border-white/5 bg-white/5 backdrop-blur-xl">
+            <motion.div variants={fadeInUp} className="glass p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
               <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
                 <NotebookText className="w-8 h-8 text-white" strokeWidth={2.5} />
               </div>
@@ -298,7 +299,7 @@ export default function LandingPage() {
                   >
                     5.8
                   </motion.div>
-                  <p className="text-gray-400 font-medium text-sm">Promedio general</p>
+                  <p className="text-indigo-200/70 font-medium text-sm">Promedio general</p>
                 </div>
               </div>
             </div>
@@ -335,6 +336,7 @@ export default function LandingPage() {
       <footer className="py-10 text-center text-gray-500 font-medium text-sm border-t border-white/5 relative z-10">
         © 2026 Malla Pro — Todos los derechos reservados.
       </footer>
+      </div>
     </div>
   );
 }

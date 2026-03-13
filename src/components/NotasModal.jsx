@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { parseGrade } from "../utils/gradeUtils";
 
 export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }) {
   const [evaluaciones, setEvaluaciones] = useState([]);
@@ -12,7 +13,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   // Configuración de Eximición y Examen
   const [config, setConfig] = useState({
-    notaEximicion: 4.0,
+    notaEximicion: 5.0,
     ponderacionPresentacion: 70,
     ponderacionExamen: 30,
   });
@@ -25,7 +26,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   // Helper para mostrar decimales sin crashear si el valor no es número
   const safeToFixed = (val, dec = 2) => {
-    const num = typeof val === "string" ? parseFloat(val.replace(",", ".")) : val;
+    const num = typeof val === "string" ? parseGrade(val) : val;
     return typeof num === "number" && !isNaN(num) ? num.toFixed(dec) : "--";
   };
 
@@ -45,7 +46,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
         localStorage.getItem("malla-configs") || "{}"
       );
       setConfig(configsGuardadas[curso.id] || {
-        notaEximicion: 4.0,
+        notaEximicion: 5.0,
         ponderacionPresentacion: 70,
         ponderacionExamen: 30,
       });
@@ -77,9 +78,15 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   const handleConfigChange = (e) => {
     const { name, value } = e.target;
-    const parsedValue = parseFloat(String(value).replace(",", "."));
-    const newConfig = { ...config, [name]: isNaN(parsedValue) ? "" : parsedValue };
-    guardarConfig(newConfig);
+    if (name === "notaEximicion") {
+      const parsedValue = parseGrade(value);
+      const newConfig = { ...config, [name]: parsedValue ?? value };
+      guardarConfig(newConfig);
+    } else {
+      const parsedValue = parseFloat(value);
+      const newConfig = { ...config, [name]: isNaN(parsedValue) ? "" : parsedValue };
+      guardarConfig(newConfig);
+    }
   };
 
   const handleNotaExamenChange = (e) => {
@@ -132,10 +139,9 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   const agregarSubNota = (evalId) => {
     const valorRaw = subNotaInputs[evalId];
     if (!valorRaw) return;
-    const valor = String(valorRaw).replace(",", ".");
-    const nota = parseFloat(valor);
+    const nota = parseGrade(valorRaw);
 
-    if (isNaN(nota) || nota < 1.0 || nota > 7.0) return;
+    if (nota === null) return;
 
     const evalTarget = evaluaciones.find((e) => e.id === evalId);
     const subActuales = evalTarget?.subNotas || [];
@@ -163,11 +169,8 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   // Agregar evaluación
   const agregarEvaluacion = () => {
-    const pesoValue = typeof nuevaEval.peso === 'string' ? nuevaEval.peso.replace(",", ".") : nuevaEval.peso;
-    const notaValue = typeof nuevaEval.nota === 'string' ? nuevaEval.nota.replace(",", ".") : nuevaEval.nota;
-    
-    const peso = parseFloat(pesoValue);
-    const nota = nuevaEval.nota ? parseFloat(notaValue) : null;
+    const peso = parseFloat(typeof nuevaEval.peso === 'string' ? nuevaEval.peso.replace(",", ".") : nuevaEval.peso);
+    const nota = parseGrade(nuevaEval.nota);
 
     if (!nuevaEval.nombre.trim()) {
       setError("El nombre de la evaluación es requerido");
@@ -184,7 +187,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
       return;
     }
 
-    if (nota !== null && (isNaN(nota) || nota < 1.0 || nota > 7.0)) {
+    if (nuevaEval.nota && nota === null) {
       setError("La nota debe estar entre 1.0 y 7.0");
       return;
     }
@@ -208,18 +211,13 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
     setOpenSubNotas((prev) => prev.filter((pid) => pid !== id));
   };
 
-  // Actualizar nota directa (solo si NO tiene sub-notas)
   const actualizarNota = (id, nuevaNota) => {
-    if (!nuevaNota) return;
-    const notaLimpia = String(nuevaNota).replace(",", ".");
-    const nota = parseFloat(notaLimpia);
-    if (isNaN(nota) || nota < 1.0 || nota > 7.0) return;
+    const nota = parseGrade(nuevaNota);
+    if (nota === null && nuevaNota !== "") return;
 
     const evals = evaluaciones.map((e) => {
       if (e.id !== id) return e;
-      // Si tiene subNotas, ignoramos el cambio directo
-      if (e.subNotas && e.subNotas.length > 0) return e;
-      return { ...e, nota: parseFloat(nota.toFixed(1)) };
+      return { ...e, nota: nota };
     });
 
     guardarEvaluaciones(evals);
@@ -558,7 +556,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                                     {evaluacion.peso}%
                                   </td>
                                   <td className="py-3 px-4 text-center">
-                                    {!tieneSubNotas ? (
+                                    <div className="flex flex-col items-center gap-1">
                                       <input
                                         type="text"
                                         inputMode="decimal"
@@ -569,11 +567,12 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                                         placeholder="-"
                                         className="w-16 px-1.5 py-1 rounded border border-borderColor bg-bgPrimary focus:bg-bgSecondary hover:border-primary/50 text-textPrimary text-center text-sm font-semibold transition-colors mx-auto"
                                       />
-                                    ) : (
-                                      <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                                        {promedioSub}
-                                      </span>
-                                    )}
+                                      {tieneSubNotas && (
+                                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                          Prom: {safeToFixed(evaluacion.nota, 2)}
+                                        </span>
+                                      )}
+                                    </div>
                                   </td>
                                   <td className="py-3 px-4 text-right">
                                     <div className="flex items-center justify-end gap-1 sm:gap-2">
