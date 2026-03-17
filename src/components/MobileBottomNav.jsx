@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle } from "lucide-react";
+import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle, CalendarDays } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function MobileBottomNav({
@@ -16,6 +16,7 @@ export default function MobileBottomNav({
   ocultarCompletados,
   setOcultarCompletados,
   onShowTour,
+  onShowHorario,
   onChangeMalla
 }) {
   const [showMore, setShowMore] = useState(false);
@@ -84,6 +85,21 @@ export default function MobileBottomNav({
                     <option value="golden">Golden Carbon</option>
                  </select>
               </div>
+            </div>
+
+            {/* Horario */}
+            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
+              <button
+                onClick={() => {
+                  onShowHorario();
+                  setShowMore(false);
+                }}
+                className="w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm
+                           bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15"
+              >
+                <CalendarDays className="w-5 h-5" />
+                Horario
+              </button>
             </div>
 
             {/* Ocultar semestres completados */}

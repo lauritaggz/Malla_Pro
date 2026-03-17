@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { GraduationCap, ChevronDown, Moon, Sun, FileText, HelpCircle } from "lucide-react";
+import { GraduationCap, ChevronDown, Moon, Sun, FileText, HelpCircle, CalendarDays } from "lucide-react";
 
 export default function Navbar({
   theme,
@@ -12,6 +12,7 @@ export default function Navbar({
   mallaSeleccionada,
   cantidadSemestres,
   onShowTour,
+  onShowHorario,
   mostrarResumen,
 }) {
   const [mostrarControles, setMostrarControles] = useState(true);
@@ -188,6 +189,17 @@ export default function Navbar({
                 ) : (
                   <Sun className="w-5 h-5 transition-transform duration-500 rotate-0 hover:rotate-90" />
                 )}
+              </button>
+
+              {/* HORARIO */}
+              <button
+                onClick={onShowHorario}
+                className="flex-shrink-0 w-11 h-11 rounded-xl bg-bgPrimary/50 backdrop-blur-sm border border-borderColor/50 
+                           flex items-center justify-center transition-all duration-300 
+                           hover:scale-105 hover:bg-primary/10 hover:border-primary/40 hover:shadow-md text-primary"
+                aria-label="Abrir Horario"
+              >
+                <CalendarDays className="w-5 h-5" />
               </button>
 
               {/* AYUDA / TOUR */}
