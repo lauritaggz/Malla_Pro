@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react"; // useRef para formRef
 import { AnimatePresence, motion } from "framer-motion";
-import { BookOpen, Calendar, Copy, ImagePlus, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
+import { BookOpen, Calendar, Copy, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
 import { DAYS, buildSlots, createScheduleItem, getScheduleBounds } from "../utils/scheduleUtils";
 
 const STORAGE_KEY = "malla-horario-v1";
@@ -17,7 +17,10 @@ function loadSchedule() {
     imagesByDay: typeof data.imagesByDay === "object" ? data.imagesByDay : {},
   };
 }
-function saveSchedule(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+function saveSchedule(s) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  window.dispatchEvent(new Event("horario-updated"));
+}
 function dayLabel(id) { return DAYS.find((d) => d.id === id)?.label ?? String(id); }
 function formatEndTime(item, slotsByStart) {
   const slot = slotsByStart.get(item.startTime);
@@ -28,30 +31,14 @@ function formatEndTime(item, slotsByStart) {
 
 export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] }) {
   const [selectedDay, setSelectedDay] = useState(new Date().getDay() || 1);
-  const fileRef = useRef(null);
   const formRef = useRef(null);
 
   const [schedule, setSchedule] = useState(() => loadSchedule());
   const [draft, setDraft] = useState({ ...BLANK_DRAFT, day: new Date().getDay() || 1 });
   const [editingId, setEditingId] = useState(null);
-  const [imgDragOver, setImgDragOver] = useState(false);
 
   useEffect(() => { if (isOpen) setSchedule(loadSchedule()); }, [isOpen]);
   useEffect(() => { if (isOpen) saveSchedule(schedule); }, [schedule, isOpen]);
-
-  // Pegar imagen con Ctrl+V
-  useEffect(() => {
-    if (!isOpen) return;
-    const onPaste = (e) => {
-      const file = Array.from(e.clipboardData?.items || [])
-        .find((item) => item.type.startsWith("image/"))
-        ?.getAsFile();
-      if (file) setDayImage(selectedDay, file);
-    };
-    window.addEventListener("paste", onPaste);
-    return () => window.removeEventListener("paste", onPaste);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, selectedDay]);
 
   const cursosOptions = useMemo(() =>
     (Array.isArray(cursosCursandoData) ? cursosCursandoData : [])
@@ -217,18 +204,6 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
   const updateItem = (id, patch) =>
     setSchedule((p) => ({ ...p, items: p.items.map((it) => (it.id === id ? { ...it, ...patch } : it)) }));
 
-  const setDayImage = async (dayId, file) => {
-    if (!file) return;
-    if (file.size > 2.5 * 1024 * 1024) { alert("La imagen es muy pesada (máx 2.5 MB)."); return; }
-    const dataUrl = await new Promise((res, rej) => {
-      const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
-    });
-    setSchedule((p) => ({ ...p, imagesByDay: { ...p.imagesByDay, [String(dayId)]: dataUrl } }));
-  };
-
-  const removeDayImage = (dayId) =>
-    setSchedule((p) => { const n = { ...p.imagesByDay }; delete n[String(dayId)]; return { ...p, imagesByDay: n }; });
-
   const isEditing = editingId !== null;
   const editingItem = isEditing ? schedule.items.find((it) => it.id === editingId) : null;
 
@@ -262,64 +237,6 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
             <p className="text-xs sm:text-sm text-textSecondary mt-0.5">
               Bloques 45 min + 10 min pausa · arrastra un ramo a la planilla
             </p>
-          </div>
-
-          {/* Imagen por día */}
-          <div
-            className={`rounded-2xl border p-4 mb-5 transition-colors duration-150 ${
-              imgDragOver ? "border-primary bg-primary/10 border-dashed" : "border-borderColor/50 bg-bgSecondary/40"
-            }`}
-            onDragOver={(e) => {
-              if (e.dataTransfer.types.includes("Files")) {
-                e.preventDefault(); e.stopPropagation(); setImgDragOver(true);
-              }
-            }}
-            onDragLeave={() => setImgDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault(); e.stopPropagation(); setImgDragOver(false);
-              const file = Array.from(e.dataTransfer.files).find((f) => f.type.startsWith("image/"));
-              if (file) setDayImage(selectedDay, file);
-            }}
-          >
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-2 min-w-0">
-                <ImagePlus className="w-4 h-4 text-primary flex-shrink-0" />
-                <div>
-                  <div className="text-sm font-semibold text-textPrimary">Foto del horario — {dayLabel(selectedDay)}</div>
-                  <div className="text-xs text-textSecondary">
-                    {imgDragOver ? "¡Suelta aquí!" : "Arrastra, pega (Ctrl+V) o sube una imagen"}
-                  </div>
-                </div>
-              </div>
-              <input ref={fileRef} type="file" accept="image/*" className="hidden"
-                onChange={(e) => setDayImage(selectedDay, e.target.files?.[0])} />
-              <div className="flex gap-2 flex-shrink-0">
-                <button onClick={() => fileRef.current?.click()}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-borderColor bg-bgPrimary text-textPrimary hover:border-primary/50 hover:text-primary transition">
-                  Subir archivo
-                </button>
-                {schedule.imagesByDay?.[String(selectedDay)] && (
-                  <button onClick={() => removeDayImage(selectedDay)}
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/15 transition">
-                    Quitar
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {schedule.imagesByDay?.[String(selectedDay)] ? (
-              <div className="mt-3 overflow-hidden rounded-xl border border-borderColor/40">
-                <img src={schedule.imagesByDay[String(selectedDay)]} alt="Horario" className="w-full max-h-72 object-contain" />
-              </div>
-            ) : (
-              <div onClick={() => fileRef.current?.click()}
-                className={`mt-3 rounded-xl border-2 border-dashed flex flex-col items-center justify-center py-6 gap-1 cursor-pointer transition-colors ${
-                  imgDragOver ? "border-primary bg-primary/5" : "border-borderColor/30 hover:border-primary/40 hover:bg-primary/5"
-                }`}>
-                <ImagePlus className="w-6 h-6 text-textSecondary/50" />
-                <p className="text-xs text-textSecondary/60 text-center">Arrastra una imagen, pega con Ctrl+V o toca para subir</p>
-              </div>
-            )}
           </div>
 
           {/* Formulario */}

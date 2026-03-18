@@ -48,9 +48,15 @@ function ProximaClase() {
   useEffect(() => {
     refresh();
     const interval = setInterval(refresh, 60_000);
-    const onStorage = (e) => { if (e.key === SCHEDULE_KEY) refresh(); };
+    const onStorage = (e) => { if (!e.key || e.key === SCHEDULE_KEY) refresh(); };
+    const onHorarioUpdated = () => refresh();
     window.addEventListener("storage", onStorage);
-    return () => { clearInterval(interval); window.removeEventListener("storage", onStorage); };
+    window.addEventListener("horario-updated", onHorarioUpdated);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("horario-updated", onHorarioUpdated);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
