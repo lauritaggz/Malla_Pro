@@ -135,12 +135,6 @@ const MallaViewer = ({
     }
   }, [malla]);
 
-  // Debugging logs to verify malla loading
-  useEffect(() => {
-    console.log("Fetching malla from:", mallaSeleccionada.url);
-    console.log("Loaded malla:", malla);
-  }, [mallaSeleccionada, malla]);
-
   // ✅ Guardar en localStorage
   useEffect(() => {
     setExcepcionesActivas(excepciones.length);
@@ -240,32 +234,23 @@ const MallaViewer = ({
 
   // ✅ Marcar / desmarcar como excepcional
   const marcarExcepcional = (id) => {
-    setExcepciones((prevExcepciones) => {
-      if (prevExcepciones.includes(id)) {
-        return prevExcepciones.filter((e) => e !== id);
-      } else {
-        return [...prevExcepciones, id];
-      }
+    // Capturar la decisión ANTES de cualquier setState para evitar stale closures
+    const isRemoving = excepciones.includes(id);
+
+    setExcepciones((prev) =>
+      isRemoving ? prev.filter((e) => e !== id) : [...prev, id]
+    );
+
+    setAprobados((prev) => {
+      if (isRemoving) return prev.filter((a) => a !== id);
+      if (!prev.includes(id)) return [...prev, id];
+      return prev;
     });
 
-    setAprobados((prevAprobados) => {
-      // Si estamos quitando la excepción, también quitamos de aprobados
-      if (excepciones.includes(id)) { // Usando estado actual de la closure para saber si estamos activando o desactivando
-        return prevAprobados.filter((a) => a !== id);
-      } 
-      // Si estamos agregando excepción, lo agregamos a aprobados si no está
-      if (!prevAprobados.includes(id)) {
-        return [...prevAprobados, id];
-      }
-      return prevAprobados;
-    });
-
-    // Si queda aprobado por excepcional, quitamos "en curso" si existía
-    setCursando((prevCursando) => {
-      if (!excepciones.includes(id) && prevCursando.includes(id)) {
-        return prevCursando.filter((c) => c !== id);
-      }
-      return prevCursando;
+    // Si se activa la excepción, quitar "en curso" si existía
+    setCursando((prev) => {
+      if (!isRemoving && prev.includes(id)) return prev.filter((c) => c !== id);
+      return prev;
     });
   };
 

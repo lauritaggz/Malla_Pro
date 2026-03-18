@@ -30,11 +30,15 @@ function formatEndTime(item, slotsByStart) {
 }
 
 export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] }) {
-  const [selectedDay, setSelectedDay] = useState(new Date().getDay() || 1);
   const formRef = useRef(null);
 
+  // Domingo (0) y Sábado (6) no son días de clases habituales → caer en Lunes
+  const todayDayId = new Date().getDay();
+  const defaultDay = todayDayId >= 1 && todayDayId <= 5 ? todayDayId : 1;
+
+  const [selectedDay, setSelectedDay] = useState(defaultDay);
   const [schedule, setSchedule] = useState(() => loadSchedule());
-  const [draft, setDraft] = useState({ ...BLANK_DRAFT, day: new Date().getDay() || 1 });
+  const [draft, setDraft] = useState({ ...BLANK_DRAFT, day: defaultDay });
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => { if (isOpen) setSchedule(loadSchedule()); }, [isOpen]);
@@ -49,7 +53,6 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
 
   const slots = useMemo(() => buildSlots({ firstTime: "08:30", lastTime: "22:00" }), []);
   const slotsByStart = useMemo(() => new Map(slots.map((s) => [s.startTime, s])), [slots]);
-  const todayDayId = new Date().getDay();
   const hasCursando = cursosOptions.length > 0;
 
   // Celdas interiores a bloques multi-row (para ocultar línea intermedia)

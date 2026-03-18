@@ -188,7 +188,7 @@ export default function MobileBottomNav({
           }`}
         >
           <FileText className={`w-6 h-6 mb-1 ${modoExcepcional ? "animate-pulse" : ""}`} />
-          <span className="text-[10px] font-medium">{modoExcepcional ? "Excepcional" : "Excepcional"}</span>
+          <span className="text-[10px] font-medium">{modoExcepcional ? "Activo" : "Excepcional"}</span>
           {excepcionesActivas > 0 && (
             <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
               {excepcionesActivas}
