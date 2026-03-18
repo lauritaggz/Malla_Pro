@@ -111,11 +111,11 @@ const Curso = ({
         ${shake ? "shake" : ""}
         ${
           aprobado
-            ? "bg-emerald-500/90 text-white border-emerald-400/50 shadow-md"
+            ? "bg-emerald-500/85 text-white border-emerald-400/50 shadow-md dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800/60"
             : excepcional
-            ? "bg-amber-500/90 text-white border-amber-400/50 shadow-md"
+            ? "bg-amber-500/85 text-white border-amber-400/50 shadow-md dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/60"
             : enCurso
-            ? "bg-primary text-white border-primary shadow-lg shadow-primary/30 scale-[1.02]"
+            ? "bg-primary text-white border-primary shadow-lg shadow-primary/30 scale-[1.02] dark:bg-primary/50 dark:border-primary/40"
             : !disponible
             ? "bg-bgSecondary/50 text-textSecondary opacity-70 border-dashed border-borderColor/80"
             : "bg-primary/10 text-textPrimary shadow-sm hover:bg-primary/20 hover:border-primary/50 border-primary/30"
@@ -134,7 +134,7 @@ const Curso = ({
           className={`absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-bold rounded-md border flex items-center justify-center min-w-[30px] shadow-sm transition-all
             ${
               aprobado || excepcional || enCurso
-                ? "bg-white/20 border-white/30 text-white" 
+                ? "bg-white/20 border-white/30 text-white dark:bg-white/10 dark:border-white/15 dark:text-current"
                 : "bg-primary/15 border-primary/30 text-primary"
             }`}
         >
