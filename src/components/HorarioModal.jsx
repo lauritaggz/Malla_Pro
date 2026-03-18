@@ -40,9 +40,17 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
   const [schedule, setSchedule] = useState(() => loadSchedule());
   const [draft, setDraft] = useState({ ...BLANK_DRAFT, day: defaultDay });
   const [editingId, setEditingId] = useState(null);
+  const [toast, setToast] = useState(null);
+  const toastTimerRef = useRef(null);
 
   useEffect(() => { if (isOpen) setSchedule(loadSchedule()); }, [isOpen]);
   useEffect(() => { if (isOpen) saveSchedule(schedule); }, [schedule, isOpen]);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3500);
+  };
 
   const cursosOptions = useMemo(() =>
     (Array.isArray(cursosCursandoData) ? cursosCursandoData : [])
@@ -144,7 +152,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
     const courseId = draft.courseId ? String(draft.courseId) : null;
     const candidate = { day: draft.day, startTime: draft.startTime, blocks: Number(draft.blocks || 1) };
     if (hasCollision(schedule.items, candidate, editingId || null)) {
-      alert("Ya existe una clase en ese horario. Toca otra celda para cambiar la hora.");
+      showToast("Ya existe una clase en ese horario. Toca otra celda para cambiar la hora.");
       return;
     }
     if (editingId) {
@@ -175,7 +183,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
     const currentSlot = slotsByStart.get(editingItem.startTime);
     const afterIndex = (currentSlot?.index ?? 0) + Math.max(1, Number(editingItem.blocks || 1));
     const freeSlot = nextFreeSlot(schedule.items, editingItem.day, afterIndex, editingItem.blocks);
-    if (!freeSlot) { alert("No hay espacio libre después de esta clase en el mismo día."); return; }
+    if (!freeSlot) { showToast("No hay espacio libre después de esta clase en el mismo día."); return; }
     setSchedule((p) => ({
       ...p,
       items: [...p.items, createScheduleItem({
@@ -195,7 +203,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
     if (!course) return;
     const blocks = 2;
     if (hasCollision(schedule.items, { day, startTime, blocks })) {
-      alert("Ya existe una clase en ese horario.");
+      showToast("Ya existe una clase en ese horario.");
       return;
     }
     setSchedule((p) => ({
@@ -227,7 +235,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
           onClick={(e) => e.stopPropagation()}
           className="relative bg-bgPrimary max-w-5xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-borderColor p-4 sm:p-6"
         >
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label="Cerrar horario"
             className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full bg-bgSecondary/60 hover:bg-bgSecondary transition flex items-center justify-center text-lg font-bold border border-borderColor text-textPrimary z-10">
             ✕
           </button>
@@ -241,6 +249,26 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               Bloques 45 min + 10 min pausa · arrastra un ramo a la planilla
             </p>
           </div>
+
+          {/* Toast de error inline */}
+          <AnimatePresence>
+            {toast && (
+              <motion.div
+                key="toast"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-2 px-4 py-2.5 mb-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-medium"
+              >
+                <span className="flex-shrink-0">⚠</span>
+                <span>{toast}</span>
+                <button onClick={() => setToast(null)} className="ml-auto opacity-60 hover:opacity-100 transition">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Formulario */}
           <div ref={formRef}
