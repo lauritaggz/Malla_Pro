@@ -93,6 +93,7 @@ export function createScheduleItem({
   blocks = 1,
   title = "",
   courseId = null,
+  sala = "",
 } = {}) {
   return {
     id: crypto?.randomUUID?.() || String(Date.now() + Math.random()),
@@ -101,6 +102,7 @@ export function createScheduleItem({
     blocks: Math.max(1, Number(blocks || 1)),
     title: String(title || ""),
     courseId: courseId ?? null,
+    sala: String(sala || ""),
     createdAt: Date.now(),
   };
 }

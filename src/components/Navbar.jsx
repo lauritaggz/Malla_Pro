@@ -228,7 +228,7 @@ export default function Navbar({
                   <FileText className="w-4 h-4" /> 
                   Excepcional
                   {excepcionesActivas > 0 && (
-                    <span className="flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full min-w[20px] h-5 px-1.5 shadow-sm border border-red-600/50">
+                    <span className="flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 shadow-sm border border-red-600/50">
                       {excepcionesActivas}
                     </span>
                   )}
