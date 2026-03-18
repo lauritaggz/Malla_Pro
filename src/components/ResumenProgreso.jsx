@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
-import {
-  CheckCircle2,
-  Hourglass,
-  GraduationCap,
-  TrendingUp,
-  BarChart2,
-} from "lucide-react";
+import { CheckCircle2, Hourglass, GraduationCap, BarChart2 } from "lucide-react";
+import DrawerPanel from "./DrawerPanel";
 
 export default function ResumenProgreso({
   mallaData,
@@ -17,26 +10,18 @@ export default function ResumenProgreso({
   onClose,
   isOpen,
 }) {
-  const [creditosData, setCreditosData] = useState({
-    aprobados: 0,
-    cursando: 0,
-    totales: 0,
-  });
-
+  const [creditosData, setCreditosData] = useState({ aprobados: 0, cursando: 0, totales: 0 });
   const [promedioGlobal, setPromedioGlobal] = useState(null);
 
-  // =============================
-  // CALCULOS
-  // =============================
   useEffect(() => {
-    if (!isOpen) return; // evita cálculos innecesarios
+    if (!isOpen) return;
     calcularEstadisticas();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, mallaData, aprobados, excepciones, cursando]);
 
   const calcularEstadisticas = () => {
     if (!mallaData) return;
 
-    // Mallas con menciones usan semestresComunes + menciones en lugar de semestres
     let semestresEfectivos = [];
     if (mallaData.isMencion) {
       semestresEfectivos = [
@@ -46,7 +31,6 @@ export default function ResumenProgreso({
     } else {
       semestresEfectivos = mallaData.semestres || [];
     }
-
     if (semestresEfectivos.length === 0) return;
 
     let creditosTotales = 0;
@@ -55,178 +39,164 @@ export default function ResumenProgreso({
     let sumaNotasPonderadas = 0;
     let creditosConNota = 0;
 
-    const notasGuardadas = JSON.parse(
-      localStorage.getItem("malla-notas") || "{}"
-    );
+    const notasGuardadas = JSON.parse(localStorage.getItem("malla-notas") || "{}");
 
-    const stats = semestresEfectivos.map((semestre, idx) => {
-      let aprobS = 0;
-      let cursandoS = 0;
-      let totalS = 0;
-
+    semestresEfectivos.forEach((semestre) => {
       semestre.cursos.forEach((c) => {
         const sct = c.sct || 0;
-        totalS += sct;
         creditosTotales += sct;
-
         if (aprobados.includes(c.id) || excepciones.includes(c.id)) {
           creditosAprobados += sct;
-          aprobS += sct;
-
-          // notas
           if (notasGuardadas[c.id]) {
             const evals = notasGuardadas[c.id];
             const pesoTotal = evals.reduce((a, b) => a + b.peso, 0);
-
             if (pesoTotal === 100) {
-              const prom =
-                evals.reduce((sum, e) => sum + (e.nota || 0) * e.peso, 0) / 100;
-
+              const prom = evals.reduce((sum, e) => sum + (e.nota || 0) * e.peso, 0) / 100;
               sumaNotasPonderadas += prom * sct;
               creditosConNota += sct;
             }
           }
         } else if (cursando.includes(c.id)) {
           creditosCursando += sct;
-          cursandoS += sct;
         }
       });
-
-      return {
-        semestre: `S${idx + 1}`,
-        aprobados: aprobS,
-        cursando: cursandoS,
-        pendientes: totalS - aprobS - cursandoS,
-      };
     });
 
-    setCreditosData({
-      aprobados: creditosAprobados,
-      cursando: creditosCursando,
-      totales: creditosTotales,
-    });
-
-    setPromedioGlobal(
-      creditosConNota > 0 ? sumaNotasPonderadas / creditosConNota : null
-    );
+    setCreditosData({ aprobados: creditosAprobados, cursando: creditosCursando, totales: creditosTotales });
+    setPromedioGlobal(creditosConNota > 0 ? sumaNotasPonderadas / creditosConNota : null);
   };
 
-  if (!isOpen) return null;
-
-  // =============================
-  // PORCENTAJES Y GRAFICOS
-  // =============================
-
-  const porcentajeAprobado =
-    creditosData.totales > 0
-      ? (creditosData.aprobados / creditosData.totales) * 100
-      : 0;
-
-  const porcentajeCursando =
-    creditosData.totales > 0
-      ? (creditosData.cursando / creditosData.totales) * 100
-      : 0;
-
-  // =============================
-  // RENDER
-  // =============================
+  const porcentajeAprobado = creditosData.totales > 0 ? (creditosData.aprobados / creditosData.totales) * 100 : 0;
+  const porcentajeCursando = creditosData.totales > 0 ? (creditosData.cursando / creditosData.totales) * 100 : 0;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          key="modal"
-          exit={{ opacity: 0 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[80] flex items-center justify-center p-4 pb-[5rem] sm:pb-4"
-          onClick={onClose}
-        >
-        {/* MODAL CONTENT */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 10 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 10 }}
-          transition={{ duration: 0.2 }}
-          onClick={(e) => e.stopPropagation()}
-          className="relative bg-bgPrimary max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-borderColor p-6"
-        >
-          {/* BOTÓN CERRAR */}
-          <button
-            onClick={onClose}
-            aria-label="Cerrar resumen de progreso"
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-bgSecondary/60 hover:bg-bgSecondary transition flex items-center justify-center text-xl font-bold border border-borderColor"
-          >
-            ✕
-          </button>
+    <DrawerPanel
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Resumen de progreso"
+      subtitle="Vista general de tu avance académico"
+      width="max-w-lg"
+    >
+      <div className="px-6 py-6 space-y-6">
 
-          {/* TITULO */}
-          <h1 className="text-3xl font-bold text-textPrimary mb-1">
-            <BarChart2 className="inline-block w-6 h-6 mr-2" />
-            Resumen de Progreso
-          </h1>
-          <p className="text-textSecondary mb-8">
-            Vista general de tu rendimiento y avance académico.
-          </p>
+        {/* Stat cards */}
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard
+            icon={<CheckCircle2 className="w-4 h-4" />}
+            label="Aprobados"
+            value={creditosData.aprobados}
+            color="text-emerald-500"
+            bg="bg-emerald-500/8 border-emerald-500/20"
+          />
+          <StatCard
+            icon={<Hourglass className="w-4 h-4" />}
+            label="En curso"
+            value={creditosData.cursando}
+            color="text-primary"
+            bg="bg-primaryMuted border-primary/20"
+          />
+          <StatCard
+            icon={<GraduationCap className="w-4 h-4" />}
+            label="Total"
+            value={creditosData.totales}
+            color="text-textPrimary"
+            bg="bg-bgSurface border-borderColor"
+          />
+        </div>
 
-          {/* CARDS GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {/* APROBADOS */}
-            <div className="glass-card p-5 rounded-xl border border-borderColor">
-              <p className="text-sm text-textSecondary mb-1">
-                Créditos Aprobados
-              </p>
-              <p className="text-3xl font-bold text-emerald-500">
-                {creditosData.aprobados}
-              </p>
-            </div>
-
-            {/* CURSANDO */}
-            <div className="glass-card p-5 rounded-xl border border-borderColor">
-              <p className="text-sm text-textSecondary mb-1">En Curso</p>
-              <p className="text-3xl font-bold text-primary">
-                {creditosData.cursando}
-              </p>
-            </div>
-
-            {/* TOTALES */}
-            <div className="glass-card p-5 rounded-xl border border-borderColor">
-              <p className="text-sm text-textSecondary mb-1">Total Créditos</p>
-              <p className="text-3xl font-bold text-primary">
-                {creditosData.totales}
-              </p>
-            </div>
+        {/* Barra de progreso */}
+        <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Progreso general</span>
+            <span className="text-sm font-bold text-textPrimary">
+              {(porcentajeAprobado + porcentajeCursando).toFixed(1)}%
+            </span>
           </div>
 
-
-
-          {/* PROGRESO GENERAL */}
-          <div className="mt-10 glass-card p-6 rounded-xl border border-borderColor">
-            <h3 className="text-xl font-bold text-textPrimary mb-4">
-              Progreso General
-            </h3>
-
-            <div className="relative w-full h-8 bg-bgSecondary rounded-full overflow-hidden">
-              <div
-                className="absolute top-0 h-full bg-emerald-500/80"
-                style={{ width: `${porcentajeAprobado}%` }}
-              />
-              <div
-                className="absolute top-0 h-full bg-primary/80"
-                style={{
-                  left: `${porcentajeAprobado}%`,
-                  width: `${porcentajeCursando}%`,
-                }}
-              />
-            </div>
-
-            <p className="text-center text-textSecondary mt-2">
-              {(porcentajeAprobado + porcentajeCursando).toFixed(1)}% completado
-            </p>
+          <div className="relative w-full h-3 bg-borderColor/40 rounded-full overflow-hidden">
+            <div
+              className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full transition-all duration-700"
+              style={{ width: `${porcentajeAprobado}%` }}
+            />
+            <div
+              className="absolute inset-y-0 rounded-full transition-all duration-700"
+              style={{
+                left: `${porcentajeAprobado}%`,
+                width: `${porcentajeCursando}%`,
+                background: "var(--primary)",
+                opacity: 0.6,
+              }}
+            />
           </div>
-        </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+
+          <div className="flex items-center gap-4 mt-3">
+            <LegendDot color="bg-emerald-500" label={`Aprobado (${porcentajeAprobado.toFixed(1)}%)`} />
+            <LegendDot color="bg-primary" label={`En curso (${porcentajeCursando.toFixed(1)}%)`} opacity="opacity-60" />
+          </div>
+        </div>
+
+        {/* Promedio */}
+        {promedioGlobal !== null && (
+          <div className="rounded-xl border border-borderColor bg-bgSurface p-5 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide">Promedio ponderado</p>
+              <p className="text-xs text-textSecondary/60 mt-0.5">Solo cursos con notas completas (100% peso)</p>
+            </div>
+            <span className={`text-3xl font-bold tabular-nums ${promedioGlobal >= 4 ? "text-emerald-500" : "text-red-500"}`}>
+              {promedioGlobal.toFixed(1)}
+            </span>
+          </div>
+        )}
+
+        {/* Detalle créditos */}
+        <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
+          <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">Créditos SCT</p>
+          <div className="space-y-2">
+            <CreditRow label="Aprobados" value={creditosData.aprobados} total={creditosData.totales} color="text-emerald-500" />
+            <CreditRow label="En curso" value={creditosData.cursando} total={creditosData.totales} color="text-primary" />
+            <CreditRow
+              label="Pendientes"
+              value={creditosData.totales - creditosData.aprobados - creditosData.cursando}
+              total={creditosData.totales}
+              color="text-textSecondary"
+            />
+          </div>
+        </div>
+      </div>
+    </DrawerPanel>
+  );
+}
+
+function StatCard({ icon, label, value, color, bg }) {
+  return (
+    <div className={`rounded-xl border p-4 flex flex-col gap-2 ${bg}`}>
+      <div className={`${color} opacity-80`}>{icon}</div>
+      <div>
+        <div className={`text-2xl font-bold tabular-nums ${color}`}>{value}</div>
+        <div className="text-[11px] text-textSecondary mt-0.5">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function LegendDot({ color, label, opacity = "" }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className={`w-2.5 h-2.5 rounded-full ${color} ${opacity}`} />
+      <span className="text-xs text-textSecondary">{label}</span>
+    </div>
+  );
+}
+
+function CreditRow({ label, value, total, color }) {
+  const pct = total > 0 ? (value / total) * 100 : 0;
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-textSecondary w-20 flex-shrink-0">{label}</span>
+      <div className="flex-1 h-1.5 bg-borderColor/40 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${color.replace("text-", "bg-")}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className={`text-xs font-semibold tabular-nums ${color} w-12 text-right`}>{value} SCT</span>
+    </div>
   );
 }

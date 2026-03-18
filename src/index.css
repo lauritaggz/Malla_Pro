@@ -3,157 +3,145 @@
 @tailwind utilities;
 
 /* ================================================================
-   MALLA PRO — Design System
-   Tokens: primary, bgPrimary, bgSecondary, bgSurface,
-           textPrimary, textSecondary, borderColor,
-           shadowPrimary, primaryMuted
+   MALLA PRO — Design System v2 (Profesional Académico)
+   Principios:
+   · Fondos neutros — el color primario no contamina el fondo
+   · Bordes grises neutrales — no tematizados
+   · Glass solo en navbar (superpuesta), cards con superficie sólida
+   · Tipografía con contraste real
    ================================================================ */
-
-/* ── Base palette (iOS-inspired) ──────────────────────────────── */
-:root {
-  --apple-blue-light:   #007AFF;
-  --apple-blue-dark:    #0A84FF;
-  --apple-pink-light:   #FF2D55;
-  --apple-pink-dark:    #FF375F;
-  --apple-green-light:  #34C759;
-  --apple-green-dark:   #32D74B;
-  --apple-indigo-light: #5856D6;
-  --apple-indigo-dark:  #5E5CE6;
-  --apple-orange-light: #FF9500;
-  --apple-orange-dark:  #FF9F0A;
-}
 
 /* ── Light themes ─────────────────────────────────────────────── */
 .aurora.light {
-  --primary:        #007AFF;
-  --bgPrimary:      #EFF6FF;
+  --primary:        #2563EB;
+  --bgPrimary:      #F8FAFC;
   --bgSecondary:    #FFFFFF;
-  --bgSurface:      rgba(255,255,255,0.75);
-  --textPrimary:    #0A0A0F;
-  --textSecondary:  #6B7A92;
-  --borderColor:    rgba(0,122,255,0.18);
-  --shadowPrimary:  rgba(0,122,255,0.15);
-  --primaryMuted:   rgba(0,122,255,0.08);
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.10);
+  --shadowPrimary:  rgba(37,99,235,0.14);
+  --primaryMuted:   rgba(37,99,235,0.07);
 }
 
 .sunset.light {
-  --primary:        #E8437A;
-  --bgPrimary:      #FFF1F6;
+  --primary:        #DB2777;
+  --bgPrimary:      #FDF8F8;
   --bgSecondary:    #FFFFFF;
-  --bgSurface:      rgba(255,255,255,0.80);
-  --textPrimary:    #0F0509;
-  --textSecondary:  #8A6372;
-  --borderColor:    rgba(232,67,122,0.18);
-  --shadowPrimary:  rgba(232,67,122,0.15);
-  --primaryMuted:   rgba(232,67,122,0.08);
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.10);
+  --shadowPrimary:  rgba(219,39,119,0.14);
+  --primaryMuted:   rgba(219,39,119,0.07);
 }
 
 .emerald.light {
-  --primary:        #1DB954;
-  --bgPrimary:      #EDFAF3;
+  --primary:        #059669;
+  --bgPrimary:      #F7FBF9;
   --bgSecondary:    #FFFFFF;
-  --bgSurface:      rgba(255,255,255,0.78);
-  --textPrimary:    #040F08;
-  --textSecondary:  #527A60;
-  --borderColor:    rgba(29,185,84,0.18);
-  --shadowPrimary:  rgba(29,185,84,0.15);
-  --primaryMuted:   rgba(29,185,84,0.08);
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.10);
+  --shadowPrimary:  rgba(5,150,105,0.14);
+  --primaryMuted:   rgba(5,150,105,0.07);
 }
 
 .midnight.light {
-  --primary:        #6C63FF;
-  --bgPrimary:      #F0EFFE;
+  --primary:        #7C3AED;
+  --bgPrimary:      #F9F8FE;
   --bgSecondary:    #FFFFFF;
-  --bgSurface:      rgba(255,255,255,0.78);
-  --textPrimary:    #07060F;
-  --textSecondary:  #6B6A8A;
-  --borderColor:    rgba(108,99,255,0.18);
-  --shadowPrimary:  rgba(108,99,255,0.15);
-  --primaryMuted:   rgba(108,99,255,0.08);
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.10);
+  --shadowPrimary:  rgba(124,58,237,0.14);
+  --primaryMuted:   rgba(124,58,237,0.07);
 }
 
 .golden.light {
-  --primary:        #F59E0B;
-  --bgPrimary:      #FFFBEB;
+  --primary:        #D97706;
+  --bgPrimary:      #FDFAF5;
   --bgSecondary:    #FFFFFF;
-  --bgSurface:      rgba(255,255,255,0.80);
-  --textPrimary:    #0D0900;
-  --textSecondary:  #8A7040;
-  --borderColor:    rgba(245,158,11,0.2);
-  --shadowPrimary:  rgba(245,158,11,0.15);
-  --primaryMuted:   rgba(245,158,11,0.08);
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.10);
+  --shadowPrimary:  rgba(217,119,6,0.14);
+  --primaryMuted:   rgba(217,119,6,0.07);
 }
 
 /* ── Dark themes ──────────────────────────────────────────────── */
 .aurora.dark {
-  --primary:        #3B9EFF;
-  --bgPrimary:      #050D1A;
-  --bgSecondary:    #0C1829;
-  --bgSurface:      rgba(14,28,52,0.80);
-  --textPrimary:    #E8F2FF;
-  --textSecondary:  #7A9EC0;
-  --borderColor:    rgba(59,158,255,0.2);
-  --shadowPrimary:  rgba(59,158,255,0.2);
-  --primaryMuted:   rgba(59,158,255,0.1);
+  --primary:        #60A5FA;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(96,165,250,0.18);
+  --primaryMuted:   rgba(96,165,250,0.10);
 }
 
 .sunset.dark {
-  --primary:        #FF6B9D;
-  --bgPrimary:      #160810;
-  --bgSecondary:    #221018;
-  --bgSurface:      rgba(38,16,26,0.85);
-  --textPrimary:    #FFE8F0;
-  --textSecondary:  #C4849A;
-  --borderColor:    rgba(255,107,157,0.2);
-  --shadowPrimary:  rgba(255,107,157,0.2);
-  --primaryMuted:   rgba(255,107,157,0.1);
+  --primary:        #F472B6;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(244,114,182,0.18);
+  --primaryMuted:   rgba(244,114,182,0.10);
 }
 
 .emerald.dark {
-  --primary:        #2ECC71;
-  --bgPrimary:      #03120A;
-  --bgSecondary:    #071C0F;
-  --bgSurface:      rgba(8,30,16,0.85);
-  --textPrimary:    #DFFAEB;
-  --textSecondary:  #6DA87E;
-  --borderColor:    rgba(46,204,113,0.2);
-  --shadowPrimary:  rgba(46,204,113,0.2);
-  --primaryMuted:   rgba(46,204,113,0.1);
+  --primary:        #34D399;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(52,211,153,0.18);
+  --primaryMuted:   rgba(52,211,153,0.10);
 }
 
 .midnight.dark {
-  --primary:        #8B83FF;
-  --bgPrimary:      #09071A;
-  --bgSecondary:    #110E28;
-  --bgSurface:      rgba(20,16,48,0.85);
-  --textPrimary:    #EDEDFF;
-  --textSecondary:  #9490C8;
-  --borderColor:    rgba(139,131,255,0.2);
-  --shadowPrimary:  rgba(139,131,255,0.2);
-  --primaryMuted:   rgba(139,131,255,0.1);
+  --primary:        #A78BFA;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(167,139,250,0.18);
+  --primaryMuted:   rgba(167,139,250,0.10);
 }
 
 .golden.dark {
-  --primary:        #FBB72B;
-  --bgPrimary:      #110900;
-  --bgSecondary:    #1C1000;
-  --bgSurface:      rgba(32,18,0,0.88);
-  --textPrimary:    #FFF4DC;
-  --textSecondary:  #C4924D;
-  --borderColor:    rgba(251,183,43,0.2);
-  --shadowPrimary:  rgba(251,183,43,0.2);
-  --primaryMuted:   rgba(251,183,43,0.1);
+  --primary:        #FCD34D;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(252,211,77,0.18);
+  --primaryMuted:   rgba(252,211,77,0.10);
 }
 
 /* ── Utility classes ──────────────────────────────────────────── */
-.bg-primary        { background-color: var(--primary); }
-.text-primary      { color: var(--primary); }
-.border-primary    { border-color: var(--primary); }
-.bg-bgPrimary      { background-color: var(--bgPrimary); }
-.bg-bgSecondary    { background-color: var(--bgSecondary); }
-.text-textPrimary  { color: var(--textPrimary); }
-.text-textSecondary{ color: var(--textSecondary); }
-.border-borderColor{ border-color: var(--borderColor); }
+.bg-primary         { background-color: var(--primary); }
+.text-primary       { color: var(--primary); }
+.border-primary     { border-color: var(--primary); }
+.bg-bgPrimary       { background-color: var(--bgPrimary); }
+.bg-bgSecondary     { background-color: var(--bgSecondary); }
+.text-textPrimary   { color: var(--textPrimary); }
+.text-textSecondary { color: var(--textSecondary); }
+.border-borderColor { border-color: var(--borderColor); }
 
 /* ── Global base ──────────────────────────────────────────────── */
 body {
@@ -164,93 +152,80 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
-  transition: background-color 0.35s ease, color 0.35s ease;
-}
-
-/* Subtle radial mesh tint behind every page */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 15% 10%, var(--primaryMuted), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 90%, var(--primaryMuted), transparent 60%);
-  opacity: 0.7;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ── Theme transition ─────────────────────────────────────────── */
 :root, .dark, .light {
-  transition: background-color 0.35s ease, color 0.35s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ── Glass card ───────────────────────────────────────────────── */
+/* ── Card surface — sólida, sin blur ──────────────────────────── */
 .glass-card {
-  background: var(--bgSurface, rgba(255,255,255,0.72));
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: var(--bgSecondary);
   border: 1px solid var(--borderColor);
-  box-shadow:
-    0 2px 16px -2px rgba(0,0,0,0.06),
-    0 1px 0 inset rgba(255,255,255,0.35);
-  border-radius: 1.25rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  border-radius: 12px;
+  transition: box-shadow 0.18s ease;
 }
-
-.dark .glass-card {
-  box-shadow:
-    0 4px 28px -4px rgba(0,0,0,0.5),
-    0 1px 0 inset rgba(255,255,255,0.06);
-}
-
 .glass-card:hover {
-  transform: translateY(-2px) scale(1.005);
-  box-shadow:
-    0 12px 32px -4px var(--shadowPrimary),
-    0 1px 0 inset rgba(255,255,255,0.4);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+}
+.dark .glass-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
+.dark .glass-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
 
-/* ── Primary button ───────────────────────────────────────────── */
+/* ── Navbar glass (único lugar donde blur tiene sentido) ──────── */
+.navbar-glass {
+  background: rgba(var(--bgSecondary-rgb, 255,255,255), 0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+.dark .navbar-glass {
+  background: rgba(22,27,34,0.88);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
 .btn-primary {
   background: var(--primary);
   color: white;
-  padding: 14px 28px;
-  border-radius: 9999px;
+  padding: 10px 20px;
+  border-radius: 8px;
   font-weight: 600;
+  font-size: 14px;
   letter-spacing: -0.01em;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  box-shadow: 0 4px 14px var(--shadowPrimary);
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 .btn-primary:hover {
-  transform: scale(1.02) translateY(-1px);
-  filter: brightness(1.08);
-  box-shadow: 0 8px 20px var(--shadowPrimary);
+  opacity: 0.9;
+  box-shadow: 0 4px 12px var(--shadowPrimary);
 }
 
 .btn-secondary {
-  background: var(--primaryMuted);
-  border: 1.5px solid var(--borderColor);
+  background: var(--bgSecondary);
+  border: 1px solid var(--borderColor);
   color: var(--textPrimary);
-  padding: 14px 28px;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: background 0.2s ease, transform 0.15s ease;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 .btn-secondary:hover {
-  background: var(--primaryMuted);
-  filter: brightness(1.15);
-  transform: scale(1.02);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 /* ── Animations ───────────────────────────────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
-}
+.fade-in { animation: fadeIn 0.3s ease-out forwards; }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -259,11 +234,7 @@ body::before {
 }
 .shake { animation: shake 0.3s ease-in-out; }
 
-.gradient-text {
-  color: var(--primary);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
+.gradient-text { color: var(--primary); font-weight: 700; }
 
 /* ── Scrollbars ───────────────────────────────────────────────── */
 ::-webkit-scrollbar        { height: 6px; width: 6px; }
@@ -279,18 +250,15 @@ body::before {
   -webkit-overflow-scrolling: touch;
   contain: paint;
 }
-.scroll-container::-webkit-scrollbar       { height: 8px; }
-.scroll-container::-webkit-scrollbar-thumb { background-color: var(--borderColor); border-radius: 8px; transition: background-color 0.3s ease; }
+.scroll-container::-webkit-scrollbar       { height: 6px; }
+.scroll-container::-webkit-scrollbar-thumb { background-color: var(--borderColor); border-radius: 8px; transition: background-color 0.2s ease; }
 .scroll-container::-webkit-scrollbar-thumb:hover { background-color: var(--primary); }
 .scroll-container::-webkit-scrollbar-track { background: transparent; }
 
-/* ── Drag state ───────────────────────────────────────────────── */
-.dragging {
-  cursor: grabbing !important;
-  user-select: none;
-}
+/* ── Drag ─────────────────────────────────────────────────────── */
+.dragging { cursor: grabbing !important; user-select: none; }
 
-/* ── Responsive overrides ─────────────────────────────────────── */
+/* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .scroll-container        { padding-bottom: 1.5rem; }
   .min-w-\[460px\]         { min-width: 380px !important; }
@@ -299,4 +267,14 @@ body::before {
 @media (max-width: 480px) {
   .min-w-\[460px\]         { min-width: 320px !important; }
   .min-w-\[210px\]         { min-width: 150px !important; }
+}
+
+/* ── Drawer panel ─────────────────────────────────────────────── */
+.drawer-panel {
+  background: var(--bgSecondary);
+  border-left: 1px solid var(--borderColor);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.08);
+}
+.dark .drawer-panel {
+  box-shadow: -4px 0 32px rgba(0,0,0,0.5);
 }

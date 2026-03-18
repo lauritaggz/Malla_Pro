@@ -1,5 +1,37 @@
 import { useState, useEffect, useRef } from "react";
-import { GraduationCap, ChevronDown, Moon, Sun, FileText, HelpCircle, CalendarDays } from "lucide-react";
+import {
+  GraduationCap, Moon, Sun, FileText, HelpCircle,
+  CalendarDays, ChevronDown, BookMarked,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const THEMES = [
+  { id: "aurora",   name: "Aurora",   color: "#2563EB" },
+  { id: "sunset",   name: "Sunset",   color: "#DB2777" },
+  { id: "emerald",  name: "Emerald",  color: "#059669" },
+  { id: "midnight", name: "Midnight", color: "#7C3AED" },
+  { id: "golden",   name: "Golden",   color: "#D97706" },
+];
+
+/* Small icon button used in the right control strip */
+function NavBtn({ onClick, label, active, children, amber }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={`
+        w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150
+        ${active
+          ? amber
+            ? "bg-amber-400/20 text-amber-500"
+            : "bg-primary/10 text-primary"
+          : "text-textSecondary hover:text-textPrimary hover:bg-borderColor/40"}
+      `}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function Navbar({
   theme,
@@ -15,237 +47,224 @@ export default function Navbar({
   onShowHorario,
   mostrarResumen,
 }) {
-  const [mostrarControles, setMostrarControles] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const navRef      = useRef(null);
+  const [isScrolled, setIsScrolled]         = useState(false);
+  const [themeOpen,  setThemeOpen]          = useState(false);
+  const [semestreOpen, setSemestreOpen]     = useState(false);
+  const themeRef    = useRef(null);
+  const semestreRef = useRef(null);
 
+  /* Scroll shadow */
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 4);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // === MEDIR ALTURA REAL DEL NAVBAR ===
-  const navRef = useRef(null);
-
+  /* Navbar height reporting */
   useEffect(() => {
-    const updateHeight = () => {
-      const height = navRef.current?.offsetHeight || 0;
-      window.dispatchEvent(
-        new CustomEvent("navbarHeightChange", { detail: height })
-      );
+    const report = () => {
+      const h = navRef.current?.offsetHeight || 0;
+      window.dispatchEvent(new CustomEvent("navbarHeightChange", { detail: h }));
     };
-
-    updateHeight();
-    const obs = new ResizeObserver(updateHeight);
+    report();
+    const obs = new ResizeObserver(report);
     if (navRef.current) obs.observe(navRef.current);
-
     return () => obs.disconnect();
   }, []);
 
-  const themes = [
-    { id: "aurora", name: "Aurora Blue" },
-    { id: "sunset", name: "Sunset Pink" },
-    { id: "emerald", name: "Emerald Mist" },
-    { id: "midnight", name: "Midnight Purple" },
-    { id: "golden", name: "Golden Carbon" },
-  ];
+  /* Close popovers on outside click */
+  useEffect(() => {
+    const handler = (e) => {
+      if (themeRef.current && !themeRef.current.contains(e.target)) setThemeOpen(false);
+      if (semestreRef.current && !semestreRef.current.contains(e.target)) setSemestreOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
-  const toggleDarkMode = () => setDarkMode(!darkMode);
+  const currentTheme = THEMES.find((t) => t.id === theme) || THEMES[0];
+  const uni = mallaSeleccionada?.url?.includes("uch") ? "U. de Chile" : "UNAB";
 
   return (
     <nav
       ref={navRef}
       id="app-navbar"
-      className={`fixed top-0 left-0 right-0 z-[80]
-                 backdrop-blur-xl bg-bgSecondary/70 border-b border-borderColor/20 dark:border-white/5
-                 shadow-[0_4px_30px_rgba(0,0,0,0.1)]
-                 transition-[opacity,transform] duration-300
-                 ${mostrarResumen ? "opacity-0 pointer-events-none translate-y-[-100%]" : "opacity-100 translate-y-0"}`}
+      className={`
+        fixed top-0 left-0 right-0 z-[80]
+        bg-bgSecondary/90 backdrop-blur-xl
+        border-b border-borderColor
+        transition-[box-shadow,opacity,transform] duration-200
+        ${isScrolled ? "shadow-sm" : ""}
+        ${mostrarResumen ? "opacity-0 pointer-events-none -translate-y-full" : "opacity-100 translate-y-0"}
+      `}
     >
-      <div className={`max-w-7xl mx-auto px-6 relative select-none transition-all duration-300 ${isScrolled ? "py-2" : "py-4"}`}>
-        {/* ---------------- HEADER SUPERIOR ---------------- */}
-        <div className="flex items-center justify-between">
-           <div className="flex flex-col">
-            {mallaSeleccionada && (
-              <>
-                <h1 className={`font-bold text-primary tracking-tight transition-all duration-300 drop-shadow-sm ${isScrolled ? "text-lg md:text-xl" : "text-2xl md:text-3xl hover:scale-[1.02]"}`}>
-                  {mallaSeleccionada.nombre}
-                </h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
 
-                <div className={`flex items-center gap-2 transition-all duration-300 overflow-hidden ${isScrolled ? "max-h-0 opacity-0 mt-0" : "max-h-10 opacity-100 mt-1"}`}>
-                  <span
-                    className="text-xs md:text-sm font-medium text-primary/80 
-                                  px-3 py-1 rounded-full bg-primary/10 border border-primary/20 shadow-inner"
-                  >
-                    <GraduationCap className="inline-block w-4 h-4 mr-1 text-primary" />
-                    {mallaSeleccionada.url.includes("uch")
-                      ? "Universidad de Chile"
-                      : "UNAB"}
-                  </span>
-                </div>
-              </>
-            )}
+        {/* ── Left: Brand ─────────────────────────────────────── */}
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          {/* App icon */}
+          <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
+            style={{ background: "var(--primary)" }}>
+            <BookMarked className="w-3.5 h-3.5 text-white" />
           </div>
 
-          {/* BOTÓN COLAPSAR */}
-          <button
-            onClick={() => setMostrarControles(!mostrarControles)}
-            className="hidden sm:flex relative items-center justify-center w-10 h-10 rounded-full border border-borderColor/50 
-                       bg-bgPrimary/50 backdrop-blur-md hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-all duration-300 hover:scale-110 shadow-sm"
-          >
-            <ChevronDown
-              className={`w-5 h-5 transition-transform duration-500 ${
-                mostrarControles ? "rotate-180 text-primary" : "text-textSecondary"
-              }`}
-            />
-          </button>
+          {mallaSeleccionada ? (
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="font-semibold text-sm text-textPrimary truncate leading-tight">
+                {mallaSeleccionada.nombre}
+              </span>
+              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-primaryMuted text-primary border border-primary/20 flex-shrink-0">
+                <GraduationCap className="w-3 h-3" />
+                {uni}
+              </span>
+            </div>
+          ) : (
+            <span className="font-semibold text-sm text-textPrimary">Malla Pro</span>
+          )}
         </div>
 
-        <div className="w-full mt-4 mb-4" />
+        {/* ── Right: Controls ─────────────────────────────────── */}
+        <div className="flex items-center gap-1">
 
-        {/* ---------------- CONTROLES (Optimizado) ---------------- */}
-        <div
-          className={`hidden sm:grid transition-[grid-template-rows,opacity,transform] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[grid-template-rows,opacity,transform] ${
-            mostrarControles
-              ? "grid-rows-[1fr] opacity-100 translate-y-0"
-              : "grid-rows-[0fr] opacity-0 -translate-y-2 pointer-events-none"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative pt-3 border-t border-borderColor/20 dark:border-white/5">
-            {/* SELECT MARCAR HASTA */}
-            <div className="relative group w-full sm:w-auto">
-              <select
-                className="appearance-none rounded-xl px-4 py-2.5 border border-borderColor/50 bg-black/5 dark:bg-white/10 backdrop-blur-sm text-textPrimary text-sm font-medium
-                           hover:shadow-md hover:border-primary/40 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all w-full cursor-pointer pr-10"
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (value) {
-                    window.dispatchEvent(
-                      new CustomEvent("aprobarHastaSemestre", { detail: value })
-                    );
-                    e.target.value = "";
-                  }
-                }}
-              >
-                <option value="" className="text-textSecondary bg-bgPrimary">📘 Marcar hasta</option>
-                {Array.from({ length: cantidadSemestres }).map((_, i) => (
-                  <option key={i} value={i + 1} className="text-textPrimary bg-bgPrimary">
-                    Semestre {i + 1}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textSecondary pointer-events-none" />
-
-              {/* TOOLTIP */}
-              <div
-                className="absolute left-0 top-full mt-3 w-64 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 border border-white/10 dark:border-black/10
-                           shadow-xl rounded-xl p-3 text-sm text-zinc-100 font-medium z-50
-                           opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none"
-              >
-                <div className="absolute -top-1 left-4 w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45 border-t border-l border-white/10 dark:border-black/10"></div>
-                Marca todos los ramos hasta ese semestre como aprobados ✔
-              </div>
-            </div>
-
-            {/* SELECT TEMA */}
-            <div className="relative group w-full sm:w-auto">
-              <select
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-                className="appearance-none rounded-xl px-4 py-2.5 border border-borderColor/50 bg-black/5 dark:bg-white/10 backdrop-blur-sm text-textPrimary text-sm font-medium
-                           hover:shadow-md hover:border-primary/40 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all w-full cursor-pointer pr-10"
-              >
-                {themes.map((t) => (
-                  <option key={t.id} value={t.id} className="text-textPrimary bg-bgPrimary">
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-textSecondary pointer-events-none" />
-
-              <div
-                className="absolute left-0 top-full mt-3 w-64 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 border border-white/10 dark:border-black/10
-                           shadow-xl rounded-xl p-3 text-sm text-zinc-100 font-medium z-50
-                           opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none"
-              >
-                 <div className="absolute -top-1 left-4 w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45 border-t border-l border-white/10 dark:border-black/10"></div>
-                Cambia el estilo visual de la plataforma 🎨
-              </div>
-            </div>
-
-            {/* CONTROLES DERECHOS */}
-            <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-               {/* MODO OSCURO */}
+          {/* Marcar hasta semestre */}
+          {mallaSeleccionada && cantidadSemestres > 0 && (
+            <div ref={semestreRef} className="relative hidden sm:block">
               <button
-                onClick={toggleDarkMode}
-                className="flex-shrink-0 w-11 h-11 rounded-xl bg-bgPrimary/50 backdrop-blur-sm border border-borderColor/50 
-                           flex items-center justify-center transition-all duration-300 
-                           hover:scale-105 hover:bg-primary/10 hover:border-primary/40 hover:shadow-md text-primary"
-                aria-label="Alternar modo oscuro"
+                onClick={() => setSemestreOpen((v) => !v)}
+                aria-label="Marcar hasta semestre"
+                className={`
+                  h-8 px-3 rounded-lg flex items-center gap-1.5 text-xs font-medium transition-all duration-150
+                  ${semestreOpen
+                    ? "bg-primary/10 text-primary"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-borderColor/40"}
+                `}
               >
-                {darkMode ? (
-                  <Moon className="w-5 h-5 transition-transform duration-500 rotate-0 hover:rotate-12" />
-                ) : (
-                  <Sun className="w-5 h-5 transition-transform duration-500 rotate-0 hover:rotate-90" />
+                <span>Marcar hasta</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${semestreOpen ? "rotate-180" : ""}`} />
+              </button>
+              <AnimatePresence>
+                {semestreOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute right-0 top-full mt-1.5 bg-bgSecondary border border-borderColor rounded-xl shadow-lg z-50 py-1 min-w-[160px]"
+                  >
+                    {Array.from({ length: cantidadSemestres }).map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent("aprobarHastaSemestre", { detail: i + 1 }));
+                          setSemestreOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-textSecondary hover:text-textPrimary hover:bg-borderColor/30 transition-colors"
+                      >
+                        Semestre {i + 1}
+                      </button>
+                    ))}
+                  </motion.div>
                 )}
-              </button>
-
-              {/* HORARIO */}
-              <button
-                onClick={onShowHorario}
-                className="flex-shrink-0 w-11 h-11 rounded-xl bg-bgPrimary/50 backdrop-blur-sm border border-borderColor/50 
-                           flex items-center justify-center transition-all duration-300 
-                           hover:scale-105 hover:bg-primary/10 hover:border-primary/40 hover:shadow-md text-primary"
-                aria-label="Abrir Horario"
-              >
-                <CalendarDays className="w-5 h-5" />
-              </button>
-
-              {/* AYUDA / TOUR */}
-              <button
-                onClick={onShowTour}
-                className="flex-shrink-0 w-11 h-11 rounded-xl bg-bgPrimary/50 backdrop-blur-sm border border-borderColor/50 
-                           flex items-center justify-center transition-all duration-300 
-                           hover:scale-105 hover:bg-primary/10 hover:border-primary/40 hover:shadow-md text-primary"
-                aria-label="Ver Ayuda"
-              >
-                <HelpCircle className="w-5 h-5" />
-              </button>
-
-              {/* EXCEPCIONAL */}
-              <div className="relative group flex-1 sm:flex-none">
-                <button
-                  onClick={() => setModoExcepcional(!modoExcepcional)}
-                  className={`w-full px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 
-                              flex items-center justify-center gap-2 border
-                              ${
-                                modoExcepcional
-                                  ? "bg-amber-400 text-amber-950 border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.5)]"
-                                  : "bg-primary text-white border-primary/80 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-lg shadow-primary/20"
-                              }`}
-                >
-                  <FileText className="w-4 h-4" /> 
-                  Excepcional
-                  {excepcionesActivas > 0 && (
-                    <span className="flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1.5 shadow-sm border border-red-600/50">
-                      {excepcionesActivas}
-                    </span>
-                  )}
-                </button>
-
-                <div
-                  className="absolute right-0 top-full mt-3 w-72 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 border border-white/10 dark:border-black/10
-                             shadow-xl rounded-xl p-3 text-sm text-zinc-100 font-medium z-50
-                             opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none"
-                >
-                  <div className="absolute -top-1 right-6 w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45 border-t border-l border-white/10 dark:border-black/10"></div>
-                  Permite aprobar un ramo SIN prerrequisitos temporalmente ⚠️
-                </div>
-              </div>
+              </AnimatePresence>
             </div>
-            </div>
+          )}
+
+          {/* Divider */}
+          {mallaSeleccionada && (
+            <div className="hidden sm:block w-px h-4 bg-borderColor mx-1" />
+          )}
+
+          {/* Theme swatches popover */}
+          <div ref={themeRef} className="relative">
+            <button
+              onClick={() => setThemeOpen((v) => !v)}
+              aria-label="Cambiar tema"
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:bg-borderColor/40"
+            >
+              <span
+                className="w-4 h-4 rounded-full border-2 border-white/30 shadow-sm flex-shrink-0"
+                style={{ background: currentTheme.color }}
+              />
+            </button>
+            <AnimatePresence>
+              {themeOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute right-0 top-full mt-1.5 bg-bgSecondary border border-borderColor rounded-xl shadow-lg z-50 p-2.5"
+                >
+                  <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wider px-1.5 mb-2">Tema</p>
+                  <div className="flex flex-col gap-1">
+                    {THEMES.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => { setTheme(t.id); setThemeOpen(false); }}
+                        className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm transition-colors ${
+                          theme === t.id ? "bg-borderColor/50 text-textPrimary font-medium" : "text-textSecondary hover:text-textPrimary hover:bg-borderColor/30"
+                        }`}
+                      >
+                        <span className="w-3.5 h-3.5 rounded-full flex-shrink-0 ring-1 ring-black/10"
+                          style={{ background: t.color }} />
+                        {t.name}
+                        {theme === t.id && (
+                          <span className="ml-auto text-primary text-xs">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+
+          {/* Dark mode */}
+          <NavBtn onClick={() => setDarkMode(!darkMode)} label="Alternar modo oscuro">
+            {darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </NavBtn>
+
+          {/* Horario */}
+          {mallaSeleccionada && (
+            <NavBtn onClick={onShowHorario} label="Abrir horario">
+              <CalendarDays className="w-4 h-4" />
+            </NavBtn>
+          )}
+
+          {/* Ayuda */}
+          {mallaSeleccionada && (
+            <NavBtn onClick={onShowTour} label="Ver ayuda">
+              <HelpCircle className="w-4 h-4" />
+            </NavBtn>
+          )}
+
+          {/* Divider */}
+          {mallaSeleccionada && (
+            <div className="hidden sm:block w-px h-4 bg-borderColor mx-1" />
+          )}
+
+          {/* Excepcional */}
+          {mallaSeleccionada && (
+            <button
+              onClick={() => setModoExcepcional(!modoExcepcional)}
+              aria-label={modoExcepcional ? "Desactivar modo excepcional" : "Activar modo excepcional"}
+              className={`
+                hidden sm:flex relative h-8 px-3 rounded-lg items-center gap-1.5 text-xs font-semibold transition-all duration-200 border
+                ${modoExcepcional
+                  ? "bg-amber-400/15 text-amber-600 border-amber-400/40 dark:text-amber-400"
+                  : "bg-primary/8 text-primary border-primary/20 hover:bg-primary/12"}
+              `}
+            >
+              <FileText className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Excepcional</span>
+              {excepcionesActivas > 0 && (
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                  {excepcionesActivas}
+                </span>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </nav>

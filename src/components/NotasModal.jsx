@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { parseGrade } from "../utils/gradeUtils";
+import DrawerPanel from "./DrawerPanel";
 
 export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }) {
   const [evaluaciones, setEvaluaciones] = useState([]);
@@ -277,42 +278,19 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   if (!isOpen || !curso) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-[4px] z-[100] flex items-center justify-center p-4"
-      onClick={onClose}
-      style={{ backfaceVisibility: "hidden" }}
+    <DrawerPanel
+      isOpen={isOpen}
+      onClose={onClose}
+      title={curso.nombre}
+      subtitle={`${curso.codigo} · ${curso.sct} SCT`}
+      width="max-w-3xl"
     >
-      <div className="w-full max-w-4xl" style={{ willChange: "transform, opacity" }}>
-          <motion.div
-            initial={{ scale: 0.96, opacity: 0, y: 15 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.96, opacity: 0, y: 15 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            style={{ backfaceVisibility: "hidden", willChange: "transform, opacity" }}
-            className="bg-bgPrimary rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-borderColor/40 flex flex-col max-h-[90vh]"
-          >
-            {/* Header */}
-            <div className="bg-primary text-white px-6 py-4 flex items-center justify-between rounded-t-xl">
-              <div className="min-w-0 flex items-center gap-3">
-                <h2 className="text-lg sm:text-xl font-bold truncate">
-                  {curso.nombre}
-                </h2>
-              </div>
-              <button
-                onClick={onClose}
-                className="ml-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full hover:bg-white/20 transition-colors flex items-center justify-center text-lg sm:text-xl font-bold shrink-0"
-                aria-label="Cerrar"
-              >
-                ✕
-              </button>
-            </div>
+      <div className="flex flex-col md:flex-row h-full">
+        {/* Main content */}
+        <div className="flex-1 overflow-y-auto p-5">
 
             {/* SubHeader / Stats Toolbar */}
-            <div className="bg-bgTertiary border-b border-borderColor px-4 py-2 flex flex-wrap items-center justify-between gap-3 shadow-inner">
+            <div className="border border-borderColor rounded-xl px-4 py-2 flex flex-wrap items-center justify-between gap-3 mb-4 bg-bgSurface">
                <div className="flex items-center gap-2 text-xs text-textSecondary font-medium">
                  <span>{curso.codigo}</span>
                  <span className="opacity-50">•</span>
@@ -331,8 +309,8 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                </button>
             </div>
 
-            {/* Contenido scrolleable analítico */}
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col md:flex-row gap-6">
+            {/* Contenido analítico */}
+            <div className="flex flex-col gap-6">
               
               {/* Columna Izquierda: Métricas y Evaluaciones */}
               <div className="flex-1">
@@ -599,7 +577,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
                                 {/* Fila expandible de Sub-notas */}
                                 {openSubNotas.includes(evaluacion.id) && (
-                                  <tr className="bg-bgTertiary/50 border-b border-borderColor/50">
+                                  <tr className="bg-bgSurface border-b border-borderColor/50">
                                     <td colSpan="4" className="p-4">
                                       <div className="flex flex-col sm:flex-row gap-4 items-start">
                                         {/* Input agregador */}
@@ -664,9 +642,9 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                 </div>
               </div>
 
-              {/* Columna Derecha: Agregar evaluación */}
-              <div className="w-full md:w-72 shrink-0">
-                <div className="bg-bgSecondary rounded-lg p-5 border border-borderColor sticky top-0 shadow-sm">
+              {/* Agregar evaluación */}
+              <div className="w-full shrink-0">
+                <div className="bg-bgSurface rounded-xl p-5 border border-borderColor">
                   <h3 className="text-base font-bold mb-4 text-textPrimary flex items-center gap-2">
                     <span className="bg-primary/20 text-primary w-6 h-6 rounded flex items-center justify-center text-sm">+</span>
                     Agregar Item
@@ -748,18 +726,8 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                 </div>
               </div>
             </div>
-
-            {/* Footer */}
-            <div className="bg-bgSecondary px-4 sm:px-6 py-3 sm:py-4 border-t border-borderColor flex justify-end rounded-b-xl">
-              <button
-                onClick={onClose}
-                className="px-5 sm:px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm sm:text-base"
-              >
-                Cerrar
-              </button>
-            </div>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+    </DrawerPanel>
   );
 }
