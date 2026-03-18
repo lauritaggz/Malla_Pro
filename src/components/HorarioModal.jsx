@@ -1,198 +1,244 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, ImagePlus, LayoutGrid, List, Plus, Trash2 } from "lucide-react";
-import {
-  DAYS,
-  buildSlots,
-  createScheduleItem,
-  getScheduleBounds,
-} from "../utils/scheduleUtils";
+import { BookOpen, Calendar, Copy, ImagePlus, MapPin, Pencil, Plus, Trash2, X } from "lucide-react";
+import { DAYS, buildSlots, createScheduleItem, getScheduleBounds } from "../utils/scheduleUtils";
 
 const STORAGE_KEY = "malla-horario-v1";
+const BLANK_DRAFT = { day: 1, startTime: "08:30", blocks: 2, courseId: "", sala: "" };
 
 function safeJsonParse(str, fallback) {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return fallback;
-  }
+  try { return JSON.parse(str); } catch { return fallback; }
 }
-
 function loadSchedule() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  const data = safeJsonParse(raw, null);
+  const data = safeJsonParse(localStorage.getItem(STORAGE_KEY), null);
   if (!data || typeof data !== "object") return { items: [], imagesByDay: {} };
   return {
     items: Array.isArray(data.items) ? data.items : [],
-    imagesByDay: data.imagesByDay && typeof data.imagesByDay === "object" ? data.imagesByDay : {},
+    imagesByDay: typeof data.imagesByDay === "object" ? data.imagesByDay : {},
   };
 }
-
-function saveSchedule(schedule) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
-}
-
-function dayLabel(dayId) {
-  return DAYS.find((d) => d.id === dayId)?.label ?? String(dayId);
-}
-
+function saveSchedule(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+function dayLabel(id) { return DAYS.find((d) => d.id === id)?.label ?? String(id); }
 function formatEndTime(item, slotsByStart) {
   const slot = slotsByStart.get(item.startTime);
   if (!slot) return null;
-  const blocks = Math.max(1, Number(item.blocks || 1));
-  const endIndex = slot.index + (blocks - 1);
-  const endSlot = Array.from(slotsByStart.values()).find((s) => s.index === endIndex);
-  // endTime real = end of last slot in the block
-  return endSlot?.endTime ?? slot.endTime;
+  const endIndex = slot.index + (Math.max(1, Number(item.blocks || 1)) - 1);
+  return Array.from(slotsByStart.values()).find((s) => s.index === endIndex)?.endTime ?? slot.endTime;
 }
 
-export default function HorarioModal({
-  isOpen,
-  onClose,
-  cursosCursandoData = [],
-}) {
-  const [tab, setTab] = useState("dia"); // "dia" | "semana"
-  const [selectedDay, setSelectedDay] = useState(1);
+export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] }) {
+  const [selectedDay, setSelectedDay] = useState(new Date().getDay() || 1);
   const fileRef = useRef(null);
+  const formRef = useRef(null);
 
   const [schedule, setSchedule] = useState(() => loadSchedule());
+  const [draft, setDraft] = useState({ ...BLANK_DRAFT, day: new Date().getDay() || 1 });
+  const [editingId, setEditingId] = useState(null);
+  const [imgDragOver, setImgDragOver] = useState(false);
 
+  useEffect(() => { if (isOpen) setSchedule(loadSchedule()); }, [isOpen]);
+  useEffect(() => { if (isOpen) saveSchedule(schedule); }, [schedule, isOpen]);
+
+  // Pegar imagen con Ctrl+V
   useEffect(() => {
     if (!isOpen) return;
-    setSchedule(loadSchedule());
-  }, [isOpen]);
+    const onPaste = (e) => {
+      const file = Array.from(e.clipboardData?.items || [])
+        .find((item) => item.type.startsWith("image/"))
+        ?.getAsFile();
+      if (file) setDayImage(selectedDay, file);
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, selectedDay]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    saveSchedule(schedule);
-  }, [schedule, isOpen]);
-
-  const cursosOptions = useMemo(() => {
-    const items = Array.isArray(cursosCursandoData) ? cursosCursandoData : [];
-    return items
-      .map((c) => ({
-        id: c.id,
-        nombre: c.nombre,
-        codigo: c.codigo,
-      }))
-      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
-  }, [cursosCursandoData]);
+  const cursosOptions = useMemo(() =>
+    (Array.isArray(cursosCursandoData) ? cursosCursandoData : [])
+      .map((c) => ({ id: String(c.id), nombre: c.nombre }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es")),
+    [cursosCursandoData]
+  );
 
   const slots = useMemo(() => buildSlots({ firstTime: "08:30", lastTime: "22:00" }), []);
   const slotsByStart = useMemo(() => new Map(slots.map((s) => [s.startTime, s])), [slots]);
+  const todayDayId = new Date().getDay();
+  const hasCursando = cursosOptions.length > 0;
 
-  const dayItems = useMemo(() => {
-    return schedule.items
-      .filter((it) => it.day === selectedDay)
-      .sort((a, b) => {
-        const sa = slotsByStart.get(a.startTime)?.startMinutes ?? 0;
-        const sb = slotsByStart.get(b.startTime)?.startMinutes ?? 0;
-        return sa - sb;
-      });
-  }, [schedule.items, selectedDay, slotsByStart]);
+  // Celdas interiores a bloques multi-row (para ocultar línea intermedia)
+  const interiorByDay = useMemo(() => {
+    const map = new Map();
+    schedule.items.forEach((it) => {
+      const startIdx = slotsByStart.get(it.startTime)?.index;
+      if (startIdx == null) return;
+      const blocks = Math.max(1, Number(it.blocks || 1));
+      for (let i = 1; i < blocks; i++) {
+        if (!map.has(it.day)) map.set(it.day, new Set());
+        map.get(it.day).add(startIdx + i);
+      }
+    });
+    return map;
+  }, [schedule.items, slotsByStart]);
 
-  const weekBounds = useMemo(() => getScheduleBounds(schedule.items, slots), [schedule.items, slots]);
-  const visibleSlots = useMemo(() => slots.slice(weekBounds.minSlotIndex, weekBounds.maxSlotIndex + 1), [slots, weekBounds]);
+  const interiorSlotIndices = useMemo(() => {
+    const set = new Set();
+    schedule.items.forEach((it) => {
+      const startIdx = slotsByStart.get(it.startTime)?.index;
+      if (startIdx == null) return;
+      const blocks = Math.max(1, Number(it.blocks || 1));
+      for (let i = 1; i < blocks; i++) set.add(startIdx + i);
+    });
+    return set;
+  }, [schedule.items, slotsByStart]);
 
-  const [draft, setDraft] = useState(() => ({
-    day: selectedDay,
-    startTime: "08:30",
-    blocks: 1,
-    title: "",
-    courseId: "",
-  }));
-
-  useEffect(() => {
-    setDraft((d) => ({ ...d, day: selectedDay }));
-  }, [selectedDay]);
+  // Solo mostrar el rango de slots relevante
+  const visibleSlots = useMemo(() => {
+    if (schedule.items.length === 0) return slots.slice(0, 12);
+    const bounds = getScheduleBounds(schedule.items, slots);
+    const from = Math.max(0, bounds.minSlotIndex - 1);
+    const to = Math.min(slots.length - 1, bounds.maxSlotIndex + 2);
+    return slots.slice(from, to + 1);
+  }, [schedule.items, slots]);
 
   if (!isOpen) return null;
 
-  const setDayImage = async (dayId, file) => {
-    if (!file) return;
-    const maxBytes = 2.5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      alert("La imagen es muy pesada (máx 2.5MB).");
+  /* ── helpers ── */
+  const resolvedTitle = (d) => {
+    if (d.courseId) return cursosOptions.find((c) => c.id === d.courseId)?.nombre || "Sin nombre";
+    return "Sin nombre";
+  };
+
+  const hasCollision = (items, candidate, excludeId = null) => {
+    const cStartIdx = slotsByStart.get(candidate.startTime)?.index;
+    if (cStartIdx == null) return false;
+    const cEndIdx = cStartIdx + Math.max(1, Number(candidate.blocks || 1));
+    return items.some((it) => {
+      if (excludeId && it.id === excludeId) return false;
+      if (Number(it.day) !== Number(candidate.day)) return false;
+      const iStartIdx = slotsByStart.get(it.startTime)?.index;
+      if (iStartIdx == null) return false;
+      const iEndIdx = iStartIdx + Math.max(1, Number(it.blocks || 1));
+      return cStartIdx < iEndIdx && iStartIdx < cEndIdx;
+    });
+  };
+
+  const nextFreeSlot = (items, day, fromIndex, blocks, excludeId = null) => {
+    const sorted = Array.from(slotsByStart.values()).sort((a, b) => a.index - b.index);
+    for (const s of sorted) {
+      if (s.index < fromIndex) continue;
+      if (!hasCollision(items, { day, startTime: s.startTime, blocks }, excludeId)) return s;
+    }
+    return null;
+  };
+
+  const clearForm = (day = selectedDay) => {
+    setDraft({ ...BLANK_DRAFT, day });
+    setEditingId(null);
+  };
+
+  const loadItemIntoDraft = (item) => {
+    setDraft({
+      day: item.day,
+      startTime: item.startTime,
+      blocks: Number(item.blocks || 2),
+      courseId: item.courseId != null ? String(item.courseId) : "",
+      sala: item.sala || "",
+    });
+    setEditingId(item.id);
+    setSelectedDay(item.day);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+
+  const commitDraft = () => {
+    const title = resolvedTitle(draft);
+    const courseId = draft.courseId ? String(draft.courseId) : null;
+    const candidate = { day: draft.day, startTime: draft.startTime, blocks: Number(draft.blocks || 1) };
+    if (hasCollision(schedule.items, candidate, editingId || null)) {
+      alert("Ya existe una clase en ese horario. Toca otra celda para cambiar la hora.");
       return;
     }
-
-    const dataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-    setSchedule((prev) => ({
-      ...prev,
-      imagesByDay: { ...prev.imagesByDay, [String(dayId)]: dataUrl },
-    }));
-  };
-
-  const removeDayImage = (dayId) => {
-    setSchedule((prev) => {
-      const next = { ...prev.imagesByDay };
-      delete next[String(dayId)];
-      return { ...prev, imagesByDay: next };
-    });
-  };
-
-  const addItem = () => {
-    const titleFromCourse =
-      draft.courseId && draft.courseId !== ""
-        ? cursosOptions.find((c) => c.id === draft.courseId)?.nombre || ""
-        : "";
-
-    const item = createScheduleItem({
-      day: draft.day,
-      startTime: draft.startTime,
-      blocks: Number(draft.blocks || 1),
-      title: (draft.title || titleFromCourse || "").trim(),
-      courseId: draft.courseId || null,
-    });
-
-    setSchedule((prev) => ({ ...prev, items: [...prev.items, item] }));
-    setDraft((d) => ({ ...d, title: "" }));
-  };
-
-  const updateItem = (id, patch) => {
-    setSchedule((prev) => ({
-      ...prev,
-      items: prev.items.map((it) => (it.id === id ? { ...it, ...patch } : it)),
-    }));
+    if (editingId) {
+      setSchedule((p) => ({
+        ...p,
+        items: p.items.map((it) =>
+          it.id === editingId
+            ? { ...it, day: draft.day, startTime: draft.startTime, blocks: Number(draft.blocks), title, courseId, sala: draft.sala || "" }
+            : it
+        ),
+      }));
+    } else {
+      setSchedule((p) => ({
+        ...p,
+        items: [...p.items, createScheduleItem({ day: draft.day, startTime: draft.startTime, blocks: Number(draft.blocks || 1), title, courseId, sala: draft.sala || "" })],
+      }));
+    }
+    clearForm(draft.day);
   };
 
   const deleteItem = (id) => {
-    setSchedule((prev) => ({ ...prev, items: prev.items.filter((it) => it.id !== id) }));
+    setSchedule((p) => ({ ...p, items: p.items.filter((it) => it.id !== id) }));
+    if (editingId === id) clearForm();
   };
 
-  const importFromCursando = () => {
-    const existing = new Set(schedule.items.map((it) => it.courseId).filter(Boolean));
-    const toAdd = cursosOptions
-      .filter((c) => !existing.has(c.id))
-      .slice(0, 50)
-      .map((c, idx) =>
-        createScheduleItem({
-          day: selectedDay,
-          startTime: slots[Math.min(idx, slots.length - 1)]?.startTime || "08:30",
-          blocks: 1,
-          title: c.nombre,
-          courseId: c.id,
-        })
-      );
-
-    if (toAdd.length === 0) return;
-    setSchedule((prev) => ({ ...prev, items: [...prev.items, ...toAdd] }));
+  const duplicateItem = () => {
+    if (!editingItem) return;
+    const currentSlot = slotsByStart.get(editingItem.startTime);
+    const afterIndex = (currentSlot?.index ?? 0) + Math.max(1, Number(editingItem.blocks || 1));
+    const freeSlot = nextFreeSlot(schedule.items, editingItem.day, afterIndex, editingItem.blocks);
+    if (!freeSlot) { alert("No hay espacio libre después de esta clase en el mismo día."); return; }
+    setSchedule((p) => ({
+      ...p,
+      items: [...p.items, createScheduleItem({
+        day: editingItem.day,
+        startTime: freeSlot.startTime,
+        blocks: editingItem.blocks,
+        title: editingItem.title,
+        courseId: editingItem.courseId,
+        sala: editingItem.sala,
+      })],
+    }));
+    clearForm(editingItem.day);
   };
 
+  const dropCursando = (courseId, day, startTime) => {
+    const course = cursosOptions.find((c) => c.id === String(courseId));
+    if (!course) return;
+    const blocks = 2;
+    if (hasCollision(schedule.items, { day, startTime, blocks })) {
+      alert("Ya existe una clase en ese horario.");
+      return;
+    }
+    setSchedule((p) => ({
+      ...p,
+      items: [...p.items, createScheduleItem({ day, startTime, blocks, title: course.nombre, courseId: String(courseId), sala: "" })],
+    }));
+  };
+
+  const updateItem = (id, patch) =>
+    setSchedule((p) => ({ ...p, items: p.items.map((it) => (it.id === id ? { ...it, ...patch } : it)) }));
+
+  const setDayImage = async (dayId, file) => {
+    if (!file) return;
+    if (file.size > 2.5 * 1024 * 1024) { alert("La imagen es muy pesada (máx 2.5 MB)."); return; }
+    const dataUrl = await new Promise((res, rej) => {
+      const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
+    });
+    setSchedule((p) => ({ ...p, imagesByDay: { ...p.imagesByDay, [String(dayId)]: dataUrl } }));
+  };
+
+  const removeDayImage = (dayId) =>
+    setSchedule((p) => { const n = { ...p.imagesByDay }; delete n[String(dayId)]; return { ...p, imagesByDay: n }; });
+
+  const isEditing = editingId !== null;
+  const editingItem = isEditing ? schedule.items.find((it) => it.id === editingId) : null;
+
+  /* ── RENDER ── */
   return (
     <AnimatePresence>
       <motion.div
         key="horario-modal"
-        exit={{ opacity: 0 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-md z-[85] flex items-center justify-center p-4 pb-[5rem] sm:pb-4"
+        exit={{ opacity: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-md z-[85] flex items-center justify-center p-2 sm:p-4 pb-[5rem] sm:pb-4"
         onClick={onClose}
       >
         <motion.div
@@ -201,452 +247,424 @@ export default function HorarioModal({
           exit={{ scale: 0.96, opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative bg-bgPrimary max-w-5xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-borderColor p-6"
+          className="relative bg-bgPrimary max-w-5xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-borderColor p-4 sm:p-6"
         >
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-bgSecondary/60 hover:bg-bgSecondary transition flex items-center justify-center text-xl font-bold border border-borderColor"
-            aria-label="Cerrar"
-          >
+          <button onClick={onClose}
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full bg-bgSecondary/60 hover:bg-bgSecondary transition flex items-center justify-center text-lg font-bold border border-borderColor text-textPrimary z-10">
             ✕
           </button>
 
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
-            <div>
-              <h1 className="text-3xl font-bold text-textPrimary mb-1 flex items-center gap-2">
-                <Calendar className="w-6 h-6" />
-                Horario
-              </h1>
-              <p className="text-textSecondary">
-                Crea tu horario por bloques (45 min + 10 min pausa) y edita los nombres como quieras.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setTab("dia")}
-                className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
-                  tab === "dia"
-                    ? "bg-primary text-white border-primary"
-                    : "bg-bgSecondary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/50"
-                }`}
-              >
-                <List className="inline-block w-4 h-4 mr-2" />
-                Día
-              </button>
-              <button
-                onClick={() => setTab("semana")}
-                className={`px-4 py-2 rounded-full text-sm font-semibold border transition ${
-                  tab === "semana"
-                    ? "bg-primary text-white border-primary"
-                    : "bg-bgSecondary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/50"
-                }`}
-              >
-                <LayoutGrid className="inline-block w-4 h-4 mr-2" />
-                Semana
-              </button>
-            </div>
+          {/* Header */}
+          <div className="mb-5 pr-10">
+            <h1 className="text-xl sm:text-2xl font-bold text-textPrimary flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary flex-shrink-0" /> Horario
+            </h1>
+            <p className="text-xs sm:text-sm text-textSecondary mt-0.5">
+              Bloques 45 min + 10 min pausa · arrastra un ramo a la planilla
+            </p>
           </div>
 
-          {/* Selector de día */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {DAYS.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => setSelectedDay(d.id)}
-                className={`px-3 py-2 rounded-full text-sm font-semibold border transition ${
-                  selectedDay === d.id
-                    ? "bg-primary text-white border-primary"
-                    : "bg-bgSecondary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/50"
-                }`}
-              >
-                {d.label}
-              </button>
-            ))}
-
-            <div className="flex-1" />
-
-            <button
-              onClick={importFromCursando}
-              className="px-4 py-2 rounded-full text-sm font-semibold border bg-primary/10 text-primary border-primary/30 hover:bg-primary/15 transition"
-              title="Crea bloques base para tus ramos marcados como cursando"
-            >
-              Importar “cursando”
-            </button>
-          </div>
-
-          {/* Imagen del horario por día */}
-          <div className="glass-card p-4 rounded-xl border border-borderColor mb-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <div className="font-semibold text-textPrimary">
-                  Imagen del horario ({dayLabel(selectedDay)})
-                </div>
-                <div className="text-sm text-textSecondary">
-                  Sube una captura/PDF como imagen para tener referencia rápida (guardado localmente).
+          {/* Imagen por día */}
+          <div
+            className={`rounded-2xl border p-4 mb-5 transition-colors duration-150 ${
+              imgDragOver ? "border-primary bg-primary/10 border-dashed" : "border-borderColor/50 bg-bgSecondary/40"
+            }`}
+            onDragOver={(e) => {
+              if (e.dataTransfer.types.includes("Files")) {
+                e.preventDefault(); e.stopPropagation(); setImgDragOver(true);
+              }
+            }}
+            onDragLeave={() => setImgDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault(); e.stopPropagation(); setImgDragOver(false);
+              const file = Array.from(e.dataTransfer.files).find((f) => f.type.startsWith("image/"));
+              if (file) setDayImage(selectedDay, file);
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 min-w-0">
+                <ImagePlus className="w-4 h-4 text-primary flex-shrink-0" />
+                <div>
+                  <div className="text-sm font-semibold text-textPrimary">Foto del horario — {dayLabel(selectedDay)}</div>
+                  <div className="text-xs text-textSecondary">
+                    {imgDragOver ? "¡Suelta aquí!" : "Arrastra, pega (Ctrl+V) o sube una imagen"}
+                  </div>
                 </div>
               </div>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => setDayImage(selectedDay, e.target.files?.[0])}
-              />
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  className="px-4 py-2 rounded-full text-sm font-semibold border bg-bgSecondary/70 text-textPrimary border-borderColor hover:border-primary/40 hover:text-primary transition"
-                >
-                  <ImagePlus className="inline-block w-4 h-4 mr-2" />
-                  Subir
+              <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                onChange={(e) => setDayImage(selectedDay, e.target.files?.[0])} />
+              <div className="flex gap-2 flex-shrink-0">
+                <button onClick={() => fileRef.current?.click()}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-borderColor bg-bgPrimary text-textPrimary hover:border-primary/50 hover:text-primary transition">
+                  Subir archivo
                 </button>
                 {schedule.imagesByDay?.[String(selectedDay)] && (
-                  <button
-                    onClick={() => removeDayImage(selectedDay)}
-                    className="px-4 py-2 rounded-full text-sm font-semibold border bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/15 transition"
-                  >
+                  <button onClick={() => removeDayImage(selectedDay)}
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/15 transition">
                     Quitar
                   </button>
                 )}
               </div>
             </div>
 
-            {schedule.imagesByDay?.[String(selectedDay)] && (
-              <div className="mt-4 overflow-hidden rounded-xl border border-borderColor/50 bg-bgSecondary/40">
-                <img
-                  src={schedule.imagesByDay[String(selectedDay)]}
-                  alt={`Horario ${dayLabel(selectedDay)}`}
-                  className="w-full max-h-[320px] object-contain"
-                />
+            {schedule.imagesByDay?.[String(selectedDay)] ? (
+              <div className="mt-3 overflow-hidden rounded-xl border border-borderColor/40">
+                <img src={schedule.imagesByDay[String(selectedDay)]} alt="Horario" className="w-full max-h-72 object-contain" />
+              </div>
+            ) : (
+              <div onClick={() => fileRef.current?.click()}
+                className={`mt-3 rounded-xl border-2 border-dashed flex flex-col items-center justify-center py-6 gap-1 cursor-pointer transition-colors ${
+                  imgDragOver ? "border-primary bg-primary/5" : "border-borderColor/30 hover:border-primary/40 hover:bg-primary/5"
+                }`}>
+                <ImagePlus className="w-6 h-6 text-textSecondary/50" />
+                <p className="text-xs text-textSecondary/60 text-center">Arrastra una imagen, pega con Ctrl+V o toca para subir</p>
               </div>
             )}
           </div>
 
-          {/* Formulario: agregar bloque */}
-          <div className="glass-card p-4 rounded-xl border border-borderColor mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-              <div className="md:col-span-3">
-                <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">
-                  Ramo (cursando)
-                </label>
-                <select
-                  value={draft.courseId}
-                  onChange={(e) => setDraft((d) => ({ ...d, courseId: e.target.value }))}
-                  className="mt-1 w-full appearance-none rounded-xl px-3 py-2 border border-borderColor bg-bgSecondary/70 text-textPrimary text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40"
-                >
-                  <option value="">(Opcional) Elegir ramo</option>
-                  {cursosOptions.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">
-                  Nombre (editable)
-                </label>
-                <input
-                  value={draft.title}
-                  onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-                  placeholder="Ej: Matemáticas I"
-                  className="mt-1 w-full rounded-xl px-3 py-2 border border-borderColor bg-bgSecondary/70 text-textPrimary text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">
-                  Inicio
-                </label>
-                <select
-                  value={draft.startTime}
-                  onChange={(e) => setDraft((d) => ({ ...d, startTime: e.target.value }))}
-                  className="mt-1 w-full appearance-none rounded-xl px-3 py-2 border border-borderColor bg-bgSecondary/70 text-textPrimary text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40"
-                >
-                  {slots.map((s) => (
-                    <option key={s.startTime} value={s.startTime}>
-                      {s.startTime} → {s.endTime}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">
-                  Bloques
-                </label>
-                <select
-                  value={draft.blocks}
-                  onChange={(e) => setDraft((d) => ({ ...d, blocks: Number(e.target.value) }))}
-                  className="mt-1 w-full appearance-none rounded-xl px-3 py-2 border border-borderColor bg-bgSecondary/70 text-textPrimary text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40"
-                >
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <option key={n} value={n}>
-                      {n} bloque{n > 1 ? "s" : ""} ({n * 45} min + {Math.max(0, n - 1) * 10} pausa)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-2 flex gap-2">
-                <button
-                  onClick={addItem}
-                  className="w-full px-4 py-2 rounded-xl text-sm font-bold border bg-primary text-white border-primary hover:brightness-110 transition"
-                >
-                  <Plus className="inline-block w-4 h-4 mr-2" />
-                  Agregar
+          {/* Formulario */}
+          <div ref={formRef}
+            className={`rounded-2xl border p-4 sm:p-5 mb-5 transition-colors duration-200 ${
+              isEditing ? "border-primary/40 bg-primary/5" : "border-borderColor/50 bg-bgSecondary/40"
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              {isEditing ? <Pencil className="w-4 h-4 text-primary" /> : <Plus className="w-4 h-4 text-primary" />}
+              <span className="text-sm font-bold text-textPrimary flex-1">
+                {isEditing ? `Editando: ${editingItem?.title || "clase"}` : "Agregar clase"}
+              </span>
+              {isEditing && (
+                <button onClick={() => clearForm(selectedDay)}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs text-textSecondary hover:text-primary border border-borderColor/50 hover:border-primary/30 transition">
+                  <X className="w-3 h-3" /> Nuevo
                 </button>
+              )}
+            </div>
+
+            {/* Indicador de celda seleccionada */}
+            {(draft.startTime && draft.day) && (
+              <div className="flex items-center gap-1.5 text-xs text-textSecondary mb-4 px-1">
+                <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                <span>
+                  Se colocará en <strong className="text-textPrimary">{dayLabel(draft.day)}</strong> a las{" "}
+                  <strong className="text-textPrimary">{draft.startTime}</strong>
+                  <span className="text-textSecondary/60"> · toca otra celda para cambiar</span>
+                </span>
               </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              {/* Ramo */}
+              <div>
+                <label className="block text-xs font-semibold text-textSecondary mb-1">Ramo</label>
+                <select value={draft.courseId}
+                  onChange={(e) => setDraft((d) => ({ ...d, courseId: e.target.value }))}
+                  className="w-full appearance-none rounded-xl px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/40">
+                  <option value="">Sin ramo / manual</option>
+                  {cursosOptions.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                </select>
+              </div>
+
+              {/* Sala */}
+              <div>
+                <label className="block text-xs font-semibold text-textSecondary mb-1">Sala / Lugar</label>
+                <input value={draft.sala}
+                  onChange={(e) => setDraft((d) => ({ ...d, sala: e.target.value }))}
+                  placeholder="Ej: A-201, Edificio B"
+                  className="w-full rounded-xl px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/40" />
+              </div>
+
+              {/* Duración */}
+              <div>
+                <label className="block text-xs font-semibold text-textSecondary mb-1">Duración</label>
+                <select value={draft.blocks}
+                  onChange={(e) => setDraft((d) => ({ ...d, blocks: Number(e.target.value) }))}
+                  className="w-full appearance-none rounded-xl px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/40">
+                  {[1,2,3,4,5].map((n) => <option key={n} value={n}>{n} bloque{n > 1 ? "s" : ""} · {n * 45} min</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button onClick={commitDraft}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:brightness-110 transition shadow-sm flex items-center gap-1.5">
+                {isEditing ? <><Pencil className="w-4 h-4" />Guardar cambios</> : <><Plus className="w-4 h-4" />Agregar al horario</>}
+              </button>
+              {isEditing && editingItem && (
+                <>
+                  <button onClick={duplicateItem}
+                    className="px-4 py-2.5 rounded-xl text-sm font-bold border border-borderColor bg-bgPrimary text-textPrimary hover:border-primary/50 hover:text-primary transition flex items-center gap-1.5">
+                    <Copy className="w-4 h-4" />Duplicar
+                  </button>
+                  <button onClick={() => deleteItem(editingItem.id)}
+                    className="px-4 py-2.5 rounded-xl text-sm font-bold border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/15 transition flex items-center gap-1.5">
+                    <Trash2 className="w-4 h-4" />Eliminar
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          {tab === "dia" ? (
-            <div className="glass-card p-4 rounded-xl border border-borderColor">
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-bold text-textPrimary">Clases del día ({dayLabel(selectedDay)})</div>
-                <div className="text-sm text-textSecondary">{dayItems.length} bloque(s)</div>
-              </div>
-
-              {dayItems.length === 0 ? (
-                <div className="text-textSecondary text-sm">
-                  Aún no tienes bloques este día. Agrega uno arriba o importa desde “cursando”.
+          {/* Aviso sin ramos cursando */}
+          {!hasCursando && (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 mb-5 flex items-start gap-3">
+              <BookOpen className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <div className="text-sm font-semibold text-textPrimary">Sin ramos "cursando"</div>
+                <div className="text-xs text-textSecondary mt-0.5">
+                  Márcalos como <strong>cursando</strong> en la malla para que aparezcan aquí.
+                  De todas formas puedes agregar clases manualmente.
                 </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {dayItems.map((it) => {
-                    const endTime = formatEndTime(it, slotsByStart);
-                    return (
-                      <div
-                        key={it.id}
-                        className="rounded-2xl border border-borderColor/50 bg-bgSecondary/60 p-4 flex flex-col md:flex-row md:items-center gap-3"
-                      >
-                        <div className="min-w-[170px]">
-                          <div className="text-sm font-bold text-primary">
-                            {it.startTime} {endTime ? `→ ${endTime}` : ""}
-                          </div>
-                          <div className="text-xs text-textSecondary">
-                            {it.blocks} bloque{it.blocks > 1 ? "s" : ""} · {dayLabel(it.day)}
-                          </div>
-                        </div>
-
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
-                          <input
-                            value={it.title || ""}
-                            onChange={(e) => updateItem(it.id, { title: e.target.value })}
-                            className="w-full rounded-xl px-3 py-2 border border-borderColor bg-bgPrimary/40 text-textPrimary text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/40"
-                          />
-
-                          <select
-                            value={it.courseId || ""}
-                            onChange={(e) => {
-                              const courseId = e.target.value || null;
-                              const name = courseId
-                                ? cursosOptions.find((c) => c.id === courseId)?.nombre || it.title
-                                : it.title;
-                              updateItem(it.id, { courseId, title: name });
-                            }}
-                            className="w-full appearance-none rounded-xl px-3 py-2 border border-borderColor bg-bgPrimary/40 text-textPrimary text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40"
-                          >
-                            <option value="">(Sin ramo asociado)</option>
-                            {cursosOptions.map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.nombre}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <select
-                            value={it.startTime}
-                            onChange={(e) => updateItem(it.id, { startTime: e.target.value })}
-                            className="appearance-none rounded-xl px-3 py-2 border border-borderColor bg-bgPrimary/40 text-textPrimary text-sm font-medium outline-none"
-                          >
-                            {slots.map((s) => (
-                              <option key={s.startTime} value={s.startTime}>
-                                {s.startTime}
-                              </option>
-                            ))}
-                          </select>
-                          <select
-                            value={it.blocks}
-                            onChange={(e) => updateItem(it.id, { blocks: Number(e.target.value) })}
-                            className="appearance-none rounded-xl px-3 py-2 border border-borderColor bg-bgPrimary/40 text-textPrimary text-sm font-medium outline-none"
-                          >
-                            {[1, 2, 3, 4, 5].map((n) => (
-                              <option key={n} value={n}>
-                                {n}b
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            onClick={() => deleteItem(it.id)}
-                            className="w-10 h-10 rounded-xl border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/15 transition flex items-center justify-center"
-                            aria-label="Eliminar"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="glass-card p-4 rounded-xl border border-borderColor">
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-bold text-textPrimary">Semana (ajustada a tus horas)</div>
-                <div className="text-sm text-textSecondary">
-                  {visibleSlots.length} bloque(s) visibles
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <WeekGrid
-                  visibleSlots={visibleSlots}
-                  minSlotIndex={weekBounds.minSlotIndex}
-                  schedule={schedule}
-                  slotsByStart={slotsByStart}
-                  cursosOptions={cursosOptions}
-                  updateItem={updateItem}
-                  deleteItem={deleteItem}
-                />
               </div>
             </div>
           )}
+
+          {/* Chips de cursando arrastrables */}
+          {hasCursando && (
+            <div className="rounded-2xl border border-borderColor/50 bg-bgSecondary/40 p-4 mb-5">
+              <p className="text-xs font-bold text-textSecondary uppercase tracking-wider mb-2">
+                Ramos cursando · arrastra a la planilla o toca para editar
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {cursosOptions.map((c) => {
+                  const active = draft.courseId === c.id && isEditing;
+                  return (
+                    <button key={c.id} type="button"
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/cursando-id", c.id);
+                        e.dataTransfer.effectAllowed = "copy";
+                      }}
+                      onClick={() => {
+                        setDraft((d) => ({ ...d, courseId: active ? "" : c.id }));
+                        if (editingId) formRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition cursor-grab active:cursor-grabbing select-none ${
+                        active
+                          ? "bg-primary text-white border-primary shadow"
+                          : "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                      }`}>
+                      {c.nombre}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-textSecondary/60 mt-2">
+                Arrastra directamente sobre la planilla · 2 bloques por defecto
+              </p>
+            </div>
+          )}
+
+          {/* Vista: semana desktop / día móvil */}
+          <div className="rounded-2xl border border-borderColor/50 bg-bgSecondary/30 p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-textPrimary">
+                <span className="hidden sm:inline">Semana completa</span>
+                <span className="sm:hidden">{dayLabel(selectedDay)}</span>
+              </span>
+              <span className="text-xs text-textSecondary">{schedule.items.length} clase{schedule.items.length !== 1 ? "s" : ""}</span>
+            </div>
+
+            {/* Selector de día (solo móvil) */}
+            <div className="flex flex-wrap gap-1.5 mb-3 sm:hidden">
+              {DAYS.map((d) => (
+                <button key={d.id}
+                  onClick={() => { setSelectedDay(d.id); setDraft((prev) => ({ ...prev, day: d.id })); }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                    selectedDay === d.id ? "bg-primary text-white border-primary" :
+                    d.id === todayDayId ? "bg-primary/10 text-primary border-primary/30" :
+                    "bg-bgSecondary/60 text-textSecondary border-borderColor"
+                  }`}>
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Lista día (móvil) */}
+            <div className="sm:hidden">
+              <DayList
+                items={schedule.items.filter((it) => it.day === selectedDay)
+                  .sort((a, b) => (slotsByStart.get(a.startTime)?.startMinutes ?? 0) - (slotsByStart.get(b.startTime)?.startMinutes ?? 0))}
+                allSlots={slots}
+                slotsByStart={slotsByStart}
+                editingId={editingId}
+                onSelect={(it) => it.id === editingId ? clearForm(selectedDay) : loadItemIntoDraft(it)}
+                onSelectEmpty={(startTime) => {
+                  if (!isEditing) clearForm(selectedDay);
+                  setDraft((d) => ({ ...d, day: selectedDay, startTime }));
+                  formRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                }}
+                formatEndTime={formatEndTime}
+              />
+            </div>
+
+            {/* Grid semanal (desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <WeekGrid
+                slots={visibleSlots}
+                slotsByStart={slotsByStart}
+                schedule={schedule}
+                updateItem={updateItem}
+                todayDayId={todayDayId}
+                editingId={editingId}
+                formatEndTime={formatEndTime}
+                interiorByDay={interiorByDay}
+                interiorSlotIndices={interiorSlotIndices}
+                onSelectItem={loadItemIntoDraft}
+                onSelectEmpty={(dayId, startTime) => {
+                  if (!isEditing) clearForm(dayId);
+                  setSelectedDay(dayId);
+                  setDraft((d) => ({ ...d, day: dayId, startTime }));
+                  formRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                }}
+                onDropCursando={dropCursando}
+              />
+            </div>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
   );
 }
 
-function WeekGrid({
-  visibleSlots,
-  minSlotIndex,
-  schedule,
-  slotsByStart,
-  cursosOptions,
-  updateItem,
-  deleteItem,
-}) {
-  const rowHeight = 56; // px
-  const headerHeight = 44; // px
-
-  const items = schedule.items
-    .filter((it) => slotsByStart.has(it.startTime))
-    .map((it) => {
-      const startIdx = slotsByStart.get(it.startTime)?.index ?? 0;
-      const blocks = Math.max(1, Number(it.blocks || 1));
-      return {
-        ...it,
-        _gridRowStart: startIdx - minSlotIndex + 2, // row 1 is header
-        _gridRowEnd: startIdx - minSlotIndex + 2 + blocks,
-        _gridCol: dayToGridCol(it.day),
-      };
-    });
-
+/* ── Vista lista por día (móvil) ── */
+function DayList({ items, allSlots, slotsByStart, editingId, onSelect, onSelectEmpty, formatEndTime }) {
+  const visibleSlots = allSlots.slice(0, 16);
   return (
-    <div
-      className="min-w-[980px] grid gap-2 relative"
-      style={{
-        gridTemplateColumns: `140px repeat(7, minmax(0, 1fr))`,
-        gridTemplateRows: `${headerHeight}px repeat(${visibleSlots.length}, ${rowHeight}px)`,
-      }}
-    >
-      {/* Header */}
-      <div className="text-xs font-bold text-textSecondary uppercase tracking-wider px-2 py-2 flex items-center">
-        Hora
-      </div>
-      {DAYS.map((d) => (
-        <div
-          key={d.id}
-          className="text-xs font-bold text-textSecondary uppercase tracking-wider px-2 py-2 rounded-xl border border-borderColor/40 bg-bgSecondary/50 flex items-center"
-        >
-          {d.label}
-        </div>
-      ))}
-
-      {/* Time column */}
-      {visibleSlots.map((slot, i) => (
-        <div
-          key={slot.startTime}
-          className="px-2 py-2 rounded-xl border border-borderColor/30 bg-bgSecondary/30"
-          style={{ gridColumn: 1, gridRow: i + 2 }}
-        >
-          <div className="text-sm font-bold text-primary">{slot.startTime}</div>
-          <div className="text-[11px] text-textSecondary">{slot.endTime}</div>
-        </div>
-      ))}
-
-      {/* Background cells */}
-      {visibleSlots.flatMap((slot, i) =>
-        DAYS.map((d) => (
-          <div
-            key={`${slot.startTime}-${d.id}-bg`}
-            className="rounded-xl border border-borderColor/30 bg-bgPrimary/20"
-            style={{ gridColumn: dayToGridCol(d.id), gridRow: i + 2 }}
-          />
-        ))
-      )}
-
-      {/* Items (spanning rows) */}
-      {items.map((it) => (
-        <div
-          key={it.id}
-          className="z-[2] rounded-xl border border-primary/25 bg-primary/10 text-textPrimary p-2 overflow-hidden"
-          style={{
-            gridColumn: it._gridCol,
-            gridRow: `${it._gridRowStart} / ${it._gridRowEnd}`,
-            margin: "4px",
-          }}
-        >
-          <input
-            value={it.title || ""}
-            onChange={(e) => updateItem(it.id, { title: e.target.value })}
-            className="w-full bg-transparent outline-none text-sm font-bold"
-          />
-          <div className="mt-1 flex items-center gap-2">
-            <select
-              value={it.courseId || ""}
-              onChange={(e) => {
-                const courseId = e.target.value || null;
-                const name = courseId
-                  ? cursosOptions.find((c) => c.id === courseId)?.nombre || it.title
-                  : it.title;
-                updateItem(it.id, { courseId, title: name });
-              }}
-              className="flex-1 appearance-none rounded-lg px-2 py-1 border border-borderColor/40 bg-bgSecondary/40 text-[12px] font-medium outline-none"
-            >
-              <option value="">(sin ramo)</option>
-              {cursosOptions.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => deleteItem(it.id)}
-              className="w-8 h-8 rounded-lg border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/15 transition flex items-center justify-center"
-              aria-label="Eliminar"
-            >
-              <Trash2 className="w-4 h-4" />
+    <div className="flex flex-col gap-1">
+      {visibleSlots.map((slot) => {
+        const item = items.find((it) => it.startTime === slot.startTime);
+        if (item) {
+          const end = formatEndTime(item, slotsByStart);
+          const sel = editingId === item.id;
+          return (
+            <button key={slot.startTime} type="button" onClick={() => onSelect(item)}
+              className={`flex items-stretch rounded-2xl overflow-hidden border text-left w-full transition ${
+                sel ? "border-primary bg-primary/10 shadow-md" : "border-borderColor/40 bg-bgPrimary/50 hover:border-primary/40"
+              }`}>
+              <div className="w-1 flex-shrink-0 bg-primary" />
+              <div className="flex flex-col gap-0.5 flex-1 px-3 py-2.5">
+                <div className="text-xs font-bold text-primary">{item.startTime}{end ? ` → ${end}` : ""}</div>
+                <div className="text-sm font-semibold text-textPrimary">{item.title || "Sin nombre"}</div>
+                {item.sala && <div className="text-xs text-textSecondary">📍 {item.sala}</div>}
+              </div>
             </button>
-          </div>
-          <div className="text-[11px] text-textSecondary mt-1">
-            {it.startTime} · {Math.max(1, Number(it.blocks || 1))} bloque{Number(it.blocks || 1) > 1 ? "s" : ""}
-          </div>
-        </div>
-      ))}
+          );
+        }
+        return (
+          <button key={slot.startTime} type="button" onClick={() => onSelectEmpty(slot.startTime)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-left w-full hover:bg-primary/5 transition group">
+            <span className="text-[11px] font-semibold text-textSecondary/50 w-10 flex-shrink-0">{slot.startTime}</span>
+            <span className="text-xs text-textSecondary/30 group-hover:text-primary/40 transition">+ agregar</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function dayToGridCol(dayId) {
-  // grid columns: 1 = time, 2..8 = days (in DAYS order)
-  const idx = DAYS.findIndex((d) => d.id === dayId);
-  return 2 + (idx >= 0 ? idx : 0);
-}
+/* ── WeekGrid (desktop) ── */
+function WeekGrid({ slots, slotsByStart, schedule, updateItem, todayDayId, editingId, formatEndTime, interiorByDay, interiorSlotIndices, onSelectItem, onSelectEmpty, onDropCursando }) {
+  const ROW_H = 44;
+  const HEAD_H = 48;
 
+  const items = schedule.items
+    .filter((it) => slotsByStart.has(it.startTime))
+    .map((it) => {
+      const absIdx = slotsByStart.get(it.startTime)?.index ?? 0;
+      const visibleIdx = slots.findIndex((s) => s.index === absIdx);
+      if (visibleIdx === -1) return null;
+      return {
+        ...it,
+        _row: visibleIdx + 2,
+        _rowSpan: Math.max(1, Number(it.blocks || 1)),
+        _col: DAYS.findIndex((d) => d.id === it.day) + 2,
+      };
+    })
+    .filter(Boolean);
+
+  const handleDrop = (e, dayId, startTime) => {
+    e.preventDefault();
+    const itemId = e.dataTransfer.getData("text/schedule-item-id");
+    if (itemId) { updateItem(itemId, { day: dayId, startTime }); return; }
+    const cursandoId = e.dataTransfer.getData("text/cursando-id");
+    if (cursandoId) onDropCursando(cursandoId, dayId, startTime);
+  };
+
+  return (
+    <div className="relative"
+      style={{
+        display: "grid",
+        gridTemplateColumns: `64px repeat(7, minmax(80px, 1fr))`,
+        gridTemplateRows: `${HEAD_H}px repeat(${slots.length}, ${ROW_H}px)`,
+        minWidth: 640,
+      }}
+    >
+      <div style={{ gridColumn: 1, gridRow: 1 }} />
+
+      {DAYS.map((d, ci) => (
+        <div key={d.id} style={{ gridColumn: ci + 2, gridRow: 1 }}
+          className={`flex items-center justify-center text-xs font-bold uppercase tracking-wider rounded-xl mx-0.5 ${
+            d.id === todayDayId ? "bg-primary/10 text-primary" : "text-textSecondary"
+          }`}>
+          {d.label}
+        </div>
+      ))}
+
+      {slots.map((slot, i) => (
+        <div key={`h-${slot.startTime}`} style={{ gridColumn: 1, gridRow: i + 2 }}
+          className="pr-2 flex items-start pt-1 justify-end">
+          {!interiorSlotIndices.has(slot.index) && (
+            <span className="text-[11px] font-semibold text-textSecondary/70">{slot.startTime}</span>
+          )}
+        </div>
+      ))}
+
+      {slots.flatMap((slot, i) =>
+        DAYS.map((d, ci) => {
+          const isInterior = interiorByDay.get(d.id)?.has(slot.index) ?? false;
+          return (
+            <div key={`${slot.startTime}-${d.id}`}
+              style={{ gridColumn: ci + 2, gridRow: i + 2 }}
+              className={`mx-0.5 cursor-pointer hover:bg-primary/5 transition ${isInterior ? "" : "border-t border-borderColor/20"}`}
+              onClick={() => onSelectEmpty(d.id, slot.startTime)}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = e.dataTransfer.types.includes("text/schedule-item-id") ? "move" : "copy";
+              }}
+              onDrop={(e) => handleDrop(e, d.id, slot.startTime)}
+            />
+          );
+        })
+      )}
+
+      {items.map((it) => {
+        const end = formatEndTime(it, slotsByStart);
+        const sel = editingId === it.id;
+        return (
+          <div key={it.id}
+            style={{ gridColumn: it._col, gridRow: `${it._row} / span ${it._rowSpan}`, margin: "2px 3px", zIndex: 10, position: "relative" }}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("text/schedule-item-id", it.id);
+              e.dataTransfer.effectAllowed = "move";
+            }}
+            onClick={(e) => { e.stopPropagation(); onSelectItem(it); }}
+            className={`cursor-pointer rounded-xl overflow-hidden flex flex-col transition ${sel ? "ring-2 ring-primary" : ""}`}
+          >
+            <div className={`flex h-full rounded-xl overflow-hidden border transition ${
+              sel ? "border-primary bg-primary/20" : "border-primary/20 bg-primary/10 hover:bg-primary/15"
+            }`}>
+              <div className="w-[3px] flex-shrink-0 bg-primary" />
+              <div className="flex flex-col justify-center px-2 py-1 min-w-0 flex-1 overflow-hidden">
+                <div className="text-[11px] font-bold text-textPrimary leading-tight truncate">{it.title || "Sin nombre"}</div>
+                {it.sala && <div className="text-[10px] text-textSecondary leading-tight truncate">📍 {it.sala}</div>}
+                {end && <div className="text-[10px] text-textSecondary leading-tight">{it.startTime} → {end}</div>}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
