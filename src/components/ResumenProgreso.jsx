@@ -34,7 +34,20 @@ export default function ResumenProgreso({
   }, [isOpen, mallaData, aprobados, excepciones, cursando]);
 
   const calcularEstadisticas = () => {
-    if (!mallaData || !mallaData.semestres) return;
+    if (!mallaData) return;
+
+    // Mallas con menciones usan semestresComunes + menciones en lugar de semestres
+    let semestresEfectivos = [];
+    if (mallaData.isMencion) {
+      semestresEfectivos = [
+        ...(mallaData.semestresComunes || []),
+        ...Object.values(mallaData.menciones || {}).flatMap((m) => m.semestres || []),
+      ];
+    } else {
+      semestresEfectivos = mallaData.semestres || [];
+    }
+
+    if (semestresEfectivos.length === 0) return;
 
     let creditosTotales = 0;
     let creditosAprobados = 0;
@@ -46,7 +59,7 @@ export default function ResumenProgreso({
       localStorage.getItem("malla-notas") || "{}"
     );
 
-    const stats = mallaData.semestres.map((semestre, idx) => {
+    const stats = semestresEfectivos.map((semestre, idx) => {
       let aprobS = 0;
       let cursandoS = 0;
       let totalS = 0;
@@ -141,6 +154,7 @@ export default function ResumenProgreso({
           {/* BOTÓN CERRAR */}
           <button
             onClick={onClose}
+            aria-label="Cerrar resumen de progreso"
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-bgSecondary/60 hover:bg-bgSecondary transition flex items-center justify-center text-xl font-bold border border-borderColor"
           >
             ✕
@@ -162,7 +176,7 @@ export default function ResumenProgreso({
               <p className="text-sm text-textSecondary mb-1">
                 Créditos Aprobados
               </p>
-              <p className="text-3xl font-bold text-green-500">
+              <p className="text-3xl font-bold text-emerald-500">
                 {creditosData.aprobados}
               </p>
             </div>
@@ -170,7 +184,7 @@ export default function ResumenProgreso({
             {/* CURSANDO */}
             <div className="glass-card p-5 rounded-xl border border-borderColor">
               <p className="text-sm text-textSecondary mb-1">En Curso</p>
-              <p className="text-3xl font-bold text-blue-500">
+              <p className="text-3xl font-bold text-primary">
                 {creditosData.cursando}
               </p>
             </div>
@@ -194,11 +208,11 @@ export default function ResumenProgreso({
 
             <div className="relative w-full h-8 bg-bgSecondary rounded-full overflow-hidden">
               <div
-                className="absolute top-0 h-full bg-green-500/80"
+                className="absolute top-0 h-full bg-emerald-500/80"
                 style={{ width: `${porcentajeAprobado}%` }}
               />
               <div
-                className="absolute top-0 h-full bg-blue-500/80"
+                className="absolute top-0 h-full bg-primary/80"
                 style={{
                   left: `${porcentajeAprobado}%`,
                   width: `${porcentajeCursando}%`,

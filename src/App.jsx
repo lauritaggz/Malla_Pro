@@ -7,6 +7,7 @@ import ResumenProgreso from "./components/ResumenProgreso";
 import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
 import MobileBottomNav from "./components/MobileBottomNav";
+import HorarioModal from "./components/HorarioModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 
@@ -42,6 +43,7 @@ export default function App() {
   const [mostrarNotas, setMostrarNotas] = useState(false);
   const [mostrarTour, setMostrarTour] = useState(false);
   const [ocultarCompletados, setOcultarCompletados] = useState(false);
+  const [mostrarHorario, setMostrarHorario] = useState(false);
   
   // Detectar si es dispositivo touch
   const isMobile = typeof window !== 'undefined' && 
@@ -144,6 +146,7 @@ export default function App() {
           cantidadSemestres={cantidadSemestres}
           onVerProgreso={() => setMostrarResumen(true)}
           onShowTour={() => setMostrarTour(true)}
+          onShowHorario={() => setMostrarHorario(true)}
           mostrarResumen={mostrarResumen}
         />
       )}
@@ -163,6 +166,7 @@ export default function App() {
           ocultarCompletados={ocultarCompletados}
           setOcultarCompletados={setOcultarCompletados}
           onShowTour={() => setMostrarTour(true)}
+          onShowHorario={() => setMostrarHorario(true)}
           onChangeMalla={handleCambiarMalla}
         />
       )}
@@ -304,6 +308,19 @@ export default function App() {
         onClose={() => setMostrarTour(false)} 
         isMobile={isMobile}
       />
+
+      {/* MODAL HORARIO */}
+      {mallaSeleccionada && mallaData && (
+        <HorarioModal
+          isOpen={mostrarHorario}
+          onClose={() => setMostrarHorario(false)}
+          cursosCursandoData={
+            mallaData?.semestres?.flatMap((s) =>
+              s.cursos.filter((c) => cursando.includes(c.id))
+            ) || []
+          }
+        />
+      )}
     </div>
   );
 }

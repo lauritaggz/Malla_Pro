@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle } from "lucide-react";
+import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle, CalendarDays } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function MobileBottomNav({
@@ -16,6 +16,7 @@ export default function MobileBottomNav({
   ocultarCompletados,
   setOcultarCompletados,
   onShowTour,
+  onShowHorario,
   onChangeMalla
 }) {
   const [showMore, setShowMore] = useState(false);
@@ -84,6 +85,21 @@ export default function MobileBottomNav({
                     <option value="golden">Golden Carbon</option>
                  </select>
               </div>
+            </div>
+
+            {/* Horario */}
+            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
+              <button
+                onClick={() => {
+                  onShowHorario();
+                  setShowMore(false);
+                }}
+                className="w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm
+                           bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15"
+              >
+                <CalendarDays className="w-5 h-5" />
+                Horario
+              </button>
             </div>
 
             {/* Ocultar semestres completados */}
@@ -172,7 +188,7 @@ export default function MobileBottomNav({
           }`}
         >
           <FileText className={`w-6 h-6 mb-1 ${modoExcepcional ? "animate-pulse" : ""}`} />
-          <span className="text-[10px] font-medium">{modoExcepcional ? "Excepcional" : "Excepcional"}</span>
+          <span className="text-[10px] font-medium">{modoExcepcional ? "Activo" : "Excepcional"}</span>
           {excepcionesActivas > 0 && (
             <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
               {excepcionesActivas}
