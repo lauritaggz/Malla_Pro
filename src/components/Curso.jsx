@@ -115,7 +115,7 @@ const Curso = ({
             : excepcional
             ? "bg-amber-500/85 text-white border-amber-400/50 shadow-md dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/60"
             : enCurso
-            ? "bg-primary text-white border-primary shadow-lg shadow-primary/30 scale-[1.02] dark:bg-primary/50 dark:border-primary/40"
+            ? "bg-primary text-white border-primary shadow-lg shadow-primary/30 scale-[1.02] dark:bg-primary/20 dark:text-primary dark:border-primary/40 dark:shadow-none"
             : !disponible
             ? "bg-bgSecondary/50 text-textSecondary opacity-70 border-dashed border-borderColor/80"
             : "bg-primary/10 text-textPrimary shadow-sm hover:bg-primary/20 hover:border-primary/50 border-primary/30"
