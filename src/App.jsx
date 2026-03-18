@@ -8,6 +8,7 @@ import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
 import MobileBottomNav from "./components/MobileBottomNav";
 import HorarioModal from "./components/HorarioModal";
+import LoginSuggestion, { shouldShowLogin, getStoredUser } from "./components/LoginSuggestion";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 
@@ -44,7 +45,9 @@ export default function App() {
   const [mostrarTour, setMostrarTour] = useState(false);
   const [ocultarCompletados, setOcultarCompletados] = useState(false);
   const [mostrarHorario, setMostrarHorario] = useState(false);
-  
+  const [mostrarLogin, setMostrarLogin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+
   // Detectar si es dispositivo touch
   const isMobile = typeof window !== 'undefined' && 
     (('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024);
@@ -77,14 +80,23 @@ export default function App() {
     }
   };
 
-  // Mostrar Tour la primera vez, solo si hay una malla seleccionada
+  // Mostrar login sugerido una vez al seleccionar una malla
   useEffect(() => {
-    const hasSeenTour = localStorage.getItem("malla-has-seen-tour");
-    if (!hasSeenTour && mallaSeleccionada) {
-      setMostrarTour(true);
-      localStorage.setItem("malla-has-seen-tour", "true");
+    if (mallaSeleccionada && shouldShowLogin()) {
+      setMostrarLogin(true);
     }
   }, [mallaSeleccionada]);
+
+  // Mostrar Tour la primera vez (solo después de que el login fue manejado)
+  useEffect(() => {
+    if (!mostrarLogin) {
+      const hasSeenTour = localStorage.getItem("malla-has-seen-tour");
+      if (!hasSeenTour && mallaSeleccionada) {
+        setMostrarTour(true);
+        localStorage.setItem("malla-has-seen-tour", "true");
+      }
+    }
+  }, [mallaSeleccionada, mostrarLogin]);
 
   // ---------------- NAVBAR HEIGHT LISTENER ----------------
   useEffect(() => {
@@ -301,6 +313,15 @@ export default function App() {
           }}
         />
       )}
+
+      {/* LOGIN SUGERIDO */}
+      <LoginSuggestion
+        isOpen={mostrarLogin}
+        onClose={(user) => {
+          setMostrarLogin(false);
+          if (user) setCurrentUser(user);
+        }}
+      />
 
       {/* ONBOARDING TOUR */}
       <OnboardingTour 
