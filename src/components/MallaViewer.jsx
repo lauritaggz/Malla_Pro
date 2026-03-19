@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
+import { Eye, EyeOff } from "lucide-react";
 import Curso from "./Curso";
 
 const MallaViewer = ({
@@ -434,13 +435,15 @@ const MallaViewer = ({
 
         <button
           onClick={() => setOcultarCompletados(!ocultarCompletados)}
-          className={`hidden sm:flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-300 border
-            ${ocultarCompletados 
-              ? "bg-primary text-white border-primary shadow-[0_0_12px_var(--primary)] opacity-90 scale-105" 
-              : "bg-bgSecondary/80 backdrop-blur-md text-textSecondary border-borderColor/50 hover:text-primary hover:border-primary/50"}
+          className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border
+            ${ocultarCompletados
+              ? "bg-primary text-white border-primary"
+              : "bg-bgSecondary text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
           `}
         >
-          {ocultarCompletados ? "👁️ Mostrar todo" : "🫣 Ocultar semestres listos"}
+          {ocultarCompletados
+            ? <><Eye className="w-3.5 h-3.5" /> Mostrar todo</>
+            : <><EyeOff className="w-3.5 h-3.5" /> Ocultar completados</>}
         </button>
       </div>
 
@@ -472,6 +475,7 @@ const MallaViewer = ({
                transform: "translateZ(0)" /* Force layer for the whole flex container */
             }}
           >
+            <AnimatePresence mode="popLayout">
             {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
             (_, i) => {
               const year = i + 1;
@@ -498,7 +502,9 @@ const MallaViewer = ({
                   }`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: -8 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
+                  layout
                 >
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="text-xs uppercase tracking-wide text-textSecondary/80">
@@ -571,6 +577,7 @@ const MallaViewer = ({
               );
             }
           )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

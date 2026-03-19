@@ -2,381 +2,365 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== Variables de color por tema (Estilo Apple / iOS) ===== */
-:root {
-  /* Paleta iOS Light Base */
-  --ios-light-bg: #F2F2F7;
-  --ios-light-card: #FFFFFF;
-  --ios-light-text: #000000;
-  --ios-light-text-sec: #8A8A8E;
-  --ios-light-border: rgba(60, 60, 67, 0.15);
+/* ================================================================
+   MALLA PRO — Design System v2 (Profesional Académico)
+   Principios:
+   · Fondos neutros — el color primario no contamina el fondo
+   · Bordes grises neutrales — no tematizados
+   · Glass solo en navbar (superpuesta), cards con superficie sólida
+   · Tipografía con contraste real
+   ================================================================ */
 
-  /* Paleta iOS Dark Base */
-  --ios-dark-bg: #000000;
-  --ios-dark-card: #1C1C1E;
-  --ios-dark-text: #FFFFFF;
-  --ios-dark-text-sec: #98989D;
-  --ios-dark-border: rgba(84, 84, 88, 0.4);
-
-  /* Acentos iOS (Light) */
-  --apple-blue-light: #007AFF;
-  --apple-pink-light: #FF2D55;
-  --apple-green-light: #34C759;
-  --apple-indigo-light: #5856D6;
-  --apple-orange-light: #FF9500;
-
-  /* Acentos iOS (Dark) */
-  --apple-blue-dark: #0A84FF;
-  --apple-pink-dark: #FF375F;
-  --apple-green-dark: #32D74B;
-  --apple-indigo-dark: #5E5CE6;
-  --apple-orange-dark: #FF9F0A;
-}
-
-/* ===== Temas claros ===== */
+/* ── Light themes ─────────────────────────────────────────────── */
 .aurora.light {
-  --primary: var(--apple-blue-light);
-  --bgPrimary: #E0EFFF; /* Stronger Blue tint */
-  --bgSecondary: #F5FAFF;
-  --textPrimary: var(--ios-light-text);
-  --textSecondary: var(--ios-light-text-sec);
-  --borderColor: rgba(0, 122, 255, 0.25);
+  --primary:        #2563EB;
+  --bgPrimary:      #F8FAFC;
+  --bgSecondary:    #FFFFFF;
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.13);
+  --shadowPrimary:  rgba(37,99,235,0.14);
+  --primaryMuted:   rgba(37,99,235,0.07);
 }
 
 .sunset.light {
-  --primary: #FF7597; /* Cozy Bubblegum/Hello Kitty Pink */
-  --bgPrimary: #FFF0F5; /* Lavender Blush / Baby Pink */
-  --bgSecondary: #FFFFFF;
-  --textPrimary: var(--ios-light-text);
-  --textSecondary: var(--ios-light-text-sec);
-  --borderColor: rgba(255, 117, 151, 0.25);
+  --primary:        #DB2777;
+  --bgPrimary:      #FDF8F8;
+  --bgSecondary:    #FFFFFF;
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.13);
+  --shadowPrimary:  rgba(219,39,119,0.14);
+  --primaryMuted:   rgba(219,39,119,0.07);
 }
 
 .emerald.light {
-  --primary: var(--apple-green-light);
-  --bgPrimary: #E6F9EC; /* Stronger Green tint */
-  --bgSecondary: #F4FDF6;
-  --textPrimary: var(--ios-light-text);
-  --textSecondary: var(--ios-light-text-sec);
-  --borderColor: rgba(52, 199, 89, 0.25);
+  --primary:        #059669;
+  --bgPrimary:      #F7FBF9;
+  --bgSecondary:    #FFFFFF;
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.13);
+  --shadowPrimary:  rgba(5,150,105,0.14);
+  --primaryMuted:   rgba(5,150,105,0.07);
 }
 
 .midnight.light {
-  --primary: var(--apple-indigo-light);
-  --bgPrimary: #EAE8FC; /* Stronger Indigo tint */
-  --bgSecondary: #F7F6FD;
-  --textPrimary: var(--ios-light-text);
-  --textSecondary: var(--ios-light-text-sec);
-  --borderColor: rgba(88, 86, 214, 0.25);
+  --primary:        #7C3AED;
+  --bgPrimary:      #F9F8FE;
+  --bgSecondary:    #FFFFFF;
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.13);
+  --shadowPrimary:  rgba(124,58,237,0.14);
+  --primaryMuted:   rgba(124,58,237,0.07);
 }
 
 .golden.light {
-  --primary: var(--apple-orange-light);
-  --bgPrimary: #FFF1DB; /* Stronger Orange tint */
-  --bgSecondary: #FFFAF2;
-  --textPrimary: var(--ios-light-text);
-  --textSecondary: var(--ios-light-text-sec);
-  --borderColor: rgba(255, 149, 0, 0.25);
+  --primary:        #D97706;
+  --bgPrimary:      #FDFAF5;
+  --bgSecondary:    #FFFFFF;
+  --bgSurface:      #FFFFFF;
+  --textPrimary:    #0F172A;
+  --textSecondary:  #64748B;
+  --borderColor:    rgba(15,23,42,0.13);
+  --shadowPrimary:  rgba(217,119,6,0.14);
+  --primaryMuted:   rgba(217,119,6,0.07);
 }
 
-/* ===== Modo oscuro ===== */
+/* ── Dark themes ──────────────────────────────────────────────── */
 .aurora.dark {
-  --primary: var(--apple-blue-dark);
-  --bgPrimary: #01132C; /* Deep Neon Blue */
-  --bgSecondary: #051F41; 
-  --textPrimary: #E5F1FF;
-  --textSecondary: #90B3D6;
-  --borderColor: rgba(10, 132, 255, 0.5);
+  --primary:        #60A5FA;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(96,165,250,0.18);
+  --primaryMuted:   rgba(96,165,250,0.10);
 }
 
 .sunset.dark {
-  --primary: #FF9EBB; /* Soft glowing cozy pink */
-  --bgPrimary: #2A171D; /* Deep warm chocolate-rose */
-  --bgSecondary: #3B2129; 
-  --textPrimary: #FFEFEF; /* Softer text */
-  --textSecondary: #DCAEBC;
-  --borderColor: rgba(255, 158, 187, 0.4);
+  --primary:        #F472B6;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(244,114,182,0.18);
+  --primaryMuted:   rgba(244,114,182,0.10);
 }
 
 .emerald.dark {
-  --primary: var(--apple-green-dark);
-  --bgPrimary: #03210C;
-  --bgSecondary: #0A3315;
-  --textPrimary: #E6F9EF;
-  --textSecondary: #8FCB9C;
-  --borderColor: rgba(50, 215, 75, 0.5);
+  --primary:        #34D399;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(52,211,153,0.18);
+  --primaryMuted:   rgba(52,211,153,0.10);
 }
 
 .midnight.dark {
-  --primary: var(--apple-indigo-dark);
-  --bgPrimary: #11053B;
-  --bgSecondary: #1A0D4A;
-  --textPrimary: #EFEAFF;
-  --textSecondary: #A297D2;
-  --borderColor: rgba(94, 92, 230, 0.5);
+  --primary:        #A78BFA;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(167,139,250,0.18);
+  --primaryMuted:   rgba(167,139,250,0.10);
 }
 
 .golden.dark {
-  --primary: var(--apple-orange-dark);
-  --bgPrimary: #2B1600;
-  --bgSecondary: #432200;
-  --textPrimary: #FFF1E0;
-  --textSecondary: #DDB78F;
-  --borderColor: rgba(255, 159, 10, 0.5);
+  --primary:        #FCD34D;
+  --bgPrimary:      #0D1117;
+  --bgSecondary:    #161B22;
+  --bgSurface:      #1C2128;
+  --textPrimary:    #E6EDF3;
+  --textSecondary:  #7D8590;
+  --borderColor:    rgba(255,255,255,0.08);
+  --shadowPrimary:  rgba(252,211,77,0.18);
+  --primaryMuted:   rgba(252,211,77,0.10);
 }
 
-/* ===== Colores globales ===== */
+/* ── Utility classes ──────────────────────────────────────────── */
+.bg-primary         { background-color: var(--primary); }
+.text-primary       { color: var(--primary); }
+.border-primary     { border-color: var(--primary); }
+.bg-bgPrimary       { background-color: var(--bgPrimary); }
+.bg-bgSecondary     { background-color: var(--bgSecondary); }
+.text-textPrimary   { color: var(--textPrimary); }
+.text-textSecondary { color: var(--textSecondary); }
+.border-borderColor { border-color: var(--borderColor); }
+
+/* ── Global base ──────────────────────────────────────────────── */
 body {
   background-color: var(--bgPrimary);
   color: var(--textPrimary);
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  /* Font features to make Inter look like SF Pro */
   font-feature-settings: "cv02", "cv03", "cv04", "cv11", "kern" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
-  font-smooth: always;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.bg-primary {
-  background-color: var(--primary);
+/* ── Theme transition ─────────────────────────────────────────── */
+:root, .dark, .light {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-.text-primary {
+
+/* ── Card surface — sólida, sin blur ──────────────────────────── */
+.glass-card {
+  background: var(--bgSecondary);
+  border: 1px solid var(--borderColor);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  transition: box-shadow 0.18s ease;
+}
+.glass-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.11), 0 1px 4px rgba(0,0,0,0.07);
+}
+.dark .glass-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
+.dark .glass-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* ── Navbar glass (único lugar donde blur tiene sentido) ──────── */
+.navbar-glass {
+  background: rgba(var(--bgSecondary-rgb, 255,255,255), 0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+.dark .navbar-glass {
+  background: rgba(22,27,34,0.88);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 12px var(--shadowPrimary);
+}
+
+.btn-secondary {
+  background: var(--bgSecondary);
+  border: 1px solid var(--borderColor);
+  color: var(--textPrimary);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-secondary:hover {
+  border-color: var(--primary);
   color: var(--primary);
 }
-.bg-bgPrimary {
-  background-color: var(--bgPrimary);
+
+/* ── Animations ───────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.bg-bgSecondary {
-  background-color: var(--bgSecondary);
-}
-.text-textPrimary {
-  color: var(--textPrimary);
-}
-.text-textSecondary {
-  color: var(--textSecondary);
-}
-.border-borderColor {
-  border-color: var(--borderColor);
-}
+.fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
 @keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-5px); }
+  75%       { transform: translateX(5px); }
 }
-.shake {
-  animation: shake 0.3s ease-in-out;
-}
+.shake { animation: shake 0.3s ease-in-out; }
 
-/* ===== Scroll suave tipo dashboard ===== */
-::-webkit-scrollbar {
-  height: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: var(--borderColor);
-  border-radius: 20px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary);
-  opacity: 0.8;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+.gradient-text { color: var(--primary); font-weight: 700; }
 
-/* ===== Animaciones suaves (movidas a clases específicas para mejor rendimiento) ===== */
+/* ── Scrollbars ───────────────────────────────────────────────── */
+::-webkit-scrollbar        { height: 6px; width: 6px; }
+::-webkit-scrollbar-thumb  { background-color: var(--borderColor); border-radius: 20px; }
+::-webkit-scrollbar-thumb:hover { background-color: var(--primary); }
+::-webkit-scrollbar-track  { background: transparent; }
 
-
-/* ===== Scroll horizontal profesional ===== */
-.scroll-container {
-  scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: var(--borderColor) transparent;
-}
-
-/* Chrome / Edge / Safari */
-.scroll-container::-webkit-scrollbar {
-  height: 6px; /* Ultra-thin scrollbar */
-}
-.scroll-container::-webkit-scrollbar-thumb {
-  background-color: var(--borderColor);
-  border-radius: 10px;
-  transition: background-color 0.2s ease;
-}
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary);
-}
-.scroll-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-/* Suaviza el scroll y estiliza la barra horizontal */
 .scroll-container {
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: var(--borderColor) transparent;
   backface-visibility: hidden;
   -webkit-overflow-scrolling: touch;
-  contain: paint; /* Performance boost for big grids */
+  contain: paint;
 }
-.scroll-container::-webkit-scrollbar {
-  height: 10px;
-}
-.scroll-container::-webkit-scrollbar-thumb {
-  background-color: var(--borderColor);
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary);
-}
+.scroll-container::-webkit-scrollbar       { height: 6px; }
+.scroll-container::-webkit-scrollbar-thumb { background-color: var(--borderColor); border-radius: 8px; transition: background-color 0.2s ease; }
+.scroll-container::-webkit-scrollbar-thumb:hover { background-color: var(--primary); }
+.scroll-container::-webkit-scrollbar-track { background: transparent; }
 
-/* Mejora UX mientras arrastras */
-.dragging {
-  cursor: grabbing !important;
-  user-select: none;
-}
-/* ===== Scroll horizontal profesional ===== */
-/* Eliminados duplicados innecesarios */
+/* ── Drag ─────────────────────────────────────────────────────── */
+.dragging { cursor: grabbing !important; user-select: none; }
 
-/* ===== Efecto mientras arrastras ===== */
-.dragging {
-  cursor: grabbing !important;
-  user-select: none;
-}
-/* ===== Scroll horizontal profesional ===== */
-.scroll-container {
-  scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: var(--borderColor) transparent;
-}
-.scroll-container::-webkit-scrollbar {
-  height: 10px;
-}
-.scroll-container::-webkit-scrollbar-thumb {
-  background-color: var(--borderColor);
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary);
-}
-.scroll-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* ===== Efecto durante arrastre ===== */
-.dragging {
-  cursor: grabbing !important;
-  user-select: none;
-}
-
-/* ===== Responsividad avanzada ===== */
+/* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .scroll-container {
-    padding-bottom: 1.5rem;
-    -webkit-overflow-scrolling: touch;
-  }
-  .min-w-\[460px\] {
-    min-width: 380px !important;
-  }
-  .min-w-\[210px\] {
-    min-width: 180px !important;
-  }
+  .scroll-container        { padding-bottom: 1.5rem; }
+  .min-w-\[460px\]         { min-width: 380px !important; }
+  .min-w-\[210px\]         { min-width: 180px !important; }
 }
 @media (max-width: 480px) {
-  .min-w-\[460px\] {
-    min-width: 320px !important;
-  }
-  .min-w-\[210px\] {
-    min-width: 150px !important;
-  }
+  .min-w-\[460px\]         { min-width: 320px !important; }
+  .min-w-\[210px\]         { min-width: 150px !important; }
 }
 
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  padding: 16px 32px;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+/* ── Estados de tarjetas de curso ────────────────────────────── */
+
+/* Tarjeta disponible — blanco con borde izquierdo de acento */
+.curso-disponible {
+  background-color: var(--bgSecondary);
+  border-left: 3px solid var(--primary) !important;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.curso-disponible:hover {
+  box-shadow: 0 2px 8px var(--shadowPrimary);
+}
+.dark .curso-disponible {
+  background-color: var(--bgSurface);
 }
 
-.btn-primary:hover {
-  transform: scale(1.02);
-  filter: brightness(1.1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+/* Base (dark mode fallback) */
+.curso-aprobado   { background-color: rgb(16 185 129 / 0.88); }
+.curso-excepcional { background-color: rgb(245 158 11 / 0.88); }
+.curso-encurso    { background-color: var(--primary); }
+
+/* Light mode — pastels sofisticados */
+.light .curso-aprobado {
+  background-color: #ECFDF5;
+  color: #065F46 !important;
+  border-color: #6EE7B7 !important;
+}
+.light .curso-excepcional {
+  background-color: #FFFBEB;
+  color: #78350F !important;
+  border-color: #FCD34D !important;
+}
+/* En curso light mode — pastel del color primario (fondo claro + texto oscuro) */
+.aurora.light  .curso-encurso { background-color: #EFF6FF; color: #1E3A8A !important; border-color: #BFDBFE !important; }
+.sunset.light  .curso-encurso { background-color: #FDF2F8; color: #831843 !important; border-color: #FBCFE8 !important; }
+.emerald.light .curso-encurso { background-color: #ECFDF5; color: #064E3B !important; border-color: #A7F3D0 !important; }
+.midnight.light .curso-encurso { background-color: #F5F3FF; color: #4C1D95 !important; border-color: #DDD6FE !important; }
+.golden.light  .curso-encurso { background-color: #FFFBEB; color: #78350F !important; border-color: #FDE68A !important; }
+.light .curso-encurso {
+  filter: none;
+  box-shadow: none;
+}
+/* Botón "Notas" en cursando light mode */
+.aurora.light  .curso-encurso button { background-color: rgba(30,58,138,0.10) !important; border-color: rgba(30,58,138,0.20) !important; color: #1E3A8A !important; }
+.sunset.light  .curso-encurso button { background-color: rgba(131,24,67,0.10) !important; border-color: rgba(131,24,67,0.20) !important; color: #831843 !important; }
+.emerald.light .curso-encurso button { background-color: rgba(6,78,59,0.10) !important; border-color: rgba(6,78,59,0.20) !important; color: #064E3B !important; }
+.midnight.light .curso-encurso button { background-color: rgba(76,29,149,0.10) !important; border-color: rgba(76,29,149,0.20) !important; color: #4C1D95 !important; }
+.golden.light  .curso-encurso button { background-color: rgba(120,53,15,0.10) !important; border-color: rgba(120,53,15,0.20) !important; color: #78350F !important; }
+
+/* Botón "Notas" adaptado al fondo pastel en light mode */
+.light .curso-aprobado button {
+  background-color: rgba(6,95,70,0.10) !important;
+  border-color: rgba(6,95,70,0.20) !important;
+  color: #065F46 !important;
+}
+.light .curso-aprobado button:hover {
+  background-color: rgba(6,95,70,0.18) !important;
+}
+.light .curso-excepcional button {
+  background-color: rgba(120,53,15,0.10) !important;
+  border-color: rgba(120,53,15,0.20) !important;
+  color: #78350F !important;
+}
+.light .curso-excepcional button:hover {
+  background-color: rgba(120,53,15,0.18) !important;
 }
 
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: 16px 32px;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: background 0.2s ease, transform 0.15s ease;
+/* Dark mode — fondos muy apagados, texto en tono del color */
+.dark .curso-aprobado {
+  background-color: rgb(2 44 34 / 0.85);
+  color: #6ee7b7 !important;
+  border-color: rgb(6 95 70 / 0.5) !important;
+  box-shadow: none;
+}
+.dark .curso-excepcional {
+  background-color: rgb(69 26 3 / 0.85);
+  color: #fcd34d !important;
+  border-color: rgb(120 53 15 / 0.5) !important;
+  box-shadow: none;
+}
+.dark .curso-encurso {
+  background-color: var(--primaryMuted);
+  color: var(--primary) !important;
+  border-color: var(--shadowPrimary) !important;
+  box-shadow: none;
 }
 
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.03);
+/* ── Drawer panel ─────────────────────────────────────────────── */
+.drawer-panel {
+  background: var(--bgSecondary);
+  border-left: 1px solid var(--borderColor);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.08);
 }
-
-/* Efecto de fade-in para elementos */
-.fade-in {
-  opacity: 0;
-  transform: translateY(8px);
-  animation: fadeIn 0.4s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Texto destacado o con color principal */
-.gradient-text {
-  color: var(--primary);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-/* Only animate bg/color for theme switching — NOT every property */
-:root,
-.dark,
-.light {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05),
-              inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  border-radius: 1.25rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.dark .glass-card {
-  background: rgba(30, 30, 32, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5),
-              inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.glass-card:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08),
-              inset 0 1px 0 rgba(255, 255, 255, 0.6);
+.dark .drawer-panel {
+  box-shadow: -4px 0 32px rgba(0,0,0,0.5);
 }
