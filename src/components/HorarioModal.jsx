@@ -251,24 +251,21 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
       {/* ══════════════════════════════════════════
           MOBILE LAYOUT
           ══════════════════════════════════════════ */}
-      <div className="sm:hidden" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
+      {/* ══════════════════════════════════════════
+          MOBILE LAYOUT — ambas vistas SIEMPRE montadas,
+          slide via CSS transform para no desmontar inputs
+          ══════════════════════════════════════════ */}
+      <div className="sm:hidden" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, position: "relative" }}>
 
         {/* Toast */}
-        <AnimatePresence>
-          {toast && (
-            <motion.div
-              key="toast-m"
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-              className="absolute top-2 left-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-medium shadow-lg"
-            >
-              <span className="flex-1">{toast}</span>
-              <button onClick={() => setToast(null)}><X className="w-3.5 h-3.5" /></button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {toast && (
+          <div
+            className="absolute top-2 left-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-medium shadow-lg"
+          >
+            <span className="flex-1">{toast}</span>
+            <button onClick={() => setToast(null)}><X className="w-3.5 h-3.5" /></button>
+          </div>
+        )}
 
         {/* ── Day bar (siempre visible) ── */}
         <MobileDayBar
@@ -283,191 +280,177 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
           }}
         />
 
-        {/* ── Vistas con animación ── */}
+        {/* ── Contenedor deslizante: ambas vistas siempre montadas ── */}
         <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
-          <AnimatePresence mode="wait" initial={false}>
-            {mobileView === "schedule" ? (
-              /* Vista A — Lista de clases del día */
-              <motion.div
-                key="schedule-view"
-                initial={{ x: "-100%", opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: "-100%", opacity: 0 }}
-                transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="absolute inset-0 overflow-y-auto"
+
+          {/* Vista A — Horario del día */}
+          <div
+            style={{
+              position: "absolute", inset: 0, overflowY: "auto",
+              transform: mobileView === "schedule" ? "translateX(0)" : "translateX(-100%)",
+              transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
+              willChange: "transform",
+            }}
+          >
+            <MobileClassList
+              items={dayItems}
+              slotsByStart={slotsByStart}
+              editingId={editingId}
+              onSelect={loadItemIntoDraft}
+              formatEndTime={formatEndTime}
+            />
+          </div>
+
+          {/* Vista B — Formulario (SIEMPRE montado, nunca se desmonta) */}
+          <div
+            ref={formRef}
+            style={{
+              position: "absolute", inset: 0, overflowY: "auto",
+              transform: mobileView === "form" ? "translateX(0)" : "translateX(100%)",
+              transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
+              willChange: "transform",
+            }}
+          >
+            <div style={{ padding: "16px 16px 80px" }}>
+              {/* Sub-header */}
+              <div
+                className="border"
+                style={{
+                  borderRadius: 12, padding: "12px 14px", marginBottom: 16,
+                  borderColor: isEditing ? "var(--primary)" : "var(--borderColor)",
+                  background: isEditing ? "var(--primaryMuted)" : "var(--bgSurface)",
+                  opacity: isEditing ? 1 : 0.9,
+                }}
               >
-                <MobileClassList
-                  items={dayItems}
-                  slotsByStart={slotsByStart}
-                  editingId={editingId}
-                  onSelect={loadItemIntoDraft}
-                  formatEndTime={formatEndTime}
-                />
-              </motion.div>
-            ) : (
-              /* Vista B — Formulario */
-              <motion.div
-                key="form-view"
-                initial={{ x: "100%", opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: "100%", opacity: 0 }}
-                transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="absolute inset-0 overflow-y-auto"
-                ref={formRef}
-              >
-                <div className="px-4 py-4 space-y-5 pb-8">
-                  {/* Sub-header de la vista B */}
-                  <div className={`rounded-xl border p-4 ${isEditing ? "border-primary/30 bg-primaryMuted" : "border-borderColor bg-bgSurface"}`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      {isEditing ? <Pencil className="w-3.5 h-3.5 text-primary" /> : <Plus className="w-3.5 h-3.5 text-primary" />}
-                      <span className="text-sm font-semibold text-textPrimary">
-                        {isEditing ? `Editando: ${editingItem?.title || "clase"}` : "Nueva clase"}
-                      </span>
-                    </div>
-                    {/* Posición seleccionada */}
-                    <div className="flex items-center gap-1.5 text-xs text-textSecondary">
-                      <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
-                      <span>
-                        <strong className="text-textPrimary">{dayLabel(draft.day)}</strong> · <strong className="text-textPrimary">{draft.startTime}</strong>
-                        <span className="text-textSecondary/60"> · toca el horario para cambiar</span>
-                      </span>
-                    </div>
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  {isEditing ? <Pencil size={13} color="var(--primary)" /> : <Plus size={13} color="var(--primary)" />}
+                  <span className="text-sm font-semibold text-textPrimary">
+                    {isEditing ? `Editando: ${editingItem?.title || "clase"}` : "Nueva clase"}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <MapPin size={11} color="var(--primary)" />
+                  <span className="text-xs text-textSecondary">
+                    <strong className="text-textPrimary">{dayLabel(draft.day)}</strong>
+                    {" · "}
+                    <strong className="text-textPrimary">{draft.startTime}</strong>
+                  </span>
+                </div>
+              </div>
 
-                  {/* Campos del formulario */}
-                  <FormFields draft={draft} setDraft={setDraft} cursosOptions={cursosOptions} />
+              {/* Campos del formulario */}
+              <FormFields draft={draft} setDraft={setDraft} cursosOptions={cursosOptions} />
 
-                  {/* Chips de cursando */}
-                  {hasCursando && (
-                    <div>
-                      <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-2">Ramos cursando</p>
-                      <div className="flex flex-wrap gap-2">
-                        {cursosOptions.map((c) => {
-                          const active = draft.courseId === c.id;
-                          return (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => setDraft((d) => ({ ...d, courseId: active ? "" : c.id }))}
-                              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition select-none ${
-                                active
-                                  ? "bg-primary text-white border-primary"
-                                  : "border-primary/25 bg-primaryMuted text-primary hover:bg-primary/15"
-                              }`}
-                            >
-                              {c.nombre}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+              {/* Selector de hora */}
+              <div style={{ marginTop: 14 }}>
+                <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide" style={{ marginBottom: 8 }}>Hora de inicio</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, maxHeight: 120, overflowY: "auto" }}>
+                  {slots.slice(0, 20).map((s) => (
+                    <button
+                      key={s.startTime}
+                      type="button"
+                      onClick={() => setDraft((d) => ({ ...d, startTime: s.startTime }))}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition ${
+                        draft.startTime === s.startTime
+                          ? "bg-primary text-white border-primary"
+                          : "border-borderColor bg-bgPrimary text-textSecondary"
+                      }`}
+                    >
+                      {s.startTime}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                  {!hasCursando && (
-                    <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-3 flex items-start gap-2">
-                      <BookOpen className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-textSecondary">
-                        Sin ramos marcados como <strong>cursando</strong>. Puedes igualmente agregar la clase manualmente.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Hora manual (selector de slot) */}
-                  <div>
-                    <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-2">
-                      Hora de inicio
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
-                      {slots.slice(0, 20).map((s) => (
+              {/* Chips cursando */}
+              {hasCursando && (
+                <div style={{ marginTop: 14 }}>
+                  <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide" style={{ marginBottom: 8 }}>Ramos cursando</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {cursosOptions.map((c) => {
+                      const active = draft.courseId === c.id;
+                      return (
                         <button
-                          key={s.startTime}
+                          key={c.id}
                           type="button"
-                          onClick={() => setDraft((d) => ({ ...d, startTime: s.startTime }))}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition ${
-                            draft.startTime === s.startTime
-                              ? "bg-primary text-white border-primary"
-                              : "border-borderColor bg-bgPrimary text-textSecondary hover:border-primary/40"
+                          onClick={() => setDraft((d) => ({ ...d, courseId: active ? "" : c.id }))}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition select-none ${
+                            active ? "bg-primary text-white border-primary" : "border-primary/25 bg-primaryMuted text-primary"
                           }`}
                         >
-                          {s.startTime}
+                          {c.nombre}
                         </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Botones de acción */}
-                  <div className="flex flex-col gap-2 pt-2">
-                    <button
-                      onClick={commitDraft}
-                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold bg-primary text-white hover:opacity-90 transition"
-                    >
-                      {isEditing ? <><Pencil className="w-4 h-4" />Guardar cambios</> : <><Plus className="w-4 h-4" />Agregar al horario</>}
-                    </button>
-                    {isEditing && editingItem && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={duplicateItem}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-borderColor bg-bgPrimary text-textPrimary hover:border-primary/40 hover:text-primary transition"
-                        >
-                          <Copy className="w-4 h-4" />Duplicar
-                        </button>
-                        <button
-                          onClick={() => deleteItem(editingItem.id)}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-red-500/25 bg-red-500/8 text-red-500 hover:bg-red-500/15 transition"
-                        >
-                          <Trash2 className="w-4 h-4" />Eliminar
-                        </button>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+
+              {!hasCursando && (
+                <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-3 flex items-start gap-2" style={{ marginTop: 14 }}>
+                  <BookOpen className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-textSecondary">
+                    Sin ramos marcados como <strong>cursando</strong>.
+                  </p>
+                </div>
+              )}
+
+              {/* Botones de acción */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 20 }}>
+                <button
+                  onClick={commitDraft}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold bg-primary text-white"
+                  style={{ opacity: 1 }}
+                >
+                  {isEditing ? <><Pencil className="w-4 h-4" />Guardar cambios</> : <><Plus className="w-4 h-4" />Agregar al horario</>}
+                </button>
+                {isEditing && editingItem && (
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={duplicateItem}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-borderColor bg-bgPrimary text-textPrimary"
+                    >
+                      <Copy className="w-4 h-4" />Duplicar
+                    </button>
+                    <button
+                      onClick={() => deleteItem(editingItem.id)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-red-500/25 bg-red-500/8 text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* ── FAB (solo en vista schedule) ── */}
-        <AnimatePresence>
-          {mobileView === "schedule" && (
-            <motion.button
-              key="fab"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              onClick={() => {
-                clearForm(selectedDay);
-                setMobileView("form");
-              }}
-              className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center z-10"
-              style={{ boxShadow: "0 4px 20px var(--shadowPrimary)" }}
-              aria-label="Agregar clase"
-            >
-              <Plus className="w-6 h-6" />
-            </motion.button>
-          )}
-        </AnimatePresence>
+        {/* ── FAB agregar (solo vista schedule) ── */}
+        {mobileView === "schedule" && (
+          <button
+            onClick={() => { clearForm(selectedDay); setMobileView("form"); }}
+            className="absolute bg-primary text-white rounded-full flex items-center justify-center"
+            style={{ bottom: 20, right: 20, width: 56, height: 56, boxShadow: "0 4px 20px var(--shadowPrimary)", zIndex: 10, border: "none" }}
+            aria-label="Agregar clase"
+          >
+            <Plus size={24} />
+          </button>
+        )}
 
-        {/* ── Botón volver (solo en vista form) ── */}
-        <AnimatePresence>
-          {mobileView === "form" && (
-            <motion.div
-              key="back-bar"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="flex-shrink-0 border-t border-borderColor px-4 py-3 bg-bgSecondary"
+        {/* ── Barra inferior volver (solo vista form) ── */}
+        {mobileView === "form" && (
+          <div
+            className="border-t border-borderColor bg-bgSecondary"
+            style={{ flexShrink: 0, padding: "10px 16px" }}
+          >
+            <button
+              onClick={() => { clearForm(selectedDay); setMobileView("schedule"); }}
+              className="flex items-center gap-2 text-sm text-textSecondary"
             >
-              <button
-                onClick={() => { clearForm(selectedDay); setMobileView("schedule"); }}
-                className="flex items-center gap-2 text-sm text-textSecondary hover:text-textPrimary transition"
-              >
-                <ArrowLeft className="w-4 h-4" /> Volver al horario
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <ArrowLeft className="w-4 h-4" /> Volver al horario
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ══════════════════════════════════════════
