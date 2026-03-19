@@ -269,6 +269,34 @@ body {
   .min-w-\[210px\]         { min-width: 150px !important; }
 }
 
+/* ── Estados de tarjetas de curso ────────────────────────────── */
+
+/* Light mode — colores saturados normales */
+.curso-aprobado   { background-color: rgb(16 185 129 / 0.88); }
+.curso-excepcional { background-color: rgb(245 158 11 / 0.88); }
+.curso-encurso    { background-color: var(--primary); }
+
+/* Dark mode — fondos muy apagados, texto en tono del color */
+.dark .curso-aprobado {
+  background-color: rgb(2 44 34 / 0.85);
+  color: #6ee7b7 !important;
+  border-color: rgb(6 95 70 / 0.5) !important;
+  box-shadow: none;
+}
+.dark .curso-excepcional {
+  background-color: rgb(69 26 3 / 0.85);
+  color: #fcd34d !important;
+  border-color: rgb(120 53 15 / 0.5) !important;
+  box-shadow: none;
+}
+.dark .curso-encurso {
+  background-color: var(--primaryMuted);
+  color: var(--primary) !important;
+  border-color: var(--shadowPrimary) !important;
+  box-shadow: none;
+  transform: scale(1.02);
+}
+
 /* ── Drawer panel ─────────────────────────────────────────────── */
 .drawer-panel {
   background: var(--bgSecondary);
