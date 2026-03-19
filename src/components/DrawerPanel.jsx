@@ -13,7 +13,15 @@ import { X } from "lucide-react";
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 640);
+    let lastWidth = window.innerWidth;
+    const handler = () => {
+      const w = window.innerWidth;
+      // Solo actualizar si cambió el ANCHO (ignorar resize por teclado virtual en iOS)
+      if (w !== lastWidth) {
+        lastWidth = w;
+        setIsMobile(w < 640);
+      }
+    };
     window.addEventListener("resize", handler, { passive: true });
     return () => window.removeEventListener("resize", handler);
   }, []);
