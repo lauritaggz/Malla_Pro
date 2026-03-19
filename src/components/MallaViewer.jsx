@@ -475,6 +475,7 @@ const MallaViewer = ({
                transform: "translateZ(0)" /* Force layer for the whole flex container */
             }}
           >
+            <AnimatePresence mode="popLayout">
             {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
             (_, i) => {
               const year = i + 1;
@@ -501,7 +502,9 @@ const MallaViewer = ({
                   }`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: -8 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
+                  layout
                 >
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="text-xs uppercase tracking-wide text-textSecondary/80">
@@ -574,6 +577,7 @@ const MallaViewer = ({
               );
             }
           )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
