@@ -53,17 +53,18 @@ export default function DrawerPanel({
     ? { type: "spring", damping: 32, stiffness: 300 }
     : { type: "spring", damping: 30, stiffness: 280 };
 
-  /* Posicionamiento via inline style para evitar conflictos de versión Tailwind */
+  /* Posicionamiento via inline style para evitar conflictos de versión Tailwind.
+     Z-index 96 para estar por encima de la barra inferior (z-90) y su menú. */
   const panelStyle = isMobile
     ? {
         position: "fixed",
         bottom: 0,
         left: 0,
         right: 0,
-        maxHeight: "96dvh",
+        maxHeight: "100dvh",
         borderRadius: "16px 16px 0 0",
         boxShadow: "0 -8px 40px rgba(0,0,0,0.22)",
-        zIndex: 85,
+        zIndex: 96,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -74,7 +75,7 @@ export default function DrawerPanel({
         right: 0,
         bottom: 0,
         boxShadow: "-8px 0 40px rgba(0,0,0,0.12)",
-        zIndex: 85,
+        zIndex: 96,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -84,7 +85,7 @@ export default function DrawerPanel({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — z-95 para estar encima de la barra inferior pero debajo del panel */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -95,7 +96,7 @@ export default function DrawerPanel({
             style={{
               position: "fixed",
               inset: 0,
-              zIndex: 84,
+              zIndex: 95,
               background: isMobile ? "rgba(0,0,0,0.52)" : "rgba(0,0,0,0.18)",
               backdropFilter: isMobile ? "blur(3px)" : "none",
             }}
@@ -139,7 +140,7 @@ export default function DrawerPanel({
             </div>
 
             {/* Contenido — flex-1, cada hijo maneja su propio scroll */}
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", paddingBottom: isMobile ? "env(safe-area-inset-bottom, 0px)" : 0 }}>
               {children}
             </div>
           </motion.div>
