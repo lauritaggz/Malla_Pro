@@ -335,11 +335,18 @@ export default function App() {
         <HorarioModal
           isOpen={mostrarHorario}
           onClose={() => setMostrarHorario(false)}
-          cursosCursandoData={
-            mallaData?.semestres?.flatMap((s) =>
+          cursosCursandoData={(() => {
+            if (!mallaData) return [];
+            const semestres = mallaData.isMencion
+              ? [
+                  ...(mallaData.semestresComunes || []),
+                  ...Object.values(mallaData.menciones || {}).flatMap((m) => m.semestres || []),
+                ]
+              : (mallaData.semestres || []);
+            return semestres.flatMap((s) =>
               s.cursos.filter((c) => cursando.includes(c.id))
-            ) || []
-          }
+            );
+          })()}
         />
       )}
     </div>

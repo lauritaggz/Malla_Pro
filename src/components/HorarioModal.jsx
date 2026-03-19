@@ -239,46 +239,6 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
     return map;
   }, [schedule.items]);
 
-  /* ── Shared form fields ── */
-  const FormFields = ({ compact = false }) => (
-    <div className={`space-y-3 ${compact ? "" : "mb-4"}`}>
-      <div>
-        <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Ramo</label>
-        <select
-          value={draft.courseId}
-          onChange={(e) => setDraft((d) => ({ ...d, courseId: e.target.value }))}
-          className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition appearance-none"
-        >
-          <option value="">Sin ramo</option>
-          {cursosOptions.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-        </select>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Sala</label>
-          <input
-            value={draft.sala}
-            onChange={(e) => setDraft((d) => ({ ...d, sala: e.target.value }))}
-            placeholder="Ej: A-201"
-            className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition"
-          />
-        </div>
-        <div>
-          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Duración</label>
-          <select
-            value={draft.blocks}
-            onChange={(e) => setDraft((d) => ({ ...d, blocks: Number(e.target.value) }))}
-            className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition appearance-none"
-          >
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>{n} bl · {n * 45}min</option>
-            ))}
-          </select>
-        </div>
-      </div>
-    </div>
-  );
-
   /* ── RENDER ── */
   return (
     <DrawerPanel
@@ -375,7 +335,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
                   </div>
 
                   {/* Campos del formulario */}
-                  <FormFields />
+                  <FormFields draft={draft} setDraft={setDraft} cursosOptions={cursosOptions} />
 
                   {/* Chips de cursando */}
                   {hasCursando && (
@@ -702,6 +662,48 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
         </div>
       </div>
     </DrawerPanel>
+  );
+}
+
+/* ── FormFields — definido FUERA del componente padre para evitar remount en cada keystroke ── */
+function FormFields({ draft, setDraft, cursosOptions }) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Ramo</label>
+        <select
+          value={draft.courseId}
+          onChange={(e) => setDraft((d) => ({ ...d, courseId: e.target.value }))}
+          className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition appearance-none"
+        >
+          <option value="">Sin ramo</option>
+          {cursosOptions.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+        </select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Sala</label>
+          <input
+            value={draft.sala}
+            onChange={(e) => setDraft((d) => ({ ...d, sala: e.target.value }))}
+            placeholder="Ej: A-201"
+            className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition"
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Duración</label>
+          <select
+            value={draft.blocks}
+            onChange={(e) => setDraft((d) => ({ ...d, blocks: Number(e.target.value) }))}
+            className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition appearance-none"
+          >
+            {[1, 2, 3, 4, 5].map((n) => (
+              <option key={n} value={n}>{n} bl · {n * 45}min</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
   );
 }
 
