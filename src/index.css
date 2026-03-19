@@ -300,10 +300,23 @@ body {
   color: #78350F !important;
   border-color: #FCD34D !important;
 }
-/* En curso light mode — mismo color primario pero menos saturado */
+/* En curso light mode — pastel del color primario (fondo claro + texto oscuro) */
+.aurora.light  .curso-encurso { background-color: #EFF6FF; color: #1E3A8A !important; border-color: #BFDBFE !important; }
+.sunset.light  .curso-encurso { background-color: #FDF2F8; color: #831843 !important; border-color: #FBCFE8 !important; }
+.emerald.light .curso-encurso { background-color: #ECFDF5; color: #064E3B !important; border-color: #A7F3D0 !important; }
+.midnight.light .curso-encurso { background-color: #F5F3FF; color: #4C1D95 !important; border-color: #DDD6FE !important; }
+.golden.light  .curso-encurso { background-color: #FFFBEB; color: #78350F !important; border-color: #FDE68A !important; }
 .light .curso-encurso {
-  filter: saturate(0.72) brightness(1.12);
+  filter: none;
+  box-shadow: none;
+  transform: scale(1.02);
 }
+/* Botón "Notas" en cursando light mode */
+.aurora.light  .curso-encurso button { background-color: rgba(30,58,138,0.10) !important; border-color: rgba(30,58,138,0.20) !important; color: #1E3A8A !important; }
+.sunset.light  .curso-encurso button { background-color: rgba(131,24,67,0.10) !important; border-color: rgba(131,24,67,0.20) !important; color: #831843 !important; }
+.emerald.light .curso-encurso button { background-color: rgba(6,78,59,0.10) !important; border-color: rgba(6,78,59,0.20) !important; color: #064E3B !important; }
+.midnight.light .curso-encurso button { background-color: rgba(76,29,149,0.10) !important; border-color: rgba(76,29,149,0.20) !important; color: #4C1D95 !important; }
+.golden.light  .curso-encurso button { background-color: rgba(120,53,15,0.10) !important; border-color: rgba(120,53,15,0.20) !important; color: #78350F !important; }
 
 /* Botón "Notas" adaptado al fondo pastel en light mode */
 .light .curso-aprobado button {
