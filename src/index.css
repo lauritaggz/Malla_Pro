@@ -19,7 +19,7 @@
   --bgSurface:      #FFFFFF;
   --textPrimary:    #0F172A;
   --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.10);
+  --borderColor:    rgba(15,23,42,0.13);
   --shadowPrimary:  rgba(37,99,235,0.14);
   --primaryMuted:   rgba(37,99,235,0.07);
 }
@@ -31,7 +31,7 @@
   --bgSurface:      #FFFFFF;
   --textPrimary:    #0F172A;
   --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.10);
+  --borderColor:    rgba(15,23,42,0.13);
   --shadowPrimary:  rgba(219,39,119,0.14);
   --primaryMuted:   rgba(219,39,119,0.07);
 }
@@ -43,7 +43,7 @@
   --bgSurface:      #FFFFFF;
   --textPrimary:    #0F172A;
   --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.10);
+  --borderColor:    rgba(15,23,42,0.13);
   --shadowPrimary:  rgba(5,150,105,0.14);
   --primaryMuted:   rgba(5,150,105,0.07);
 }
@@ -55,7 +55,7 @@
   --bgSurface:      #FFFFFF;
   --textPrimary:    #0F172A;
   --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.10);
+  --borderColor:    rgba(15,23,42,0.13);
   --shadowPrimary:  rgba(124,58,237,0.14);
   --primaryMuted:   rgba(124,58,237,0.07);
 }
@@ -67,7 +67,7 @@
   --bgSurface:      #FFFFFF;
   --textPrimary:    #0F172A;
   --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.10);
+  --borderColor:    rgba(15,23,42,0.13);
   --shadowPrimary:  rgba(217,119,6,0.14);
   --primaryMuted:   rgba(217,119,6,0.07);
 }
@@ -164,12 +164,12 @@ body {
 .glass-card {
   background: var(--bgSecondary);
   border: 1px solid var(--borderColor);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05);
   border-radius: 12px;
   transition: box-shadow 0.18s ease;
 }
 .glass-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.11), 0 1px 4px rgba(0,0,0,0.07);
 }
 .dark .glass-card {
   box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
@@ -271,10 +271,52 @@ body {
 
 /* ── Estados de tarjetas de curso ────────────────────────────── */
 
-/* Light mode — colores saturados normales */
+/* Tarjeta disponible — blanco con borde izquierdo de acento */
+.curso-disponible {
+  background-color: var(--bgSecondary);
+  border-left: 3px solid var(--primary) !important;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.curso-disponible:hover {
+  box-shadow: 0 2px 8px var(--shadowPrimary);
+}
+.dark .curso-disponible {
+  background-color: var(--bgSurface);
+}
+
+/* Base (dark mode fallback) */
 .curso-aprobado   { background-color: rgb(16 185 129 / 0.88); }
 .curso-excepcional { background-color: rgb(245 158 11 / 0.88); }
 .curso-encurso    { background-color: var(--primary); }
+
+/* Light mode — pastels sofisticados */
+.light .curso-aprobado {
+  background-color: #ECFDF5;
+  color: #065F46 !important;
+  border-color: #6EE7B7 !important;
+}
+.light .curso-excepcional {
+  background-color: #FFFBEB;
+  color: #78350F !important;
+  border-color: #FCD34D !important;
+}
+/* Botón "Notas" adaptado al fondo pastel en light mode */
+.light .curso-aprobado button {
+  background-color: rgba(6,95,70,0.10) !important;
+  border-color: rgba(6,95,70,0.20) !important;
+  color: #065F46 !important;
+}
+.light .curso-aprobado button:hover {
+  background-color: rgba(6,95,70,0.18) !important;
+}
+.light .curso-excepcional button {
+  background-color: rgba(120,53,15,0.10) !important;
+  border-color: rgba(120,53,15,0.20) !important;
+  color: #78350F !important;
+}
+.light .curso-excepcional button:hover {
+  background-color: rgba(120,53,15,0.18) !important;
+}
 
 /* Dark mode — fondos muy apagados, texto en tono del color */
 .dark .curso-aprobado {
