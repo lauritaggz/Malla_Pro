@@ -77,7 +77,7 @@ export default function ResumenProgreso({
       subtitle="Vista general de tu avance académico"
       width="max-w-lg"
     >
-      <div className="px-6 py-6 space-y-6" style={{ overflowY: "auto", flex: 1 }}>
+      <div className="px-6 py-6 space-y-6 pb-8" style={{ overflowY: "auto", flex: 1 }}>
 
         {/* Stat cards */}
         <div className="grid grid-cols-3 gap-3">
