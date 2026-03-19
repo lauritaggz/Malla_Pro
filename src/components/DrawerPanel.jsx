@@ -1,7 +1,10 @@
 /**
  * DrawerPanel — wrapper reutilizable para todos los modales tipo drawer.
- * Desktop: desliza desde la derecha, sin oscurecer el fondo.
- * Mobile: panel de pantalla completa desde abajo.
+ * Desktop: desliza desde la derecha.
+ * Mobile: panel de pantalla completa desde abajo (slide-up).
+ *
+ * NOTA: Se usan inline styles para el posicionamiento mobile/desktop
+ * porque max-sm: no está disponible en esta versión de Tailwind.
  */
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,39 +45,60 @@ export default function DrawerPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
 
-  const panelInitial  = isMobile ? { y: "100%", opacity: 1 }   : { x: "100%", opacity: 0 };
-  const panelAnimate  = isMobile ? { y: 0, opacity: 1 }         : { x: 0, opacity: 1 };
-  const panelExit     = isMobile ? { y: "100%", opacity: 1 }    : { x: "100%", opacity: 0 };
+  /* Animación: mobile desde abajo, desktop desde la derecha */
+  const panelInitial    = isMobile ? { y: "100%" } : { x: "100%", opacity: 0 };
+  const panelAnimate    = isMobile ? { y: 0 }       : { x: 0, opacity: 1 };
+  const panelExit       = isMobile ? { y: "100%" }  : { x: "100%", opacity: 0 };
   const panelTransition = isMobile
     ? { type: "spring", damping: 32, stiffness: 300 }
     : { type: "spring", damping: 30, stiffness: 280 };
+
+  /* Posicionamiento via inline style para evitar conflictos de versión Tailwind */
+  const panelStyle = isMobile
+    ? {
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        maxHeight: "96dvh",
+        borderRadius: "16px 16px 0 0",
+        boxShadow: "0 -8px 40px rgba(0,0,0,0.22)",
+        zIndex: 85,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }
+    : {
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        boxShadow: "-8px 0 40px rgba(0,0,0,0.12)",
+        zIndex: 85,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop mobile */}
+          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[84] sm:hidden"
-            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+            transition={{ duration: 0.22 }}
             onClick={onClose}
-          />
-
-          {/* Backdrop desktop — muy sutil */}
-          <motion.div
-            key="backdrop-desk"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[84] hidden sm:block"
-            style={{ background: "rgba(0,0,0,0.15)" }}
-            onClick={onClose}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 84,
+              background: isMobile ? "rgba(0,0,0,0.52)" : "rgba(0,0,0,0.18)",
+              backdropFilter: isMobile ? "blur(3px)" : "none",
+            }}
           />
 
           {/* Panel */}
@@ -84,40 +108,38 @@ export default function DrawerPanel({
             animate={panelAnimate}
             exit={panelExit}
             transition={panelTransition}
-            className={`
-              fixed z-[85] bg-bgSecondary shadow-2xl
-              sm:top-0 sm:right-0 sm:h-full sm:border-l sm:border-borderColor sm:flex sm:flex-col
-              ${width} w-full
-              max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:rounded-t-2xl max-sm:max-h-[96vh]
-              sm:flex-col flex flex-col
-            `}
-            style={{ boxShadow: isMobile ? "0 -8px 40px rgba(0,0,0,0.18)" : "-8px 0 40px rgba(0,0,0,0.12)" }}
+            className={`bg-bgSecondary ${isMobile ? "w-full" : `w-full ${width}`}`}
+            style={panelStyle}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle — solo mobile */}
-            <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
-              <div className="w-10 h-1 rounded-full bg-borderColor" />
-            </div>
+            {isMobile && (
+              <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 6px" }}>
+                <div style={{ width: 40, height: 4, borderRadius: 99, background: "var(--borderColor)" }} />
+              </div>
+            )}
 
             {/* Header */}
-            <div className="flex items-start justify-between gap-4 px-6 py-4 sm:py-5 border-b border-borderColor flex-shrink-0">
+            <div
+              className="border-b border-borderColor"
+              style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, padding: isMobile ? "12px 20px" : "20px 24px", flexShrink: 0 }}
+            >
               <div>
-                <h2 className="text-base font-semibold text-textPrimary tracking-tight">{title}</h2>
-                {subtitle && (
-                  <p className="text-xs text-textSecondary mt-0.5">{subtitle}</p>
-                )}
+                <h2 className="text-base font-semibold text-textPrimary" style={{ margin: 0 }}>{title}</h2>
+                {subtitle && <p className="text-xs text-textSecondary" style={{ margin: "2px 0 0" }}>{subtitle}</p>}
               </div>
               <button
                 onClick={onClose}
                 aria-label="Cerrar panel"
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-textSecondary hover:text-textPrimary hover:bg-borderColor/40 transition-colors flex-shrink-0 mt-0.5"
+                className="text-textSecondary hover:text-textPrimary transition-colors"
+                style={{ width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "transparent", border: "none", cursor: "pointer" }}
               >
-                <X className="w-4 h-4" />
+                <X size={16} />
               </button>
             </div>
 
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto min-h-0">
+            {/* Contenido — flex-1, cada hijo maneja su propio scroll */}
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
               {children}
             </div>
           </motion.div>
