@@ -291,7 +291,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
       {/* ══════════════════════════════════════════
           MOBILE LAYOUT
           ══════════════════════════════════════════ */}
-      <div className="sm:hidden flex flex-col h-full relative overflow-hidden">
+      <div className="sm:hidden" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
 
         {/* Toast */}
         <AnimatePresence>
@@ -513,7 +513,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
       {/* ══════════════════════════════════════════
           DESKTOP LAYOUT (sin cambios)
           ══════════════════════════════════════════ */}
-      <div className="hidden sm:block px-6 py-5 space-y-5">
+      <div className="hidden sm:block px-6 py-5 space-y-5" style={{ overflowY: "auto", flex: 1 }}>
 
         {/* Toast desktop */}
         <AnimatePresence>
