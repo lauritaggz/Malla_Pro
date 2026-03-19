@@ -324,7 +324,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
         />
 
         {/* ── Vistas con animación ── */}
-        <div className="flex-1 relative overflow-hidden">
+        <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
           <AnimatePresence mode="wait" initial={false}>
             {mobileView === "schedule" ? (
               /* Vista A — Lista de clases del día */
@@ -748,7 +748,7 @@ function MobileDayBar({ days, selectedDay, todayDayId, countByDay, onSelect }) {
 function MobileClassList({ items, slotsByStart, editingId, onSelect, formatEndTime }) {
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center py-16">
+      <div className="flex flex-col items-center justify-center gap-3 px-6 text-center py-24" style={{ minHeight: "100%" }}>
         <div className="w-14 h-14 rounded-2xl bg-borderColor/30 flex items-center justify-center">
           <Calendar className="w-7 h-7 text-textSecondary/40" />
         </div>

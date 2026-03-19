@@ -61,6 +61,7 @@ export default function DrawerPanel({
         bottom: 0,
         left: 0,
         right: 0,
+        height: "88dvh",        /* altura fija tipo bottom-sheet */
         maxHeight: "100dvh",
         borderRadius: "16px 16px 0 0",
         boxShadow: "0 -8px 40px rgba(0,0,0,0.22)",
