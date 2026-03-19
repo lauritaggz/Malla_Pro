@@ -3,9 +3,19 @@
  * Desktop: desliza desde la derecha, sin oscurecer el fondo.
  * Mobile: panel de pantalla completa desde abajo.
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handler, { passive: true });
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+}
 
 export default function DrawerPanel({
   isOpen,
@@ -15,7 +25,9 @@ export default function DrawerPanel({
   width = "max-w-xl",
   children,
 }) {
-  /* Bloquear scroll del body en mobile cuando está abierto */
+  const isMobile = useIsMobile();
+
+  /* Bloquear scroll del body cuando está abierto */
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -30,11 +42,18 @@ export default function DrawerPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
 
+  const panelInitial  = isMobile ? { y: "100%", opacity: 1 }   : { x: "100%", opacity: 0 };
+  const panelAnimate  = isMobile ? { y: 0, opacity: 1 }         : { x: 0, opacity: 1 };
+  const panelExit     = isMobile ? { y: "100%", opacity: 1 }    : { x: "100%", opacity: 0 };
+  const panelTransition = isMobile
+    ? { type: "spring", damping: 32, stiffness: 300 }
+    : { type: "spring", damping: 30, stiffness: 280 };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop — solo mobile */}
+          {/* Backdrop mobile */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -46,7 +65,7 @@ export default function DrawerPanel({
             onClick={onClose}
           />
 
-          {/* Semi-backdrop desktop — muy sutil */}
+          {/* Backdrop desktop — muy sutil */}
           <motion.div
             key="backdrop-desk"
             initial={{ opacity: 0 }}
@@ -61,22 +80,27 @@ export default function DrawerPanel({
           {/* Panel */}
           <motion.div
             key="panel"
-            /* Desktop: slide desde la derecha */
-            initial={{ x: "100%", opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: "100%", opacity: 0 }}
-            transition={{ type: "spring", damping: 30, stiffness: 280 }}
+            initial={panelInitial}
+            animate={panelAnimate}
+            exit={panelExit}
+            transition={panelTransition}
             className={`
-              fixed z-[85] top-0 right-0 h-full ${width} w-full
-              flex flex-col
-              bg-bgSecondary border-l border-borderColor
-              shadow-2xl
+              fixed z-[85] bg-bgSecondary shadow-2xl
+              sm:top-0 sm:right-0 sm:h-full sm:border-l sm:border-borderColor sm:flex sm:flex-col
+              ${width} w-full
+              max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:rounded-t-2xl max-sm:max-h-[96vh]
+              sm:flex-col flex flex-col
             `}
-            style={{ boxShadow: "-8px 0 40px rgba(0,0,0,0.12)" }}
+            style={{ boxShadow: isMobile ? "0 -8px 40px rgba(0,0,0,0.18)" : "-8px 0 40px rgba(0,0,0,0.12)" }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Drag handle — solo mobile */}
+            <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-borderColor" />
+            </div>
+
             {/* Header */}
-            <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-borderColor flex-shrink-0">
+            <div className="flex items-start justify-between gap-4 px-6 py-4 sm:py-5 border-b border-borderColor flex-shrink-0">
               <div>
                 <h2 className="text-base font-semibold text-textPrimary tracking-tight">{title}</h2>
                 {subtitle && (
@@ -93,7 +117,7 @@ export default function DrawerPanel({
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto min-h-0">
               {children}
             </div>
           </motion.div>
