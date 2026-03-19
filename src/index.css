@@ -300,6 +300,11 @@ body {
   color: #78350F !important;
   border-color: #FCD34D !important;
 }
+/* En curso light mode — mismo color primario pero menos saturado */
+.light .curso-encurso {
+  filter: saturate(0.72) brightness(1.12);
+}
+
 /* Botón "Notas" adaptado al fondo pastel en light mode */
 .light .curso-aprobado button {
   background-color: rgba(6,95,70,0.10) !important;
