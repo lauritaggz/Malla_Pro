@@ -80,12 +80,12 @@ export default function App() {
     }
   };
 
-  // Mostrar login sugerido una vez al seleccionar una malla
-  useEffect(() => {
-    if (mallaSeleccionada && shouldShowLogin()) {
-      setMostrarLogin(true);
-    }
-  }, [mallaSeleccionada]);
+  // Login desactivado temporalmente — componente disponible en LoginSuggestion.jsx
+  // useEffect(() => {
+  //   if (mallaSeleccionada && shouldShowLogin()) {
+  //     setMostrarLogin(true);
+  //   }
+  // }, [mallaSeleccionada]);
 
   // Mostrar Tour la primera vez (solo después de que el login fue manejado)
   useEffect(() => {
