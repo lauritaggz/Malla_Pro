@@ -309,7 +309,6 @@ body {
 .light .curso-encurso {
   filter: none;
   box-shadow: none;
-  transform: scale(1.02);
 }
 /* Botón "Notas" en cursando light mode */
 .aurora.light  .curso-encurso button { background-color: rgba(30,58,138,0.10) !important; border-color: rgba(30,58,138,0.20) !important; color: #1E3A8A !important; }
@@ -354,7 +353,6 @@ body {
   color: var(--primary) !important;
   border-color: var(--shadowPrimary) !important;
   box-shadow: none;
-  transform: scale(1.02);
 }
 
 /* ── Drawer panel ─────────────────────────────────────────────── */
