@@ -249,13 +249,13 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
       width="max-w-2xl"
     >
       {/* ══════════════════════════════════════════
-          MOBILE LAYOUT
-          ══════════════════════════════════════════ */}
-      {/* ══════════════════════════════════════════
           MOBILE LAYOUT — ambas vistas SIEMPRE montadas,
-          slide via CSS transform para no desmontar inputs
+          slide via CSS transform para no desmontar inputs.
+          IMPORTANTE: NO poner display en el inline style;
+          la clase Tailwind sm:hidden necesita poder aplicar
+          display:none sin ser anulada por un inline style.
           ══════════════════════════════════════════ */}
-      <div className="sm:hidden" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, position: "relative" }}>
+      <div className="sm:hidden flex" style={{ flexDirection: "column", flex: 1, minHeight: 0, position: "relative" }}>
 
         {/* Toast */}
         {toast && (
@@ -454,9 +454,15 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
       </div>
 
       {/* ══════════════════════════════════════════
-          DESKTOP LAYOUT (sin cambios)
+          DESKTOP LAYOUT
+          El outer div NO lleva display en inline style
+          para que hidden/sm:block de Tailwind funcionen.
+          El inner div tiene height:100% + overflowY:auto
+          para un scroll predecible sin que los hijos encojan.
           ══════════════════════════════════════════ */}
-      <div className="hidden sm:block px-6 py-5 space-y-5" style={{ overflowY: "auto", flex: 1 }}>
+      <div className="hidden sm:block" style={{ flex: 1, minHeight: 0 }}>
+      <div style={{ height: "100%", overflowY: "auto", padding: "20px 24px" }}>
+      <div className="space-y-5">
 
         {/* Toast desktop */}
         <AnimatePresence>
@@ -643,7 +649,10 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
             />
           </div>
         </div>
-      </div>
+
+      </div>{/* /space-y-5 */}
+      </div>{/* /inner scroll */}
+      </div>{/* /outer hidden sm:block */}
     </DrawerPanel>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   GraduationCap, Moon, Sun, FileText, HelpCircle,
-  CalendarDays, ChevronDown, BookMarked,
+  CalendarDays, ChevronDown, BookMarked, Heart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -45,6 +45,7 @@ export default function Navbar({
   cantidadSemestres,
   onShowTour,
   onShowHorario,
+  onShowContacto,
   mostrarResumen,
 }) {
   const navRef      = useRef(null);
@@ -231,6 +232,11 @@ export default function Navbar({
               <CalendarDays className="w-4 h-4" />
             </NavBtn>
           )}
+
+          {/* Enviar malla */}
+          <NavBtn onClick={onShowContacto} label="Enviar mi malla">
+            <Heart className="w-4 h-4" />
+          </NavBtn>
 
           {/* Ayuda */}
           {mallaSeleccionada && (
