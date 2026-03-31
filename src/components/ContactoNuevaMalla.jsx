@@ -70,7 +70,21 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
             }}
           />
 
-          {/* Panel */}
+          {/* Contenedor centrador (no animado) */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 96,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "16px",
+              pointerEvents: "none",
+            }}
+          >
+          {/* Panel animado — dentro del flex-center para que transform no rompa el centrado */}
           <motion.div
             key="panel"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -79,11 +93,6 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
             transition={{ type: "spring", damping: 26, stiffness: 280 }}
             onClick={(e) => e.stopPropagation()}
             style={{
-              position: "fixed",
-              zIndex: 96,
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
               width: "min(94vw, 600px)",
               maxHeight: "92dvh",
               borderRadius: 20,
@@ -91,6 +100,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
               flexDirection: "column",
               overflow: "hidden",
               boxShadow: "0 28px 72px rgba(0,0,0,0.30)",
+              pointerEvents: "auto",
             }}
             className="border border-primary/20 bg-bgSecondary"
           >
@@ -226,6 +236,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
               </div>
             </div>
           </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
