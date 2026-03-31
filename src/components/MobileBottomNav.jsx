@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle, CalendarDays } from "lucide-react";
+import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle, CalendarDays, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function MobileBottomNav({
@@ -17,6 +17,7 @@ export default function MobileBottomNav({
   setOcultarCompletados,
   onShowTour,
   onShowHorario,
+  onShowContacto,
   onChangeMalla
 }) {
   const [showMore, setShowMore] = useState(false);
@@ -99,6 +100,21 @@ export default function MobileBottomNav({
               >
                 <CalendarDays className="w-5 h-5" />
                 Horario
+              </button>
+            </div>
+
+            {/* Enviar malla */}
+            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
+              <button
+                onClick={() => {
+                  onShowContacto();
+                  setShowMore(false);
+                }}
+                className="w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm
+                           bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/15"
+              >
+                <Heart className="w-5 h-5" />
+                Enviar mi malla
               </button>
             </div>
 

@@ -8,6 +8,7 @@ import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
 import MobileBottomNav from "./components/MobileBottomNav";
 import HorarioModal from "./components/HorarioModal";
+import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
 import LoginSuggestion, { shouldShowLogin, getStoredUser } from "./components/LoginSuggestion";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
@@ -45,6 +46,7 @@ export default function App() {
   const [mostrarTour, setMostrarTour] = useState(false);
   const [ocultarCompletados, setOcultarCompletados] = useState(false);
   const [mostrarHorario, setMostrarHorario] = useState(false);
+  const [mostrarContacto, setMostrarContacto] = useState(false);
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => getStoredUser());
 
@@ -159,6 +161,7 @@ export default function App() {
           onVerProgreso={() => setMostrarResumen(true)}
           onShowTour={() => setMostrarTour(true)}
           onShowHorario={() => setMostrarHorario(true)}
+          onShowContacto={() => setMostrarContacto(true)}
           mostrarResumen={mostrarResumen}
         />
       )}
@@ -179,6 +182,7 @@ export default function App() {
           setOcultarCompletados={setOcultarCompletados}
           onShowTour={() => setMostrarTour(true)}
           onShowHorario={() => setMostrarHorario(true)}
+          onShowContacto={() => setMostrarContacto(true)}
           onChangeMalla={handleCambiarMalla}
         />
       )}
@@ -245,12 +249,12 @@ export default function App() {
                 <p className="text-sm text-textSecondary mb-5 relative z-10">
                   ¡Escríbenos y la agregamos rápidamente para que puedas usar la app!
                 </p>
-                <a
-                  href="mailto:lauragv910@gmail.com?subject=Solicitud%20Nueva%20Malla%20-%20Malla%20Pro&body=Hola!%20Me%20gustar%C3%ADa%20que%20agreguen%20una%20nueva%20malla.%20%C2%BFCu%C3%A1les%20son%20los%20pasos%20para%20poder%20agregarla%3F"
+                <button
+                  onClick={() => setMostrarContacto(true)}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white bg-primary hover:brightness-110 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all transform hover:scale-105 relative z-10 w-full sm:w-auto"
                 >
-                  ¡Contáctanos aquí!
-                </a>
+                  ¡Envíanos tu malla!
+                </button>
               </div>
             </div>
           </div>
@@ -328,6 +332,12 @@ export default function App() {
         isVisible={mostrarTour} 
         onClose={() => setMostrarTour(false)} 
         isMobile={isMobile}
+      />
+
+      {/* MODAL CONTACTO / NUEVA MALLA */}
+      <ContactoNuevaMalla
+        isOpen={mostrarContacto}
+        onClose={() => setMostrarContacto(false)}
       />
 
       {/* MODAL HORARIO */}

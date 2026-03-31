@@ -249,13 +249,13 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
       width="max-w-2xl"
     >
       {/* ══════════════════════════════════════════
-          MOBILE LAYOUT
-          ══════════════════════════════════════════ */}
-      {/* ══════════════════════════════════════════
           MOBILE LAYOUT — ambas vistas SIEMPRE montadas,
-          slide via CSS transform para no desmontar inputs
+          slide via CSS transform para no desmontar inputs.
+          IMPORTANTE: NO poner display en el inline style;
+          la clase Tailwind sm:hidden necesita poder aplicar
+          display:none sin ser anulada por un inline style.
           ══════════════════════════════════════════ */}
-      <div className="sm:hidden" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, position: "relative" }}>
+      <div className="sm:hidden flex" style={{ flexDirection: "column", flex: 1, minHeight: 0, position: "relative" }}>
 
         {/* Toast */}
         {toast && (
@@ -454,9 +454,9 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
       </div>
 
       {/* ══════════════════════════════════════════
-          DESKTOP LAYOUT (sin cambios)
+          DESKTOP LAYOUT
           ══════════════════════════════════════════ */}
-      <div className="hidden sm:block px-6 py-5 space-y-5" style={{ overflowY: "auto", flex: 1 }}>
+      <div className="hidden sm:flex flex-col gap-5 px-6 py-5" style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
 
         {/* Toast desktop */}
         <AnimatePresence>
