@@ -455,8 +455,14 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
 
       {/* ══════════════════════════════════════════
           DESKTOP LAYOUT
+          El outer div NO lleva display en inline style
+          para que hidden/sm:block de Tailwind funcionen.
+          El inner div tiene height:100% + overflowY:auto
+          para un scroll predecible sin que los hijos encojan.
           ══════════════════════════════════════════ */}
-      <div className="hidden sm:flex flex-col gap-5 px-6 py-5" style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+      <div className="hidden sm:block" style={{ flex: 1, minHeight: 0 }}>
+      <div style={{ height: "100%", overflowY: "auto", padding: "20px 24px" }}>
+      <div className="space-y-5">
 
         {/* Toast desktop */}
         <AnimatePresence>
@@ -643,7 +649,10 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
             />
           </div>
         </div>
-      </div>
+
+      </div>{/* /space-y-5 */}
+      </div>{/* /inner scroll */}
+      </div>{/* /outer hidden sm:block */}
     </DrawerPanel>
   );
 }
