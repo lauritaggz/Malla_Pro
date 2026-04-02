@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:cpanel": "vite build",
+    "pack:cpanel": "npm run build && node scripts/pack-cpanel.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

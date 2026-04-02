@@ -220,16 +220,48 @@ sudo certbot --nginx -d tudominio.com
 
 Hosting compartido tipo Bluehost sirve la app como sitio **estático**: no necesitas Node.js en el servidor, solo subir el resultado del build.
 
-1. En tu computadora, dentro del proyecto:
-   ```bash
-   npm install
-   npm run build
-   ```
-2. Abre la carpeta `dist/`. Sube **todo su contenido** (incluido `.htaccess`, `index.html`, `assets/`, `mallas/`, etc.) a la raíz del sitio en Bluehost, normalmente **`public_html/`** (Administrador de archivos o FTP).
-3. El archivo **`public/.htaccess`** se copia automáticamente a `dist/` al construir. En Apache redirige las rutas de la SPA (por ejemplo `/app`) a `index.html` sin romper archivos estáticos ni los JSON en `/mallas/`.
-4. Activa **SSL** en cPanel si aún no lo tienes (certificado gratuito habitual en estos hostings).
+#### 1. Generar el sitio en tu PC
 
-Si publicas en una **subcarpeta** (ej. `tudominio.com/malla/`), cambia en `vite.config.js` la opción `base` a esa ruta (por ejemplo `base: "/malla/"`), vuelve a ejecutar `npm run build` y ajusta `RewriteBase` en `.htaccess` para que coincida con la subcarpeta.
+```bash
+npm install
+npm run build
+```
+
+- La salida queda en la carpeta **`dist/`**.
+- **`public/.htaccess`** se copia solo a `dist/` al construir: en Apache envía las rutas de la SPA (React Router) a `index.html` y deja intactos `assets/`, `mallas/*.json`, etc.
+
+Opcional — **un solo zip para subir** (en Windows incluye `.htaccess`):
+
+```bash
+npm run pack:cpanel
+```
+
+Se crea **`mallapro-cpanel-upload.zip`** en la raíz del proyecto. En cPanel puedes subir ese archivo a la carpeta del dominio y usar **Extraer**.
+
+#### 2. Subir a cPanel (Administrador de archivos o FTP)
+
+1. Entra en la carpeta **raíz del dominio** (si `mallapro.cl` es dominio adicional, suele ser algo como `public_html/mallapro.cl`, como en tu hosting).
+2. Activa **mostrar archivos ocultos** (punto inicial): sin **`.htaccess`**, al recargar rutas como `/app` Apache devolverá 404.
+3. Sube **todo** el contenido de `dist/` (o extrae el zip ahí). Conviene **reemplazar** archivos viejos para no mezclar hashes de JS/CSS de builds anteriores.
+4. Comprueba que existan al menos: `index.html`, `.htaccess`, carpeta `assets/`, carpeta `mallas/`.
+
+#### 3. SSL y comprobación
+
+En cPanel, activa **SSL** para el dominio (Let’s Encrypt u otro certificado gratuito del hosting).
+
+Abre tu dominio en el navegador y prueba una ruta interna (por ejemplo una vista que no sea la home) recargando con F5: debe cargar la app, no un 404 del servidor.
+
+#### Dominio en subcarpeta (no es el caso habitual de un dominio propio)
+
+Si la URL fuera `tudominio.com/malla/` en lugar de la raíz del dominio:
+
+1. En `vite.config.js`, pon `base: "/malla/"` (con barra final).
+2. En `public/.htaccess`, ajusta `RewriteBase` a esa misma ruta (ver comentarios en el archivo).
+3. Vuelve a ejecutar `npm run build` y sube de nuevo `dist/`.
+
+#### Favicon
+
+Si usas **`favicon.png`**, colócalo en **`public/`** antes del build para que Vite lo copie a `dist/` (el `index.html` ya lo referencia).
 
 ---
 

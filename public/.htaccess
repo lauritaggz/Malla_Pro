@@ -1,16 +1,24 @@
-# Bluehost / Apache — enrutamiento SPA (React Router)
-# Sube el contenido de dist/ a public_html (o la carpeta raíz del dominio).
+# Bluehost / cPanel / Apache — SPA (React Router + Vite)
+#
+# Tras `npm run build`, sube TODO el contenido de dist/ a la raíz del dominio
+# (ej. public_html/mallapro.cl si el dominio apunta ahí). Activa "mostrar archivos
+# ocultos" en el administrador de archivos: .htaccess debe subirse sí o sí.
+#
+# Si la app vive en subcarpeta (ej. tudominio.com/malla/), en vite.config.js pon
+# base: "/malla/" y aquí descomenta y ajusta RewriteBase:
+#   RewriteBase /malla/
+
+DirectoryIndex index.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # No reescribir archivos ni directorios que existan (assets, mallas JSON, etc.)
+  # No reescribir archivos ni directorios reales (assets, /mallas/*.json, etc.)
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # El resto va a index.html
   RewriteRule ^ index.html [L]
 </IfModule>
 
