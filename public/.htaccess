@@ -1,0 +1,22 @@
+# Bluehost / Apache — enrutamiento SPA (React Router)
+# Sube el contenido de dist/ a public_html (o la carpeta raíz del dominio).
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # No reescribir archivos ni directorios que existan (assets, mallas JSON, etc.)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # El resto va a index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Caché larga para assets con hash (Vite emite nombres versionados en /assets/)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+</IfModule>

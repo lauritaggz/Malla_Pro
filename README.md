@@ -15,6 +15,7 @@ Aplicación web interactiva para gestionar y visualizar la malla curricular univ
    - [Netlify](#opción-b-netlify)
    - [Servidor propio / VPS](#opción-c-servidor-propio--vps)
    - [GitHub Pages](#opción-d-github-pages)
+   - [Bluehost (cPanel)](#opción-e-bluehost-cpanel)
 6. [Manual de usuario](#manual-de-usuario)
 7. [Estructura del proyecto](#estructura-del-proyecto)
 8. [Variables y configuración](#variables-y-configuración)
@@ -215,6 +216,23 @@ sudo certbot --nginx -d tudominio.com
 
 ---
 
+### Opción E — Bluehost (cPanel)
+
+Hosting compartido tipo Bluehost sirve la app como sitio **estático**: no necesitas Node.js en el servidor, solo subir el resultado del build.
+
+1. En tu computadora, dentro del proyecto:
+   ```bash
+   npm install
+   npm run build
+   ```
+2. Abre la carpeta `dist/`. Sube **todo su contenido** (incluido `.htaccess`, `index.html`, `assets/`, `mallas/`, etc.) a la raíz del sitio en Bluehost, normalmente **`public_html/`** (Administrador de archivos o FTP).
+3. El archivo **`public/.htaccess`** se copia automáticamente a `dist/` al construir. En Apache redirige las rutas de la SPA (por ejemplo `/app`) a `index.html` sin romper archivos estáticos ni los JSON en `/mallas/`.
+4. Activa **SSL** en cPanel si aún no lo tienes (certificado gratuito habitual en estos hostings).
+
+Si publicas en una **subcarpeta** (ej. `tudominio.com/malla/`), cambia en `vite.config.js` la opción `base` a esa ruta (por ejemplo `base: "/malla/"`), vuelve a ejecutar `npm run build` y ajusta `RewriteBase` en `.htaccess` para que coincida con la subcarpeta.
+
+---
+
 ## Manual de usuario
 
 ### Seleccionar carrera
@@ -322,6 +340,7 @@ Desde *Opciones* (mobile) o la barra superior (desktop), puedes marcar todos los
 ```
 Malla-pro-UCH/
 ├── public/
+│   ├── .htaccess           # Apache / Bluehost — SPA fallback (va a dist/)
 │   ├── _redirects          # Redirección SPA para Netlify
 │   └── ...
 ├── src/
