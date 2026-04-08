@@ -115,7 +115,7 @@ const Curso = ({
             : excepcional
             ? "curso-excepcional text-white border-amber-400/50 shadow-md"
             : enCurso
-            ? "curso-encurso text-white border-primary shadow-md"
+            ? "curso-encurso text-white border-primary shadow-md encurso-glow"
             : !disponible
             ? "bg-bgSecondary/50 text-textSecondary opacity-70 border-dashed border-borderColor/80"
             : "curso-disponible text-textPrimary border-borderColor hover:border-primary/40"
@@ -128,6 +128,20 @@ const Curso = ({
         contain: "layout"
       }}
     >
+      {/* ── Indicador pulsante "en curso" ── */}
+      {enCurso && (
+        <span className="absolute top-2.5 left-2.5 flex h-2 w-2">
+          <span
+            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-70"
+            style={{ background: "currentColor" }}
+          />
+          <span
+            className="relative inline-flex rounded-full h-2 w-2"
+            style={{ background: "currentColor", opacity: 0.95 }}
+          />
+        </span>
+      )}
+
       {/* Badge de Promedio en el Top Right */}
       {promedio !== null && (
         <div 
@@ -142,8 +156,8 @@ const Curso = ({
         </div>
       )}
 
-      {/* Nombre (agregamos pr-8 si hay promedio para no chocar con el badge) */}
-      <div className={`font-semibold leading-tight mb-1.5 line-clamp-2 ${promedio !== null ? 'pr-8' : ''}`}>
+      {/* Nombre — padding izquierdo cuando hay dot, derecho cuando hay badge */}
+      <div className={`font-semibold leading-tight mb-1.5 line-clamp-2 ${enCurso ? 'pl-4' : ''} ${promedio !== null ? 'pr-8' : ''}`}>
         {curso.nombre}
       </div>
 
