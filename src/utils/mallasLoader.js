@@ -28,6 +28,10 @@ export async function listarMallas() {
           nombre: "Ingeniería Civil en Minas",
           url: "/mallas/Minas.json",
         },
+        {
+          nombre: "Medicina",
+          url: "/mallas/med.json",
+        },
       ],
     },
   ];

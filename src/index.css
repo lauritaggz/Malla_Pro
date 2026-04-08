@@ -303,7 +303,8 @@ body {
 /* En curso light mode — pastel del color primario (fondo claro + texto oscuro) */
 .aurora.light  .curso-encurso { background-color: #EFF6FF; color: #1E3A8A !important; border-color: #BFDBFE !important; }
 .sunset.light  .curso-encurso { background-color: #FDF2F8; color: #831843 !important; border-color: #FBCFE8 !important; }
-.emerald.light .curso-encurso { background-color: #ECFDF5; color: #064E3B !important; border-color: #A7F3D0 !important; }
+/* Emerald: cursando usa familia TEAL para diferenciarse del aprobado (verde esmeralda) */
+.emerald.light .curso-encurso { background-color: #CCFBF1; color: #0F766E !important; border-color: #5EEAD4 !important; }
 .midnight.light .curso-encurso { background-color: #F5F3FF; color: #4C1D95 !important; border-color: #DDD6FE !important; }
 .golden.light  .curso-encurso { background-color: #FFFBEB; color: #78350F !important; border-color: #FDE68A !important; }
 .light .curso-encurso {
@@ -313,7 +314,8 @@ body {
 /* Botón "Notas" en cursando light mode */
 .aurora.light  .curso-encurso button { background-color: rgba(30,58,138,0.10) !important; border-color: rgba(30,58,138,0.20) !important; color: #1E3A8A !important; }
 .sunset.light  .curso-encurso button { background-color: rgba(131,24,67,0.10) !important; border-color: rgba(131,24,67,0.20) !important; color: #831843 !important; }
-.emerald.light .curso-encurso button { background-color: rgba(6,78,59,0.10) !important; border-color: rgba(6,78,59,0.20) !important; color: #064E3B !important; }
+/* Emerald: botón en teal */
+.emerald.light .curso-encurso button { background-color: rgba(15,118,110,0.12) !important; border-color: rgba(15,118,110,0.25) !important; color: #0F766E !important; }
 .midnight.light .curso-encurso button { background-color: rgba(76,29,149,0.10) !important; border-color: rgba(76,29,149,0.20) !important; color: #4C1D95 !important; }
 .golden.light  .curso-encurso button { background-color: rgba(120,53,15,0.10) !important; border-color: rgba(120,53,15,0.20) !important; color: #78350F !important; }
 
@@ -353,6 +355,37 @@ body {
   color: var(--primary) !important;
   border-color: var(--shadowPrimary) !important;
   box-shadow: none;
+}
+/* Emerald dark: cursando → teal oscuro para diferenciarse del aprobado verde */
+.emerald.dark .curso-encurso {
+  background-color: rgb(4 47 46 / 0.85) !important;
+  color: #5eead4 !important;
+  border-color: rgb(15 118 110 / 0.5) !important;
+  box-shadow: none;
+}
+
+/* ── Stat cards — diferenciación en tema emerald ─────────────── */
+/*
+  Por defecto:
+    aprobados → bg-emerald-500 (hardcoded en JSX)
+    encurso   → bg-primary (= emerald en tema verde → idénticos)
+  Solución: en tema emerald, encurso pasa a teal-600
+*/
+.emerald .stat-card-encurso {
+  background-color: #0d9488 !important; /* teal-600 */
+  border-color: rgba(20, 184, 166, 0.25) !important;
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.28) !important;
+}
+/* Emerald dark: aprobados en verde bosque, encurso en teal vibrante */
+.emerald.dark .stat-card-aprobados {
+  background-color: #166534 !important; /* green-800 */
+  border-color: rgba(22, 163, 74, 0.3) !important;
+  box-shadow: 0 8px 20px rgba(22, 101, 52, 0.35) !important;
+}
+.emerald.dark .stat-card-encurso {
+  background-color: #0f766e !important; /* teal-700 */
+  border-color: rgba(20, 184, 166, 0.25) !important;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35) !important;
 }
 
 /* ── Drawer panel ─────────────────────────────────────────────── */

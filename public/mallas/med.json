@@ -1,0 +1,499 @@
+{
+    "carrera": "Medicina (UNAB)",
+    "total_creditos": 0,
+    "totalSemestres": 12,
+    "semestres": [
+      {
+        "numero": 1,
+        "cursos": [
+          {
+            "id": 1,
+            "codigo": "BIOL132",
+            "nombre": "Biología Celular",
+            "sct": 12,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 2,
+            "codigo": "CEGHC11",
+            "nombre": "Habilidades Comunicativas",
+            "sct": 8,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 3,
+            "codigo": "MAT007",
+            "nombre": "Razonamiento Matemático Aplicado a la Medicina",
+            "sct": 8,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 4,
+            "codigo": "MEDI001",
+            "nombre": "Fundamentos de la Medicina I",
+            "sct": 12,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 5,
+            "codigo": "MORF335",
+            "nombre": "Bases Morfológicas y Estructurales I",
+            "sct": 16,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 6,
+            "codigo": "QUIM500",
+            "nombre": "Química General y Orgánica",
+            "sct": 11,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          }
+        ]
+      },
+      {
+        "numero": 2,
+        "cursos": [
+          {
+            "id": 7,
+            "codigo": "BIOL148",
+            "nombre": "Genética y Biología Molecular Humana",
+            "sct": 15,
+            "prerrequisitos": [1],
+            "prereq_expr": "BIOL132 o (BIO130 y BIO131)"
+          },
+          {
+            "id": 8,
+            "codigo": "CFIS350",
+            "nombre": "Física Aplicada a la Medicina",
+            "sct": 7,
+            "prerrequisitos": [3],
+            "prereq_expr": "MAT007 o FMM007"
+          },
+          {
+            "id": 9,
+            "codigo": "MEDI002",
+            "nombre": "Fundamentos de la Medicina II",
+            "sct": 13,
+            "prerrequisitos": [4],
+            "prereq_expr": "MEDI001 o MED016"
+          },
+          {
+            "id": 10,
+            "codigo": "MORF336",
+            "nombre": "Bases Morfológicas y Estructurales II",
+            "sct": 18,
+            "prerrequisitos": [5],
+            "prereq_expr": "MORF335 o (MOR330 y MOR331 y BIO320 y BIO321)"
+          },
+          {
+            "id": 11,
+            "codigo": "SPAB305",
+            "nombre": "Bioestadística",
+            "sct": 14,
+            "prerrequisitos": [3],
+            "prereq_expr": "MAT007 o FMM007"
+          }
+        ]
+      },
+      {
+        "numero": 3,
+        "cursos": [
+          {
+            "id": 12,
+            "codigo": "BIOL259",
+            "nombre": "Microbiología y Parasitología",
+            "sct": 13,
+            "prerrequisitos": [1],
+            "prereq_expr": "BIOL132 o (BIO130 y BIO131)"
+          },
+          {
+            "id": 13,
+            "codigo": "BIOL276",
+            "nombre": "Bases Funcionales I",
+            "sct": 19,
+            "prerrequisitos": [7, 6, 8],
+            "prereq_expr": "(BIOL148 o (BIO148 y BIO242)) y (QUIM500 o (QUI109 y QUI024)) y (CFIS350 o FMF019)"
+          },
+          {
+            "id": 14,
+            "codigo": "ING119",
+            "nombre": "Inglés I",
+            "sct": 12,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 15,
+            "codigo": "MEDI003",
+            "nombre": "Psicología Médica",
+            "sct": 10,
+            "prerrequisitos": [9],
+            "prereq_expr": "MEDI002 o (MED017 o MED121 o MED122)"
+          },
+          {
+            "id": 16,
+            "codigo": "SPAB306",
+            "nombre": "Epidemiología",
+            "sct": 10,
+            "prerrequisitos": [11],
+            "prereq_expr": "SPAB305 o MED293"
+          }
+        ]
+      },
+      {
+        "numero": 4,
+        "cursos": [
+          {
+            "id": 17,
+            "codigo": "BIOL376",
+            "nombre": "Bases Funcionales II",
+            "sct": 20,
+            "prerrequisitos": [13],
+            "prereq_expr": "BIOL276 o (BIO376 y BIO266)"
+          },
+          {
+            "id": 18,
+            "codigo": "ING129",
+            "nombre": "Inglés II",
+            "sct": 12,
+            "prerrequisitos": [14],
+            "prereq_expr": "ING119 o ING111 o ING110 o ING116 o ING117 o CNT021 o (ING050 y ING051) o (FLG301 y FLG302) o (BMA281 y BMA282) o (ETU081 y ETU082)"
+          },
+          {
+            "id": 19,
+            "codigo": "MEDI004",
+            "nombre": "Medicina Familiar y Comunitaria",
+            "sct": 12,
+            "prerrequisitos": [9, 15],
+            "prereq_expr": "(MEDI002 o (MED017 o MED121 o MED122)) y (MEDI003 o MED131)"
+          },
+          {
+            "id": 20,
+            "codigo": "MEDI005",
+            "nombre": "Medicina y Sociedad",
+            "sct": 11,
+            "prerrequisitos": [9],
+            "prereq_expr": "MEDI002 o (MED017 o MED121 o MED122)"
+          },
+          {
+            "id": 21,
+            "codigo": "SPAB307",
+            "nombre": "Salud Pública",
+            "sct": 12,
+            "prerrequisitos": [16],
+            "prereq_expr": "SPAB306 o MED293"
+          }
+        ]
+      },
+      {
+        "numero": 5,
+        "cursos": [
+          {
+            "id": 22,
+            "codigo": "FARM131",
+            "nombre": "Farmacología",
+            "sct": 14,
+            "prerrequisitos": [17],
+            "prereq_expr": "BIOL376 o (MED294 y BIO377)"
+          },
+          {
+            "id": 23,
+            "codigo": "ING239",
+            "nombre": "Inglés III",
+            "sct": 12,
+            "prerrequisitos": [18],
+            "prereq_expr": "ING129 o ING121 o ING120 o ING216 o ING126 o ING134 o ING127 o CNT026 o (ETU181 y ETU182) o ING229"
+          },
+          {
+            "id": 24,
+            "codigo": "MEDI006",
+            "nombre": "Semiología",
+            "sct": 16,
+            "prerrequisitos": [9, 17],
+            "prereq_expr": "MEDI002 o (MED017 o MED121 o MED122) y BIOL376"
+          },
+          {
+            "id": 25,
+            "codigo": "MEDI007",
+            "nombre": "Bases Funcionales III",
+            "sct": 18,
+            "prerrequisitos": [17],
+            "prereq_expr": "BIOL376 o (MED294 y BIO377)"
+          },
+          {
+            "id": 26,
+            "codigo": "MEDI0100",
+            "nombre": "Integrador I",
+            "sct": 5,
+            "prerrequisitos": [9, 15, 19, 12, 20, 17, 10, 21],
+            "prereq_expr": "(MEDI002 o (MED017 o MED121 o MED122)) y (MEDI003 o MED131) y (MEDI004 o MED292) y (BIOL259 o (BIO250 y BIO251)) y (MEDI005 o (MED131 o HUF124)) y (BIOL376 o (MED294 y BIO377)) y (MORF336 o (MOR332 y MOR333)) y (SPAB307 o MED292)"
+          }
+        ]
+      },
+      {
+        "numero": 6,
+        "cursos": [
+          {
+            "id": 27,
+            "codigo": "ING249",
+            "nombre": "Inglés IV",
+            "sct": 12,
+            "prerrequisitos": [23],
+            "prereq_expr": "ING239 o ING210 o ING216 o ING224 o ING126 o CNT126 o (ETU281 y ETU282) o ING217"
+          },
+          {
+            "id": 28,
+            "codigo": "MEDI008",
+            "nombre": "Ética Médica",
+            "sct": 8,
+            "prerrequisitos": [9],
+            "prereq_expr": "MEDI002 o (MED017 o MED121 o MED122)"
+          },
+          {
+            "id": 29,
+            "codigo": "MEDI009",
+            "nombre": "Clínica Médico Quirúrgica I",
+            "sct": 20,
+            "prerrequisitos": [25],
+            "prereq_expr": "MEDI007 o (MED260 y MED295 y MED257)"
+          },
+          {
+            "id": 30,
+            "codigo": "MEDI010",
+            "nombre": "Neurología",
+            "sct": 9,
+            "prerrequisitos": [25],
+            "prereq_expr": "MEDI007 o (MED260 y MED295 y MED257)"
+          },
+          {
+            "id": 31,
+            "codigo": "MEDI011",
+            "nombre": "Métodos de Investigación",
+            "sct": 8,
+            "prerrequisitos": [11],
+            "prereq_expr": "SPAB305 o MED293"
+          },
+          {
+            "id": 32,
+            "codigo": "SPAB308",
+            "nombre": "Gestión en Salud",
+            "sct": 8,
+            "prerrequisitos": [21, 22],
+            "prereq_expr": "(SPAB307 o MED292) y (FARM131 o BIO288)"
+          }
+        ]
+      },
+      {
+        "numero": 7,
+        "cursos": [
+          {
+            "id": 33,
+            "codigo": "MEDI012",
+            "nombre": "Clínica Médico Quirúrgica II",
+            "sct": 39,
+            "prerrequisitos": [29],
+            "prereq_expr": "MEDI009 o (MED257 y MED249)"
+          },
+          {
+            "id": 34,
+            "codigo": "MEDI013",
+            "nombre": "Dermatología",
+            "sct": 18,
+            "prerrequisitos": [29],
+            "prereq_expr": "MEDI009 o (MED257 y MED249)"
+          },
+          {
+            "id": 35,
+            "codigo": "MEDI014",
+            "nombre": "Otorrinolaringología",
+            "sct": 18,
+            "prerrequisitos": [29],
+            "prereq_expr": "MEDI009 o (MED257 y MED249)"
+          },
+          {
+            "id": 36,
+            "codigo": "MEDI015",
+            "nombre": "Psiquiatría",
+            "sct": 13,
+            "prerrequisitos": [15],
+            "prereq_expr": "MEDI003 o MED131"
+          },
+          {
+            "id": 37,
+            "codigo": "MEDI016",
+            "nombre": "Medicina Basada en la Evidencia",
+            "sct": 9,
+            "prerrequisitos": [31],
+            "prereq_expr": "MEDI011 o (MED278 y MED279)"
+          }
+        ]
+      },
+      {
+        "numero": 8,
+        "cursos": [
+          {
+            "id": 38,
+            "codigo": "CEGPC13",
+            "nombre": "Pensamiento Crítico",
+            "sct": 5,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 39,
+            "codigo": "MEDI017",
+            "nombre": "Clínica Médico Quirúrgica III",
+            "sct": 41,
+            "prerrequisitos": [33],
+            "prereq_expr": "MEDI012 o (MED296 y MED287 y MED257)"
+          },
+          {
+            "id": 40,
+            "codigo": "MEDI018",
+            "nombre": "Traumatología y Ortopedia",
+            "sct": 16,
+            "prerrequisitos": [33],
+            "prereq_expr": "MEDI012 o (MED296 y MED287 y MED257)"
+          },
+          {
+            "id": 41,
+            "codigo": "MEDI019",
+            "nombre": "Oftalmología",
+            "sct": 20,
+            "prerrequisitos": [33],
+            "prereq_expr": "MEDI012 o (MED296 y MED287 y MED257)"
+          },
+          {
+            "id": 42,
+            "codigo": "MEDI020",
+            "nombre": "Urología",
+            "sct": 20,
+            "prerrequisitos": [33],
+            "prereq_expr": "MEDI012 o (MED296 y MED287 y MED257)"
+          },
+          {
+            "id": 43,
+            "codigo": "MEDI021",
+            "nombre": "Medicina Legal y Forense",
+            "sct": 19,
+            "prerrequisitos": [33],
+            "prereq_expr": "MEDI012 o (MED296 y MED287 y MED257)"
+          }
+        ]
+      },
+      {
+        "numero": 9,
+        "cursos": [
+          {
+            "id": 44,
+            "codigo": "MEDI0200",
+            "nombre": "Integrador II",
+            "sct": 8,
+            "prerrequisitos": [28, 29, 30, 33, 36, 39, 40, 32, 37],
+            "prereq_expr": "(MEDI008 o (MED258 y MED259)) y (MEDI009 o (MED257 y MED249)) y (MEDI010 o MED244) y (MEDI012 o (MED296 y MED287 y MED257)) y (MEDI015 o MED245) y (MEDI017 o (MED296 o MED287 o MED257)) y (MEDI018 o MED296) y SPAB308 y MEDI016"
+          },
+          {
+            "id": 45,
+            "codigo": "MEDI022",
+            "nombre": "Pediatría y Cirugía Infantil",
+            "sct": 32,
+            "prerrequisitos": [39],
+            "prereq_expr": "MEDI017 o (MED296 o MED287 o MED257)"
+          },
+          {
+            "id": 46,
+            "codigo": "MEDI023",
+            "nombre": "Obstetricia y Ginecología",
+            "sct": 27,
+            "prerrequisitos": [39],
+            "prereq_expr": "MEDI017 o (MED296 o MED287 o MED257)"
+          }
+        ]
+      },
+      {
+        "numero": 10,
+        "cursos": [
+          {
+            "id": 47,
+            "codigo": "MEDI024",
+            "nombre": "Internado de Pediatría",
+            "sct": 58,
+            "prerrequisitos": [45],
+            "prereq_expr": "MEDI022 o MED297"
+          },
+          {
+            "id": 48,
+            "codigo": "MEDI025",
+            "nombre": "Internado de Obstetricia y Ginecología",
+            "sct": 58,
+            "prerrequisitos": [46],
+            "prereq_expr": "MEDI023 o MED298"
+          }
+        ]
+      },
+      {
+        "numero": 11,
+        "cursos": [
+          {
+            "id": 49,
+            "codigo": "MEDI026",
+            "nombre": "Internado de Cirugía",
+            "sct": 58,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 50,
+            "codigo": "MEDI027",
+            "nombre": "Internado de Medicina Interna",
+            "sct": 58,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          }
+        ]
+      },
+      {
+        "numero": 12,
+        "cursos": [
+          {
+            "id": 51,
+            "codigo": "MEDI028",
+            "nombre": "Internado de Medicina Rural y Comunitaria",
+            "sct": 47,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 52,
+            "codigo": "MEDI029",
+            "nombre": "Internado Psiquiatría",
+            "sct": 32,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 53,
+            "codigo": "MEDI030",
+            "nombre": "Internado Electivo",
+            "sct": 43,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 54,
+            "codigo": "MEDI0300",
+            "nombre": "Integrador III",
+            "sct": 5,
+            "prerrequisitos": [19, 25, 16, 21, 47, 48, 49, 50],
+            "prereq_expr": "(MEDI004 o MED292) y (MEDI007 o (MED260 y MED295 y MED257)) y (SPAB306 o MED293) y (SPAB307 o MED292) y (MEDI024 o MED374) y (MEDI025 o MED376) y (MEDI026 o MED375) y (MEDI027 o MED377)"
+          }
+        ]
+      }
+    ]
+  }
