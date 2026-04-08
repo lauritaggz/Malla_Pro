@@ -220,13 +220,8 @@ body {
   color: var(--primary);
 }
 
-/* ── Animación "en curso" — glow pulsante ─────────────────────── */
-@keyframes encurso-glow {
-  0%, 100% { box-shadow: 0 2px 6px var(--shadowPrimary), 0 0 0 0 var(--shadowPrimary); }
-  50%       { box-shadow: 0 4px 18px var(--shadowPrimary), 0 0 0 3px transparent; }
-}
+/* ── Borde izquierdo destacado para "en curso" ─────────────────── */
 .encurso-glow {
-  animation: encurso-glow 2.8s ease-in-out infinite;
   border-left-width: 4px !important;
 }
 
