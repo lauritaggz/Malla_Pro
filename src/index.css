@@ -393,6 +393,14 @@ body {
   box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35) !important;
 }
 
+/* ── Selector de mención (native select) ─────────────────────── */
+.mencion-select option {
+  background-color: var(--bgSecondary);
+  color: var(--textPrimary);
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+}
+
 /* ── Drawer panel ─────────────────────────────────────────────── */
 .drawer-panel {
   background: var(--bgSecondary);

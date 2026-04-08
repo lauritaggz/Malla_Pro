@@ -36,6 +36,10 @@ export async function listarMallas() {
           nombre: "Tecnología Médica",
           url: "/mallas/TM.json",
         },
+        {
+          nombre: "Psicología",
+          url: "/mallas/Psicologia.json",
+        },
       ],
     },
   ];

@@ -418,19 +418,40 @@ const MallaViewer = ({
         {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
           malla.mencionesDisponibles.length > 3 ? (
             /* ── Dropdown para 4+ menciones (nombres largos) ── */
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-borderColor bg-bgSecondary/90 backdrop-blur-md shadow-sm">
-              <BookMarked className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-              <select
-                value={mencionActiva || ""}
-                onChange={(e) => setMencionActiva(e.target.value)}
-                className="bg-transparent text-sm font-medium text-textPrimary outline-none cursor-pointer"
-                style={{ maxWidth: "min(260px, 55vw)" }}
+            <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[280px] max-w-[min(100%,420px)]">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-textSecondary/90 px-0.5">
+                Especialidad / mención
+              </span>
+              <div
+                className="group flex items-center gap-2.5 pl-3 pr-2.5 py-2 rounded-xl
+                  border border-borderColor bg-bgPrimary
+                  shadow-[0_1px_2px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+                  hover:border-primary/35 hover:bg-bgSecondary/80
+                  hover:shadow-[0_2px_8px_var(--shadowPrimary)]
+                  transition-all duration-200
+                  focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary/50 focus-within:bg-bgSecondary"
               >
-                {malla.mencionesDisponibles.map((m) => (
-                  <option key={m.codigo} value={m.codigo}>{m.nombre}</option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-textSecondary flex-shrink-0 pointer-events-none" />
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primaryMuted text-primary">
+                  <BookMarked className="w-4 h-4" strokeWidth={2} />
+                </div>
+                <select
+                  value={mencionActiva || ""}
+                  onChange={(e) => setMencionActiva(e.target.value)}
+                  aria-label="Seleccionar especialidad o mención"
+                  className="mencion-select w-full min-w-0 flex-1 cursor-pointer bg-transparent py-0.5 pl-0 pr-1
+                    text-sm font-semibold leading-snug text-textPrimary
+                    outline-none appearance-none
+                    truncate"
+                >
+                  {malla.mencionesDisponibles.map((m) => (
+                    <option key={m.codigo} value={m.codigo}>{m.nombre}</option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className="w-4 h-4 flex-shrink-0 text-primary/70 pointer-events-none transition-transform duration-200 group-hover:translate-y-px"
+                  strokeWidth={2.5}
+                />
+              </div>
             </div>
           ) : (
             /* ── Píldoras para ≤ 3 menciones (sin cambios) ── */
