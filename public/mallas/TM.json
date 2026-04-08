@@ -1,0 +1,1573 @@
+{
+    "carrera": "Tecnología Médica (UNAB)",
+    "codigo_programa": "UNAB19600",
+    "menciones_disponibles": [
+      {
+        "codigo": "BACIMET",
+        "nombre": "Bioanálisis Clínico, Hematología y Medicina Transfusional"
+      },
+      {
+        "codigo": "IFIME",
+        "nombre": "Imagenología, Física Médica y Medicina Nuclear"
+      },
+      {
+        "codigo": "MORFO",
+        "nombre": "Morfofisiopatología y Citodiagnóstico"
+      },
+      {
+        "codigo": "OFTA",
+        "nombre": "Oftalmología y Optometría"
+      },
+      {
+        "codigo": "OTO",
+        "nombre": "Otorrinolaringología"
+      }
+    ],
+    "totalSemestres": 10,
+    "total_creditos_por_mencion": {
+      "BACIMET": 628,
+      "IFIME": 633,
+      "MORFO": 641,
+      "OFTA": 641,
+      "OTO": 637
+    },
+    "semestres_comunes": [
+      {
+        "numero": 1,
+        "cursos": [
+          {
+            "id": 1,
+            "codigo": "BIOL035",
+            "nombre": "Laboratorio Biología Celular",
+            "sct": 6,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 2,
+            "codigo": "BIOL130",
+            "nombre": "Biología Celular",
+            "sct": 8,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 3,
+            "codigo": "FMMP101",
+            "nombre": "Elementos de Álgebra y Cálculo",
+            "sct": 14,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 4,
+            "codigo": "MORF010",
+            "nombre": "Anatomía Humana",
+            "sct": 12,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 5,
+            "codigo": "QUIM102",
+            "nombre": "Química General",
+            "sct": 16,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 6,
+            "codigo": "TMED001",
+            "nombre": "Introducción a la Tecnología Médica",
+            "sct": 5,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          }
+        ]
+      },
+      {
+        "numero": 2,
+        "cursos": [
+          {
+            "id": 7,
+            "codigo": "CEGHC11",
+            "nombre": "Habilidades Comunicativas",
+            "sct": 8,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 8,
+            "codigo": "CFIS020",
+            "nombre": "Física General",
+            "sct": 12,
+            "prerrequisitos": [3],
+            "prereq_expr": "FMMP101 o (FMM032 y FMM134)"
+          },
+          {
+            "id": 9,
+            "codigo": "ING119",
+            "nombre": "Inglés I",
+            "sct": 12,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 10,
+            "codigo": "MORF122",
+            "nombre": "Histoembriología",
+            "sct": 14,
+            "prerrequisitos": [4, 2],
+            "prereq_expr": "(MORF010 o (BIO010 y BIO013)) y (BIOL130 o BIO034)"
+          },
+          {
+            "id": 11,
+            "codigo": "QUIM022",
+            "nombre": "Química Orgánica",
+            "sct": 15,
+            "prerrequisitos": [5],
+            "prereq_expr": "QUIM102 o QUI102"
+          }
+        ]
+      },
+      {
+        "numero": 3,
+        "cursos": [
+          {
+            "id": 12,
+            "codigo": "BIOL166",
+            "nombre": "Bioquímica",
+            "sct": 8,
+            "prerrequisitos": [2, 1, 5, 10, 11],
+            "prereq_expr": "Requisitos de biología celular, laboratorio, química general/orgánica e histoembriología según equivalencias de la malla"
+          },
+          {
+            "id": 13,
+            "codigo": "BIOL272",
+            "nombre": "Fisiología Humana",
+            "sct": 11,
+            "prerrequisitos": [2, 1],
+            "prereq_expr": "(BIOL130 o BIO034) y (BIOL035 o BIO035)"
+          },
+          {
+            "id": 14,
+            "codigo": "CEGCT12",
+            "nombre": "Razonamiento Científico y Tecnologías de Información",
+            "sct": 6,
+            "prerrequisitos": [],
+            "prereq_expr": ""
+          },
+          {
+            "id": 15,
+            "codigo": "ING129",
+            "nombre": "Inglés II",
+            "sct": 12,
+            "prerrequisitos": [9],
+            "prereq_expr": "ING119 o equivalentes"
+          },
+          {
+            "id": 16,
+            "codigo": "TMED003",
+            "nombre": "Bioética",
+            "sct": 8,
+            "prerrequisitos": [6],
+            "prereq_expr": "TMED001 o TMD001"
+          },
+          {
+            "id": 17,
+            "codigo": "TMED004",
+            "nombre": "Infectología",
+            "sct": 8,
+            "prerrequisitos": [12],
+            "prereq_expr": "BIOL166 o BIO268"
+          }
+        ]
+      }
+    ],
+    "menciones": {
+      "BACIMET": {
+        "nombre": "Bioanálisis Clínico, Hematología y Medicina Transfusional",
+        "semestres": [
+          {
+            "numero": 4,
+            "cursos": [
+              {
+                "id": 18,
+                "codigo": "FARM171",
+                "nombre": "Farmacología General",
+                "sct": 5,
+                "prerrequisitos": [12],
+                "prereq_expr": "BIOL166 o BIO268"
+              },
+              {
+                "id": 19,
+                "codigo": "ING239",
+                "nombre": "Inglés III",
+                "sct": 12,
+                "prerrequisitos": [15],
+                "prereq_expr": "ING129 o equivalentes"
+              },
+              {
+                "id": 20,
+                "codigo": "TMED005",
+                "nombre": "Fisiopatología",
+                "sct": 15,
+                "prerrequisitos": [13],
+                "prereq_expr": "BIOL272 o (BIO372 y BIO171)"
+              },
+              {
+                "id": 21,
+                "codigo": "TMED411",
+                "nombre": "Parasitología",
+                "sct": 14,
+                "prerrequisitos": [8, 13, 12, 16, 17, 15],
+                "prereq_expr": "(CFIS020 o FMF020) y BIOL272 y BIOL166 y TMED003 y TMED004 y ING129"
+              },
+              {
+                "id": 22,
+                "codigo": "TMED412",
+                "nombre": "Inmunología Diagnóstica",
+                "sct": 17,
+                "prerrequisitos": [8, 13, 12, 16, 17, 15],
+                "prereq_expr": "(CFIS020 o FMF020) y BIOL272 y BIOL166 y TMED003 y TMED004 y ING129"
+              }
+            ]
+          },
+          {
+            "numero": 5,
+            "cursos": [
+              {
+                "id": 23,
+                "codigo": "ING249",
+                "nombre": "Inglés IV",
+                "sct": 12,
+                "prerrequisitos": [19],
+                "prereq_expr": "ING239 o equivalentes"
+              },
+              {
+                "id": 24,
+                "codigo": "SPAB110",
+                "nombre": "Salud Pública I",
+                "sct": 7,
+                "prerrequisitos": [20],
+                "prereq_expr": "TMED005 o equivalentes / vías alternativas según malla"
+              },
+              {
+                "id": 25,
+                "codigo": "TMED006",
+                "nombre": "Procedimientos de Tecnología Médica y Bioseguridad",
+                "sct": 6,
+                "prerrequisitos": [18],
+                "prereq_expr": "FARM171 o BIO184"
+              },
+              {
+                "id": 26,
+                "codigo": "TMED511",
+                "nombre": "Microbiología I",
+                "sct": 23,
+                "prerrequisitos": [21, 18],
+                "prereq_expr": "(TMED411 o TMD225) y (FARM171 o BIO184)"
+              },
+              {
+                "id": 27,
+                "codigo": "TMED512",
+                "nombre": "Hematología I",
+                "sct": 20,
+                "prerrequisitos": [22, 20],
+                "prereq_expr": "(TMED412 o (BIO286 y TMD255)) y (TMED005 o TMD110)"
+              }
+            ]
+          },
+          {
+            "numero": 6,
+            "cursos": [
+              {
+                "id": 28,
+                "codigo": "SPAB111",
+                "nombre": "Salud Pública II",
+                "sct": 10,
+                "prerrequisitos": [24],
+                "prereq_expr": "SPAB110 u otras vías equivalentes según malla"
+              },
+              {
+                "id": 29,
+                "codigo": "TMED611",
+                "nombre": "Bioquímica Clínica I",
+                "sct": 15,
+                "prerrequisitos": [22],
+                "prereq_expr": "TMED412 o (BIO286 y TMD255)"
+              },
+              {
+                "id": 30,
+                "codigo": "TMED612",
+                "nombre": "Microbiología II",
+                "sct": 18,
+                "prerrequisitos": [26],
+                "prereq_expr": "TMED511 o TMD329"
+              },
+              {
+                "id": 31,
+                "codigo": "TMED613",
+                "nombre": "Hematología II",
+                "sct": 22,
+                "prerrequisitos": [27],
+                "prereq_expr": "TMED512 o TMD233"
+              }
+            ]
+          },
+          {
+            "numero": 7,
+            "cursos": [
+              {
+                "id": 32,
+                "codigo": "SPAB112",
+                "nombre": "Administración y Gestión en Salud",
+                "sct": 6,
+                "prerrequisitos": [28],
+                "prereq_expr": "SPAB111 o vías equivalentes según malla"
+              },
+              {
+                "id": 33,
+                "codigo": "TMED002",
+                "nombre": "Educación en Salud",
+                "sct": 4,
+                "prerrequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 34,
+                "codigo": "TMED711",
+                "nombre": "Biología Molecular",
+                "sct": 11,
+                "prerrequisitos": [29],
+                "prereq_expr": "TMED611 o TMD204"
+              },
+              {
+                "id": 35,
+                "codigo": "TMED712",
+                "nombre": "Inmunohematología",
+                "sct": 15,
+                "prerrequisitos": [29, 27],
+                "prereq_expr": "TMED611 y TMED512"
+              },
+              {
+                "id": 36,
+                "codigo": "TMED713",
+                "nombre": "Bioquímica Clínica II",
+                "sct": 18,
+                "prerrequisitos": [31, 30, 29],
+                "prereq_expr": "TMED613 y TMED612 y TMED611"
+              },
+              {
+                "id": 37,
+                "codigo": "TMED714",
+                "nombre": "Integrador I: Caso Clínico BACIMET",
+                "sct": 9,
+                "prerrequisitos": [29, 30, 31],
+                "prereq_expr": "Trayectoria BACIMET aprobada según malla"
+              }
+            ]
+          },
+          {
+            "numero": 8,
+            "cursos": [
+              {
+                "id": 38,
+                "codigo": "CEGPC13",
+                "nombre": "Pensamiento Crítico",
+                "sct": 5,
+                "prerrequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 39,
+                "codigo": "SPAB103",
+                "nombre": "Gestión y Aseguramiento de la Calidad",
+                "sct": 8,
+                "prerrequisitos": [32, 37],
+                "prereq_expr": "SPAB112 y TMED714 o equivalentes"
+              },
+              {
+                "id": 40,
+                "codigo": "SPAB303",
+                "nombre": "Metodología de la Investigación",
+                "sct": 5,
+                "prerrequisitos": [32, 37],
+                "prereq_expr": "SPAB112 y TMED714 o equivalentes"
+              },
+              {
+                "id": 41,
+                "codigo": "TMED811",
+                "nombre": "Medicina Transfusional",
+                "sct": 24,
+                "prerrequisitos": [35, 37],
+                "prereq_expr": "(TMED712 o TMD325) y TMED714"
+              },
+              {
+                "id": 42,
+                "codigo": "TMED812",
+                "nombre": "Diagnóstico Molecular Clínico",
+                "sct": 19,
+                "prereq_expr": "TMED711 y TMED714 y (TMED713 o TMD231)",
+                "prerrequisitos": [34, 37, 36]
+              }
+            ]
+          },
+          {
+            "numero": 9,
+            "cursos": [
+              {
+                "id": 43,
+                "codigo": "CEGRS14",
+                "nombre": "Responsabilidad Social",
+                "sct": 6,
+                "prerrequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 44,
+                "codigo": "TMED911",
+                "nombre": "Seminario de Investigación BACIMET",
+                "sct": 55,
+                "prerrequisitos": [39, 40, 41, 42],
+                "prereq_expr": "SPAB303 y SPAB103 y TMED811 y TMED812"
+              }
+            ]
+          },
+          {
+            "numero": 10,
+            "cursos": [
+              {
+                "id": 45,
+                "codigo": "TMED912",
+                "nombre": "Integrador II: Internado Clínico BACIMET",
+                "sct": 72,
+                "prerrequisitos": [44],
+                "prereq_expr": "TMED911"
+              }
+            ]
+          }
+        ]
+      },
+      "IFIME": {
+        "nombre": "Imagenología, Física Médica y Medicina Nuclear",
+        "semestres": [
+          {
+            "numero": 4,
+            "cursos": [
+              {
+                "id": 46,
+                "codigo": "FARM171",
+                "nombre": "Farmacología General",
+                "sct": 5,
+                "prerrequisitos": [12],
+                "prereq_expr": "BIOL166 o BIO268"
+              },
+              {
+                "id": 47,
+                "codigo": "ING239",
+                "nombre": "Inglés III",
+                "sct": 12,
+                "prerrequisitos": [15],
+                "prereq_expr": "ING129 o equivalentes"
+              },
+              {
+                "id": 48,
+                "codigo": "TMED005",
+                "nombre": "Fisiopatología",
+                "sct": 15,
+                "prerrequisitos": [13],
+                "prereq_expr": "BIOL272 o (BIO372 y BIO171)"
+              },
+              {
+                "id": 49,
+                "codigo": "TMED431",
+                "nombre": "Protección Radiológica",
+                "sct": 6,
+                "prerrequisitos": [8, 13, 12, 16, 17, 15],
+                "prereq_expr": "(CFIS020 o FMF020) y BIOL272 y BIOL166 y TMED003 y TMED004 y ING129"
+              },
+              {
+                "id": 50,
+                "codigo": "TMED432",
+                "nombre": "Radiodiagnóstico I",
+                "sct": 20,
+                "prerrequisitos": [8, 13, 12, 16, 17, 15],
+                "prereq_expr": "(CFIS020 o FMF020) y BIOL272 y BIOL166 y TMED003 y TMED004 y ING129"
+              },
+              {
+                "id": 51,
+                "codigo": "TMED433",
+                "nombre": "Física Electromagnética",
+                "sct": 10,
+                "prerrequisitos": [12, 13],
+                "prereq_expr": "BIOL166 y BIOL272"
+              }
+            ]
+          },
+          {
+            "numero": 5,
+            "cursos": [
+              {
+                "id": 52,
+                "codigo": "ING249",
+                "nombre": "Inglés IV",
+                "sct": 12,
+                "prerrequisitos": [47],
+                "prereq_expr": "ING239 o equivalentes"
+              },
+              {
+                "id": 53,
+                "codigo": "SPAB110",
+                "nombre": "Salud Pública I",
+                "sct": 7,
+                "prereq_expr": "TMED005 o equivalentes / vías alternativas según malla",
+                "prerrequisitos": [48]
+              },
+              {
+                "id": 54,
+                "codigo": "TMED006",
+                "nombre": "Procedimientos de Tecnología Médica y Bioseguridad",
+                "sct": 6,
+                "prerrequisitos": [46],
+                "prereq_expr": "FARM171 o BIO184"
+              },
+              {
+                "id": 55,
+                "codigo": "TMED531",
+                "nombre": "Física Moderna",
+                "sct": 7,
+                "prerrequisitos": [49],
+                "prereq_expr": "TMED431 o TMD223"
+              },
+              {
+                "id": 56,
+                "codigo": "TMED532",
+                "nombre": "Radiodiagnóstico II",
+                "sct": 24,
+                "prereq_expr": "(TMED432 o TMD222) y (FARM171 o BIO184)",
+                "prerrequisitos": [50, 46]
+              },
+              {
+                "id": 57,
+                "codigo": "TMED533",
+                "nombre": "Anatomía Imagenológica",
+                "sct": 11,
+                "prereq_expr": "(TMED432 o TMD222) y (TMED005 o TMD110)",
+                "prerrequisitos": [50, 48]
+              }
+            ]
+          },
+          {
+            "numero": 6,
+            "cursos": [
+              {
+                "id": 58,
+                "codigo": "SPAB111",
+                "nombre": "Salud Pública II",
+                "sct": 10,
+                "prereq_expr": "SPAB110 u otras vías equivalentes según malla",
+                "prerrequisitos": [53]
+              },
+              {
+                "id": 59,
+                "codigo": "TMED631",
+                "nombre": "Física Nuclear",
+                "sct": 13,
+                "prerrequisitos": [55],
+                "prereq_expr": "TMED531"
+              },
+              {
+                "id": 60,
+                "codigo": "TMED632",
+                "nombre": "Tomografía Computada",
+                "sct": 19,
+                "prerrequisitos": [56, 57],
+                "prereq_expr": "(TMED532 o TMD249) y (TMED533 o (TMD251 y TMD282))"
+              },
+              {
+                "id": 61,
+                "codigo": "TMED633",
+                "nombre": "Sistema Informático en Radiología",
+                "sct": 13,
+                "prerrequisitos": [56],
+                "prereq_expr": "TMED532 o TMD249"
+              },
+              {
+                "id": 62,
+                "codigo": "TMED634",
+                "nombre": "Patología Imagenológica",
+                "sct": 12,
+                "prerrequisitos": [56, 57],
+                "prereq_expr": "(TMED532 o TMD249) y (TMED533 o (TMD251 y TMD282))"
+              }
+            ]
+          },
+          {
+            "numero": 7,
+            "cursos": [
+              {
+                "id": 63,
+                "codigo": "SPAB112",
+                "nombre": "Administración y Gestión en Salud",
+                "sct": 6,
+                "prerrequisitos": [58],
+                "prereq_expr": "SPAB111 o vías equivalentes según malla"
+              },
+              {
+                "id": 64,
+                "codigo": "TMED002",
+                "nombre": "Educación en Salud",
+                "sct": 4,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 65,
+                "codigo": "TMED731",
+                "nombre": "Medicina Nuclear",
+                "sct": 17,
+                "prereq_expr": "TMED631 o TMD264",
+                "prerrequisitos": [59]
+              },
+              {
+                "id": 66,
+                "codigo": "TMED732",
+                "nombre": "Intervencionismo Endovascular",
+                "sct": 12,
+                "prereq_expr": "TMED634 o (TMD251 y TMD282)",
+                "prerrequisitos": [62]
+              },
+              {
+                "id": 67,
+                "codigo": "TMED733",
+                "nombre": "Integrador I: Caso Clínico IFIME",
+                "sct": 9,
+                "prereq_expr": "(TMED632 o TMD297) y TMED633 y TMED634",
+                "prerrequisitos": [60, 61, 62]
+              },
+              {
+                "id": 68,
+                "codigo": "TMED734",
+                "nombre": "Ultrasonido",
+                "sct": 17,
+                "prereq_expr": "TMED634 o (TMD251 y TMD282)",
+                "prerrequisitos": [62]
+              }
+            ]
+          },
+          {
+            "numero": 8,
+            "cursos": [
+              {
+                "id": 69,
+                "codigo": "CEGPC13",
+                "nombre": "Pensamiento Crítico",
+                "sct": 5,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 70,
+                "codigo": "SPAB103",
+                "nombre": "Gestión y Aseguramiento de la Calidad",
+                "sct": 8,
+                "prereq_expr": "SPAB112 y TMED733 o equivalentes",
+                "prerrequisitos": [63, 67]
+              },
+              {
+                "id": 71,
+                "codigo": "SPAB303",
+                "nombre": "Metodología de la Investigación",
+                "sct": 5,
+                "prereq_expr": "SPAB112 y TMED733 o equivalentes",
+                "prerrequisitos": [63, 67]
+              },
+              {
+                "id": 72,
+                "codigo": "TMED831",
+                "nombre": "Radioterapia",
+                "sct": 19,
+                "prereq_expr": "(TMED732 o TMD298) y TMED733",
+                "prerrequisitos": [66, 67]
+              },
+              {
+                "id": 73,
+                "codigo": "TMED832",
+                "nombre": "Resonancia Magnética",
+                "sct": 21,
+                "prereq_expr": "TMED733 y (TMED734 o TMD298)",
+                "prerrequisitos": [67, 68]
+              }
+            ]
+          },
+          {
+            "numero": 9,
+            "cursos": [
+              {
+                "id": 74,
+                "codigo": "CEGRS14",
+                "nombre": "Responsabilidad Social",
+                "sct": 6,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 75,
+                "codigo": "TMED931",
+                "nombre": "Seminario de Investigación IFIME",
+                "sct": 55,
+                "prereq_expr": "SPAB303 y SPAB103 y TMED831 y TMED832",
+                "prerrequisitos": [71, 70, 72, 73]
+              }
+            ]
+          },
+          {
+            "numero": 10,
+            "cursos": [
+              {
+                "id": 76,
+                "codigo": "TMED932",
+                "nombre": "Integrador II: Internado Clínico IFIME",
+                "sct": 72,
+                "prerrequisitos": [75],
+                "prereq_expr": "TMED931"
+              }
+            ]
+          }
+        ]
+      },
+      "MORFO": {
+        "nombre": "Morfofisiopatología y Citodiagnóstico",
+        "semestres": [
+          {
+            "numero": 4,
+            "cursos": [
+              {
+                "id": 77,
+                "codigo": "FARM171",
+                "nombre": "Farmacología General",
+                "sct": 5,
+                "prerrequisitos": [12],
+                "prereq_expr": "BIOL166 o BIO268"
+              },
+              {
+                "id": 78,
+                "codigo": "ING239",
+                "nombre": "Inglés III",
+                "sct": 12,
+                "prerrequisitos": [15],
+                "prereq_expr": "ING129 o equivalentes"
+              },
+              {
+                "id": 79,
+                "codigo": "TMED005",
+                "nombre": "Fisiopatología",
+                "sct": 15,
+                "prerrequisitos": [13],
+                "prereq_expr": "BIOL272 o (BIO372 y BIO171)"
+              },
+              {
+                "id": 80,
+                "codigo": "TMED441",
+                "nombre": "Técnicas Histológicas y Citológicas I",
+                "sct": 22,
+                "prereq_expr": "(BIOL272 o (BIO372 y BIO171)) y (BIOL166 o BIO268) y (TMED003 o equivalentes) y (TMED004 o equivalentes) y ING129 y (CFIS020 o FMF020)",
+                "prerrequisitos": [13, 12, 16, 17, 15, 8]
+              },
+              {
+                "id": 81,
+                "codigo": "TMED442",
+                "nombre": "Histología Clínica",
+                "sct": 12,
+                "prereq_expr": "BIOL166 o BIO268",
+                "prerrequisitos": [12]
+              }
+            ]
+          },
+          {
+            "numero": 5,
+            "cursos": [
+              {
+                "id": 82,
+                "codigo": "ING249",
+                "nombre": "Inglés IV",
+                "sct": 12,
+                "prerrequisitos": [78],
+                "prereq_expr": "ING239 o equivalentes"
+              },
+              {
+                "id": 83,
+                "codigo": "SPAB110",
+                "nombre": "Salud Pública I",
+                "sct": 7,
+                "prerrequisitos": [79],
+                "prereq_expr": "TMED005 o equivalentes / vías alternativas según malla"
+              },
+              {
+                "id": 84,
+                "codigo": "TMED006",
+                "nombre": "Procedimientos de Tecnología Médica y Bioseguridad",
+                "sct": 6,
+                "prerrequisitos": [77],
+                "prereq_expr": "FARM171 o BIO184"
+              },
+              {
+                "id": 85,
+                "codigo": "TMED541",
+                "nombre": "Técnicas Histológicas y Citológicas II",
+                "sct": 26,
+                "prereq_expr": "TMED441 o TMD197",
+                "prerequisitos": [80]
+              },
+              {
+                "id": 86,
+                "codigo": "TMED542",
+                "nombre": "Anatomía Patológica I",
+                "sct": 16,
+                "prereq_expr": "(TMED442 o TMD199) y (TMED005 o TMD110)",
+                "prerequisitos": [81, 79]
+              }
+            ]
+          },
+          {
+            "numero": 6,
+            "cursos": [
+              {
+                "id": 87,
+                "codigo": "CEGPC13",
+                "nombre": "Pensamiento Crítico",
+                "sct": 5,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 88,
+                "codigo": "SPAB111",
+                "nombre": "Salud Pública II",
+                "sct": 10,
+                "prereq_expr": "SPAB110 u otras vías equivalentes según malla",
+                "prerrequisitos": [83]
+              },
+              {
+                "id": 89,
+                "codigo": "TMED641",
+                "nombre": "Biología Molecular y Genética",
+                "sct": 12,
+                "prereq_expr": "TMED541 o TMD197",
+                "prerequisitos": [85]
+              },
+              {
+                "id": 90,
+                "codigo": "TMED642",
+                "nombre": "Diagnóstico Histoquímico",
+                "sct": 21,
+                "prereq_expr": "(TMED541 o TMD197) y (TMED542 o TMD256)",
+                "prerequisitos": [85, 86]
+              },
+              {
+                "id": 91,
+                "codigo": "TMED643",
+                "nombre": "Anatomía Patológica II",
+                "sct": 22,
+                "prereq_expr": "TMED542 o TMD256",
+                "prerequisitos": [86]
+              }
+            ]
+          },
+          {
+            "numero": 7,
+            "cursos": [
+              {
+                "id": 92,
+                "codigo": "SPAB112",
+                "nombre": "Administración y Gestión en Salud",
+                "sct": 6,
+                "prereq_expr": "SPAB111 o vías equivalentes según malla",
+                "prerequisitos": [88]
+              },
+              {
+                "id": 93,
+                "codigo": "TMED002",
+                "nombre": "Educación en Salud",
+                "sct": 4,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 94,
+                "codigo": "TMED741",
+                "nombre": "Fundamentos de Citogenética",
+                "sct": 13,
+                "prereq_expr": "TMED641 o BIO040",
+                "prerequisitos": [89]
+              },
+              {
+                "id": 95,
+                "codigo": "TMED742",
+                "nombre": "Diagnóstico Inmunohistoquímico",
+                "sct": 18,
+                "prereq_expr": "(TMED641 o BIO040) y (TMED642 o TMD248) y (TMED643 o TMD256)",
+                "prerequisitos": [89, 90, 91]
+              },
+              {
+                "id": 96,
+                "codigo": "TMED743",
+                "nombre": "Citopatología I",
+                "sct": 17,
+                "prereq_expr": "(TMED743 o TMD321) y TMED744",
+                "prerequisitos": [91]
+              },
+              {
+                "id": 97,
+                "codigo": "TMED744",
+                "nombre": "Integrador I: Caso Clínico MORFO",
+                "sct": 7,
+                "prereq_expr": "Trayectoria MORFO aprobada según malla",
+                "prerequisitos": [89, 90, 91]
+              }
+            ]
+          },
+          {
+            "numero": 8,
+            "cursos": [
+              {
+                "id": 98,
+                "codigo": "SPAB103",
+                "nombre": "Gestión y Aseguramiento de la Calidad",
+                "sct": 8,
+                "prereq_expr": "SPAB112 y TMED744 o equivalentes",
+                "prerequisitos": [92, 97]
+              },
+              {
+                "id": 99,
+                "codigo": "SPAB303",
+                "nombre": "Metodología de la Investigación",
+                "sct": 5,
+                "prereq_expr": "SPAB112 y TMED744 o equivalentes",
+                "prerequisitos": [92, 97]
+              },
+              {
+                "id": 100,
+                "codigo": "TMED841",
+                "nombre": "Diagnóstico Citogenético",
+                "sct": 19,
+                "prereq_expr": "(TMED741 o TMD294) y TMED744",
+                "prerequisitos": [94, 97]
+              },
+              {
+                "id": 101,
+                "codigo": "TMED842",
+                "nombre": "Diagnóstico Molecular",
+                "sct": 19,
+                "prereq_expr": "(TMED741 o TMD294) y (TMED742 o TMD327) y TMED744",
+                "prerequisitos": [94, 95, 97]
+              },
+              {
+                "id": 102,
+                "codigo": "TMED843",
+                "nombre": "Citopatología II",
+                "sct": 14,
+                "prereq_expr": "(TMED743 o TMD321) y TMED744",
+                "prerequisitos": [96, 97]
+              }
+            ]
+          },
+          {
+            "numero": 9,
+            "cursos": [
+              {
+                "id": 103,
+                "codigo": "CEGRS14",
+                "nombre": "Responsabilidad Social",
+                "sct": 6,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 104,
+                "codigo": "TMED941",
+                "nombre": "Seminario de Investigación MORFO",
+                "sct": 55,
+                "prereq_expr": "SPAB303 y SPAB103 y TMED841 y TMED842 y TMED843",
+                "prerequisitos": [99, 98, 100, 101, 102]
+              }
+            ]
+          },
+          {
+            "numero": 10,
+            "cursos": [
+              {
+                "id": 105,
+                "codigo": "TMED942",
+                "nombre": "Integrador II: Internado Clínico MORFO",
+                "sct": 72,
+                "prereq_expr": "TMED941",
+                "prerequisitos": [104]
+              }
+            ]
+          }
+        ]
+      },
+      "OFTA": {
+        "nombre": "Oftalmología y Optometría",
+        "semestres": [
+          {
+            "numero": 4,
+            "cursos": [
+              {
+                "id": 106,
+                "codigo": "FARM171",
+                "nombre": "Farmacología General",
+                "sct": 5,
+                "prereq_expr": "BIOL166 o BIO268",
+                "prerequisitos": [12]
+              },
+              {
+                "id": 107,
+                "codigo": "ING239",
+                "nombre": "Inglés III",
+                "sct": 12,
+                "prereq_expr": "ING129 o equivalentes",
+                "prerequisitos": [15]
+              },
+              {
+                "id": 108,
+                "codigo": "TMED005",
+                "nombre": "Fisiopatología",
+                "sct": 15,
+                "prereq_expr": "BIOL272 o (BIO372 y BIO171)",
+                "prerequisitos": [13]
+              },
+              {
+                "id": 109,
+                "codigo": "TMED421",
+                "nombre": "Morfofisiología Ocular",
+                "sct": 11,
+                "prereq_expr": "TMED005 y trayectoria formativa ocular según malla",
+                "prerequisitos": [108]
+              },
+              {
+                "id": 110,
+                "codigo": "TMED422",
+                "nombre": "Oftalmología General",
+                "sct": 18,
+                "prereq_expr": "(BIOL272 o (BIO372 y BIO171)) y (BIOL166 o BIO268) y (TMED003 o equivalentes) y (TMED004 o equivalentes) y ING129 y (CFIS020 o FMF020)",
+                "prerequisitos": [13, 12, 16, 17, 15, 8]
+              },
+              {
+                "id": 111,
+                "codigo": "TMED423",
+                "nombre": "Biofísica Óptica",
+                "sct": 7,
+                "prereq_expr": "BIOL166 o BIO268",
+                "prerequisitos": [12]
+              }
+            ]
+          },
+          {
+            "numero": 5,
+            "cursos": [
+              {
+                "id": 112,
+                "codigo": "ING249",
+                "nombre": "Inglés IV",
+                "sct": 12,
+                "prereq_expr": "ING239 o equivalentes",
+                "prerequisitos": [107]
+              },
+              {
+                "id": 113,
+                "codigo": "SPAB110",
+                "nombre": "Salud Pública I",
+                "sct": 7,
+                "prereq_expr": "TMED005 o equivalentes / vías alternativas según malla",
+                "prerequisitos": [108]
+              },
+              {
+                "id": 114,
+                "codigo": "TMED006",
+                "nombre": "Procedimientos de Tecnología Médica y Bioseguridad",
+                "sct": 6,
+                "prereq_expr": "FARM171 o BIO184",
+                "prerequisitos": [106]
+              },
+              {
+                "id": 115,
+                "codigo": "TMED521",
+                "nombre": "Morfofisiopatología Ocular",
+                "sct": 13,
+                "prereq_expr": "(TMED005 o TMD110) y (TMED421 o TMD193)",
+                "prerequisitos": [108, 109]
+              },
+              {
+                "id": 116,
+                "codigo": "TMED522",
+                "nombre": "Exploración del Sistema Visual",
+                "sct": 21,
+                "prereq_expr": "(TMED422 o TMD195) y (TMED423 o TMD192)",
+                "prerequisitos": [110, 111]
+              },
+              {
+                "id": 117,
+                "codigo": "TMED523",
+                "nombre": "Oftalmofarmacología",
+                "sct": 9,
+                "prereq_expr": "(FARM171 o BIO184) y (TMED421 o TMD193)",
+                "prerequisitos": [106, 109]
+              }
+            ]
+          },
+          {
+            "numero": 6,
+            "cursos": [
+              {
+                "id": 118,
+                "codigo": "SPAB111",
+                "nombre": "Salud Pública II",
+                "sct": 10,
+                "prereq_expr": "SPAB110 u otras vías equivalentes según malla",
+                "prerequisitos": [113]
+              },
+              {
+                "id": 119,
+                "codigo": "TMED621",
+                "nombre": "Estudio del Campo Visual",
+                "sct": 20,
+                "prereq_expr": "TMED521 o TMD258",
+                "prerequisitos": [115]
+              },
+              {
+                "id": 120,
+                "codigo": "TMED622",
+                "nombre": "Estrabismo y Ortóptica",
+                "sct": 21,
+                "prereq_expr": "(TMED521 o TMD258) y (TMED523 o TMD263)",
+                "prerequisitos": [115, 117]
+              },
+              {
+                "id": 121,
+                "codigo": "TMED623",
+                "nombre": "Optometría I",
+                "sct": 15,
+                "prereq_expr": "TMED522 o TMD194",
+                "prerequisitos": [116]
+              }
+            ]
+          },
+          {
+            "numero": 7,
+            "cursos": [
+              {
+                "id": 122,
+                "codigo": "CEGPC13",
+                "nombre": "Pensamiento Crítico",
+                "sct": 5,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 123,
+                "codigo": "SPAB112",
+                "nombre": "Administración y Gestión en Salud",
+                "sct": 6,
+                "prereq_expr": "SPAB111 o vías equivalentes según malla",
+                "prerequisitos": [118]
+              },
+              {
+                "id": 124,
+                "codigo": "TMED002",
+                "nombre": "Educación en Salud",
+                "sct": 4,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 125,
+                "codigo": "TMED721",
+                "nombre": "Neurooftalmología",
+                "sct": 14,
+                "prereq_expr": "(TMED621 o TMD268) y (TMED622 o TMD265)",
+                "prerequisitos": [119, 120]
+              },
+              {
+                "id": 126,
+                "codigo": "TMED722",
+                "nombre": "Optometría II",
+                "sct": 17,
+                "prereq_expr": "TMED623 o TMD295",
+                "prerequisitos": [121]
+              },
+              {
+                "id": 127,
+                "codigo": "TMED723",
+                "nombre": "Procedimientos de Apoyo en Cirugía Refractiva",
+                "sct": 15,
+                "prereq_expr": "(TMED623 o TMD295) y (TMED622 o TMD265) y (TMED621 o TMD268)",
+                "prerequisitos": [121, 120, 119]
+              },
+              {
+                "id": 128,
+                "codigo": "TMED724",
+                "nombre": "Integrador I: Atención Primaria en Oftalmología",
+                "sct": 5,
+                "prereq_expr": "Trayectoria OFTA aprobada según malla",
+                "prerequisitos": [119, 120, 121]
+              }
+            ]
+          },
+          {
+            "numero": 8,
+            "cursos": [
+              {
+                "id": 129,
+                "codigo": "SPAB103",
+                "nombre": "Gestión y Aseguramiento de la Calidad",
+                "sct": 8,
+                "prereq_expr": "SPAB112 y TMED724 o equivalentes",
+                "prerequisitos": [123, 128]
+              },
+              {
+                "id": 130,
+                "codigo": "SPAB303",
+                "nombre": "Metodología de la Investigación",
+                "sct": 5,
+                "prereq_expr": "SPAB112 y TMED724 o equivalentes",
+                "prerequisitos": [123, 128]
+              },
+              {
+                "id": 131,
+                "codigo": "TMED821",
+                "nombre": "Formulación y Evaluación de Proyectos en Oftalmología",
+                "sct": 12,
+                "prereq_expr": "SPAB112 o TMD320",
+                "prerequisitos": [123]
+              },
+              {
+                "id": 132,
+                "codigo": "TMED822",
+                "nombre": "Exámenes Funcionales del Sistema Visual",
+                "sct": 23,
+                "prereq_expr": "TMED722 y TMED724",
+                "prerequisitos": [126, 128]
+              },
+              {
+                "id": 133,
+                "codigo": "TMED823",
+                "nombre": "Imagenología Ocular",
+                "sct": 17,
+                "prereq_expr": "(TMED723 o (TMD323 y TMD296)) y TMED724",
+                "prerequisitos": [127, 128]
+              }
+            ]
+          },
+          {
+            "numero": 9,
+            "cursos": [
+              {
+                "id": 134,
+                "codigo": "CEGRS14",
+                "nombre": "Responsabilidad Social",
+                "sct": 6,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 135,
+                "codigo": "TMED921",
+                "nombre": "Seminario de Investigación OFTA",
+                "sct": 55,
+                "prereq_expr": "SPAB303 y SPAB103 y TMED821 y TMED822 y TMED823",
+                "prerequisitos": [130, 129, 131, 132, 133]
+              }
+            ]
+          },
+          {
+            "numero": 10,
+            "cursos": [
+              {
+                "id": 136,
+                "codigo": "TMED922",
+                "nombre": "Integrador II: Internado Clínico OFTA",
+                "sct": 72,
+                "prereq_expr": "TMED921",
+                "prerequisitos": [135]
+              }
+            ]
+          }
+        ]
+      },
+      "OTO": {
+        "nombre": "Otorrinolaringología",
+        "semestres": [
+          {
+            "numero": 4,
+            "cursos": [
+              {
+                "id": 137,
+                "codigo": "FARM171",
+                "nombre": "Farmacología General",
+                "sct": 5,
+                "prereq_expr": "BIOL166 o BIO268",
+                "prerequisitos": [12]
+              },
+              {
+                "id": 138,
+                "codigo": "ING239",
+                "nombre": "Inglés III",
+                "sct": 12,
+                "prereq_expr": "ING129 o equivalentes",
+                "prerequisitos": [15]
+              },
+              {
+                "id": 139,
+                "codigo": "TMED005",
+                "nombre": "Fisiopatología",
+                "sct": 15,
+                "prereq_expr": "BIOL272 o (BIO372 y BIO171)",
+                "prerequisitos": [13]
+              },
+              {
+                "id": 140,
+                "codigo": "TMED451",
+                "nombre": "Psicoacústica y Fonología",
+                "sct": 10,
+                "prereq_expr": "(TMED005 o TMD110) y (TMED451 o FMF120)",
+                "prerequisitos": [139]
+              },
+              {
+                "id": 141,
+                "codigo": "TMED452",
+                "nombre": "Neuroanatomía Otorrinolaringológica",
+                "sct": 15,
+                "prereq_expr": "TMED005 o TMD110",
+                "prerequisitos": [139]
+              },
+              {
+                "id": 142,
+                "codigo": "TMED453",
+                "nombre": "Lengua de Señas",
+                "sct": 9,
+                "prereq_expr": "TMED452 o TMD196",
+                "prerequisitos": [141]
+              }
+            ]
+          },
+          {
+            "numero": 5,
+            "cursos": [
+              {
+                "id": 143,
+                "codigo": "ING249",
+                "nombre": "Inglés IV",
+                "sct": 12,
+                "prereq_expr": "ING239 o equivalentes",
+                "prerequisitos": [138]
+              },
+              {
+                "id": 144,
+                "codigo": "SPAB110",
+                "nombre": "Salud Pública I",
+                "sct": 7,
+                "prereq_expr": "TMED005 o equivalentes / vías alternativas según malla",
+                "prerequisitos": [139]
+              },
+              {
+                "id": 145,
+                "codigo": "TMED006",
+                "nombre": "Procedimientos de Tecnología Médica y Bioseguridad",
+                "sct": 6,
+                "prereq_expr": "FARM171 o BIO184",
+                "prerequisitos": [137]
+              },
+              {
+                "id": 146,
+                "codigo": "TMED551",
+                "nombre": "Morfofisiopatología ORL",
+                "sct": 15,
+                "prereq_expr": "TMED005 o TMD110",
+                "prerequisitos": [139]
+              },
+              {
+                "id": 147,
+                "codigo": "TMED552",
+                "nombre": "Función Nasal",
+                "sct": 13,
+                "prereq_expr": "TMED451 o FMF120",
+                "prerequisitos": [140]
+              },
+              {
+                "id": 148,
+                "codigo": "TMED553",
+                "nombre": "Neurofisiología Aplicada a la ORL",
+                "sct": 13,
+                "prereq_expr": "TMED452 o TMD196",
+                "prerequisitos": [141]
+              }
+            ]
+          },
+          {
+            "numero": 6,
+            "cursos": [
+              {
+                "id": 149,
+                "codigo": "CEGPC13",
+                "nombre": "Pensamiento Crítico",
+                "sct": 5,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 150,
+                "codigo": "SPAB111",
+                "nombre": "Salud Pública II",
+                "sct": 10,
+                "prereq_expr": "SPAB110 u otras vías equivalentes según malla",
+                "prerequisitos": [144]
+              },
+              {
+                "id": 151,
+                "codigo": "TMED651",
+                "nombre": "Audiología Básica",
+                "sct": 39,
+                "prereq_expr": "TMED551 y trayectoria ORL según malla",
+                "prerequisitos": [146]
+              },
+              {
+                "id": 152,
+                "codigo": "TMED652",
+                "nombre": "Otoneurología I",
+                "sct": 12,
+                "prereq_expr": "TMED551 y TMED553",
+                "prerequisitos": [146, 148]
+              }
+            ]
+          },
+          {
+            "numero": 7,
+            "cursos": [
+              {
+                "id": 153,
+                "codigo": "SPAB112",
+                "nombre": "Administración y Gestión en Salud",
+                "sct": 6,
+                "prereq_expr": "SPAB111 o vías equivalentes según malla",
+                "prerequisitos": [150]
+              },
+              {
+                "id": 154,
+                "codigo": "TMED002",
+                "nombre": "Educación en Salud",
+                "sct": 4,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 155,
+                "codigo": "TMED751",
+                "nombre": "Audiología Avanzada y Electrofisiología",
+                "sct": 24,
+                "prereq_expr": "TMED651 o (TMD252 y TMD253)",
+                "prerequisitos": [151]
+              },
+              {
+                "id": 156,
+                "codigo": "TMED752",
+                "nombre": "Otoneurología II",
+                "sct": 23,
+                "prereq_expr": "(TMED651 o (TMD252 y TMD253)) y (TMED652 o (TMD202 y TMD316))",
+                "prerequisitos": [151, 152]
+              },
+              {
+                "id": 157,
+                "codigo": "TMED753",
+                "nombre": "Integrador I: Caso Clínico OTO",
+                "sct": 7,
+                "prereq_expr": "Trayectoria OTO aprobada según malla",
+                "prerequisitos": [151, 152]
+              }
+            ]
+          },
+          {
+            "numero": 8,
+            "cursos": [
+              {
+                "id": 158,
+                "codigo": "SPAB103",
+                "nombre": "Gestión y Aseguramiento de la Calidad",
+                "sct": 8,
+                "prereq_expr": "SPAB112 y TMED753 o equivalentes",
+                "prerequisitos": [153, 157]
+              },
+              {
+                "id": 159,
+                "codigo": "SPAB303",
+                "nombre": "Metodología de la Investigación",
+                "sct": 5,
+                "prereq_expr": "SPAB112 y TMED753 o equivalentes",
+                "prerequisitos": [153, 157]
+              },
+              {
+                "id": 160,
+                "codigo": "TMED851",
+                "nombre": "Salud Ocupacional",
+                "sct": 12,
+                "prereq_expr": "SPAB112 o TMD320",
+                "prerequisitos": [153]
+              },
+              {
+                "id": 161,
+                "codigo": "TMED852",
+                "nombre": "Prótesis y Ortesis Auditivas",
+                "sct": 25,
+                "prereq_expr": "(TMED751 o TMD324) y TMED753",
+                "prerequisitos": [155, 157]
+              },
+              {
+                "id": 162,
+                "codigo": "TMED853",
+                "nombre": "Rehabilitación Vestibular Auditiva",
+                "sct": 17,
+                "prereq_expr": "(TMED751 o TMD324) y (TMED752 o TMD316)",
+                "prerequisitos": [155, 156]
+              }
+            ]
+          },
+          {
+            "numero": 9,
+            "cursos": [
+              {
+                "id": 163,
+                "codigo": "CEGRS14",
+                "nombre": "Responsabilidad Social",
+                "sct": 6,
+                "prerequisitos": [],
+                "prereq_expr": ""
+              },
+              {
+                "id": 164,
+                "codigo": "TMED951",
+                "nombre": "Seminario de Investigación OTO",
+                "sct": 55,
+                "prereq_expr": "SPAB303 y SPAB103 y TMED851 y TMED852 y TMED853",
+                "prerequisitos": [159, 158, 160, 161, 162]
+              }
+            ]
+          },
+          {
+            "numero": 10,
+            "cursos": [
+              {
+                "id": 165,
+                "codigo": "TMED952",
+                "nombre": "Integrador II: Internado Clínico OTO",
+                "sct": 72,
+                "prereq_expr": "TMED951",
+                "prerequisitos": [164]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }

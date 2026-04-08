@@ -197,11 +197,16 @@ export default function App() {
             totalCursos={progreso.total}
             cursosAprobados={progreso.aprobados}
             cursosCursando={cursosCursando}
-            cursosEnCursoData={
-              mallaData?.semestres?.flatMap((s) =>
-                s.cursos.filter((c) => cursando.includes(c.id))
-              ) || []
-            }
+            cursosEnCursoData={(() => {
+              if (!mallaData) return [];
+              const semestres = mallaData.isMencion
+                ? [
+                    ...(mallaData.semestresComunes || []),
+                    ...Object.values(mallaData.menciones || {}).flatMap((m) => m.semestres || []),
+                  ]
+                : (mallaData.semestres || []);
+              return semestres.flatMap((s) => s.cursos.filter((c) => cursando.includes(c.id)));
+            })()}
           />
         )}
 

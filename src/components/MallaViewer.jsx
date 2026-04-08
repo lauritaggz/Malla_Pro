@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, BookMarked, ChevronDown } from "lucide-react";
 import Curso from "./Curso";
 
 const MallaViewer = ({
@@ -414,23 +414,42 @@ const MallaViewer = ({
       {/* Controles Superiores de Visualización */}
       <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-3 mb-4 pr-0 sm:pr-4">
         
-        {/* Selector de Especialidad si existe */}
+        {/* Selector de Especialidad / Mención */}
         {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
-          <div className="flex bg-bgSecondary/80 backdrop-blur-md p-1 rounded-full border border-borderColor/50">
-            {malla.mencionesDisponibles.map((m) => (
-              <button
-                key={m.codigo}
-                onClick={() => setMencionActiva(m.codigo)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                  mencionActiva === m.codigo
-                    ? "bg-primary text-white shadow-md scale-105"
-                    : "text-textSecondary hover:text-textPrimary hover:bg-bgSecondary"
-                }`}
+          malla.mencionesDisponibles.length > 3 ? (
+            /* ── Dropdown para 4+ menciones (nombres largos) ── */
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-borderColor bg-bgSecondary/90 backdrop-blur-md shadow-sm">
+              <BookMarked className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+              <select
+                value={mencionActiva || ""}
+                onChange={(e) => setMencionActiva(e.target.value)}
+                className="bg-transparent text-sm font-medium text-textPrimary outline-none cursor-pointer"
+                style={{ maxWidth: "min(260px, 55vw)" }}
               >
-                {m.nombre}
-              </button>
-            ))}
-          </div>
+                {malla.mencionesDisponibles.map((m) => (
+                  <option key={m.codigo} value={m.codigo}>{m.nombre}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-textSecondary flex-shrink-0 pointer-events-none" />
+            </div>
+          ) : (
+            /* ── Píldoras para ≤ 3 menciones (sin cambios) ── */
+            <div className="flex bg-bgSecondary/80 backdrop-blur-md p-1 rounded-full border border-borderColor/50">
+              {malla.mencionesDisponibles.map((m) => (
+                <button
+                  key={m.codigo}
+                  onClick={() => setMencionActiva(m.codigo)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                    mencionActiva === m.codigo
+                      ? "bg-primary text-white shadow-md scale-105"
+                      : "text-textSecondary hover:text-textPrimary hover:bg-bgSecondary"
+                  }`}
+                >
+                  {m.nombre}
+                </button>
+              ))}
+            </div>
+          )
         )}
 
         <button
