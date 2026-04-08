@@ -11,6 +11,7 @@ pnpm-lock.yaml
 # ──────────────────────────────
 dist/
 build/
+mallapro-cpanel-upload.zip
 .vite/
 .cache/
 vite.svg
