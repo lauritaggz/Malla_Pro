@@ -1,17 +1,31 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import { listarMallas } from "./utils/mallasLoader";
+import { safeJsonParse } from "./utils/safeJsonParse";
 import MallaViewer from "./components/MallaViewer";
 import { MemoizedStatsDisplay as StatsDisplay } from "./components/StatsDisplay";
 import ResumenProgreso from "./components/ResumenProgreso";
 import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
 import MobileBottomNav from "./components/MobileBottomNav";
+import TutorModule from "./components/tutors/TutorModule";
 import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
 import LoginSuggestion, { shouldShowLogin, getStoredUser } from "./components/LoginSuggestion";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
+
+function readMallaSeleccionadaFromStorage() {
+  const raw = safeJsonParse(localStorage.getItem("malla-seleccionada"), null);
+  if (!raw || typeof raw !== "object") return null;
+  const url = raw.url;
+  const nombre = raw.nombre;
+  if (typeof url !== "string" || !url.trim() || typeof nombre !== "string" || !nombre.trim()) {
+    localStorage.removeItem("malla-seleccionada");
+    return null;
+  }
+  return { ...raw, url: url.trim(), nombre: nombre.trim() };
+}
 
 export default function App() {
   const [navbarHeight, setNavbarHeight] = useState(180);
@@ -29,7 +43,7 @@ export default function App() {
   const [modoExcepcional, setModoExcepcional] = useState(false);
   const [mallasDisponibles, setMallasDisponibles] = useState([]);
   const [mallaSeleccionada, setMallaSeleccionada] = useState(
-    JSON.parse(localStorage.getItem("malla-seleccionada")) || null
+    readMallaSeleccionadaFromStorage
   );
 
   const [excepcionesActivas, setExcepcionesActivas] = useState(0);
@@ -49,6 +63,7 @@ export default function App() {
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+  const [vistaPrincipal, setVistaPrincipal] = useState("malla");
 
   // Detectar si es dispositivo touch
   const isMobile = typeof window !== 'undefined' && 
@@ -79,6 +94,7 @@ export default function App() {
       setCursando([]);
       setAprobados([]);
       setExcepciones([]);
+      setVistaPrincipal("malla");
     }
   };
 
@@ -122,6 +138,7 @@ export default function App() {
 
   const seleccionarMalla = useCallback((malla) => {
     setMallaSeleccionada(malla);
+    setVistaPrincipal("malla");
     localStorage.setItem("malla-seleccionada", JSON.stringify(malla));
   }, []);
 
@@ -129,6 +146,11 @@ export default function App() {
     (total) => setCantidadSemestres(total),
     []
   );
+
+  const handleVerProgresoNav = useCallback(() => {
+    setVistaPrincipal("malla");
+    setMostrarResumen((prev) => !prev);
+  }, []);
 
   const handleAbrirNotas = useCallback((curso, esEnCurso, esAprobado) => {
     setCursoSeleccionado(curso);
@@ -163,6 +185,8 @@ export default function App() {
           onShowHorario={() => setMostrarHorario(true)}
           onShowContacto={() => setMostrarContacto(true)}
           mostrarResumen={mostrarResumen}
+          vistaPrincipal={vistaPrincipal}
+          setVistaPrincipal={setVistaPrincipal}
         />
       )}
 
@@ -176,7 +200,7 @@ export default function App() {
           setModoExcepcional={setModoExcepcional}
           excepcionesActivas={excepcionesActivas}
           cantidadSemestres={cantidadSemestres}
-          onVerProgreso={() => setMostrarResumen(prev => !prev)}
+          onVerProgreso={handleVerProgresoNav}
           mostrarResumen={mostrarResumen}
           ocultarCompletados={ocultarCompletados}
           setOcultarCompletados={setOcultarCompletados}
@@ -184,6 +208,8 @@ export default function App() {
           onShowHorario={() => setMostrarHorario(true)}
           onShowContacto={() => setMostrarContacto(true)}
           onChangeMalla={handleCambiarMalla}
+          vistaPrincipal={vistaPrincipal}
+          setVistaPrincipal={setVistaPrincipal}
         />
       )}
 
@@ -192,7 +218,7 @@ export default function App() {
         className="relative z-[10] transition-all duration-300"
         style={{ paddingTop: mallaSeleccionada ? navbarHeight + 20 : 0 }}
       >
-        {mallaSeleccionada && (
+        {mallaSeleccionada && vistaPrincipal === "malla" && (
           <StatsDisplay
             totalCursos={progreso.total}
             cursosAprobados={progreso.aprobados}
@@ -263,6 +289,10 @@ export default function App() {
               </div>
             </div>
           </div>
+        ) : vistaPrincipal === "tutorias" ? (
+          <main>
+            <TutorModule />
+          </main>
         ) : (
           <main>
             <MallaViewer
@@ -280,7 +310,7 @@ export default function App() {
               ocultarCompletados={ocultarCompletados}
               setOcultarCompletados={setOcultarCompletados}
             />
-            
+
             {/* BOTÓN CAMBIAR MALLA */}
             <div className="flex justify-center pb-8 mt-2">
               <button

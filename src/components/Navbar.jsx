@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   GraduationCap, Moon, Sun, FileText, HelpCircle,
-  CalendarDays, ChevronDown, BookMarked, Heart,
+  CalendarDays, ChevronDown, BookMarked, Heart, MessageCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -47,6 +47,8 @@ export default function Navbar({
   onShowHorario,
   onShowContacto,
   mostrarResumen,
+  vistaPrincipal = "malla",
+  setVistaPrincipal,
 }) {
   const navRef      = useRef(null);
   const [isScrolled, setIsScrolled]         = useState(false);
@@ -237,6 +239,23 @@ export default function Navbar({
           <NavBtn onClick={onShowContacto} label="Enviar mi malla">
             <Heart className="w-4 h-4" />
           </NavBtn>
+
+          {/* Tutorías Connect / volver a malla */}
+          {mallaSeleccionada && setVistaPrincipal && (
+            <NavBtn
+              onClick={() =>
+                setVistaPrincipal(vistaPrincipal === "malla" ? "tutorias" : "malla")
+              }
+              label={vistaPrincipal === "malla" ? "Tutorías Connect" : "Ver malla curricular"}
+              active={vistaPrincipal === "tutorias"}
+            >
+              {vistaPrincipal === "malla" ? (
+                <MessageCircle className="w-4 h-4" />
+              ) : (
+                <BookMarked className="w-4 h-4" />
+              )}
+            </NavBtn>
+          )}
 
           {/* Ayuda */}
           {mallaSeleccionada && (

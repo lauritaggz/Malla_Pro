@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import { Eye, EyeOff, BookMarked, ChevronDown } from "lucide-react";
 import Curso from "./Curso";
+import { safeJsonParse } from "../utils/safeJsonParse";
 
 const MallaViewer = ({
   mallaSeleccionada,
@@ -22,14 +23,14 @@ const MallaViewer = ({
   const [malla, setMalla] = useState(null);
   const [mencionActiva, setMencionActiva] = useState(null);
 
-  const [aprobados, setAprobados] = useState(
-    JSON.parse(localStorage.getItem("malla-aprobados")) || []
+  const [aprobados, setAprobados] = useState(() =>
+    safeJsonParse(localStorage.getItem("malla-aprobados"), [])
   );
-  const [excepciones, setExcepciones] = useState(
-    JSON.parse(localStorage.getItem("malla-excepciones")) || []
+  const [excepciones, setExcepciones] = useState(() =>
+    safeJsonParse(localStorage.getItem("malla-excepciones"), [])
   );
-  const [cursando, setCursando] = useState(
-    JSON.parse(localStorage.getItem("malla-cursando")) || []
+  const [cursando, setCursando] = useState(() =>
+    safeJsonParse(localStorage.getItem("malla-cursando"), [])
   );
 
   // 🔹 Ref y estados para drag horizontal
@@ -79,7 +80,10 @@ const MallaViewer = ({
         // Auto-aprobar ramos conservados de la malla anterior al cambiar
         const conservadosJson = localStorage.getItem("malla-nombres-conservados");
         if (conservadosJson) {
-          const nombresConservados = JSON.parse(conservadosJson);
+          const nombresConservados = safeJsonParse(conservadosJson, []);
+          if (!Array.isArray(nombresConservados)) {
+            localStorage.removeItem("malla-nombres-conservados");
+          } else {
           const idsAprobados = [];
           
           const checkCurso = (curso) => {
@@ -105,6 +109,7 @@ const MallaViewer = ({
           }
           // Limpiar el guardado temporal para no activarlo accidentalmente en otro momento
           localStorage.removeItem("malla-nombres-conservados");
+          }
         }
       } catch (err) {
         console.error("Error al cargar malla:", err);
