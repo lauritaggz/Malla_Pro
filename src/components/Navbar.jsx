@@ -95,6 +95,7 @@ export default function Navbar({
       id="app-navbar"
       className={`
         fixed top-0 left-0 right-0 z-[80]
+        pt-[env(safe-area-inset-top,0px)]
         bg-bgSecondary/90 backdrop-blur-xl
         border-b border-borderColor
         transition-[box-shadow,opacity,transform] duration-200
@@ -228,6 +229,39 @@ export default function Navbar({
             {darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </NavBtn>
 
+          {/* Tutorías Connect — CTA visible (icono + texto en sm+) */}
+          {mallaSeleccionada && setVistaPrincipal && (
+            <motion.button
+              type="button"
+              layout
+              onClick={() =>
+                setVistaPrincipal(vistaPrincipal === "malla" ? "tutorias" : "malla")
+              }
+              aria-label={
+                vistaPrincipal === "malla"
+                  ? "Abrir Tutorías Connect"
+                  : "Volver a la malla curricular"
+              }
+              className={`
+                flex h-9 sm:h-8 shrink-0 items-center gap-1.5 rounded-xl sm:rounded-lg px-2.5 sm:pl-2 sm:pr-2.5
+                text-xs font-bold tracking-tight transition-all duration-200 border-2 shadow-sm
+                ${vistaPrincipal === "tutorias"
+                  ? "border-primary bg-primary text-white shadow-md shadow-primary/30"
+                  : "border-primary/50 bg-primary/12 text-primary hover:bg-primary/20 hover:border-primary/70 dark:bg-primary/18 dark:hover:bg-primary/28"}
+              `}
+              whileTap={{ scale: 0.97 }}
+            >
+              {vistaPrincipal === "malla" ? (
+                <MessageCircle className="w-4 h-4 sm:w-[17px] sm:h-[17px] shrink-0" strokeWidth={2.25} />
+              ) : (
+                <BookMarked className="w-4 h-4 sm:w-[17px] sm:h-[17px] shrink-0" strokeWidth={2.25} />
+              )}
+              <span className="hidden sm:inline max-w-[7.5rem] truncate">
+                {vistaPrincipal === "malla" ? "Tutorías" : "Mi malla"}
+              </span>
+            </motion.button>
+          )}
+
           {/* Horario */}
           {mallaSeleccionada && (
             <NavBtn onClick={onShowHorario} label="Abrir horario">
@@ -239,23 +273,6 @@ export default function Navbar({
           <NavBtn onClick={onShowContacto} label="Enviar mi malla">
             <Heart className="w-4 h-4" />
           </NavBtn>
-
-          {/* Tutorías Connect / volver a malla */}
-          {mallaSeleccionada && setVistaPrincipal && (
-            <NavBtn
-              onClick={() =>
-                setVistaPrincipal(vistaPrincipal === "malla" ? "tutorias" : "malla")
-              }
-              label={vistaPrincipal === "malla" ? "Tutorías Connect" : "Ver malla curricular"}
-              active={vistaPrincipal === "tutorias"}
-            >
-              {vistaPrincipal === "malla" ? (
-                <MessageCircle className="w-4 h-4" />
-              ) : (
-                <BookMarked className="w-4 h-4" />
-              )}
-            </NavBtn>
-          )}
 
           {/* Ayuda */}
           {mallaSeleccionada && (

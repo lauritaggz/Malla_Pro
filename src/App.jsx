@@ -28,7 +28,19 @@ function readMallaSeleccionadaFromStorage() {
 }
 
 export default function App() {
-  const [navbarHeight, setNavbarHeight] = useState(180);
+  /* Altura real ~56px (h-14); 180px dejaba un hueco enorme hasta el primer resize del Navbar */
+  const [navbarHeight, setNavbarHeight] = useState(56);
+  const [compactTopGap, setCompactTopGap] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < 640
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setCompactTopGap(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const [theme, setTheme] = useState(
     localStorage.getItem("malla-theme") || "aurora"
@@ -213,10 +225,12 @@ export default function App() {
         />
       )}
 
-      {/* CONTENIDO PRINCIPAL CON PADDING DINÁMICO SOLO SI HAY NAVBAR */}
+      {/* CONTENIDO PRINCIPAL: paddingTop = altura navbar + separación mínima */}
       <div
         className="relative z-[10] transition-all duration-300"
-        style={{ paddingTop: mallaSeleccionada ? navbarHeight + 20 : 0 }}
+        style={{
+          paddingTop: mallaSeleccionada ? navbarHeight + (compactTopGap ? 0 : 14) : 0,
+        }}
       >
         {mallaSeleccionada && vistaPrincipal === "malla" && (
           <StatsDisplay

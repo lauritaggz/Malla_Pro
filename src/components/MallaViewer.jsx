@@ -414,10 +414,10 @@ const MallaViewer = ({
 
   // ✅ Render principal
   return (
-    <div className="pb-10 px-2 sm:px-4 md:px-6">
+    <div className="max-sm:pb-[calc(5rem+env(safe-area-inset-bottom,0px))] pb-10 px-2 sm:px-4 md:px-6">
       
       {/* Controles Superiores de Visualización */}
-      <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-3 mb-4 pr-0 sm:pr-4">
+      <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-stretch sm:items-center gap-2 mb-1 sm:mb-4 pr-0 sm:pr-4 max-sm:w-full">
         
         {/* Selector de Especialidad / Mención */}
         {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
@@ -492,9 +492,11 @@ const MallaViewer = ({
         </button>
       </div>
 
-      {/* Wrapper de Cristal Seguro - Optimizado para móvil (menos blur, más rendimiento) */}
-      <div className="rounded-3xl border border-borderColor/30 shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 pb-6 pt-4 overflow-hidden" 
-           style={{ contain: "content" }}>
+      {/* Contenedor malla: en móvil menos radio y padding para alinear con el ancho útil */}
+      <div
+        className="rounded-2xl sm:rounded-3xl border border-borderColor/30 shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 overflow-hidden pt-0 pb-3 sm:pt-4 sm:pb-6"
+        style={{ contain: "content" }}
+      >
         
         {/* Scroll horizontal arrastrable invertido verticalmente (scrollbar arriba) */}
         <div
@@ -502,7 +504,7 @@ const MallaViewer = ({
           {...bind()}
           onScroll={handleScroll}
           onClickCapture={handleClickCapture}
-          className={`overflow-x-auto scroll-container overscroll-x-contain px-4 sm:px-10 pb-6 snap-x snap-mandatory sm:snap-none
+          className={`overflow-x-auto scroll-container overscroll-x-contain px-2 max-sm:px-1.5 sm:px-10 max-sm:!pb-1 pb-3 sm:pb-6 snap-x snap-mandatory sm:snap-none
                 ${
                   isDragging ? "dragging" : "cursor-grab"
                 } active:cursor-grabbing`}
@@ -514,7 +516,7 @@ const MallaViewer = ({
           }}
         >
           <div 
-            className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
+            className="flex gap-3 sm:gap-8 md:gap-10 min-w-max py-0 sm:py-3 md:py-4"
             style={{ 
                backfaceVisibility: "hidden",
                transform: "translateZ(0)" /* Force layer for the whole flex container */
@@ -551,16 +553,16 @@ const MallaViewer = ({
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   layout
                 >
-                  <div className="text-center mb-3 sm:mb-4">
-                    <span className="text-xs uppercase tracking-wide text-textSecondary/80">
+                  <div className="text-center mb-1 sm:mb-4 leading-none">
+                    <span className="text-[10px] sm:text-xs uppercase tracking-wide text-textSecondary/80">
                       Año
                     </span>
-                    <div className="text-xl sm:text-2xl font-bold text-primary drop-shadow-[0_1px_0_rgba(255,255,255,0.04)]">
+                    <div className="text-lg sm:text-2xl font-bold text-primary drop-shadow-[0_1px_0_rgba(255,255,255,0.04)] mt-0.5 sm:mt-0">
                       {year}
                     </div>
                   </div>
 
-                  <div className="flex gap-4 sm:gap-8">
+                  <div className="flex gap-3 sm:gap-8">
                     {[
                       { info: semAInfo, show: showA, key: `sem-${i * 2 + 1}` },
                       { info: semBInfo, show: showB, key: `sem-${i * 2 + 2}` }
@@ -571,25 +573,25 @@ const MallaViewer = ({
                                 {/* SEMESTRE COMÚN */}
                             {info.tipo === "comun" && info.data && (
                                <motion.div
-                                 className="flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
+                                 className="flex flex-col gap-2 sm:gap-3 w-[min(36rem,calc(100vw-1.25rem))] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
                                             bg-bgSecondary/70 
-                                            rounded-2xl p-4 sm:p-5 border border-borderColor/40 
+                                            rounded-2xl p-3 sm:p-5 border border-borderColor/40 
                                             shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10"
                                  initial={{ opacity: 0, y: 8 }}
                                  animate={{ opacity: 1, y: 0 }}
                                  transition={{ duration: 0.2, ease: "easeOut" }}
                                >
-                                 <div className="text-center sm:hidden mb-1">
-                                    <span className="text-xs font-bold text-textSecondary uppercase">Semestre {info.data.numero}</span>
+                                 <div className="text-center sm:hidden mb-0.5">
+                                    <span className="text-[11px] font-bold text-textSecondary uppercase">Semestre {info.data.numero}</span>
                                  </div>
                                  {info.data.cursos.map((c) => renderCurso(c))}
                                </motion.div>
                             )}                             {/* SEMESTRE MENCIONES (SIMPLE CARD) */}
                             {info.tipo === "mencion" && info.opciones && info.opciones[mencionActiva] && (
                                <motion.div
-                                 className="flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
+                                 className="flex flex-col gap-2 sm:gap-3 w-[min(36rem,calc(100vw-1.25rem))] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
                                             bg-primary/5 
-                                            rounded-2xl p-4 sm:p-5 border border-primary/20 
+                                            rounded-2xl p-3 sm:p-5 border border-primary/20 
                                             shadow-md hover:shadow-lg 
                                             transition-shadow duration-200 transform-gpu z-10 relative"
                                  initial={{ opacity: 0, y: 8 }}
@@ -597,17 +599,17 @@ const MallaViewer = ({
                                  transition={{ duration: 0.2, ease: "easeOut" }}
                                >
                                   {/* Header especialidad */}
-                                  <div className="flex flex-col mb-1 pb-3 border-b border-primary/20">
-                                     <div className="flex justify-between items-center mb-1">
-                                       <span className="text-[10px] font-bold tracking-wider text-primary">
+                                  <div className="flex flex-col mb-0.5 max-sm:pb-2 pb-3 border-b border-primary/20">
+                                     <div className="flex justify-between items-center gap-1 mb-0.5">
+                                       <span className="text-[10px] font-bold tracking-wider text-primary truncate">
                                           ESPECIALIDAD
                                        </span>
-                                       <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full opacity-90">
+                                       <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full opacity-90 shrink-0 max-w-[45%] truncate">
                                          {info.opciones[mencionActiva].nombreMencion}
                                        </span>
                                      </div>
-                                     <div className="text-center sm:hidden mt-2">
-                                        <span className="text-xs font-bold text-textSecondary uppercase">Semestre {info.opciones[mencionActiva].numero}</span>
+                                     <div className="text-center sm:hidden mt-1">
+                                        <span className="text-[11px] font-bold text-textSecondary uppercase">Semestre {info.opciones[mencionActiva].numero}</span>
                                      </div>
                                   </div>
 

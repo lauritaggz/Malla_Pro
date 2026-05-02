@@ -124,14 +124,14 @@ export default function StatsDisplay({
   }, [cursosEnCursoData]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-6 py-3">
+    <div className="hidden sm:block w-full max-w-7xl mx-auto px-4 py-2 sm:px-6 sm:py-3">
       <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
 
         {/* Próxima clase */}
         <ProximaClase />
 
         {/* Aprobados */}
-        <div className="stat-card-aprobados flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-emerald-500/95 backdrop-blur-md border border-emerald-400/20 shadow-lg shadow-emerald-500/20 transition-all hover:scale-105">
+        <div className="flex stat-card-aprobados items-center gap-3 px-5 py-2.5 rounded-2xl bg-emerald-500/95 backdrop-blur-md border border-emerald-400/20 shadow-lg shadow-emerald-500/20 transition-all hover:scale-105">
           <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
           <div className="flex flex-col">
             <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">Aprobados</span>
@@ -143,7 +143,7 @@ export default function StatsDisplay({
         </div>
 
         {/* En Curso */}
-        <div className="stat-card-encurso flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-primary backdrop-blur-md border border-primary/20 shadow-lg shadow-primary/25 transition-all hover:scale-105">
+        <div className="flex stat-card-encurso items-center gap-3 px-5 py-2.5 rounded-2xl bg-primary backdrop-blur-md border border-primary/20 shadow-lg shadow-primary/25 transition-all hover:scale-105">
           <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
           <div className="flex flex-col">
             <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">En Curso</span>
