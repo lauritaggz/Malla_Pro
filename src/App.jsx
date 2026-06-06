@@ -311,7 +311,7 @@ export default function App() {
           </div>
         ) : vistaPrincipal === "tutorias" ? (
           <main>
-            <TutorModule />
+            <TutorModule onVolver={() => setVistaPrincipal("malla")} />
           </main>
         ) : (
           <main className="flex flex-col flex-1 min-h-0 max-sm:px-0 sm:max-w-7xl sm:mx-auto sm:w-full">

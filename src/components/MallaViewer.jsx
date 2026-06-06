@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
-import { Eye, EyeOff, BookMarked, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X } from "lucide-react";
 import Curso from "./Curso";
 
 const MallaViewer = ({
@@ -35,8 +35,10 @@ const MallaViewer = ({
   // 🔹 Ref y estados para drag horizontal
   const scrollRef = useRef(null);
   const controlsRef = useRef(null);
+  const fullscreenShellRef = useRef(null);
   const dragMovedRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [fullscreenMalla, setFullscreenMalla] = useState(false);
   const [isMobileView, setIsMobileView] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
   );
@@ -63,6 +65,47 @@ const MallaViewer = ({
     obs.observe(controlsRef.current);
     return () => obs.disconnect();
   }, [isMobileView, malla?.isMencion, malla?.mencionesDisponibles?.length]);
+
+  const exitFullscreenMalla = () => {
+    setFullscreenMalla(false);
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  };
+
+  const enterFullscreenMalla = () => {
+    setFullscreenMalla(true);
+    requestAnimationFrame(() => {
+      fullscreenShellRef.current?.requestFullscreen?.().catch(() => {});
+    });
+  };
+
+  useEffect(() => {
+    if (!fullscreenMalla) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") exitFullscreenMalla();
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [fullscreenMalla]);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setFullscreenMalla(false);
+      }
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
 
   // ✅ Cargar malla seleccionada
   useEffect(() => {
@@ -378,6 +421,58 @@ const MallaViewer = ({
     }
   };
 
+  // Desktop: rueda vertical → scroll horizontal animado (sin mezclar scroll de página)
+  useEffect(() => {
+    if (isMobileView) return;
+
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const animState = { rafId: null, target: 0 };
+
+    const runAnimation = () => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      animState.target = Math.max(0, Math.min(maxScroll, animState.target));
+
+      const step = () => {
+        const diff = animState.target - el.scrollLeft;
+        if (Math.abs(diff) < 0.5) {
+          el.scrollLeft = animState.target;
+          animState.rafId = null;
+          return;
+        }
+        el.scrollLeft += diff * 0.34;
+        animState.rafId = requestAnimationFrame(step);
+      };
+
+      if (animState.rafId) cancelAnimationFrame(animState.rafId);
+      animState.rafId = requestAnimationFrame(step);
+    };
+
+    const handleWheel = (e) => {
+      if (window.innerWidth < 768) return;
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 1) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (animState.rafId === null) {
+        animState.target = el.scrollLeft;
+      }
+      animState.target += e.deltaY * 1.25;
+      runAnimation();
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false, capture: true });
+    return () => {
+      el.removeEventListener("wheel", handleWheel, { capture: true });
+      if (animState.rafId) cancelAnimationFrame(animState.rafId);
+    };
+  }, [isMobileView, malla]);
+
   // ---------------- Lógica de renderizado ----------------
   const getSemestreInfo = (num) => {
     if (!malla) return null;
@@ -528,12 +623,33 @@ const MallaViewer = ({
   const visibleSemesters = getVisibleSemesters();
 
   return (
-    <div className="mobile-malla-shell px-0 sm:px-2 md:px-6 pb-0 sm:pb-10 flex flex-col flex-1 min-h-0">
+    <div
+      ref={fullscreenShellRef}
+      className={
+        fullscreenMalla
+          ? "malla-fullscreen-shell fixed inset-0 z-[9999] flex flex-col bg-bgPrimary text-textPrimary h-[100dvh] w-full"
+          : "mobile-malla-shell relative px-0 sm:px-2 md:px-6 pb-0 sm:pb-10 flex flex-col flex-1 min-h-0"
+      }
+    >
+      {fullscreenMalla ? (
+        <header className="malla-fullscreen-header flex items-center justify-between gap-3 px-3 sm:px-4 h-11 shrink-0 border-b border-borderColor bg-bgSecondary/80 backdrop-blur-sm">
+          <span className="text-sm font-semibold text-textPrimary">Malla</span>
+          <button
+            type="button"
+            onClick={exitFullscreenMalla}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-borderColor bg-bgPrimary text-textSecondary hover:text-primary hover:border-primary/40 transition-colors"
+            aria-label="Salir de pantalla completa"
+          >
+            <X className="w-3.5 h-3.5" />
+            Salir
+          </button>
+        </header>
+      ) : null}
       
       {/* Controles Superiores de Visualización */}
       <div
         ref={controlsRef}
-        className="mobile-malla-controls flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 sm:gap-3 mb-2 sm:mb-4 px-2 sm:pr-4 max-sm:mb-1.5 max-sm:min-h-0"
+        className="mobile-malla-controls flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 sm:gap-3 mb-2 sm:mb-4 px-2 sm:pr-4 max-sm:mb-1.5 max-sm:min-h-0 shrink-0"
       >
         
         {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
@@ -585,6 +701,7 @@ const MallaViewer = ({
           )
         )}
 
+        {!fullscreenMalla && (
         <button
           onClick={() => setOcultarCompletados(!ocultarCompletados)}
           className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border
@@ -597,10 +714,23 @@ const MallaViewer = ({
             ? <><Eye className="w-3.5 h-3.5" /> Mostrar todo</>
             : <><EyeOff className="w-3.5 h-3.5" /> Ocultar completados</>}
         </button>
+        )}
+
+        {!fullscreenMalla && (
+        <button
+          type="button"
+          onClick={enterFullscreenMalla}
+          className="flex items-center gap-1.5 px-3 py-1.5 max-sm:px-2.5 rounded-lg text-xs font-medium border border-borderColor bg-bgSecondary/90 hover:bg-bgSecondary text-textSecondary hover:text-primary shadow-sm transition-colors shrink-0"
+          aria-label="Ver malla en pantalla completa"
+        >
+          <Maximize2 className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="hidden sm:inline">Pantalla completa</span>
+        </button>
+        )}
       </div>
 
       {isMobileView ? (
-        <div className="mobile-malla-viewport">
+        <div className={`mobile-malla-viewport flex flex-col flex-1 min-h-0 ${fullscreenMalla ? "malla-fullscreen-viewport" : ""}`}>
           <div
             ref={scrollRef}
             {...bind()}
@@ -625,7 +755,7 @@ const MallaViewer = ({
           </p>
         </div>
       ) : (
-      <div className="flex flex-col flex-1 min-h-0 sm:rounded-3xl sm:border sm:border-borderColor/30 sm:shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 sm:pb-6 sm:pt-4 overflow-hidden" 
+      <div className={`flex flex-col flex-1 min-h-0 sm:rounded-3xl sm:border sm:border-borderColor/30 sm:shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 sm:pb-6 sm:pt-4 overflow-hidden ${fullscreenMalla ? "!rounded-none !border-0 !shadow-none !pt-2 !pb-2 malla-fullscreen-viewport" : ""}`}
            style={{ contain: "content" }}>
         
         <div
@@ -633,7 +763,7 @@ const MallaViewer = ({
           {...bind()}
           onScroll={handleScroll}
           onClickCapture={handleClickCapture}
-          className={`flex-1 min-h-0 overflow-x-auto scroll-container overscroll-x-contain
+          className={`flex-1 min-h-0 overflow-x-auto overflow-y-hidden scroll-container malla-wheel-scroll overscroll-x-contain overscroll-contain
                 px-4 sm:px-10 pb-6 snap-x snap-mandatory sm:snap-none
                 ${isDragging ? "dragging" : "cursor-grab"} active:cursor-grabbing`}
           style={{ 
