@@ -12,6 +12,7 @@ import TutorModule from "./components/tutors/TutorModule";
 import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
 import LoginSuggestion, { shouldShowLogin, getStoredUser } from "./components/LoginSuggestion";
+import { trackOpenNotas, trackSelectMalla, inferUniversidadFromUrl } from "./utils/analytics";
 import { motion, AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 
@@ -24,7 +25,12 @@ function readMallaSeleccionadaFromStorage() {
     localStorage.removeItem("malla-seleccionada");
     return null;
   }
-  return { ...raw, url: url.trim(), nombre: nombre.trim() };
+  return {
+    ...raw,
+    url: url.trim(),
+    nombre: nombre.trim(),
+    universidad: raw.universidad || inferUniversidadFromUrl(url.trim()),
+  };
 }
 
 export default function App() {
@@ -152,10 +158,12 @@ export default function App() {
     listarMallas().then(setMallasDisponibles);
   }, []);
 
-  const seleccionarMalla = useCallback((malla) => {
-    setMallaSeleccionada(malla);
+  const seleccionarMalla = useCallback((malla, universidad) => {
+    const payload = universidad ? { ...malla, universidad } : malla;
+    setMallaSeleccionada(payload);
     setVistaPrincipal("malla");
-    localStorage.setItem("malla-seleccionada", JSON.stringify(malla));
+    localStorage.setItem("malla-seleccionada", JSON.stringify(payload));
+    trackSelectMalla(payload);
   }, []);
 
   const handleSemestresLoaded = useCallback(
@@ -173,7 +181,8 @@ export default function App() {
     setCursoEsEnCurso(esEnCurso);
     setCursoEsAprobado(esAprobado);
     setMostrarNotas(true);
-  }, []);
+    trackOpenNotas(mallaSeleccionada, curso);
+  }, [mallaSeleccionada]);
 
   const handleSetProgreso = useCallback((val) => setProgreso(val), []);
   const handleSetCursosCursando = useCallback((val) => setCursosCursando(val), []);
@@ -278,7 +287,7 @@ export default function App() {
                       {uni.mallas.map((m) => (
                         <button
                           key={m.nombre}
-                          onClick={() => seleccionarMalla(m)}
+                          onClick={() => seleccionarMalla(m, uni.universidad)}
                           className="p-4 rounded-xl border border-borderColor bg-bgPrimary hover:bg-primary hover:text-white transition-all text-sm font-medium shadow-sm hover:shadow-md active:scale-[0.98] text-left sm:text-center leading-snug"
                         >
                           {m.nombre}

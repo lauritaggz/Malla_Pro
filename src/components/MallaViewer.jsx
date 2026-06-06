@@ -3,6 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import { Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X } from "lucide-react";
 import Curso from "./Curso";
+import {
+  trackFullscreenMalla,
+  trackMallaView,
+  trackToggleCursoEstado,
+} from "../utils/analytics";
 
 const MallaViewer = ({
   mallaSeleccionada,
@@ -36,6 +41,7 @@ const MallaViewer = ({
   const scrollRef = useRef(null);
   const controlsRef = useRef(null);
   const fullscreenShellRef = useRef(null);
+  const lastTrackedMallaRef = useRef(null);
   const dragMovedRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [fullscreenMalla, setFullscreenMalla] = useState(false);
@@ -67,7 +73,10 @@ const MallaViewer = ({
   }, [isMobileView, malla?.isMencion, malla?.mencionesDisponibles?.length]);
 
   const exitFullscreenMalla = () => {
-    setFullscreenMalla(false);
+    setFullscreenMalla((open) => {
+      if (open) trackFullscreenMalla(mallaSeleccionada, false);
+      return false;
+    });
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {});
     }
@@ -75,6 +84,7 @@ const MallaViewer = ({
 
   const enterFullscreenMalla = () => {
     setFullscreenMalla(true);
+    trackFullscreenMalla(mallaSeleccionada, true);
     requestAnimationFrame(() => {
       fullscreenShellRef.current?.requestFullscreen?.().catch(() => {});
     });
@@ -100,16 +110,22 @@ const MallaViewer = ({
   useEffect(() => {
     const onFullscreenChange = () => {
       if (!document.fullscreenElement) {
-        setFullscreenMalla(false);
+        setFullscreenMalla((open) => {
+          if (open) trackFullscreenMalla(mallaSeleccionada, false);
+          return false;
+        });
       }
     };
     document.addEventListener("fullscreenchange", onFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
-  }, []);
+  }, [mallaSeleccionada]);
 
   // ✅ Cargar malla seleccionada
   useEffect(() => {
+    if (!mallaSeleccionada?.url) return;
+
     async function cargar() {
+      setMalla(null);
       try {
         const res = await fetch(mallaSeleccionada.url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -182,6 +198,17 @@ const MallaViewer = ({
     }
     cargar();
   }, [mallaSeleccionada, onSemestresLoaded, onMallaDataLoaded]);
+
+  // GA4: registrar vista de malla (una vez por malla cargada)
+  useEffect(() => {
+    if (!malla || !mallaSeleccionada?.url) return;
+
+    const key = mallaSeleccionada.url;
+    if (lastTrackedMallaRef.current === key) return;
+    lastTrackedMallaRef.current = key;
+
+    trackMallaView(mallaSeleccionada, malla);
+  }, [malla, mallaSeleccionada?.url, mallaSeleccionada]);
 
   // Guardar Mencion Activa
   useEffect(() => {
@@ -263,6 +290,19 @@ const MallaViewer = ({
   }, [malla, aprobados, excepciones, mencionActiva, onTotalCursosChange]);
 
   // ✅ Obtener todos los hijos (ramos que dependen de este) de forma recursiva
+  const getAllCursos = () => {
+    if (!malla) return [];
+    if (!malla.isMencion) {
+      return malla.semestres.flatMap((s) => s.cursos);
+    }
+    const fromMenciones = Object.values(malla.menciones).flatMap((m) =>
+      m.semestres.flatMap((s) => s.cursos)
+    );
+    return [...malla.semestresComunes.flatMap((s) => s.cursos), ...fromMenciones];
+  };
+
+  const getCursoById = (id) => getAllCursos().find((c) => c.id === id);
+
   const getDescendientes = (id, todasLasMallas) => {
     const hijos = todasLasMallas.filter(c => c.prerrequisitos?.includes(id));
     let descendientes = [...hijos.map(h => h.id)];
@@ -274,24 +314,17 @@ const MallaViewer = ({
 
   // ✅ Aprobar o desmarcar ramo
   const aprobar = (id) => {
+    const curso = getCursoById(id);
+    const willApprove = !aprobados.includes(id);
+    trackToggleCursoEstado(mallaSeleccionada, curso, willApprove ? "aprobado" : "desaprobado");
+
     setAprobados((prevAprobados) => {
       if (prevAprobados.includes(id)) {
-        // Si estamos desmarcando, buscamos todos los que dependen de este
-        const todosLosCursos = [];
-        if (!malla.isMencion) {
-          malla.semestres.forEach(s => todosLosCursos.push(...s.cursos));
-        } else {
-          malla.semestresComunes.forEach(s => todosLosCursos.push(...s.cursos));
-          Object.values(malla.menciones).forEach(m => {
-            m.semestres.forEach(s => todosLosCursos.push(...s.cursos));
-          });
-        }
-        
+        const todosLosCursos = getAllCursos();
         const aEliminar = getDescendientes(id, todosLosCursos);
         return prevAprobados.filter((a) => a !== id && !aEliminar.includes(a));
-      } else {
-        return [...prevAprobados, id];
       }
+      return [...prevAprobados, id];
     });
     
     // Al aprobar, limpiamos el estado "en curso" si estaba activo
@@ -305,8 +338,13 @@ const MallaViewer = ({
 
   // ✅ Marcar / desmarcar como excepcional
   const marcarExcepcional = (id) => {
-    // Capturar la decisión ANTES de cualquier setState para evitar stale closures
     const isRemoving = excepciones.includes(id);
+    const curso = getCursoById(id);
+    trackToggleCursoEstado(
+      mallaSeleccionada,
+      curso,
+      isRemoving ? "excepcional_off" : "excepcional_on"
+    );
 
     setExcepciones((prev) =>
       isRemoving ? prev.filter((e) => e !== id) : [...prev, id]
@@ -327,6 +365,14 @@ const MallaViewer = ({
 
   // ✅ En curso (Ctrl + clic)
   const toggleCursando = (id) => {
+    const curso = getCursoById(id);
+    const willEnable = !cursando.includes(id);
+    trackToggleCursoEstado(
+      mallaSeleccionada,
+      curso,
+      willEnable ? "en_curso_on" : "en_curso_off"
+    );
+
     setCursando((prevCursando) => {
       if (prevCursando.includes(id)) {
         return prevCursando.filter((c) => c !== id);
