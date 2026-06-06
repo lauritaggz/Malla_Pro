@@ -24,9 +24,6 @@ export default function MobileBottomNav({
 
   return (
     <>
-      {/* Bottom padding for content */}
-      <div className="h-16 sm:hidden w-full" />
-      
       {showMore && (
         <div 
           className="fixed inset-0 bg-black/50 z-[80] sm:hidden" 
@@ -42,7 +39,7 @@ export default function MobileBottomNav({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-[4.5rem] left-2 right-2 p-4 bg-bgSecondary border border-borderColor/50 rounded-2xl shadow-xl z-[90] sm:hidden flex flex-col gap-4 backdrop-blur-md"
+            className="fixed bottom-[var(--mobile-bottom-nav-h,4rem)] left-2 right-2 p-4 bg-bgSecondary border border-borderColor/50 rounded-2xl shadow-xl z-[90] sm:hidden flex flex-col gap-4 backdrop-blur-md"
           >
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-xs font-bold text-textSecondary uppercase tracking-wider">Más Opciones</h3>
@@ -180,7 +177,7 @@ export default function MobileBottomNav({
       </AnimatePresence>
 
       {/* Bottom Nav Bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-[4.5rem] bg-bgSecondary/90 backdrop-blur-xl border-t border-borderColor/30 z-[90] sm:hidden flex justify-around items-center px-2 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-0 left-0 right-0 h-[var(--mobile-bottom-nav-h,4rem)] bg-bgSecondary/90 backdrop-blur-xl border-t border-borderColor/30 z-[90] sm:hidden flex justify-around items-center px-1 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
         
         {/* Progreso */}
         <button 
@@ -188,25 +185,25 @@ export default function MobileBottomNav({
             onVerProgreso();
             setShowMore(false);
           }}
-          className={`flex flex-col items-center justify-center p-2 transition-colors ${mostrarResumen ? "text-primary scale-110" : "text-textSecondary hover:text-primary"}`}
+          className={`flex flex-col items-center justify-center p-1.5 transition-colors ${mostrarResumen ? "text-primary scale-105" : "text-textSecondary hover:text-primary"}`}
         >
-          <CheckCircle className="w-6 h-6 mb-1" />
-          <span className="text-[10px] font-medium">Resumen</span>
+          <CheckCircle className="w-5 h-5 mb-0.5" />
+          <span className="text-[9px] font-medium">Resumen</span>
         </button>
 
         {/* Excepcional */}
         <button 
           onClick={() => setModoExcepcional(!modoExcepcional)}
-          className={`flex flex-col items-center justify-center p-2 relative transition-all duration-300 ${
+          className={`flex flex-col items-center justify-center p-1.5 relative transition-all duration-300 ${
              modoExcepcional 
-               ? "text-amber-500 scale-110 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" 
+               ? "text-amber-500 scale-105 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" 
                : "text-textSecondary hover:text-primary"
           }`}
         >
-          <FileText className={`w-6 h-6 mb-1 ${modoExcepcional ? "animate-pulse" : ""}`} />
-          <span className="text-[10px] font-medium">{modoExcepcional ? "Activo" : "Excepcional"}</span>
+          <FileText className={`w-5 h-5 mb-0.5 ${modoExcepcional ? "animate-pulse" : ""}`} />
+          <span className="text-[9px] font-medium">{modoExcepcional ? "Activo" : "Excepcional"}</span>
           {excepcionesActivas > 0 && (
-            <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
+            <span className="absolute top-0.5 right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
               {excepcionesActivas}
             </span>
           )}
@@ -215,10 +212,10 @@ export default function MobileBottomNav({
         {/* Más Opciones */}
         <button 
           onClick={() => setShowMore(!showMore)}
-          className={`flex flex-col items-center justify-center p-2 transition-colors ${showMore ? "text-primary" : "text-textSecondary hover:text-primary"}`}
+          className={`flex flex-col items-center justify-center p-1.5 transition-colors ${showMore ? "text-primary" : "text-textSecondary hover:text-primary"}`}
         >
-          <Menu className="w-6 h-6 mb-1" />
-          <span className="text-[10px] font-medium">Opciones</span>
+          <Menu className="w-5 h-5 mb-0.5" />
+          <span className="text-[9px] font-medium">Opciones</span>
         </button>
       </div>
     </>

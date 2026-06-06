@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { NotebookPen, Check, BookOpen } from "lucide-react";
+import { NotebookPen } from "lucide-react";
 
 const Curso = ({
   curso,
@@ -29,7 +29,7 @@ const Curso = ({
         } else {
           setPromedio(null);
         }
-      } catch (err) {
+      } catch {
         setPromedio(null);
       }
     };
@@ -39,24 +39,20 @@ const Curso = ({
     return () => window.removeEventListener("notasModificadas", actualizarPromedio);
   }, [curso.id]);
   
-  // Custom Long Press Logic para móviles
   const timerRef = useRef(null);
   const isLongPressRef = useRef(false);
 
-  const startPressTimer = (e) => {
+  const startPressTimer = () => {
     isLongPressRef.current = false;
-    // Si no está disponible y no está "en curso" (ej. para desmarcarlo), 
-    // y no estamos en modo excepcional, no dejamos hacer long press
     if (!disponible && !modoExcepcional && !enCurso) return;
     
     timerRef.current = setTimeout(() => {
       isLongPressRef.current = true;
-      // Vibración háptica en móviles si es compatible
-      if (window.navigator && window.navigator.vibrate) {
+      if (window.navigator?.vibrate) {
         window.navigator.vibrate(50);
       }
       toggleCursando();
-    }, 500); // Medio segundo para activarse
+    }, 500);
   };
 
   const clearPressTimer = () => {
@@ -67,37 +63,31 @@ const Curso = ({
   };
 
   const handleClick = (e) => {
-    // Si fue un long press exitoso, cancelamos el click normal
     if (isLongPressRef.current) return;
-    // Si no está disponible y no estamos en modo excepcional
     if (!disponible && !modoExcepcional) {
-      // Permitimos quitarlo de "en curso" si por algún motivo ya lo estaba
       if (e.ctrlKey && enCurso) {
         toggleCursando();
         return;
       }
-      
-      // De lo contrario, no se puede hacer nada, solo vibra
       setShake(true);
       setTimeout(() => setShake(false), 400);
       return;
     }
 
-    // CTRL → marcar en curso (ahora seguro porque sabemos que está disponible o en modo excepcional)
     if (e.ctrlKey) {
       toggleCursando();
       return;
     }
 
-    // Excepcional
     if (modoExcepcional) {
       marcarExcepcional();
       return;
     }
 
-    // Aprobar normal
     aprobar();
   };
+
+  const hasTopRightBadge = promedio !== null;
 
   return (
     <div
@@ -106,8 +96,9 @@ const Curso = ({
       onPointerUp={clearPressTimer}
       onPointerLeave={clearPressTimer}
       onPointerCancel={clearPressTimer}
-      className={`relative cursor-pointer select-none p-3 text-[13px] rounded-2xl border shadow-sm text-left group
+      className={`mobile-course-card relative cursor-pointer select-none p-3 text-[13px] rounded-2xl border shadow-sm text-left group
         transition-[background-color,border-color,opacity,transform] duration-200 ease-out
+        max-sm:pb-9
         ${shake ? "shake" : ""}
         ${
           aprobado
@@ -128,11 +119,9 @@ const Curso = ({
         contain: "layout"
       }}
     >
-
-      {/* Badge de Promedio en el Top Right */}
       {promedio !== null && (
         <div 
-          className={`absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-bold rounded-md border flex items-center justify-center min-w-[30px] shadow-sm transition-all
+          className={`absolute top-2 right-2 max-sm:top-1.5 max-sm:right-8 px-1.5 py-0.5 text-[10px] max-sm:text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[30px] max-sm:min-w-[26px] shadow-sm transition-all
             ${
               aprobado || excepcional || enCurso
                 ? "bg-white/20 border-white/30 text-white"
@@ -143,25 +132,24 @@ const Curso = ({
         </div>
       )}
 
-      {/* Nombre (agregamos pr-8 si hay promedio para no chocar con el badge) */}
-      <div className={`font-semibold leading-tight mb-1.5 line-clamp-2 ${promedio !== null ? 'pr-8' : ''}`}>
+      <div className={`mobile-course-name font-semibold leading-tight mb-1.5 line-clamp-2 ${hasTopRightBadge ? "max-sm:pr-14 sm:pr-8" : "max-sm:pr-9"}`}>
         {curso.nombre}
       </div>
 
-      {/* Código y SCT juntos */}
-      <div className="text-[10.5px] font-medium opacity-75 flex items-center gap-1.5">
+      <div className="mobile-course-meta text-[10.5px] font-medium opacity-75">
         <span>{curso.codigo}</span>
-        <span className="opacity-50 text-[8px]">●</span>
+        <span className="opacity-50 mx-1">·</span>
         <span>{curso.sct} SCT</span>
       </div>
 
-      {/* BOTÓN DE NOTAS */}
+      {/* Desktop: botón Notas completo */}
       <button
         onClick={(e) => {
-          e.stopPropagation(); // Evita activar aprobar()
+          e.stopPropagation();
           onAbrirNotas(curso);
         }}
-        className={`mt-2 w-full py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all text-[11px] font-medium border
+        aria-label="Notas"
+        className={`hidden sm:flex mt-2 w-full py-1.5 rounded-lg items-center justify-center gap-1.5 transition-all text-[11px] font-medium border
           ${
             enCurso || aprobado || excepcional
               ? "bg-black/15 hover:bg-black/25 text-white border-white/20"
@@ -170,6 +158,23 @@ const Curso = ({
         `}
       >
         <NotebookPen className="w-3.5 h-3.5" /> Notas
+      </button>
+
+      {/* Mobile: ícono compacto */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onAbrirNotas(curso);
+        }}
+        aria-label="Notas"
+        className={`mobile-notes-button sm:hidden
+          ${
+            enCurso || aprobado || excepcional
+              ? "!bg-black/15 !border-white/20 !text-white"
+              : ""
+          }`}
+      >
+        <NotebookPen />
       </button>
     </div>
   );
