@@ -28,19 +28,10 @@ function readMallaSeleccionadaFromStorage() {
 }
 
 export default function App() {
-  /* Altura real ~56px (h-14); 180px dejaba un hueco enorme hasta el primer resize del Navbar */
-  const [navbarHeight, setNavbarHeight] = useState(56);
-  const [compactTopGap, setCompactTopGap] = useState(
-    () => typeof window !== "undefined" && window.innerWidth < 640
+  const [navbarHeight, setNavbarHeight] = useState(48);
+  const [isMobileLayout, setIsMobileLayout] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
   );
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const sync = () => setCompactTopGap(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
 
   const [theme, setTheme] = useState(
     localStorage.getItem("malla-theme") || "aurora"
@@ -128,12 +119,25 @@ export default function App() {
     }
   }, [mallaSeleccionada, mostrarLogin]);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const onChange = (e) => setIsMobileLayout(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   // ---------------- NAVBAR HEIGHT LISTENER ----------------
   useEffect(() => {
     const handler = (e) => setNavbarHeight(e.detail);
     window.addEventListener("navbarHeightChange", handler);
     return () => window.removeEventListener("navbarHeightChange", handler);
   }, []);
+
+  useEffect(() => {
+    if (isMobileLayout) {
+      document.documentElement.style.setProperty("--mobile-navbar-h", `${navbarHeight}px`);
+    }
+  }, [navbarHeight, isMobileLayout]);
 
   // ---------------- THEME & DARKMODE ----------------
   useEffect(() => {
@@ -179,7 +183,7 @@ export default function App() {
   const handleSetExcepciones = useCallback((val) => setExcepciones(val), []);
 
   return (
-    <div className="min-h-screen bg-bgPrimary text-textPrimary overflow-x-hidden relative">
+    <div className={`bg-bgPrimary text-textPrimary overflow-x-hidden relative ${mallaSeleccionada ? "mobile-app-shell min-h-[100dvh] sm:min-h-screen" : "min-h-screen"}`}>
       {/* NAVBAR */}
       {mallaSeleccionada && (
         <Navbar
@@ -225,11 +229,13 @@ export default function App() {
         />
       )}
 
-      {/* CONTENIDO PRINCIPAL: paddingTop = altura navbar + separación mínima */}
+      {/* CONTENIDO PRINCIPAL */}
       <div
-        className="relative z-[10] transition-all duration-300"
+        className={`relative z-[10] transition-all duration-300 flex flex-col flex-1 min-h-0 ${
+          mallaSeleccionada ? "mobile-main-content sm:pb-0 sm:flex-none" : ""
+        }`}
         style={{
-          paddingTop: mallaSeleccionada ? navbarHeight + (compactTopGap ? 0 : 14) : 0,
+          paddingTop: mallaSeleccionada && !isMobileLayout ? navbarHeight + 20 : undefined,
         }}
       >
         {mallaSeleccionada && vistaPrincipal === "malla" && (
@@ -308,7 +314,7 @@ export default function App() {
             <TutorModule />
           </main>
         ) : (
-          <main>
+          <main className="flex flex-col flex-1 min-h-0 max-sm:px-0 sm:max-w-7xl sm:mx-auto sm:w-full">
             <MallaViewer
               mallaSeleccionada={mallaSeleccionada}
               modoExcepcional={modoExcepcional}
@@ -324,9 +330,9 @@ export default function App() {
               ocultarCompletados={ocultarCompletados}
               setOcultarCompletados={setOcultarCompletados}
             />
-
-            {/* BOTÓN CAMBIAR MALLA */}
-            <div className="flex justify-center pb-8 mt-2">
+            
+            {/* BOTÓN CAMBIAR MALLA — solo desktop (móvil: opciones inferiores) */}
+            <div className="hidden sm:flex justify-center pb-8 mt-2">
               <button
                 onClick={handleCambiarMalla}
                 className="text-xs text-textSecondary/60 hover:text-primary transition-colors px-4 py-2 rounded-full hover:bg-primary/10"

@@ -124,64 +124,78 @@ export default function StatsDisplay({
   }, [cursosEnCursoData]);
 
   return (
-    <div className="hidden sm:block w-full max-w-7xl mx-auto px-4 py-2 sm:px-6 sm:py-3">
-      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
+    <>
+      {/* Mobile: chips compactos */}
+      <div className="mobile-progress-chips sm:hidden">
+        <span className="mobile-progress-chip mobile-progress-chip--aprobados">
+          ✓ {cursosAprobados} aprobado{cursosAprobados !== 1 ? "s" : ""}
+        </span>
+        <span className="text-textSecondary/40 text-[11px]">·</span>
+        <span className="mobile-progress-chip mobile-progress-chip--encurso">
+          ● {cursosCursando} en curso
+        </span>
+      </div>
 
-        {/* Próxima clase */}
-        <ProximaClase />
+      {/* Desktop / tablet: tarjetas completas */}
+      <div className="hidden sm:block w-full max-w-7xl mx-auto px-6 py-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
 
-        {/* Aprobados */}
-        <div className="flex stat-card-aprobados items-center gap-3 px-5 py-2.5 rounded-2xl bg-emerald-500/95 backdrop-blur-md border border-emerald-400/20 shadow-lg shadow-emerald-500/20 transition-all hover:scale-105">
-          <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
-          <div className="flex flex-col">
-            <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">Aprobados</span>
-            <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
-              {cursosAprobados}
-              <span className="text-sm font-medium opacity-80">ramos ({porcentajeAprobados}%)</span>
-            </span>
-          </div>
-        </div>
+          {/* Próxima clase */}
+          <ProximaClase />
 
-        {/* En Curso */}
-        <div className="flex stat-card-encurso items-center gap-3 px-5 py-2.5 rounded-2xl bg-primary backdrop-blur-md border border-primary/20 shadow-lg shadow-primary/25 transition-all hover:scale-105">
-          <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
-          <div className="flex flex-col">
-            <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">En Curso</span>
-            <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
-              {cursosCursando}
-              <span className="text-sm font-medium opacity-80">ramos</span>
-              {totalSctEnCurso > 0 && (
-                <>
-                  <span className="text-sm font-medium opacity-60 mx-1">•</span>
-                  <span className="text-sm font-medium opacity-90">{totalSctEnCurso} SCT</span>
-                </>
-              )}
-            </span>
-          </div>
-        </div>
-
-        {/* Promedio en curso */}
-        {promedioEnCurso !== null && (
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
-            <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm" />
+          {/* Aprobados */}
+          <div className="stat-card-aprobados flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-emerald-500/95 backdrop-blur-md border border-emerald-400/20 shadow-lg shadow-emerald-500/20 transition-all hover:scale-105">
+            <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
             <div className="flex flex-col">
-              <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Promedio En Curso</span>
-              <span className="text-textPrimary text-xl font-bold leading-tight">{promedioEnCurso.toFixed(1)}</span>
+              <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">Aprobados</span>
+              <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
+                {cursosAprobados}
+                <span className="text-sm font-medium opacity-80">ramos ({porcentajeAprobados}%)</span>
+              </span>
             </div>
           </div>
-        )}
 
-        {/* Total */}
-        <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
-          <div className="w-3 h-3 rounded-full bg-primary shadow-sm" />
-          <div className="flex flex-col">
-            <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Total Cursos</span>
-            <span className="text-textPrimary text-xl font-bold leading-tight">{totalCursos}</span>
+          {/* En Curso */}
+          <div className="stat-card-encurso flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-primary backdrop-blur-md border border-primary/20 shadow-lg shadow-primary/25 transition-all hover:scale-105">
+            <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
+            <div className="flex flex-col">
+              <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">En Curso</span>
+              <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
+                {cursosCursando}
+                <span className="text-sm font-medium opacity-80">ramos</span>
+                {totalSctEnCurso > 0 && (
+                  <>
+                    <span className="text-sm font-medium opacity-60 mx-1">•</span>
+                    <span className="text-sm font-medium opacity-90">{totalSctEnCurso} SCT</span>
+                  </>
+                )}
+              </span>
+            </div>
           </div>
-        </div>
 
+          {/* Promedio en curso */}
+          {promedioEnCurso !== null && (
+            <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
+              <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm" />
+              <div className="flex flex-col">
+                <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Promedio En Curso</span>
+                <span className="text-textPrimary text-xl font-bold leading-tight">{promedioEnCurso.toFixed(1)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Total */}
+          <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
+            <div className="w-3 h-3 rounded-full bg-primary shadow-sm" />
+            <div className="flex flex-col">
+              <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Total Cursos</span>
+              <span className="text-textPrimary text-xl font-bold leading-tight">{totalCursos}</span>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

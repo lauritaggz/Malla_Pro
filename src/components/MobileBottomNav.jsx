@@ -26,9 +26,6 @@ export default function MobileBottomNav({
 
   return (
     <>
-      {/* Bottom padding for content */}
-      <div className="h-16 sm:hidden w-full" />
-      
       {showMore && (
         <div 
           className="fixed inset-0 bg-black/50 z-[80] sm:hidden" 
@@ -44,7 +41,7 @@ export default function MobileBottomNav({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-[4.5rem] left-2 right-2 p-4 bg-bgSecondary border border-borderColor/50 rounded-2xl shadow-xl z-[90] sm:hidden flex flex-col gap-4 backdrop-blur-md"
+            className="fixed bottom-[var(--mobile-bottom-nav-h,4rem)] left-2 right-2 p-4 bg-bgSecondary border border-borderColor/50 rounded-2xl shadow-xl z-[90] sm:hidden flex flex-col gap-4 backdrop-blur-md"
           >
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-xs font-bold text-textSecondary uppercase tracking-wider">Más Opciones</h3>
@@ -182,7 +179,7 @@ export default function MobileBottomNav({
       </AnimatePresence>
 
       {/* Bottom Nav Bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-[4.5rem] bg-bgSecondary/90 backdrop-blur-xl border-t border-borderColor/30 z-[90] sm:hidden grid grid-cols-4 items-center px-1 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.1)] gap-0">
+      <div className="fixed bottom-0 left-0 right-0 h-[var(--mobile-bottom-nav-h,4rem)] bg-bgSecondary/90 backdrop-blur-xl border-t border-borderColor/30 z-[90] sm:hidden grid grid-cols-4 items-center px-1 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.1)] gap-0">
         
         {/* Progreso */}
         <button 
@@ -192,7 +189,7 @@ export default function MobileBottomNav({
           }}
           className={`flex flex-col items-center justify-center p-1.5 min-w-0 transition-colors ${mostrarResumen && vistaPrincipal === "malla" ? "text-primary scale-105" : "text-textSecondary hover:text-primary"}`}
         >
-          <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 mb-0.5 flex-shrink-0" />
+          <CheckCircle className="w-5 h-5 mb-0.5 flex-shrink-0" />
           <span className="text-[9px] font-medium truncate w-full text-center leading-tight">Resumen</span>
         </button>
 
@@ -209,7 +206,7 @@ export default function MobileBottomNav({
             vistaPrincipal === "tutorias" ? "text-primary scale-105" : "text-textSecondary hover:text-primary"
           }`}
         >
-          <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 mb-0.5 flex-shrink-0" />
+          <MessageCircle className="w-5 h-5 mb-0.5 flex-shrink-0" />
           <span className="text-[9px] font-medium truncate w-full text-center leading-tight">Tutorías</span>
         </button>
 
@@ -226,7 +223,7 @@ export default function MobileBottomNav({
                : "text-textSecondary hover:text-primary"
           }`}
         >
-          <FileText className={`w-5 h-5 sm:w-6 sm:h-6 mb-0.5 flex-shrink-0 ${modoExcepcional ? "animate-pulse" : ""}`} />
+          <FileText className={`w-5 h-5 mb-0.5 flex-shrink-0 ${modoExcepcional ? "animate-pulse" : ""}`} />
           <span className="text-[9px] font-medium truncate w-full text-center leading-tight">{modoExcepcional ? "Activo" : "Excepc."}</span>
           {excepcionesActivas > 0 && (
             <span className="absolute top-0.5 right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
@@ -240,7 +237,7 @@ export default function MobileBottomNav({
           onClick={() => setShowMore(!showMore)}
           className={`flex flex-col items-center justify-center p-1.5 min-w-0 transition-colors ${showMore ? "text-primary" : "text-textSecondary hover:text-primary"}`}
         >
-          <Menu className="w-5 h-5 sm:w-6 sm:h-6 mb-0.5 flex-shrink-0" />
+          <Menu className="w-5 h-5 mb-0.5 flex-shrink-0" />
           <span className="text-[9px] font-medium truncate w-full text-center leading-tight">Opciones</span>
         </button>
       </div>

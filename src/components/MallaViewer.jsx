@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState, Fragment } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import { Eye, EyeOff, BookMarked, ChevronDown } from "lucide-react";
 import Curso from "./Curso";
-import { safeJsonParse } from "../utils/safeJsonParse";
 
 const MallaViewer = ({
   mallaSeleccionada,
@@ -23,20 +22,47 @@ const MallaViewer = ({
   const [malla, setMalla] = useState(null);
   const [mencionActiva, setMencionActiva] = useState(null);
 
-  const [aprobados, setAprobados] = useState(() =>
-    safeJsonParse(localStorage.getItem("malla-aprobados"), [])
+  const [aprobados, setAprobados] = useState(
+    JSON.parse(localStorage.getItem("malla-aprobados")) || []
   );
-  const [excepciones, setExcepciones] = useState(() =>
-    safeJsonParse(localStorage.getItem("malla-excepciones"), [])
+  const [excepciones, setExcepciones] = useState(
+    JSON.parse(localStorage.getItem("malla-excepciones")) || []
   );
-  const [cursando, setCursando] = useState(() =>
-    safeJsonParse(localStorage.getItem("malla-cursando"), [])
+  const [cursando, setCursando] = useState(
+    JSON.parse(localStorage.getItem("malla-cursando")) || []
   );
 
   // 🔹 Ref y estados para drag horizontal
   const scrollRef = useRef(null);
+  const controlsRef = useRef(null);
   const dragMovedRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const onChange = (e) => setIsMobileView(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileView) {
+      document.documentElement.style.setProperty("--mobile-controls-h", "0px");
+      return;
+    }
+    if (!controlsRef.current) return;
+    const report = () => {
+      const h = controlsRef.current?.offsetHeight || 0;
+      document.documentElement.style.setProperty("--mobile-controls-h", `${h}px`);
+    };
+    report();
+    const obs = new ResizeObserver(report);
+    obs.observe(controlsRef.current);
+    return () => obs.disconnect();
+  }, [isMobileView, malla?.isMencion, malla?.mencionesDisponibles?.length]);
 
   // ✅ Cargar malla seleccionada
   useEffect(() => {
@@ -80,10 +106,7 @@ const MallaViewer = ({
         // Auto-aprobar ramos conservados de la malla anterior al cambiar
         const conservadosJson = localStorage.getItem("malla-nombres-conservados");
         if (conservadosJson) {
-          const nombresConservados = safeJsonParse(conservadosJson, []);
-          if (!Array.isArray(nombresConservados)) {
-            localStorage.removeItem("malla-nombres-conservados");
-          } else {
+          const nombresConservados = JSON.parse(conservadosJson);
           const idsAprobados = [];
           
           const checkCurso = (curso) => {
@@ -109,7 +132,6 @@ const MallaViewer = ({
           }
           // Limpiar el guardado temporal para no activarlo accidentalmente en otro momento
           localStorage.removeItem("malla-nombres-conservados");
-          }
         }
       } catch (err) {
         console.error("Error al cargar malla:", err);
@@ -409,65 +431,150 @@ const MallaViewer = ({
     />
   );
 
-  if (!malla)
-    return <p className="text-center text-textSecondary">Cargando malla...</p>;
+  const getVisibleSemesters = () => {
+    const list = [];
+    for (let num = 1; num <= malla.totalSemestres; num++) {
+      const info = getSemestreInfo(num);
+      if (!info) continue;
+      if (info.tipo === "comun" && !info.data) continue;
+      if (info.tipo === "mencion" && (!info.opciones || !info.opciones[mencionActiva])) continue;
+      if (ocultarCompletados && isSemestreCompletado(info)) continue;
+      list.push({ numero: num, info });
+    }
+    return list;
+  };
 
-  // ✅ Render principal
+  const renderSemestreCard = (info, semNumero, mobile = false) => {
+    if (info.tipo === "comun" && info.data) {
+      return (
+        <motion.div
+          key={`sem-${semNumero}`}
+          className={
+            mobile
+              ? "mobile-semester-card"
+              : `flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none
+                 bg-bgSecondary/70 rounded-2xl p-4 sm:p-5 border border-borderColor/40
+                 shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10`
+          }
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          layout
+        >
+          <div className={mobile ? "mobile-semester-card__header" : "text-center sm:hidden mb-1"}>
+            <span className={mobile ? "mobile-semester-card__title" : "text-xs font-bold text-textSecondary uppercase"}>
+              Semestre {info.data.numero}
+            </span>
+          </div>
+          <div className={mobile ? "mobile-semester-card__courses" : "flex flex-col gap-3"}>
+            {info.data.cursos.map((c) => renderCurso(c))}
+          </div>
+        </motion.div>
+      );
+    }
+
+    if (info.tipo === "mencion" && info.opciones?.[mencionActiva]) {
+      const semData = info.opciones[mencionActiva];
+      return (
+        <motion.div
+          key={`sem-${semNumero}`}
+          className={
+            mobile
+              ? "mobile-semester-card mobile-semester-card--mencion"
+              : `flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none
+                 bg-primary/5 rounded-2xl p-4 sm:p-5 border border-primary/20
+                 shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10 relative`
+          }
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          layout
+        >
+          {mobile ? (
+            <div className="mobile-semester-card__header border-primary/20">
+              <span className="text-[9px] font-bold tracking-wider text-primary uppercase">Especialidad</span>
+              <div className="mobile-semester-card__title mt-0.5">
+                Semestre {semData.numero} · {semData.nombreMencion}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col mb-1 pb-3 border-b border-primary/20">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold tracking-wider text-primary">ESPECIALIDAD</span>
+                  <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full opacity-90">
+                    {semData.nombreMencion}
+                  </span>
+                </div>
+                <div className="text-center sm:hidden mt-2">
+                  <span className="text-xs font-bold text-textSecondary uppercase">Semestre {semData.numero}</span>
+                </div>
+              </div>
+            </>
+          )}
+          <div className={mobile ? "mobile-semester-card__courses" : "flex flex-col gap-3"}>
+            {semData.cursos.map((c) => renderCurso(c))}
+          </div>
+        </motion.div>
+      );
+    }
+
+    return null;
+  };
+
+  if (!malla)
+    return <p className="text-center text-textSecondary py-4">Cargando malla...</p>;
+
+  const visibleSemesters = getVisibleSemesters();
+
   return (
-    <div className="max-sm:pb-[calc(5rem+env(safe-area-inset-bottom,0px))] pb-10 px-2 sm:px-4 md:px-6">
+    <div className="mobile-malla-shell px-0 sm:px-2 md:px-6 pb-0 sm:pb-10 flex flex-col flex-1 min-h-0">
       
       {/* Controles Superiores de Visualización */}
-      <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-stretch sm:items-center gap-2 mb-1 sm:mb-4 pr-0 sm:pr-4 max-sm:w-full">
+      <div
+        ref={controlsRef}
+        className="mobile-malla-controls flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 sm:gap-3 mb-2 sm:mb-4 px-2 sm:pr-4 max-sm:mb-1.5 max-sm:min-h-0"
+      >
         
-        {/* Selector de Especialidad / Mención */}
         {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
           malla.mencionesDisponibles.length > 3 ? (
-            /* ── Dropdown para 4+ menciones (nombres largos) ── */
-            <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[280px] max-w-[min(100%,420px)]">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-textSecondary/90 px-0.5">
+            <div className="flex flex-col gap-1 w-full sm:w-auto sm:min-w-[280px] max-w-[min(100%,420px)]">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-textSecondary/90 px-0.5 max-sm:hidden">
                 Especialidad / mención
               </span>
               <div
-                className="group flex items-center gap-2.5 pl-3 pr-2.5 py-2 rounded-xl
+                className="group flex items-center gap-2 pl-2.5 pr-2 py-1.5 max-sm:py-1 rounded-xl max-sm:rounded-lg
                   border border-borderColor bg-bgPrimary
-                  shadow-[0_1px_2px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
-                  hover:border-primary/35 hover:bg-bgSecondary/80
-                  hover:shadow-[0_2px_8px_var(--shadowPrimary)]
-                  transition-all duration-200
-                  focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary/50 focus-within:bg-bgSecondary"
+                  shadow-[0_1px_2px_rgba(0,0,0,0.06)]
+                  hover:border-primary/35 transition-all duration-200
+                  focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary/50"
               >
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primaryMuted text-primary">
-                  <BookMarked className="w-4 h-4" strokeWidth={2} />
+                <div className="flex h-7 w-7 max-sm:h-6 max-sm:w-6 flex-shrink-0 items-center justify-center rounded-lg bg-primaryMuted text-primary">
+                  <BookMarked className="w-3.5 h-3.5 max-sm:w-3 max-sm:h-3" strokeWidth={2} />
                 </div>
                 <select
                   value={mencionActiva || ""}
                   onChange={(e) => setMencionActiva(e.target.value)}
                   aria-label="Seleccionar especialidad o mención"
                   className="mencion-select w-full min-w-0 flex-1 cursor-pointer bg-transparent py-0.5 pl-0 pr-1
-                    text-sm font-semibold leading-snug text-textPrimary
-                    outline-none appearance-none
-                    truncate"
+                    text-sm max-sm:text-xs font-semibold leading-snug text-textPrimary outline-none appearance-none truncate"
                 >
                   {malla.mencionesDisponibles.map((m) => (
                     <option key={m.codigo} value={m.codigo}>{m.nombre}</option>
                   ))}
                 </select>
-                <ChevronDown
-                  className="w-4 h-4 flex-shrink-0 text-primary/70 pointer-events-none transition-transform duration-200 group-hover:translate-y-px"
-                  strokeWidth={2.5}
-                />
+                <ChevronDown className="w-4 h-4 flex-shrink-0 text-primary/70 pointer-events-none" strokeWidth={2.5} />
               </div>
             </div>
           ) : (
-            /* ── Píldoras para ≤ 3 menciones (sin cambios) ── */
-            <div className="flex bg-bgSecondary/80 backdrop-blur-md p-1 rounded-full border border-borderColor/50">
+            <div className="flex bg-bgSecondary/80 backdrop-blur-md p-0.5 max-sm:p-0.5 rounded-full border border-borderColor/50 max-sm:w-full max-sm:overflow-x-auto">
               {malla.mencionesDisponibles.map((m) => (
                 <button
                   key={m.codigo}
                   onClick={() => setMencionActiva(m.codigo)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                  className={`px-3 max-sm:px-2.5 py-1 max-sm:py-0.5 rounded-full text-sm max-sm:text-xs font-medium transition-all duration-300 whitespace-nowrap ${
                     mencionActiva === m.codigo
-                      ? "bg-primary text-white shadow-md scale-105"
+                      ? "bg-primary text-white shadow-md"
                       : "text-textSecondary hover:text-textPrimary hover:bg-bgSecondary"
                   }`}
                 >
@@ -492,22 +599,43 @@ const MallaViewer = ({
         </button>
       </div>
 
-      {/* Contenedor malla: en móvil menos radio y padding para alinear con el ancho útil */}
-      <div
-        className="rounded-2xl sm:rounded-3xl border border-borderColor/30 shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 overflow-hidden pt-0 pb-3 sm:pt-4 sm:pb-6"
-        style={{ contain: "content" }}
-      >
+      {isMobileView ? (
+        <div className="mobile-malla-viewport">
+          <div
+            ref={scrollRef}
+            {...bind()}
+            onScroll={handleScroll}
+            onClickCapture={handleClickCapture}
+            className={`mobile-semester-scroll scroll-container overscroll-x-contain snap-x snap-mandatory
+              ${isDragging ? "dragging" : "cursor-grab"} active:cursor-grabbing`}
+            style={{
+              WebkitOverflowScrolling: "touch",
+              willChange: "scroll-position",
+              backfaceVisibility: "hidden",
+            }}
+          >
+            <div className="mobile-semester-carousel">
+              <AnimatePresence mode="popLayout">
+                {visibleSemesters.map(({ numero, info }) => renderSemestreCard(info, numero, true))}
+              </AnimatePresence>
+            </div>
+          </div>
+          <p className="mobile-scroll-hint">
+            ← Desliza horizontalmente para ver más semestres →
+          </p>
+        </div>
+      ) : (
+      <div className="flex flex-col flex-1 min-h-0 sm:rounded-3xl sm:border sm:border-borderColor/30 sm:shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 sm:pb-6 sm:pt-4 overflow-hidden" 
+           style={{ contain: "content" }}>
         
-        {/* Scroll horizontal arrastrable invertido verticalmente (scrollbar arriba) */}
         <div
           ref={scrollRef}
           {...bind()}
           onScroll={handleScroll}
           onClickCapture={handleClickCapture}
-          className={`overflow-x-auto scroll-container overscroll-x-contain px-2 max-sm:px-1.5 sm:px-10 max-sm:!pb-1 pb-3 sm:pb-6 snap-x snap-mandatory sm:snap-none
-                ${
-                  isDragging ? "dragging" : "cursor-grab"
-                } active:cursor-grabbing`}
+          className={`flex-1 min-h-0 overflow-x-auto scroll-container overscroll-x-contain
+                px-4 sm:px-10 pb-6 snap-x snap-mandatory sm:snap-none
+                ${isDragging ? "dragging" : "cursor-grab"} active:cursor-grabbing`}
           style={{ 
             WebkitOverflowScrolling: "touch", 
             willChange: "scroll-position",
@@ -515,119 +643,67 @@ const MallaViewer = ({
             contain: "content"
           }}
         >
-          <div 
-            className="flex gap-3 sm:gap-8 md:gap-10 min-w-max py-0 sm:py-3 md:py-4"
-            style={{ 
-               backfaceVisibility: "hidden",
-               transform: "translateZ(0)" /* Force layer for the whole flex container */
-            }}
-          >
-            <AnimatePresence mode="popLayout">
-            {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
-            (_, i) => {
-              const year = i + 1;
-              const semAInfo = getSemestreInfo(i * 2 + 1);
-              const semBInfo = getSemestreInfo(i * 2 + 2);
+            <div 
+              className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
+              style={{ 
+                 backfaceVisibility: "hidden",
+                 transform: "translateZ(0)"
+              }}
+            >
+              <AnimatePresence mode="popLayout">
+              {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
+              (_, i) => {
+                const year = i + 1;
+                const semAInfo = getSemestreInfo(i * 2 + 1);
+                const semBInfo = getSemestreInfo(i * 2 + 2);
 
-              const isSemACompletado = isSemestreCompletado(semAInfo);
-              const isSemBCompletado = isSemestreCompletado(semBInfo);
+                const isSemACompletado = isSemestreCompletado(semAInfo);
+                const isSemBCompletado = isSemestreCompletado(semBInfo);
 
-              // Si ocultarCompletados está activo, determinamos qué mostrar
-              const showA = semAInfo && (semAInfo.tipo !== "comun" || semAInfo.data) && (!ocultarCompletados || !isSemACompletado);
-              const showB = semBInfo && (semBInfo.tipo !== "comun" || semBInfo.data) && (!ocultarCompletados || !isSemBCompletado);
+                const showA = semAInfo && (semAInfo.tipo !== "comun" || semAInfo.data) && (!ocultarCompletados || !isSemACompletado);
+                const showB = semBInfo && (semBInfo.tipo !== "comun" || semBInfo.data) && (!ocultarCompletados || !isSemBCompletado);
 
-              // Si ambos semestres de un año se ocultan (o no tienen datos), ocultar todo el contenedor del año
-              if (!showA && !showB) return null;
+                if (!showA && !showB) return null;
 
-              return (
-                <motion.div
-                  key={year}
-                  className={`w-max sm:w-auto flex-shrink-0 transition-all duration-300 ${
-                    showA && showB 
-                      ? "sm:min-w-[592px] md:min-w-[680px]" 
-                      : "sm:min-w-[280px] md:min-w-[320px]"
-                  }`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.92, y: -8 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                  layout
-                >
-                  <div className="text-center mb-1 sm:mb-4 leading-none">
-                    <span className="text-[10px] sm:text-xs uppercase tracking-wide text-textSecondary/80">
-                      Año
-                    </span>
-                    <div className="text-lg sm:text-2xl font-bold text-primary drop-shadow-[0_1px_0_rgba(255,255,255,0.04)] mt-0.5 sm:mt-0">
-                      {year}
+                return (
+                  <motion.div
+                    key={year}
+                    className={`w-max sm:w-auto flex-shrink-0 transition-all duration-300 ${
+                      showA && showB 
+                        ? "sm:min-w-[592px] md:min-w-[680px]" 
+                        : "sm:min-w-[280px] md:min-w-[320px]"
+                    }`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    layout
+                  >
+                    <div className="text-center mb-3 sm:mb-4">
+                      <span className="text-xs uppercase tracking-wide text-textSecondary/80">Año</span>
+                      <div className="text-xl sm:text-2xl font-bold text-primary drop-shadow-[0_1px_0_rgba(255,255,255,0.04)]">
+                        {year}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex gap-3 sm:gap-8">
-                    {[
-                      { info: semAInfo, show: showA, key: `sem-${i * 2 + 1}` },
-                      { info: semBInfo, show: showB, key: `sem-${i * 2 + 2}` }
-                    ].map(
-                      ({ info, show, key }) =>
-                        show && info && (
-                          <Fragment key={key}>
-                                {/* SEMESTRE COMÚN */}
-                            {info.tipo === "comun" && info.data && (
-                               <motion.div
-                                 className="flex flex-col gap-2 sm:gap-3 w-[min(36rem,calc(100vw-1.25rem))] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
-                                            bg-bgSecondary/70 
-                                            rounded-2xl p-3 sm:p-5 border border-borderColor/40 
-                                            shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10"
-                                 initial={{ opacity: 0, y: 8 }}
-                                 animate={{ opacity: 1, y: 0 }}
-                                 transition={{ duration: 0.2, ease: "easeOut" }}
-                               >
-                                 <div className="text-center sm:hidden mb-0.5">
-                                    <span className="text-[11px] font-bold text-textSecondary uppercase">Semestre {info.data.numero}</span>
-                                 </div>
-                                 {info.data.cursos.map((c) => renderCurso(c))}
-                               </motion.div>
-                            )}                             {/* SEMESTRE MENCIONES (SIMPLE CARD) */}
-                            {info.tipo === "mencion" && info.opciones && info.opciones[mencionActiva] && (
-                               <motion.div
-                                 className="flex flex-col gap-2 sm:gap-3 w-[min(36rem,calc(100vw-1.25rem))] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none 
-                                            bg-primary/5 
-                                            rounded-2xl p-3 sm:p-5 border border-primary/20 
-                                            shadow-md hover:shadow-lg 
-                                            transition-shadow duration-200 transform-gpu z-10 relative"
-                                 initial={{ opacity: 0, y: 8 }}
-                                 animate={{ opacity: 1, y: 0 }}
-                                 transition={{ duration: 0.2, ease: "easeOut" }}
-                               >
-                                  {/* Header especialidad */}
-                                  <div className="flex flex-col mb-0.5 max-sm:pb-2 pb-3 border-b border-primary/20">
-                                     <div className="flex justify-between items-center gap-1 mb-0.5">
-                                       <span className="text-[10px] font-bold tracking-wider text-primary truncate">
-                                          ESPECIALIDAD
-                                       </span>
-                                       <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full opacity-90 shrink-0 max-w-[45%] truncate">
-                                         {info.opciones[mencionActiva].nombreMencion}
-                                       </span>
-                                     </div>
-                                     <div className="text-center sm:hidden mt-1">
-                                        <span className="text-[11px] font-bold text-textSecondary uppercase">Semestre {info.opciones[mencionActiva].numero}</span>
-                                     </div>
-                                  </div>
-
-                                  {info.opciones[mencionActiva].cursos.map((c) => renderCurso(c))}
-                               </motion.div>
-                            )}
-                          </Fragment>
-                        )
-                    )}
-                  </div>
-                </motion.div>
-              );
-            }
-          )}
-            </AnimatePresence>
-          </div>
+                    <div className="flex gap-4 sm:gap-8">
+                      {[
+                        { info: semAInfo, show: showA, num: i * 2 + 1 },
+                        { info: semBInfo, show: showB, num: i * 2 + 2 }
+                      ].map(
+                        ({ info, show, num }) =>
+                          show && info && renderSemestreCard(info, num, false)
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              }
+            )}
+              </AnimatePresence>
+            </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

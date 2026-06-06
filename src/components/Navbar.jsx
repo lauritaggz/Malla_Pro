@@ -103,19 +103,18 @@ export default function Navbar({
         ${mostrarResumen ? "opacity-0 pointer-events-none -translate-y-full" : "opacity-100 translate-y-0"}
       `}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 h-12 sm:h-14 flex items-center gap-2 sm:gap-4">
 
         {/* ── Left: Brand ─────────────────────────────────────── */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          {/* App icon */}
-          <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex-shrink-0 flex items-center justify-center"
             style={{ background: "var(--primary)" }}>
-            <BookMarked className="w-3.5 h-3.5 text-white" />
+            <BookMarked className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
           </div>
 
           {mallaSeleccionada ? (
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="font-semibold text-sm text-textPrimary truncate leading-tight">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-semibold text-xs sm:text-sm text-textPrimary truncate leading-tight max-w-[calc(100vw-5rem)] sm:max-w-none">
                 {mallaSeleccionada.nombre}
               </span>
               <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-primaryMuted text-primary border border-primary/20 flex-shrink-0">
@@ -128,8 +127,8 @@ export default function Navbar({
           )}
         </div>
 
-        {/* ── Right: Controls ─────────────────────────────────── */}
-        <div className="flex items-center gap-1">
+        {/* ── Right: Controls (desktop/tablet) ─────────────────── */}
+        <div className="hidden sm:flex items-center gap-1">
 
           {/* Marcar hasta semestre */}
           {mallaSeleccionada && cantidadSemestres > 0 && (
