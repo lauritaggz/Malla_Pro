@@ -214,6 +214,7 @@ const MallaViewer = ({
   useEffect(() => {
     if (mencionActiva && malla) {
       localStorage.setItem(`malla-mencion-${malla.nombre}`, mencionActiva);
+      window.dispatchEvent(new CustomEvent("malla-progress-changed"));
     }
   }, [mencionActiva, malla]);
 
@@ -247,6 +248,9 @@ const MallaViewer = ({
     onAprobadosChange?.(aprobados);
     onExcepcionesChange?.(excepciones);
     onCursandoArrayChange?.(cursando);
+
+    // Avisar a Programación Académica (y otras vistas) sin re-parsear PDF
+    window.dispatchEvent(new CustomEvent("malla-progress-changed"));
   }, [
     aprobados,
     excepciones,

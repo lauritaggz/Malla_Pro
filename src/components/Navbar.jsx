@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   GraduationCap, Moon, Sun, FileText, HelpCircle,
-  CalendarDays, ChevronDown, BookMarked, Heart, MessageCircle,
+  CalendarDays, ChevronDown, BookMarked, Heart, MessageCircle, CalendarRange,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -113,14 +114,45 @@ export default function Navbar({
           </div>
 
           {mallaSeleccionada ? (
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-semibold text-xs sm:text-sm text-textPrimary truncate leading-tight max-w-[calc(100vw-5rem)] sm:max-w-none">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 min-w-0">
+              <span className="font-semibold text-xs sm:text-sm text-textPrimary truncate leading-tight max-w-[calc(100vw-8rem)] sm:max-w-none">
                 {mallaSeleccionada.nombre}
               </span>
-              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-primaryMuted text-primary border border-primary/20 flex-shrink-0">
-                <GraduationCap className="w-3 h-3" />
-                {uni}
-              </span>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-primaryMuted text-primary border border-primary/20 flex-shrink-0">
+                  <GraduationCap className="w-3 h-3" />
+                  {uni}
+                </span>
+
+                {/* Botón Toma de Ramos */}
+                <Link
+                  to="/programacion-academica"
+                  aria-label="Toma de Ramos"
+                  title="Toma de Ramos"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-semibold bg-bgPrimary text-textSecondary border border-borderColor hover:text-textPrimary hover:bg-borderColor/40 transition-colors"
+                >
+                  <CalendarRange className="w-3.5 h-3.5 text-textSecondary" />
+                  <span className="hidden sm:inline">Toma de Ramos</span>
+                </Link>
+
+                {/* Botón Tutorías */}
+                {setVistaPrincipal && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVistaPrincipal(vistaPrincipal === "malla" ? "tutorias" : "malla")
+                    }
+                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                  >
+                    {vistaPrincipal === "malla" ? (
+                      <MessageCircle className="w-3.5 h-3.5 text-primary" />
+                    ) : (
+                      <BookMarked className="w-3.5 h-3.5 text-primary" />
+                    )}
+                    <span className="hidden sm:inline">{vistaPrincipal === "malla" ? "Tutorías" : "Mi malla"}</span>
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <span className="font-semibold text-sm text-textPrimary">Malla Pro</span>
@@ -227,39 +259,6 @@ export default function Navbar({
           <NavBtn onClick={() => setDarkMode(!darkMode)} label="Alternar modo oscuro">
             {darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </NavBtn>
-
-          {/* Tutorías Connect — CTA visible (icono + texto en sm+) */}
-          {mallaSeleccionada && setVistaPrincipal && (
-            <motion.button
-              type="button"
-              layout
-              onClick={() =>
-                setVistaPrincipal(vistaPrincipal === "malla" ? "tutorias" : "malla")
-              }
-              aria-label={
-                vistaPrincipal === "malla"
-                  ? "Abrir Tutorías Connect"
-                  : "Volver a la malla curricular"
-              }
-              className={`
-                flex h-9 sm:h-8 shrink-0 items-center gap-1.5 rounded-xl sm:rounded-lg px-2.5 sm:pl-2 sm:pr-2.5
-                text-xs font-bold tracking-tight transition-all duration-200 border-2 shadow-sm
-                ${vistaPrincipal === "tutorias"
-                  ? "border-primary bg-primary text-white shadow-md shadow-primary/30"
-                  : "border-primary/50 bg-primary/12 text-primary hover:bg-primary/20 hover:border-primary/70 dark:bg-primary/18 dark:hover:bg-primary/28"}
-              `}
-              whileTap={{ scale: 0.97 }}
-            >
-              {vistaPrincipal === "malla" ? (
-                <MessageCircle className="w-4 h-4 sm:w-[17px] sm:h-[17px] shrink-0" strokeWidth={2.25} />
-              ) : (
-                <BookMarked className="w-4 h-4 sm:w-[17px] sm:h-[17px] shrink-0" strokeWidth={2.25} />
-              )}
-              <span className="hidden sm:inline max-w-[7.5rem] truncate">
-                {vistaPrincipal === "malla" ? "Tutorías" : "Mi malla"}
-              </span>
-            </motion.button>
-          )}
 
           {/* Horario */}
           {mallaSeleccionada && (

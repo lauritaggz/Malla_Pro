@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle, CalendarDays, Heart, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle, CalendarDays, Heart, MessageCircle, CalendarRange } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function MobileBottomNav({
@@ -100,6 +101,19 @@ export default function MobileBottomNav({
                 <CalendarDays className="w-5 h-5" />
                 Horario
               </button>
+            </div>
+
+            {/* Programación académica */}
+            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
+              <Link
+                to="/programacion-academica"
+                onClick={() => setShowMore(false)}
+                className="w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm
+                           bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15"
+              >
+                <CalendarRange className="w-5 h-5" />
+                Programación Académica
+              </Link>
             </div>
 
             {/* Enviar malla */}

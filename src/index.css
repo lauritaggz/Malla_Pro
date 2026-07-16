@@ -697,3 +697,88 @@ body {
     );
   }
 }
+
+/* ================================================================
+   Malla Pro — Animations & Transitions (UI/UX Improvement)
+   ================================================================ */
+
+/* Accordion Grid Animation */
+.accordion-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    grid-template-rows 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.accordion-grid[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.accordion-content {
+  overflow: hidden;
+}
+
+.accordion-chevron {
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-open="true"] .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+/* Popover & Filter Drawer animations */
+.popover-animate {
+  animation: popoverFadeIn 200ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Button & Active scaling */
+.btn-interactive {
+  transition: all 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.btn-interactive:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn-interactive:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .accordion-grid,
+  .accordion-chevron,
+  .popover-animate,
+  .btn-interactive {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .accordion-grid {
+    grid-template-rows: 1fr !important;
+    opacity: 1 !important;
+  }
+  [data-open="true"] .accordion-chevron {
+    transform: rotate(180deg) !important;
+  }
+  .accordion-grid[data-open="false"] {
+    grid-template-rows: 0fr !important;
+    opacity: 0 !important;
+  }
+}

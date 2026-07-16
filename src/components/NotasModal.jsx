@@ -514,10 +514,6 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                         <tbody className="divide-y divide-borderColor/50">
                           {evaluaciones.map((evaluacion) => {
                             const tieneSubNotas = evaluacion.subNotas && evaluacion.subNotas.length > 0;
-                            const promedioSub =
-                              tieneSubNotas && typeof evaluacion.nota === "number"
-                                ? evaluacion.nota.toFixed(2)
-                                : null;
 
                             return (
                               <React.Fragment key={evaluacion.id}>

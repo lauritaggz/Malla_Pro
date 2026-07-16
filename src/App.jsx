@@ -11,9 +11,9 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import TutorModule from "./components/tutors/TutorModule";
 import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
-import LoginSuggestion, { shouldShowLogin, getStoredUser } from "./components/LoginSuggestion";
+import LoginSuggestion, { getStoredUser } from "./components/LoginSuggestion";
 import { trackOpenNotas, trackSelectMalla, inferUniversidadFromUrl } from "./utils/analytics";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 
 function readMallaSeleccionadaFromStorage() {
@@ -71,7 +71,7 @@ export default function App() {
   const [mostrarHorario, setMostrarHorario] = useState(false);
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [mostrarLogin, setMostrarLogin] = useState(false);
-  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+  const [, setCurrentUser] = useState(() => getStoredUser());
   const [vistaPrincipal, setVistaPrincipal] = useState("malla");
 
   // Detectar si es dispositivo touch
