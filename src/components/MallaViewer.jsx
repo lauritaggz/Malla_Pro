@@ -522,6 +522,18 @@ const MallaViewer = ({
 
   const stats = getStats();
 
+  const isSemestreCompletado = (info) => {
+    if (!info) return true;
+    if (info.tipo === "comun") {
+      if (!info.data?.cursos.length) return true;
+      return info.data.cursos.every((c) => aprobados.includes(c.id));
+    } else {
+      const dataMencion = info.opciones[mencionActiva];
+      if (!dataMencion?.cursos?.length) return true;
+      return dataMencion.cursos.every((c) => aprobados.includes(c.id));
+    }
+  };
+
   const getSemestreInfo = (num) => {
     if (!malla) return null;
     if (!malla.isMencion) {
