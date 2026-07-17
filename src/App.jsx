@@ -17,6 +17,7 @@ import { AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import AcademicProgrammingPage from "./features/academicProgramming/components/AcademicProgrammingPage";
+import PeriodoActualView from "./components/PeriodoActualView";
 
 function readMallaSeleccionadaFromStorage() {
   const raw = safeJsonParse(localStorage.getItem("malla-seleccionada"), null);
@@ -228,6 +229,7 @@ export default function App() {
           onShowTour={() => setMostrarTour(true)}
           onShowHorario={() => setMostrarHorario(true)}
           onShowContacto={() => setMostrarContacto(true)}
+          onChangeMalla={handleCambiarMalla}
           mostrarResumen={mostrarResumen}
           vistaPrincipal={vistaPrincipal}
           setVistaPrincipal={setVistaPrincipal}
@@ -236,22 +238,6 @@ export default function App() {
 
       {mallaSeleccionada && (
         <MobileBottomNav
-          theme={theme}
-          setTheme={setTheme}
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-          modoExcepcional={modoExcepcional}
-          setModoExcepcional={setModoExcepcional}
-          excepcionesActivas={excepcionesActivas}
-          cantidadSemestres={cantidadSemestres}
-          onVerProgreso={handleVerProgresoNav}
-          mostrarResumen={mostrarResumen}
-          ocultarCompletados={ocultarCompletados}
-          setOcultarCompletados={setOcultarCompletados}
-          onShowTour={() => setMostrarTour(true)}
-          onShowHorario={() => setMostrarHorario(true)}
-          onShowContacto={() => setMostrarContacto(true)}
-          onChangeMalla={handleCambiarMalla}
           vistaPrincipal={vistaPrincipal}
           setVistaPrincipal={setVistaPrincipal}
         />
@@ -340,6 +326,34 @@ export default function App() {
         ) : vistaPrincipal === "toma-de-ramos" ? (
           <main className="flex flex-col flex-1 min-h-0 sm:max-w-7xl sm:mx-auto sm:w-full">
             <AcademicProgrammingPage isEmbedded={true} />
+          </main>
+        ) : vistaPrincipal === "periodo-actual" ? (
+          <main className="flex flex-col flex-1 min-h-0 sm:max-w-7xl sm:mx-auto sm:w-full">
+            <PeriodoActualView
+              cursando={cursando}
+              aprobados={aprobados}
+              excepciones={excepciones}
+              setCursando={setCursando}
+              setAprobados={setAprobados}
+              setExcepciones={setExcepciones}
+              getCursoById={(id) => {
+                if (!mallaData) return null;
+                const semestresEfectivos = mallaData.isMencion
+                  ? [
+                      ...(mallaData.semestresComunes || []),
+                      ...Object.values(mallaData.menciones || {}).flatMap((m) => m.semestres || []),
+                    ]
+                  : mallaData.semestres || [];
+                for (const sem of semestresEfectivos) {
+                  const found = sem.cursos.find((c) => c.id === id);
+                  if (found) return found;
+                }
+                return null;
+              }}
+              onAbrirNotas={(c) => handleAbrirNotas(c, true, aprobados.includes(c.id))}
+              modoExcepcional={modoExcepcional}
+              mallaData={mallaData}
+            />
           </main>
         ) : vistaPrincipal === "tutorias" ? (
           <main>

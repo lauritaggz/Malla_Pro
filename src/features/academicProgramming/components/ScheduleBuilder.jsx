@@ -286,6 +286,12 @@ export default function ScheduleBuilder({
         courseCode: s.courseCode,
         sectionId: s.id,
         nrc: s.nrc,
+        subjectName: s.subjectName || s.courseTitle,
+        teacher: s.teacher || s.professors,
+        modality: s.modality,
+        meetings: s.meetings,
+        scheduleSummary: s.scheduleSummary,
+        campus: s.campus,
       })),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -333,8 +339,47 @@ export default function ScheduleBuilder({
       .map((m) => m.dayCode)
   );
 
+  const step = proposalSaved ? 4 : selectedSectionsList.length > 0 ? 3 : 2;
+
   return (
     <div className="space-y-6">
+      {/* Stepper Progress Bar */}
+      <div className="max-w-xl mx-auto mb-8 px-4 select-none">
+        <div className="flex items-center justify-between relative">
+          <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-borderColor/60 -translate-y-1/2 z-0" />
+          <div 
+            className="absolute top-1/2 left-4 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-300"
+            style={{ width: `${((step - 1) / 3) * 100}%` }}
+          />
+          {[
+            { num: 1, label: "Cargar PDF" },
+            { num: 2, label: "Elegir Ramos" },
+            { num: 3, label: "Armar Horario" },
+            { num: 4, label: "Confirmar" },
+          ].map((s) => {
+            const isCompleted = step > s.num || s.num === 1;
+            const isActive = step === s.num;
+            return (
+              <div key={s.num} className="flex flex-col items-center gap-1.5 relative z-10">
+                <div 
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border
+                    ${isCompleted
+                      ? "bg-primary border-primary text-white"
+                      : isActive
+                      ? "bg-bgSecondary border-primary text-primary ring-4 ring-primary/10"
+                      : "bg-bgSecondary border-borderColor text-textSecondary"}`}
+                >
+                  {isCompleted ? "✓" : s.num}
+                </div>
+                <span className={`text-[10px] font-bold ${isActive ? "text-primary font-extrabold" : "text-textSecondary"}`}>
+                  {s.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* 1. Encabezado Compacto */}
       <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 pb-3 border-b border-borderColor select-none">
         <div className="space-y-1">

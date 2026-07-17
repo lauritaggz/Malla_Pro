@@ -1,21 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
-import { NotebookPen } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Lock, CheckCircle2, Circle } from "lucide-react";
 
 const Curso = ({
   curso,
   aprobado,
   excepcional,
   disponible,
-  modoExcepcional,
-  aprobar,
-  marcarExcepcional,
   enCurso,
-  toggleCursando,
-  onAbrirNotas,
+  onSelect,
+  highlightStatus = "normal",
 }) => {
-  const [shake, setShake] = useState(false);
   const [promedio, setPromedio] = useState(null);
-  
+
   useEffect(() => {
     const actualizarPromedio = () => {
       try {
@@ -33,150 +29,101 @@ const Curso = ({
         setPromedio(null);
       }
     };
-    
+
     actualizarPromedio();
     window.addEventListener("notasModificadas", actualizarPromedio);
     return () => window.removeEventListener("notasModificadas", actualizarPromedio);
   }, [curso.id]);
-  
-  const timerRef = useRef(null);
-  const isLongPressRef = useRef(false);
 
-  const startPressTimer = () => {
-    isLongPressRef.current = false;
-    if (!disponible && !modoExcepcional && !enCurso) return;
-    
-    timerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      if (window.navigator?.vibrate) {
-        window.navigator.vibrate(50);
-      }
-      toggleCursando();
-    }, 500);
-  };
+  let cardStatusClass = "curso-card-disponible";
+  let statusBadge = null;
 
-  const clearPressTimer = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  };
+  if (aprobado) {
+    cardStatusClass = "curso-card-aprobado";
+    statusBadge = (
+      <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+        <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+        <span>Aprobada</span>
+      </div>
+    );
+  } else if (excepcional) {
+    cardStatusClass = "curso-card-excepcional";
+    statusBadge = (
+      <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-500">
+        <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+        <span>Forzada</span>
+      </div>
+    );
+  } else if (enCurso) {
+    cardStatusClass = "curso-card-encurso";
+    statusBadge = (
+      <div className="flex items-center gap-1 text-[10px] font-bold text-primary">
+        <Circle className="w-2.5 h-2.5 fill-primary/30 flex-shrink-0" />
+        <span>Cursando</span>
+      </div>
+    );
+  } else if (!disponible) {
+    cardStatusClass = "curso-card-bloqueado";
+    statusBadge = (
+      <div className="flex items-center gap-1 text-[10px] font-semibold text-textSecondary/70">
+        <Lock className="w-3 h-3 flex-shrink-0" />
+        <span>Bloqueada</span>
+      </div>
+    );
+  } else {
+    cardStatusClass = "curso-card-disponible border-dashed border-borderColor/80";
+    statusBadge = (
+      <div className="text-[10px] font-semibold text-textSecondary">
+        <span>Disponible</span>
+      </div>
+    );
+  }
 
-  const handleClick = (e) => {
-    if (isLongPressRef.current) return;
-    if (!disponible && !modoExcepcional) {
-      if (e.ctrlKey && enCurso) {
-        toggleCursando();
-        return;
-      }
-      setShake(true);
-      setTimeout(() => setShake(false), 400);
-      return;
-    }
-
-    if (e.ctrlKey) {
-      toggleCursando();
-      return;
-    }
-
-    if (modoExcepcional) {
-      marcarExcepcional();
-      return;
-    }
-
-    aprobar();
-  };
-
-  const hasTopRightBadge = promedio !== null;
+  let highlightStyles = "";
+  if (highlightStatus === "fade") {
+    highlightStyles = "opacity-30 pointer-events-none scale-[0.98] blur-[0.2px] saturate-50";
+  } else if (highlightStatus === "selected") {
+    highlightStyles = "ring-2 ring-primary ring-offset-2 ring-offset-bgPrimary scale-[1.02] shadow-md z-30";
+  } else if (highlightStatus === "prereq") {
+    highlightStyles = "ring-2 ring-amber-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+  } else if (highlightStatus === "unlock") {
+    highlightStyles = "ring-2 ring-emerald-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+  }
 
   return (
-    <div
-      onClick={handleClick}
-      onPointerDown={startPressTimer}
-      onPointerUp={clearPressTimer}
-      onPointerLeave={clearPressTimer}
-      onPointerCancel={clearPressTimer}
-      className={`mobile-course-card relative cursor-pointer select-none p-3 text-[13px] rounded-2xl border shadow-sm text-left group
-        transition-[background-color,border-color,opacity,transform] duration-200 ease-out
-        max-sm:pb-9
-        ${shake ? "shake" : ""}
-        ${
-          aprobado
-            ? "curso-aprobado text-white border-emerald-400/50 shadow-md"
-            : excepcional
-            ? "curso-excepcional text-white border-amber-400/50 shadow-md"
-            : enCurso
-            ? "curso-encurso text-white border-primary shadow-md encurso-glow"
-            : !disponible
-            ? "bg-bgSecondary/50 text-textSecondary opacity-70 border-dashed border-borderColor/80"
-            : "curso-disponible text-textPrimary border-borderColor hover:border-primary/40"
-        }
+    <button
+      onClick={() => onSelect(curso)}
+      className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-primary/45
+        ${cardStatusClass} ${highlightStyles}
       `}
       style={{
         backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden",
         transform: "translateZ(0)",
         contain: "layout"
       }}
     >
+      {/* Average score badge */}
       {promedio !== null && (
         <div 
-          className={`absolute top-2 right-2 max-sm:top-1.5 max-sm:right-8 px-1.5 py-0.5 text-[10px] max-sm:text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[30px] max-sm:min-w-[26px] shadow-sm transition-all
-            ${
-              aprobado || excepcional || enCurso
-                ? "bg-white/20 border-white/30 text-white"
-                : "bg-primary/15 border-primary/30 text-primary"
-            }`}
+          className="absolute top-2.5 right-2.5 px-1.5 py-0.5 text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[26px] bg-white/10 dark:bg-white/5 border-borderColor/40 text-textPrimary shadow-sm"
         >
           {promedio.toFixed(1)}
         </div>
       )}
 
-      <div className={`mobile-course-name font-semibold leading-tight mb-1.5 line-clamp-2 ${hasTopRightBadge ? "max-sm:pr-14 sm:pr-8" : "max-sm:pr-9"}`}>
+      {/* Course Name */}
+      <div className="font-semibold text-textPrimary text-xs sm:text-[13px] leading-tight line-clamp-2 pr-8 mb-1.5">
         {curso.nombre}
       </div>
 
-      <div className="mobile-course-meta text-[10.5px] font-medium opacity-75">
-        <span>{curso.codigo}</span>
-        <span className="opacity-50 mx-1">·</span>
-        <span>{curso.sct} SCT</span>
+      {/* Meta details & status */}
+      <div className="flex items-center justify-between gap-2 mt-auto w-full select-none">
+        <div className="text-[10px] font-medium text-textSecondary leading-none">
+          {curso.codigo} · {curso.sct || 0} SCT
+        </div>
+        {statusBadge}
       </div>
-
-      {/* Desktop: botón Notas completo */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onAbrirNotas(curso);
-        }}
-        aria-label="Notas"
-        className={`hidden sm:flex mt-2 w-full py-1.5 rounded-lg items-center justify-center gap-1.5 transition-all text-[11px] font-medium border
-          ${
-            enCurso || aprobado || excepcional
-              ? "bg-black/15 hover:bg-black/25 text-white border-white/20"
-              : "bg-bgPrimary/50 hover:bg-primary/10 text-textSecondary hover:text-primary border-borderColor/30 hover:border-primary/30"
-          }
-        `}
-      >
-        <NotebookPen className="w-3.5 h-3.5" /> Notas
-      </button>
-
-      {/* Mobile: ícono compacto */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onAbrirNotas(curso);
-        }}
-        aria-label="Notas"
-        className={`mobile-notes-button sm:hidden
-          ${
-            enCurso || aprobado || excepcional
-              ? "!bg-black/15 !border-white/20 !text-white"
-              : ""
-          }`}
-      >
-        <NotebookPen />
-      </button>
-    </div>
+    </button>
   );
 };
 
@@ -186,7 +133,7 @@ export default React.memo(Curso, (prevProps, nextProps) => {
     prevProps.aprobado === nextProps.aprobado &&
     prevProps.excepcional === nextProps.excepcional &&
     prevProps.disponible === nextProps.disponible &&
-    prevProps.modoExcepcional === nextProps.modoExcepcional &&
-    prevProps.enCurso === nextProps.enCurso
+    prevProps.enCurso === nextProps.enCurso &&
+    prevProps.highlightStatus === nextProps.highlightStatus
   );
 });

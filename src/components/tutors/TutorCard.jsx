@@ -9,11 +9,11 @@ function StarsRow({ value, max = 5 }) {
       {Array.from({ length: max }).map((_, i) => (
         <Star
           key={i}
-          className={`w-3.5 h-3.5 ${i < full ? "text-amber-400 fill-amber-400" : "text-textSecondary/40"}`}
+          className={`w-3.5 h-3.5 ${i < full ? "text-amber-500 fill-amber-500" : "text-textSecondary/40"}`}
         />
       ))}
-      <span className="text-[11px] text-textSecondary ml-1 font-medium">
-        {value > 0 ? value.toFixed(1) : "Sin evaluar"}
+      <span className="text-[11px] text-textSecondary ml-1.5 font-bold">
+        {value > 0 ? value.toFixed(1) : "—"}
       </span>
     </div>
   );
@@ -37,72 +37,76 @@ export default function TutorCard({ tutor, filterSubject, onSimulateComplete }) 
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.2 }}
-      className="rounded-2xl border border-borderColor/80 bg-bgSecondary/90 p-4 shadow-sm"
+      className="rounded-2xl border border-borderColor bg-bgSecondary p-5 flex flex-col gap-4 text-left hover:border-primary/35 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h3 className="font-semibold text-textPrimary text-sm leading-tight">{tutor.nombre}</h3>
-          <p className="text-[10px] text-textSecondary mt-0.5">
-            {tutor.disponible ? "Disponible" : "No disponible ahora"}
-          </p>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col">
+          <h3 className="font-bold text-textPrimary text-sm leading-snug">{tutor.nombre}</h3>
+          <span className="text-[10px] text-textSecondary mt-1 uppercase font-semibold">
+            {tutor.disponible ? "Disponible" : "No disponible"}
+          </span>
         </div>
         {!tutor.disponible && (
-          <span className="text-[9px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-textSecondary/15 text-textSecondary">
+          <span className="text-[9px] uppercase tracking-wide font-extrabold px-2 py-0.5 rounded-md bg-textSecondary/15 text-textSecondary select-none">
             Pausado
           </span>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mt-2">
+      {/* Asignaturas */}
+      <div className="flex flex-wrap gap-1.5 py-1">
         {(tutor.asignaturas || []).map((a) => (
           <span
             key={a}
-            className="text-[10px] px-2 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20"
+            className="text-[9.5px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20"
           >
             {a}
           </span>
         ))}
       </div>
 
-      <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
+      {/* Ratings & Price */}
+      <div className="flex items-center justify-between gap-2 select-none border-t border-borderColor/40 pt-3">
         <StarsRow value={avg} />
         {tutor.precioPorSesion != null && tutor.precioPorSesion > 0 ? (
-          <span className="text-[11px] font-semibold text-textPrimary">
+          <span className="text-xs font-bold text-textPrimary">
             ${Number(tutor.precioPorSesion).toLocaleString("es-CL")} / sesión
           </span>
         ) : (
-          <span className="text-[10px] text-textSecondary">Precio a convenir</span>
+          <span className="text-xs text-textSecondary italic">Precio a convenir</span>
         )}
       </div>
 
-      <div className="mt-3 flex flex-col gap-2">
+      {/* Action buttons */}
+      <div className="flex flex-col gap-2 mt-2 w-full">
         {wa ? (
           <a
             href={wa}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors"
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-colors"
           >
-            <MessageCircle className="w-4 h-4" />
-            Solicitar tutoría
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>Solicitar tutoría</span>
           </a>
         ) : (
           <button
             type="button"
             disabled
-            className="flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-textSecondary/20 text-textSecondary text-xs font-semibold cursor-not-allowed"
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-textSecondary/20 text-textSecondary text-xs font-semibold cursor-not-allowed"
           >
-            <MessageCircle className="w-4 h-4" />
-            No disponible para contacto
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>No disponible</span>
           </button>
         )}
         <button
           type="button"
           onClick={() => onSimulateComplete(tutor)}
-          className="flex items-center justify-center gap-2 w-full py-2 rounded-xl border border-borderColor bg-bgPrimary/60 hover:bg-primary/10 text-textSecondary hover:text-primary text-xs font-medium transition-colors"
+          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl border border-borderColor bg-bgPrimary/30 hover:bg-primary/10 text-textSecondary hover:text-primary text-xs font-bold transition-all"
         >
-          <Star className="w-4 h-4" />
-          Simular tutoría realizada (evaluar)
+          <Star className="w-3.5 h-3.5" />
+          <span>Evaluar tutor</span>
         </button>
       </div>
     </motion.article>

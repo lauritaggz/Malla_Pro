@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
-import { Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X } from "lucide-react";
+import { Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X, AlertTriangle } from "lucide-react";
 import Curso from "./Curso";
+import CourseDrawer from "./CourseDrawer";
 import {
   trackFullscreenMalla,
-  trackMallaView,
   trackToggleCursoEstado,
 } from "../utils/analytics";
 
@@ -28,20 +28,21 @@ const MallaViewer = ({
   const [mencionActiva, setMencionActiva] = useState(null);
 
   const [aprobados, setAprobados] = useState(
-    JSON.parse(localStorage.getItem("malla-aprobados")) || []
+    () => JSON.parse(localStorage.getItem("malla-aprobados")) || []
   );
   const [excepciones, setExcepciones] = useState(
-    JSON.parse(localStorage.getItem("malla-excepciones")) || []
+    () => JSON.parse(localStorage.getItem("malla-excepciones")) || []
   );
   const [cursando, setCursando] = useState(
-    JSON.parse(localStorage.getItem("malla-cursando")) || []
+    () => JSON.parse(localStorage.getItem("malla-cursando")) || []
   );
 
-  // 🔹 Ref y estados para drag horizontal
+  const [selectedCurso, setSelectedCurso] = useState(null);
+
+  // Ref y estados para drag horizontal
   const scrollRef = useRef(null);
   const controlsRef = useRef(null);
   const fullscreenShellRef = useRef(null);
-  const lastTrackedMallaRef = useRef(null);
   const dragMovedRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [fullscreenMalla, setFullscreenMalla] = useState(false);
@@ -120,7 +121,7 @@ const MallaViewer = ({
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, [mallaSeleccionada]);
 
-  // ✅ Cargar malla seleccionada
+  // Cargar malla seleccionada
   useEffect(() => {
     if (!mallaSeleccionada?.url) return;
 
@@ -148,77 +149,38 @@ const MallaViewer = ({
         setMalla(mallaData);
 
         // Inicializar mención activa si aplica
-        if (isMencion) {
-          const savedMencion = localStorage.getItem(`malla-mencion-${data.carrera}`);
-          if (savedMencion && mencionesDisponibles.some(m => m.codigo === savedMencion)) {
-            setMencionActiva(savedMencion);
-          } else if (mencionesDisponibles.length > 0) {
+        if (isMencion && mencionesDisponibles.length > 0) {
+          const storedMencion = localStorage.getItem(`malla-mencion-${mallaData.nombre}`);
+          if (storedMencion && mencionesDisponibles.some(m => m.codigo === storedMencion)) {
+            setMencionActiva(storedMencion);
+          } else {
             setMencionActiva(mencionesDisponibles[0].codigo);
           }
-        } else {
-          setMencionActiva(null);
         }
-
-        onSemestresLoaded?.(totalSemestres);
-        onMallaDataLoaded?.(mallaData);
-
-        // Auto-aprobar ramos conservados de la malla anterior al cambiar
-        const conservadosJson = localStorage.getItem("malla-nombres-conservados");
-        if (conservadosJson) {
-          const nombresConservados = JSON.parse(conservadosJson);
-          const idsAprobados = [];
-          
-          const checkCurso = (curso) => {
-            if (nombresConservados.includes(curso.nombre.trim().toLowerCase())) {
-              idsAprobados.push(curso.id);
-            }
-          };
-
-          if (isMencion) {
-            mallaData.semestresComunes.forEach(sem => sem.cursos.forEach(checkCurso));
-            Object.values(mallaData.menciones).forEach(m => {
-              m.semestres.forEach(sem => sem.cursos.forEach(checkCurso));
-            });
-          } else {
-            mallaData.semestres.forEach(sem => sem.cursos.forEach(checkCurso));
-          }
-          
-          if (idsAprobados.length > 0) {
-            setAprobados((prev) => {
-              const nuevos = new Set([...prev, ...idsAprobados]);
-              return Array.from(nuevos);
-            });
-          }
-          // Limpiar el guardado temporal para no activarlo accidentalmente en otro momento
-          localStorage.removeItem("malla-nombres-conservados");
-        }
+        
+        onMallaDataLoaded?.(data);
       } catch (err) {
         console.error("Error al cargar malla:", err);
       }
     }
     cargar();
-  }, [mallaSeleccionada, onSemestresLoaded, onMallaDataLoaded]);
+  }, [mallaSeleccionada, onMallaDataLoaded]);
 
-  // GA4: registrar vista de malla (una vez por malla cargada)
+  // Guardar mención activa
   useEffect(() => {
-    if (!malla || !mallaSeleccionada?.url) return;
-
-    const key = mallaSeleccionada.url;
-    if (lastTrackedMallaRef.current === key) return;
-    lastTrackedMallaRef.current = key;
-
-    trackMallaView(mallaSeleccionada, malla);
-  }, [malla, mallaSeleccionada?.url, mallaSeleccionada]);
-
-  // Guardar Mencion Activa
-  useEffect(() => {
-    if (mencionActiva && malla) {
+    if (malla && mencionActiva) {
       localStorage.setItem(`malla-mencion-${malla.nombre}`, mencionActiva);
-      window.dispatchEvent(new CustomEvent("malla-progress-changed"));
     }
   }, [mencionActiva, malla]);
 
-  // ✅ Persistencia del Scroll
+  // Notificar semestres cargados
+  useEffect(() => {
+    if (malla && onSemestresLoaded) {
+      onSemestresLoaded(malla.totalSemestres);
+    }
+  }, [malla, onSemestresLoaded]);
+
+  // Persistencia del Scroll
   const handleScroll = () => {
     if (scrollRef.current && malla) {
       localStorage.setItem(`malla-scroll-${malla.nombre}`, scrollRef.current.scrollLeft);
@@ -234,22 +196,18 @@ const MallaViewer = ({
     }
   }, [malla]);
 
-  // ✅ Guardar en localStorage
+  // Guardar en localStorage
   useEffect(() => {
     setExcepcionesActivas(excepciones.length);
     localStorage.setItem("malla-aprobados", JSON.stringify(aprobados));
     localStorage.setItem("malla-excepciones", JSON.stringify(excepciones));
     localStorage.setItem("malla-cursando", JSON.stringify(cursando));
 
-    // Notificar cambio en cursos cursando
     onCursandoChange?.(cursando.length);
-
-    // Notificar arrays completos para el dashboard
     onAprobadosChange?.(aprobados);
     onExcepcionesChange?.(excepciones);
     onCursandoArrayChange?.(cursando);
 
-    // Avisar a Programación Académica (y otras vistas) sin re-parsear PDF
     window.dispatchEvent(new CustomEvent("malla-progress-changed"));
   }, [
     aprobados,
@@ -262,7 +220,7 @@ const MallaViewer = ({
     onCursandoArrayChange,
   ]);
 
-  // ✅ Calcular progreso cada vez que cambia el estado
+  // Calcular progreso cada vez que cambia el estado
   useEffect(() => {
     if (!malla || !onTotalCursosChange) return;
 
@@ -289,12 +247,10 @@ const MallaViewer = ({
     }
 
     const aprobadosCount = aprobados.filter((id) => activeIds.has(id)).length;
-
     onTotalCursosChange({ total, aprobados: aprobadosCount });
   }, [malla, aprobados, excepciones, mencionActiva, onTotalCursosChange]);
 
-  // ✅ Obtener todos los hijos (ramos que dependen de este) de forma recursiva
-  const getAllCursos = () => {
+  const getAllCursos = useCallback(() => {
     if (!malla) return [];
     if (!malla.isMencion) {
       return malla.semestres.flatMap((s) => s.cursos);
@@ -303,9 +259,9 @@ const MallaViewer = ({
       m.semestres.flatMap((s) => s.cursos)
     );
     return [...malla.semestresComunes.flatMap((s) => s.cursos), ...fromMenciones];
-  };
+  }, [malla]);
 
-  const getCursoById = (id) => getAllCursos().find((c) => c.id === id);
+  const getCursoById = useCallback((id) => getAllCursos().find((c) => c.id === id), [getAllCursos]);
 
   const getDescendientes = (id, todasLasMallas) => {
     const hijos = todasLasMallas.filter(c => c.prerrequisitos?.includes(id));
@@ -316,7 +272,7 @@ const MallaViewer = ({
     return Array.from(new Set(descendientes));
   };
 
-  // ✅ Aprobar o desmarcar ramo
+  // Aprobar o desmarcar ramo
   const aprobar = (id) => {
     const curso = getCursoById(id);
     const willApprove = !aprobados.includes(id);
@@ -331,7 +287,6 @@ const MallaViewer = ({
       return [...prevAprobados, id];
     });
     
-    // Al aprobar, limpiamos el estado "en curso" si estaba activo
     setCursando((prevCursando) => {
       if (prevCursando.includes(id)) {
         return prevCursando.filter((c) => c !== id);
@@ -340,7 +295,7 @@ const MallaViewer = ({
     });
   };
 
-  // ✅ Marcar / desmarcar como excepcional
+  // Marcar / desmarcar como excepcional
   const marcarExcepcional = (id) => {
     const isRemoving = excepciones.includes(id);
     const curso = getCursoById(id);
@@ -360,14 +315,13 @@ const MallaViewer = ({
       return prev;
     });
 
-    // Si se activa la excepción, quitar "en curso" si existía
     setCursando((prev) => {
       if (!isRemoving && prev.includes(id)) return prev.filter((c) => c !== id);
       return prev;
     });
   };
 
-  // ✅ En curso (Ctrl + clic)
+  // En curso
   const toggleCursando = (id) => {
     const curso = getCursoById(id);
     const willEnable = !cursando.includes(id);
@@ -386,7 +340,7 @@ const MallaViewer = ({
     });
   };
 
-  // ✅ Aprobar hasta semestre (evento global desde Navbar)
+  // Aprobar hasta semestre (evento global desde Navbar)
   const aprobarHastaSemestre = (semestreLimite) => {
     if (!malla) return;
     const nuevosAprobados = [];
@@ -415,28 +369,16 @@ const MallaViewer = ({
     const aprobadosSet = new Set(nuevosAprobados);
     setAprobados([...aprobadosSet]);
     setExcepciones([]);
-    // Todos los que pasan a aprobados dejan de estar "en curso"
     setCursando((prev) => prev.filter((id) => !aprobadosSet.has(id)));
   };
 
-  // ✅ Cumple prerrequisitos
-  const cumplePrereqs = (curso) => {
-    if (!curso.prerrequisitos?.length) return true;
-    return curso.prerrequisitos.every(
-      (pre) => aprobados.includes(pre) || excepciones.includes(pre)
-    );
-  };
-
-  // ✅ Escucha evento global (desde Navbar)
   useEffect(() => {
-    const handler = (e) => {
-      aprobarHastaSemestre(e.detail);
-    };
+    const handler = (e) => aprobarHastaSemestre(e.detail);
     window.addEventListener("aprobarHastaSemestre", handler);
     return () => window.removeEventListener("aprobarHastaSemestre", handler);
-  }, [malla, mencionActiva]); // se agregó a las dependencias por si acaso
+  }, [malla, mencionActiva]);
 
-  // ✅ Drag horizontal tipo Trello
+  // Drag horizontal
   const bind = useDrag(
     ({ first, last, event }) => {
       const el = scrollRef.current;
@@ -453,7 +395,7 @@ const MallaViewer = ({
       }
 
       if (last) {
-        setTimeout(() => setIsDragging(false), 0);
+        setTimeout(() => setIsDragging(false), 20);
       }
     },
     {
@@ -471,7 +413,7 @@ const MallaViewer = ({
     }
   };
 
-  // Desktop: rueda vertical → scroll horizontal animado (sin mezclar scroll de página)
+  // Desktop: rueda vertical → scroll horizontal animado
   useEffect(() => {
     if (isMobileView) return;
 
@@ -523,58 +465,62 @@ const MallaViewer = ({
     };
   }, [isMobileView, malla]);
 
-  // ---------------- Lógica de renderizado ----------------
-  const getSemestreInfo = (num) => {
-    if (!malla) return null;
+  // Cumple prerrequisitos
+  const cumplePrereqs = useCallback((curso) => {
+    if (!curso.prerrequisitos?.length) return true;
+    return curso.prerrequisitos.every(
+      (pre) => aprobados.includes(pre) || excepciones.includes(pre)
+    );
+  }, [aprobados, excepciones]);
+
+  // Path highlight status
+  const getHighlightStatus = (cursoId) => {
+    if (!selectedCurso) return "normal";
+    if (selectedCurso.id === cursoId) return "selected";
+    if (selectedCurso.prerrequisitos?.includes(cursoId)) return "prereq";
+    
+    // Check if immediate unlock
+    const isImmediateUnlock = selectedCurso.id && getCursoById(cursoId)?.prerrequisitos?.includes(selectedCurso.id);
+    if (isImmediateUnlock) return "unlock";
+    
+    return "fade";
+  };
+
+  const getStats = () => {
+    if (!malla) return { total: 0, aprobados: 0, cursando: 0, pendientes: 0, pct: 0 };
+    
+    const activeIds = new Set();
     if (!malla.isMencion) {
-      return { tipo: "comun", data: malla.semestres.find(s => s.numero === num) };
+      malla.semestres.forEach((sem) => {
+        sem.cursos.forEach((c) => activeIds.add(c.id));
+      });
+    } else {
+      malla.semestresComunes.forEach((sem) => {
+        sem.cursos.forEach((c) => activeIds.add(c.id));
+      });
+      if (mencionActiva && malla.menciones[mencionActiva]) {
+        malla.menciones[mencionActiva].semestres.forEach((sem) => {
+          sem.cursos.forEach((c) => activeIds.add(c.id));
+        });
+      }
     }
     
-    // Buscar en comunes
-    const comun = malla.semestresComunes.find(s => s.numero === num);
-    if (comun) return { tipo: "comun", data: comun };
-
-    // Buscar en menciones
-    const opciones = {};
-    let hasData = false;
-    malla.mencionesDisponibles.forEach(m => {
-      const semMencion = malla.menciones[m.codigo]?.semestres?.find(s => s.numero === num);
-      if (semMencion) {
-        opciones[m.codigo] = { ...semMencion, nombreMencion: m.nombre };
-        hasData = true;
-      }
-    });
-
-    return hasData ? { tipo: "mencion", opciones } : { tipo: "comun", data: null };
+    const total = activeIds.size;
+    const aprobadosCount = aprobados.filter((id) => activeIds.has(id)).length;
+    const cursandoCount = cursando.filter((id) => activeIds.has(id)).length;
+    const pendientesCount = total - aprobadosCount - cursandoCount;
+    const pct = total > 0 ? Math.round((aprobadosCount / total) * 100) : 0;
+    
+    return {
+      total,
+      aprobados: aprobadosCount,
+      cursando: cursandoCount,
+      pendientes: pendientesCount,
+      pct
+    };
   };
 
-  const isSemestreCompletado = (info) => {
-    if (!info) return true;
-    if (info.tipo === "comun") {
-      if (!info.data?.cursos.length) return true;
-      return info.data.cursos.every((c) => aprobados.includes(c.id));
-    } else {
-      const dataMencion = info.opciones[mencionActiva];
-      if (!dataMencion?.cursos?.length) return true;
-      return dataMencion.cursos.every((c) => aprobados.includes(c.id));
-    }
-  };
-
-  const renderCurso = (curso) => (
-    <Curso
-      key={curso.id}
-      curso={curso}
-      aprobado={aprobados.includes(curso.id)}
-      excepcional={excepciones.includes(curso.id)}
-      disponible={cumplePrereqs(curso)}
-      modoExcepcional={modoExcepcional}
-      aprobar={() => aprobar(curso.id)}
-      marcarExcepcional={() => marcarExcepcional(curso.id)}
-      enCurso={cursando.includes(curso.id)}
-      toggleCursando={() => toggleCursando(curso.id)}
-      onAbrirNotas={(c) => onAbrirNotas(c, cursando.includes(c.id), aprobados.includes(c.id))}
-    />
-  );
+  const stats = getStats();
 
   const getVisibleSemesters = () => {
     const list = [];
@@ -590,87 +536,59 @@ const MallaViewer = ({
   };
 
   const renderSemestreCard = (info, semNumero, mobile = false) => {
+    let cursosList = [];
+    let labelExtra = "";
+
     if (info.tipo === "comun" && info.data) {
-      return (
-        <motion.div
-          key={`sem-${semNumero}`}
-          className={
-            mobile
-              ? "mobile-semester-card"
-              : `flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none
-                 bg-bgSecondary/70 rounded-2xl p-4 sm:p-5 border border-borderColor/40
-                 shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10`
-          }
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          layout
-        >
-          <div className={mobile ? "mobile-semester-card__header" : "text-center sm:hidden mb-1"}>
-            <span className={mobile ? "mobile-semester-card__title" : "text-xs font-bold text-textSecondary uppercase"}>
-              Semestre {info.data.numero}
-            </span>
-          </div>
-          <div className={mobile ? "mobile-semester-card__courses" : "flex flex-col gap-3"}>
-            {info.data.cursos.map((c) => renderCurso(c))}
-          </div>
-        </motion.div>
-      );
+      cursosList = info.data.cursos;
+    } else if (info.tipo === "mencion" && info.opciones?.[mencionActiva]) {
+      cursosList = info.opciones[mencionActiva].cursos;
+      labelExtra = ` · ${info.opciones[mencionActiva].nombreMencion}`;
+    } else {
+      return null;
     }
 
-    if (info.tipo === "mencion" && info.opciones?.[mencionActiva]) {
-      const semData = info.opciones[mencionActiva];
-      return (
-        <motion.div
-          key={`sem-${semNumero}`}
-          className={
-            mobile
-              ? "mobile-semester-card mobile-semester-card--mencion"
-              : `flex flex-col gap-3 w-[85vw] sm:w-[280px] md:w-[320px] shrink-0 snap-center sm:snap-align-none
-                 bg-primary/5 rounded-2xl p-4 sm:p-5 border border-primary/20
-                 shadow-md hover:shadow-lg transition-shadow duration-200 transform-gpu z-10 relative`
-          }
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          layout
-        >
-          {mobile ? (
-            <div className="mobile-semester-card__header border-primary/20">
-              <span className="text-[9px] font-bold tracking-wider text-primary uppercase">Especialidad</span>
-              <div className="mobile-semester-card__title mt-0.5">
-                Semestre {semData.numero} · {semData.nombreMencion}
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-col mb-1 pb-3 border-b border-primary/20">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-[10px] font-bold tracking-wider text-primary">ESPECIALIDAD</span>
-                  <span className="text-[10px] text-white bg-primary px-2 py-0.5 rounded-full opacity-90">
-                    {semData.nombreMencion}
-                  </span>
-                </div>
-                <div className="text-center sm:hidden mt-2">
-                  <span className="text-xs font-bold text-textSecondary uppercase">Semestre {semData.numero}</span>
-                </div>
-              </div>
-            </>
-          )}
-          <div className={mobile ? "mobile-semester-card__courses" : "flex flex-col gap-3"}>
-            {semData.cursos.map((c) => renderCurso(c))}
-          </div>
-        </motion.div>
-      );
-    }
+    return (
+      <motion.div
+        key={`sem-${semNumero}`}
+        className="flex flex-col gap-3.5 w-[85vw] sm:w-[270px] md:w-[290px] shrink-0 snap-center sm:snap-align-none py-1 px-0.5"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        layout
+      >
+        <div className="flex items-baseline justify-between border-b border-borderColor/60 pb-2 mb-0.5 select-none">
+          <span className="text-xs font-bold text-textPrimary leading-none">
+            Semestre {semNumero}{labelExtra}
+          </span>
+          <span className="text-[10px] text-textSecondary font-semibold leading-none">
+            {cursosList.length} ramos
+          </span>
+        </div>
 
-    return null;
+        <div className="flex flex-col gap-3">
+          {cursosList.map((c) => (
+            <Curso
+              key={c.id}
+              curso={c}
+              aprobado={aprobados.includes(c.id)}
+              excepcional={excepciones.includes(c.id)}
+              disponible={cumplePrereqs(c)}
+              enCurso={cursando.includes(c.id)}
+              onSelect={(cursoObj) => setSelectedCurso(cursoObj)}
+              highlightStatus={getHighlightStatus(c.id)}
+            />
+          ))}
+        </div>
+      </motion.div>
+    );
   };
 
   if (!malla)
     return <p className="text-center text-textSecondary py-4">Cargando malla...</p>;
 
   const visibleSemesters = getVisibleSemesters();
+  const uni = mallaSeleccionada?.url?.includes("uch") ? "Universidad de Chile" : "UNAB";
 
   return (
     <div
@@ -678,16 +596,16 @@ const MallaViewer = ({
       className={
         fullscreenMalla
           ? "malla-fullscreen-shell fixed inset-0 z-[9999] flex flex-col bg-bgPrimary text-textPrimary h-[100dvh] w-full"
-          : "mobile-malla-shell relative px-0 sm:px-2 md:px-6 pb-0 sm:pb-10 flex flex-col flex-1 min-h-0"
+          : "mobile-malla-shell relative px-0 sm:px-4 md:px-8 pb-0 sm:pb-8 flex flex-col flex-1 min-h-0"
       }
     >
       {fullscreenMalla ? (
-        <header className="malla-fullscreen-header flex items-center justify-between gap-3 px-3 sm:px-4 h-11 shrink-0 border-b border-borderColor bg-bgSecondary/80 backdrop-blur-sm">
-          <span className="text-sm font-semibold text-textPrimary">Malla</span>
+        <header className="malla-fullscreen-header flex items-center justify-between gap-3 px-4 h-12 shrink-0 border-b border-borderColor bg-bgSecondary/80 backdrop-blur-sm">
+          <span className="text-sm font-bold text-textPrimary">Visualización Curricular</span>
           <button
             type="button"
             onClick={exitFullscreenMalla}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-borderColor bg-bgPrimary text-textSecondary hover:text-primary hover:border-primary/40 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-borderColor bg-bgPrimary text-textSecondary hover:text-primary hover:border-primary/40 transition-colors"
             aria-label="Salir de pantalla completa"
           >
             <X className="w-3.5 h-3.5" />
@@ -696,34 +614,58 @@ const MallaViewer = ({
         </header>
       ) : null}
       
-      {/* Controles Superiores de Visualización */}
+      {/* ── Compact Statistics & Title Header ── */}
+      {!fullscreenMalla && (
+        <div className="flex flex-wrap items-center justify-between gap-4 py-3 px-4 mb-4 border border-borderColor/60 bg-bgSecondary/30 rounded-2xl select-none shrink-0">
+          <div className="flex flex-col">
+            <h1 className="text-sm sm:text-base font-bold text-textPrimary leading-none">Mi malla curricular</h1>
+            <p className="text-[10px] text-textSecondary/80 font-bold mt-1 uppercase tracking-wide">
+              {malla.nombre} ({uni})
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-textSecondary font-semibold">
+            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {stats.aprobados} aprobados
+            </span>
+            <span className="opacity-45">•</span>
+            <span className="flex items-center gap-1 text-primary">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              {stats.cursando} cursando
+            </span>
+            <span className="opacity-45">•</span>
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-borderColor" />
+              {stats.pendientes} pendientes
+            </span>
+            <span className="opacity-45">•</span>
+            <span className="text-textPrimary font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md">
+              {stats.pct}% de avance
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Specialty and display filters bar */}
       <div
         ref={controlsRef}
-        className="mobile-malla-controls flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 sm:gap-3 mb-2 sm:mb-4 px-2 sm:pr-4 max-sm:mb-1.5 max-sm:min-h-0 shrink-0"
+        className="mobile-malla-controls flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 sm:gap-3 mb-3 px-2 sm:pr-2 shrink-0 select-none"
       >
-        
         {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
           malla.mencionesDisponibles.length > 3 ? (
-            <div className="flex flex-col gap-1 w-full sm:w-auto sm:min-w-[280px] max-w-[min(100%,420px)]">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-textSecondary/90 px-0.5 max-sm:hidden">
-                Especialidad / mención
-              </span>
+            <div className="flex flex-col gap-1 w-full sm:w-auto sm:min-w-[240px] max-w-[min(100%,360px)]">
               <div
-                className="group flex items-center gap-2 pl-2.5 pr-2 py-1.5 max-sm:py-1 rounded-xl max-sm:rounded-lg
-                  border border-borderColor bg-bgPrimary
-                  shadow-[0_1px_2px_rgba(0,0,0,0.06)]
-                  hover:border-primary/35 transition-all duration-200
-                  focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary/50"
+                className="group flex items-center gap-2 pl-2.5 pr-2 py-1.5 rounded-xl border border-borderColor bg-bgPrimary shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:border-primary/35 transition-all duration-200"
               >
-                <div className="flex h-7 w-7 max-sm:h-6 max-sm:w-6 flex-shrink-0 items-center justify-center rounded-lg bg-primaryMuted text-primary">
-                  <BookMarked className="w-3.5 h-3.5 max-sm:w-3 max-sm:h-3" strokeWidth={2} />
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg bg-primaryMuted text-primary">
+                  <BookMarked className="w-3 h-3" />
                 </div>
                 <select
                   value={mencionActiva || ""}
                   onChange={(e) => setMencionActiva(e.target.value)}
                   aria-label="Seleccionar especialidad o mención"
-                  className="mencion-select w-full min-w-0 flex-1 cursor-pointer bg-transparent py-0.5 pl-0 pr-1
-                    text-sm max-sm:text-xs font-semibold leading-snug text-textPrimary outline-none appearance-none truncate"
+                  className="mencion-select w-full min-w-0 flex-1 cursor-pointer bg-transparent py-0.5 pl-0 pr-1 text-xs font-semibold text-textPrimary outline-none appearance-none truncate"
                 >
                   {malla.mencionesDisponibles.map((m) => (
                     <option key={m.codigo} value={m.codigo}>{m.nombre}</option>
@@ -733,15 +675,15 @@ const MallaViewer = ({
               </div>
             </div>
           ) : (
-            <div className="flex bg-bgSecondary/80 backdrop-blur-md p-0.5 max-sm:p-0.5 rounded-full border border-borderColor/50 max-sm:w-full max-sm:overflow-x-auto">
+            <div className="flex bg-bgSecondary/60 p-0.5 rounded-xl border border-borderColor/40 max-sm:w-full max-sm:overflow-x-auto">
               {malla.mencionesDisponibles.map((m) => (
                 <button
                   key={m.codigo}
                   onClick={() => setMencionActiva(m.codigo)}
-                  className={`px-3 max-sm:px-2.5 py-1 max-sm:py-0.5 rounded-full text-sm max-sm:text-xs font-medium transition-all duration-300 whitespace-nowrap ${
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                     mencionActiva === m.codigo
-                      ? "bg-primary text-white shadow-md"
-                      : "text-textSecondary hover:text-textPrimary hover:bg-bgSecondary"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-textSecondary hover:text-textPrimary"
                   }`}
                 >
                   {m.nombre}
@@ -752,33 +694,34 @@ const MallaViewer = ({
         )}
 
         {!fullscreenMalla && (
-        <button
-          onClick={() => setOcultarCompletados(!ocultarCompletados)}
-          className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border
-            ${ocultarCompletados
-              ? "bg-primary text-white border-primary"
-              : "bg-bgSecondary text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
-          `}
-        >
-          {ocultarCompletados
-            ? <><Eye className="w-3.5 h-3.5" /> Mostrar todo</>
-            : <><EyeOff className="w-3.5 h-3.5" /> Ocultar completados</>}
-        </button>
+          <button
+            onClick={() => setOcultarCompletados(!ocultarCompletados)}
+            className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-200
+              ${ocultarCompletados
+                ? "bg-primary text-white border-primary"
+                : "bg-bgSecondary/85 text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
+            `}
+          >
+            {ocultarCompletados
+              ? <><Eye className="w-3.5 h-3.5" /> Mostrar todo</>
+              : <><EyeOff className="w-3.5 h-3.5" /> Ocultar completados</>}
+          </button>
         )}
 
         {!fullscreenMalla && (
-        <button
-          type="button"
-          onClick={enterFullscreenMalla}
-          className="flex items-center gap-1.5 px-3 py-1.5 max-sm:px-2.5 rounded-lg text-xs font-medium border border-borderColor bg-bgSecondary/90 hover:bg-bgSecondary text-textSecondary hover:text-primary shadow-sm transition-colors shrink-0"
-          aria-label="Ver malla en pantalla completa"
-        >
-          <Maximize2 className="w-3.5 h-3.5 flex-shrink-0" />
-          <span className="hidden sm:inline">Pantalla completa</span>
-        </button>
+          <button
+            type="button"
+            onClick={enterFullscreenMalla}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-borderColor bg-bgSecondary/85 text-textSecondary hover:text-primary hover:border-primary/40 shadow-sm transition-colors shrink-0"
+            aria-label="Ver malla en pantalla completa"
+          >
+            <Maximize2 className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="hidden sm:inline">Pantalla completa</span>
+          </button>
         )}
       </div>
 
+      {/* Main Grid Viewport */}
       {isMobileView ? (
         <div className={`mobile-malla-viewport flex flex-col flex-1 min-h-0 ${fullscreenMalla ? "malla-fullscreen-viewport" : ""}`}>
           <div
@@ -800,90 +743,113 @@ const MallaViewer = ({
               </AnimatePresence>
             </div>
           </div>
-          <p className="mobile-scroll-hint">
-            ← Desliza horizontalmente para ver más semestres →
+          <p className="mobile-scroll-hint select-none">
+            ← Desliza horizontalmente para ver los semestres →
           </p>
         </div>
       ) : (
-      <div className={`flex flex-col flex-1 min-h-0 sm:rounded-3xl sm:border sm:border-borderColor/30 sm:shadow-[0_4px_24px_rgba(0,0,0,0.05)] bg-bgPrimary/95 sm:pb-6 sm:pt-4 overflow-hidden ${fullscreenMalla ? "!rounded-none !border-0 !shadow-none !pt-2 !pb-2 malla-fullscreen-viewport" : ""}`}
-           style={{ contain: "content" }}>
-        
-        <div
-          ref={scrollRef}
-          {...bind()}
-          onScroll={handleScroll}
-          onClickCapture={handleClickCapture}
-          className={`flex-1 min-h-0 overflow-x-auto overflow-y-hidden scroll-container malla-wheel-scroll overscroll-x-contain overscroll-contain
-                px-4 sm:px-10 pb-6 snap-x snap-mandatory sm:snap-none
-                ${isDragging ? "dragging" : "cursor-grab"} active:cursor-grabbing`}
-          style={{ 
-            WebkitOverflowScrolling: "touch", 
-            willChange: "scroll-position",
-            backfaceVisibility: "hidden",
-            contain: "content"
-          }}
-        >
+        <div className={`flex flex-col flex-1 min-h-0 rounded-3xl border border-borderColor/40 bg-bgPrimary/45 pb-6 pt-5 overflow-hidden ${fullscreenMalla ? "!rounded-none !border-0 !pt-2 !pb-2 malla-fullscreen-viewport" : ""}`}
+             style={{ contain: "content" }}>
+          
+          <div
+            ref={scrollRef}
+            {...bind()}
+            onScroll={handleScroll}
+            onClickCapture={handleClickCapture}
+            className={`flex-1 min-h-0 overflow-x-auto overflow-y-hidden scroll-container malla-wheel-scroll overscroll-x-contain overscroll-contain
+                  px-6 sm:px-10 pb-6 snap-x snap-mandatory sm:snap-none
+                  ${isDragging ? "dragging" : "cursor-grab"} active:cursor-grabbing`}
+            style={{ 
+              WebkitOverflowScrolling: "touch", 
+              willChange: "scroll-position",
+              backfaceVisibility: "hidden",
+              contain: "content"
+            }}
+          >
             <div 
-              className="flex gap-6 sm:gap-8 md:gap-10 min-w-max py-2 sm:py-3 md:py-4"
+              className="flex gap-8 sm:gap-10 md:gap-12 min-w-max py-2"
               style={{ 
                  backfaceVisibility: "hidden",
                  transform: "translateZ(0)"
               }}
             >
               <AnimatePresence mode="popLayout">
-              {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
-              (_, i) => {
-                const year = i + 1;
-                const semAInfo = getSemestreInfo(i * 2 + 1);
-                const semBInfo = getSemestreInfo(i * 2 + 2);
+                {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
+                  (_, i) => {
+                    const year = i + 1;
+                    const semAInfo = getSemestreInfo(i * 2 + 1);
+                    const semBInfo = getSemestreInfo(i * 2 + 2);
 
-                const isSemACompletado = isSemestreCompletado(semAInfo);
-                const isSemBCompletado = isSemestreCompletado(semBInfo);
+                    const isSemACompletado = isSemestreCompletado(semAInfo);
+                    const isSemBCompletado = isSemestreCompletado(semBInfo);
 
-                const showA = semAInfo && (semAInfo.tipo !== "comun" || semAInfo.data) && (!ocultarCompletados || !isSemACompletado);
-                const showB = semBInfo && (semBInfo.tipo !== "comun" || semBInfo.data) && (!ocultarCompletados || !isSemBCompletado);
+                    const showA = semAInfo && (semAInfo.tipo !== "comun" || semAInfo.data) && (!ocultarCompletados || !isSemACompletado);
+                    const showB = semBInfo && (semBInfo.tipo !== "comun" || semBInfo.data) && (!ocultarCompletados || !isSemBCompletado);
 
-                if (!showA && !showB) return null;
+                    if (!showA && !showB) return null;
 
-                return (
-                  <motion.div
-                    key={year}
-                    className={`w-max sm:w-auto flex-shrink-0 transition-all duration-300 ${
-                      showA && showB 
-                        ? "sm:min-w-[592px] md:min-w-[680px]" 
-                        : "sm:min-w-[280px] md:min-w-[320px]"
-                    }`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.92, y: -8 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                    layout
-                  >
-                    <div className="text-center mb-3 sm:mb-4">
-                      <span className="text-xs uppercase tracking-wide text-textSecondary/80">Año</span>
-                      <div className="text-xl sm:text-2xl font-bold text-primary drop-shadow-[0_1px_0_rgba(255,255,255,0.04)]">
-                        {year}
-                      </div>
-                    </div>
+                    return (
+                      <motion.div
+                        key={year}
+                        className={`w-max sm:w-auto flex-shrink-0 transition-all duration-300 ${
+                          showA && showB 
+                            ? "sm:min-w-[580px] md:min-w-[620px]" 
+                            : "sm:min-w-[280px] md:min-w-[300px]"
+                        }`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.94, y: -8 }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        layout
+                      >
+                        <div className="text-center mb-4 select-none">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-textSecondary/80">Año</span>
+                          <div className="text-lg sm:text-xl font-extrabold text-primary">
+                            {year}
+                          </div>
+                        </div>
 
-                    <div className="flex gap-4 sm:gap-8">
-                      {[
-                        { info: semAInfo, show: showA, num: i * 2 + 1 },
-                        { info: semBInfo, show: showB, num: i * 2 + 2 }
-                      ].map(
-                        ({ info, show, num }) =>
-                          show && info && renderSemestreCard(info, num, false)
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              }
-            )}
+                        <div className="flex gap-8">
+                          {[
+                            { info: semAInfo, show: showA, num: i * 2 + 1 },
+                            { info: semBInfo, show: showB, num: i * 2 + 2 }
+                          ].map(
+                            ({ info, show, num }) =>
+                              show && info && renderSemestreCard(info, num, false)
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  }
+                )}
               </AnimatePresence>
             </div>
+          </div>
         </div>
-      </div>
       )}
+
+      {/* Reusable Course Drawer Details Panel */}
+      <CourseDrawer
+        isOpen={!!selectedCurso}
+        onClose={() => setSelectedCurso(null)}
+        curso={selectedCurso}
+        aprobado={selectedCurso ? aprobados.includes(selectedCurso.id) : false}
+        excepcional={selectedCurso ? excepciones.includes(selectedCurso.id) : false}
+        disponible={selectedCurso ? cumplePrereqs(selectedCurso) : false}
+        modoExcepcional={modoExcepcional}
+        enCurso={selectedCurso ? cursando.includes(selectedCurso.id) : false}
+        aprobar={() => selectedCurso && aprobar(selectedCurso.id)}
+        marcarExcepcional={() => selectedCurso && marcarExcepcional(selectedCurso.id)}
+        toggleCursando={() => selectedCurso && toggleCursando(selectedCurso.id)}
+        onAbrirNotas={(c) => {
+          setSelectedCurso(null); // close drawer to display notes modal cleanly
+          onAbrirNotas?.(c, cursando.includes(c.id), aprobados.includes(c.id));
+        }}
+        getCursoById={getCursoById}
+        aprobados={aprobados}
+        excepciones={excepciones}
+        allCursos={getAllCursos()}
+      />
     </div>
   );
 };
