@@ -15,6 +15,8 @@ import LoginSuggestion, { getStoredUser } from "./components/LoginSuggestion";
 import { trackOpenNotas, trackSelectMalla, inferUniversidadFromUrl } from "./utils/analytics";
 import { AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import AcademicProgrammingPage from "./features/academicProgramming/components/AcademicProgrammingPage";
 
 function readMallaSeleccionadaFromStorage() {
   const raw = safeJsonParse(localStorage.getItem("malla-seleccionada"), null);
@@ -72,7 +74,24 @@ export default function App() {
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [, setCurrentUser] = useState(() => getStoredUser());
-  const [vistaPrincipal, setVistaPrincipal] = useState("malla");
+  
+  const location = useLocation();
+
+  const [vistaPrincipal, setVistaPrincipal] = useState(() => {
+    if (typeof window !== "undefined" && window.location.pathname === "/programacion-academica") {
+      return "toma-de-ramos";
+    }
+    return "malla";
+  });
+
+  // Sync React State with React Router URL path updates
+  useEffect(() => {
+    if (location.pathname === "/programacion-academica") {
+      setVistaPrincipal("toma-de-ramos");
+    } else if (location.pathname === "/app") {
+      setVistaPrincipal((prev) => (prev === "toma-de-ramos" ? "malla" : prev));
+    }
+  }, [location.pathname]);
 
   // Detectar si es dispositivo touch
   const isMobile = typeof window !== 'undefined' && 
@@ -318,6 +337,10 @@ export default function App() {
               </div>
             </div>
           </div>
+        ) : vistaPrincipal === "toma-de-ramos" ? (
+          <main className="flex flex-col flex-1 min-h-0 sm:max-w-7xl sm:mx-auto sm:w-full">
+            <AcademicProgrammingPage isEmbedded={true} />
+          </main>
         ) : vistaPrincipal === "tutorias" ? (
           <main>
             <TutorModule onVolver={() => setVistaPrincipal("malla")} />

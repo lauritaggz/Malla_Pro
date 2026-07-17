@@ -33,7 +33,7 @@ const ERROR_MESSAGES = {
 };
 
 
-export default function AcademicProgrammingPage() {
+export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const [status, setStatus] = useState("idle");
   const [programming, setProgramming] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -169,7 +169,7 @@ export default function AcademicProgrammingPage() {
 
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
-      {status !== "ready" && (
+      {!isEmbedded && status !== "ready" && (
         <div className="sticky top-0 z-40 border-b border-borderColor bg-bgSecondary/90 backdrop-blur-xl">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center gap-3">
             <Link

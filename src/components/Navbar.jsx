@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   GraduationCap, Moon, Sun, FileText, HelpCircle,
   CalendarDays, ChevronDown, BookMarked, Heart, MessageCircle, CalendarRange,
+  ChevronUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import GooeyNav from "./GooeyNav";
 
 const THEMES = [
   { id: "aurora",   name: "Aurora",   color: "#2563EB" },
@@ -58,6 +60,55 @@ export default function Navbar({
   const themeRef    = useRef(null);
   const semestreRef = useRef(null);
 
+  const navigate = useNavigate();
+
+  const [isMinimized, setIsMinimized] = useState(() => {
+    return localStorage.getItem("navbar-minimized") === "true";
+  });
+
+  const handleToggleMinimize = () => {
+    const next = !isMinimized;
+    setIsMinimized(next);
+    localStorage.setItem("navbar-minimized", String(next));
+  };
+
+  const navItems = [
+    {
+      label: "Mi malla",
+      href: "/app",
+      icon: <BookMarked className="w-3.5 h-3.5" />,
+      onClick: (e) => {
+        e.preventDefault();
+        setVistaPrincipal("malla");
+        navigate("/app");
+      }
+    },
+    {
+      label: "Tutorías",
+      href: "/app",
+      icon: <MessageCircle className="w-3.5 h-3.5" />,
+      onClick: (e) => {
+        e.preventDefault();
+        setVistaPrincipal("tutorias");
+        navigate("/app");
+      }
+    },
+    {
+      label: "Toma de Ramos",
+      href: "/programacion-academica",
+      icon: <CalendarRange className="w-3.5 h-3.5" />,
+      onClick: (e) => {
+        e.preventDefault();
+        setVistaPrincipal("toma-de-ramos");
+        navigate("/programacion-academica");
+      }
+    }
+  ];
+
+  const activeIndex = 
+    vistaPrincipal === "malla" ? 0 : 
+    vistaPrincipal === "tutorias" ? 1 : 2;
+
   /* Scroll shadow */
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 4);
@@ -68,14 +119,14 @@ export default function Navbar({
   /* Navbar height reporting */
   useEffect(() => {
     const report = () => {
-      const h = navRef.current?.offsetHeight || 0;
+      const h = isMinimized ? 0 : (navRef.current?.offsetHeight || 0);
       window.dispatchEvent(new CustomEvent("navbarHeightChange", { detail: h }));
     };
     report();
     const obs = new ResizeObserver(report);
     if (navRef.current) obs.observe(navRef.current);
     return () => obs.disconnect();
-  }, []);
+  }, [isMinimized]);
 
   /* Close popovers on outside click */
   useEffect(() => {
@@ -91,19 +142,20 @@ export default function Navbar({
   const uni = mallaSeleccionada?.url?.includes("uch") ? "U. de Chile" : "UNAB";
 
   return (
-    <nav
-      ref={navRef}
-      id="app-navbar"
-      className={`
-        fixed top-0 left-0 right-0 z-[80]
-        pt-[env(safe-area-inset-top,0px)]
-        bg-bgSecondary/90 backdrop-blur-xl
-        border-b border-borderColor
-        transition-[box-shadow,opacity,transform] duration-200
-        ${isScrolled ? "shadow-sm" : ""}
-        ${mostrarResumen ? "opacity-0 pointer-events-none -translate-y-full" : "opacity-100 translate-y-0"}
-      `}
-    >
+    <>
+      <nav
+        ref={navRef}
+        id="app-navbar"
+        className={`
+          fixed top-0 left-0 right-0 z-[80]
+          pt-[env(safe-area-inset-top,0px)]
+          bg-bgSecondary/90 backdrop-blur-xl
+          border-b border-borderColor
+          transition-[box-shadow,opacity,transform] duration-300 ease-out
+          ${isScrolled ? "shadow-sm" : ""}
+          ${mostrarResumen || isMinimized ? "opacity-0 pointer-events-none -translate-y-full" : "opacity-100 translate-y-0"}
+        `}
+      >
       <div className="max-w-7xl mx-auto px-2 sm:px-6 h-12 sm:h-14 flex items-center gap-2 sm:gap-4">
 
         {/* ── Left: Brand ─────────────────────────────────────── */}
@@ -124,34 +176,10 @@ export default function Navbar({
                   {uni}
                 </span>
 
-                {/* Botón Toma de Ramos */}
-                <Link
-                  to="/programacion-academica"
-                  aria-label="Toma de Ramos"
-                  title="Toma de Ramos"
-                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-semibold bg-bgPrimary text-textSecondary border border-borderColor hover:text-textPrimary hover:bg-borderColor/40 transition-colors"
-                >
-                  <CalendarRange className="w-3.5 h-3.5 text-textSecondary" />
-                  <span className="hidden sm:inline">Toma de Ramos</span>
-                </Link>
-
-                {/* Botón Tutorías */}
-                {setVistaPrincipal && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setVistaPrincipal(vistaPrincipal === "malla" ? "tutorias" : "malla")
-                    }
-                    className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
-                  >
-                    {vistaPrincipal === "malla" ? (
-                      <MessageCircle className="w-3.5 h-3.5 text-primary" />
-                    ) : (
-                      <BookMarked className="w-3.5 h-3.5 text-primary" />
-                    )}
-                    <span className="hidden sm:inline">{vistaPrincipal === "malla" ? "Tutorías" : "Mi malla"}</span>
-                  </button>
-                )}
+                {/* Gooey Navigation */}
+                <div className="hidden sm:block">
+                  <GooeyNav items={navItems} activeIndex={activeIndex} />
+                </div>
               </div>
             </div>
           ) : (
@@ -305,8 +333,27 @@ export default function Navbar({
               )}
             </button>
           )}
+
+          {/* Minimizar */}
+          <NavBtn onClick={handleToggleMinimize} label="Minimizar barra">
+            <ChevronUp className="w-4 h-4" />
+          </NavBtn>
         </div>
       </div>
     </nav>
+
+    {/* Expand Floating Button */}
+    {isMinimized && !mostrarResumen && (
+      <button
+        type="button"
+        onClick={handleToggleMinimize}
+        className="fixed top-2 left-1/2 -translate-x-1/2 z-[85] bg-primary text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-[0_4px_15px_rgba(0,0,0,0.2)] flex items-center gap-1.5 hover:brightness-110 active:scale-95 transition-all animate-bounce"
+        style={{ animationDuration: '2s' }}
+      >
+        <ChevronDown className="w-4 h-4" />
+        <span>Expandir Menú</span>
+      </button>
+    )}
+  </>
   );
 }

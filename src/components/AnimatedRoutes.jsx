@@ -13,7 +13,7 @@ export default function AnimatedRoutes() {
       <Route path="/app" element={<App />} />
 
       {/* PROGRAMACIÓN ACADÉMICA */}
-      <Route path="/programacion-academica" element={<AcademicProgrammingPage />} />
+      <Route path="/programacion-academica" element={<App />} />
 
       {/* RUTA DESCONOCIDA */}
       <Route path="*" element={<LandingPage />} />
