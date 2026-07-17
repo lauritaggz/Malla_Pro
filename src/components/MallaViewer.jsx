@@ -522,6 +522,28 @@ const MallaViewer = ({
 
   const stats = getStats();
 
+  const getSemestreInfo = (num) => {
+    if (!malla) return null;
+    if (!malla.isMencion) {
+      return { tipo: "comun", data: malla.semestres.find(s => s.numero === num) };
+    }
+    
+    const comun = malla.semestresComunes.find(s => s.numero === num);
+    if (comun) return { tipo: "comun", data: comun };
+
+    const opciones = {};
+    let hasData = false;
+    malla.mencionesDisponibles.forEach(m => {
+      const semMencion = malla.menciones[m.codigo]?.semestres?.find(s => s.numero === num);
+      if (semMencion) {
+        opciones[m.codigo] = { ...semMencion, nombreMencion: m.nombre };
+        hasData = true;
+      }
+    });
+
+    return hasData ? { tipo: "mencion", opciones } : { tipo: "comun", data: null };
+  };
+
   const getVisibleSemesters = () => {
     const list = [];
     for (let num = 1; num <= malla.totalSemestres; num++) {
