@@ -727,13 +727,17 @@ const MallaViewer = ({
   // Path highlight status
   const getHighlightStatus = (cursoId) => {
     if (!selectedCurso) return "normal";
+    // En móvil el panel PR reemplaza las flechas: no atenuamos ni bloqueamos ramos.
+    if (isMobileView) return "normal";
     if (selectedCurso.id === cursoId) return "selected";
     if (selectedCurso.prerrequisitos?.includes(cursoId)) return "prereq";
-    
+
     // Check if immediate unlock
-    const isImmediateUnlock = selectedCurso.id && getCursoById(cursoId)?.prerrequisitos?.includes(selectedCurso.id);
+    const isImmediateUnlock =
+      selectedCurso.id &&
+      getCursoById(cursoId)?.prerrequisitos?.includes(selectedCurso.id);
     if (isImmediateUnlock) return "unlock";
-    
+
     return "fade";
   };
 
