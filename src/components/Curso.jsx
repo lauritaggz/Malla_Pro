@@ -90,10 +90,9 @@ const Curso = ({
 
   let highlightStyles = "";
   if (highlightStatus === "fade") {
-    // Desktop: bloquea interacción al inspeccionar PR.
-    // Móvil (<640px): permite tocar (el panel PR es la vista principal).
+    // Solo desktop (cuando MallaViewer envía "fade"): atenúa y bloquea interacción.
     highlightStyles =
-      "opacity-30 scale-[0.98] blur-[0.2px] saturate-50 sm:pointer-events-none";
+      "opacity-30 scale-[0.98] blur-[0.2px] saturate-50 pointer-events-none";
   } else if (highlightStatus === "selected") {
     highlightStyles =
       "ring-2 ring-primary ring-offset-2 ring-offset-bgPrimary scale-[1.02] shadow-md z-30";
