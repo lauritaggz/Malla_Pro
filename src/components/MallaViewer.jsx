@@ -7,6 +7,7 @@ import {
   Clock, Circle, CheckCircle2, NotebookPen
 } from "lucide-react";
 import Curso from "./Curso";
+import CourseDrawer from "./CourseDrawer";
 import {
   trackFullscreenMalla,
   trackToggleCursoEstado,
@@ -62,6 +63,7 @@ const MallaViewer = ({
   });
 
   const [selectedCurso, setSelectedCurso] = useState(null);
+  const [courseDrawerOpen, setCourseDrawerOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [paths, setPaths] = useState([]);
 
@@ -493,12 +495,21 @@ const MallaViewer = ({
   // Cerrar el menú contextual al hacer clic en cualquier parte
   useEffect(() => {
     if (!contextMenu) return;
-    const handleClose = () => setContextMenu(null);
-    window.addEventListener("click", handleClose);
-    window.addEventListener("contextmenu", handleClose);
+    const handleClose = (e) => {
+      if (e?.target?.closest?.("[data-curso-context-menu]")) return;
+      setContextMenu(null);
+    };
+    // Retraso: evita que el touchend/click sintético del long-press cierre el menú al instante
+    const timer = setTimeout(() => {
+      window.addEventListener("click", handleClose);
+      window.addEventListener("contextmenu", handleClose);
+      window.addEventListener("touchstart", handleClose, { passive: true });
+    }, 120);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("click", handleClose);
       window.removeEventListener("contextmenu", handleClose);
+      window.removeEventListener("touchstart", handleClose);
     };
   }, [contextMenu]);
 
@@ -597,9 +608,10 @@ const MallaViewer = ({
     return () => window.removeEventListener("aprobarHastaSemestre", handler);
   }, [malla, mencionActiva]);
 
-  // Drag horizontal
+  // Drag horizontal (solo desktop; en móvil usamos scroll nativo del carrusel)
   const bind = useDrag(
     ({ first, last, event }) => {
+      if (isMobileView) return;
       const el = scrollRef.current;
       if (!el) return;
 
@@ -619,18 +631,38 @@ const MallaViewer = ({
     },
     {
       axis: "x",
-      pointer: { touch: true },
+      pointer: { touch: !isMobileView },
       eventOptions: { passive: true },
       preventDefault: false,
+      enabled: !isMobileView,
     }
   );
 
   const handleClickCapture = (e) => {
+    if (isMobileView) return;
     if (dragMovedRef.current > 3) {
       e.stopPropagation();
       e.preventDefault();
     }
   };
+
+  const openCourseRelations = useCallback(
+    (cursoObj) => {
+      if (!cursoObj) return;
+      if (isMobileView) {
+        setSelectedCurso(cursoObj);
+        setCourseDrawerOpen(true);
+        setContextMenu(null);
+        return;
+      }
+      setSelectedCurso((prev) => (prev?.id === cursoObj.id ? null : cursoObj));
+    },
+    [isMobileView]
+  );
+
+  const closeCourseDrawer = useCallback(() => {
+    setCourseDrawerOpen(false);
+  }, []);
 
   // Desktop: rueda vertical → scroll horizontal animado
   useEffect(() => {
@@ -828,7 +860,7 @@ const MallaViewer = ({
               excepcional={excepciones.includes(c.id)}
               disponible={cumplePrereqs(c)}
               enCurso={cursando.includes(c.id)}
-              onSelect={(cursoObj) => setSelectedCurso((prev) => prev?.id === cursoObj.id ? null : cursoObj)}
+              onSelect={openCourseRelations}
               onLeftClick={handleCursoLeftClick}
               onLongPress={handleCursoLongPress}
               onContextMenu={handleCursoContextMenu}
@@ -1214,6 +1246,7 @@ const MallaViewer = ({
       {/* Context Menu Portal */}
       {contextMenu && createPortal(
         <div
+          data-curso-context-menu
           className="fixed z-[99999] bg-bgSecondary/95 backdrop-blur-md border border-borderColor rounded-xl shadow-2xl p-1.5 min-w-[180px] flex flex-col gap-0.5"
           style={{
             left: Math.min(contextMenu.x, window.innerWidth - 200),
@@ -1303,6 +1336,34 @@ const MallaViewer = ({
         </div>,
         document.body
       )}
+
+      <CourseDrawer
+        isOpen={courseDrawerOpen && !!selectedCurso}
+        onClose={() => {
+          closeCourseDrawer();
+          setSelectedCurso(null);
+        }}
+        curso={selectedCurso}
+        aprobado={selectedCurso ? aprobados.includes(selectedCurso.id) : false}
+        excepcional={selectedCurso ? excepciones.includes(selectedCurso.id) : false}
+        disponible={selectedCurso ? cumplePrereqs(selectedCurso) : true}
+        modoExcepcional={modoExcepcional}
+        enCurso={selectedCurso ? cursando.includes(selectedCurso.id) : false}
+        aprobar={() => selectedCurso && aprobar(selectedCurso.id)}
+        marcarExcepcional={() => selectedCurso && marcarExcepcional(selectedCurso.id)}
+        toggleCursando={() => selectedCurso && toggleCursando(selectedCurso.id)}
+        onAbrirNotas={(c) =>
+          onAbrirNotas?.(
+            c,
+            cursando.includes(c.id),
+            aprobados.includes(c.id)
+          )
+        }
+        getCursoById={getCursoById}
+        aprobados={aprobados}
+        excepciones={excepciones}
+        allCursos={getAllCursos()}
+      />
     </div>
   );
 };

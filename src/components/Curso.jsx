@@ -16,8 +16,10 @@ const Curso = ({
   highlightStatus = "normal",
 }) => {
   const [promedio, setPromedio] = useState(null);
-  const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timerRef = useRef(null);
+  const longPressTriggeredRef = useRef(false);
+  const touchMovedRef = useRef(false);
+  const touchStartRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const actualizarPromedio = () => {
@@ -88,67 +90,91 @@ const Curso = ({
 
   let highlightStyles = "";
   if (highlightStatus === "fade") {
-    highlightStyles = "opacity-30 pointer-events-none scale-[0.98] blur-[0.2px] saturate-50";
+    // En móvil dejamos interacción (solo atenuamos visualmente)
+    highlightStyles = "opacity-35 scale-[0.98] saturate-50";
   } else if (highlightStatus === "selected") {
-    highlightStyles = "ring-2 ring-primary ring-offset-2 ring-offset-bgPrimary scale-[1.02] shadow-md z-30";
+    highlightStyles =
+      "ring-2 ring-primary ring-offset-2 ring-offset-bgPrimary scale-[1.02] shadow-md z-30";
   } else if (highlightStatus === "prereq") {
-    highlightStyles = "ring-2 ring-amber-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+    highlightStyles =
+      "ring-2 ring-amber-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
   } else if (highlightStatus === "unlock") {
-    highlightStyles = "ring-2 ring-emerald-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+    highlightStyles =
+      "ring-2 ring-emerald-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
   }
 
-  const startPress = (e, isTouch) => {
-    if (!isTouch && e.button !== 0) return;
-    setLongPressTriggered(false);
-    
-    timerRef.current = setTimeout(() => {
-      onLongPress?.(curso);
-      setLongPressTriggered(true);
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-    }, 450); // 450ms hold threshold
-  };
-
-  const endPress = (e) => {
+  const clearPressTimer = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+  };
 
-    if (longPressTriggered) {
+  const startPress = (e, isTouch) => {
+    if (!isTouch && e.button !== 0) return;
+    longPressTriggeredRef.current = false;
+    touchMovedRef.current = false;
+    clearPressTimer();
+
+    timerRef.current = setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      onLongPress?.(curso);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(40);
+      }
+    }, 480);
+  };
+
+  const endPress = (e) => {
+    clearPressTimer();
+    if (longPressTriggeredRef.current) {
       e.preventDefault();
       e.stopPropagation();
-      setLongPressTriggered(false);
+      longPressTriggeredRef.current = false;
       return true;
     }
     return false;
   };
 
   const cancelPress = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearPressTimer();
+    longPressTriggeredRef.current = false;
   };
 
   return (
     <button
+      type="button"
       id={`curso-card-${curso.id}`}
       onMouseDown={(e) => startPress(e, false)}
       onMouseUp={(e) => {
-        const handled = endPress(e, false);
+        const handled = endPress(e);
         if (!handled && e.button === 0) {
           onLeftClick?.(curso);
         }
       }}
       onMouseLeave={cancelPress}
-      onTouchStart={(e) => startPress(e, true)}
-      onTouchEnd={(e) => {
-        const handled = endPress(e, true);
-        if (!handled) {
-          onLeftClick?.(curso);
+      onTouchStart={(e) => {
+        const t = e.touches[0];
+        touchStartRef.current = { x: t.clientX, y: t.clientY };
+        startPress(e, true);
+      }}
+      onTouchMove={(e) => {
+        const t = e.touches[0];
+        if (!t) return;
+        const dx = Math.abs(t.clientX - touchStartRef.current.x);
+        const dy = Math.abs(t.clientY - touchStartRef.current.y);
+        if (dx > 10 || dy > 10) {
+          touchMovedRef.current = true;
+          cancelPress();
         }
+      }}
+      onTouchEnd={(e) => {
+        const handled = endPress(e);
+        if (handled || touchMovedRef.current) {
+          touchMovedRef.current = false;
+          return;
+        }
+        onLeftClick?.(curso);
       }}
       onTouchCancel={cancelPress}
       onContextMenu={(e) => {
@@ -161,31 +187,31 @@ const Curso = ({
       style={{
         backfaceVisibility: "hidden",
         transform: "translateZ(0)",
-        contain: "layout"
+        contain: "layout",
+        WebkitUserSelect: "none",
+        userSelect: "none",
+        WebkitTouchCallout: "none",
       }}
     >
-      {/* Average score badge */}
       {promedio !== null && (
-        <div 
-          className="absolute top-1.5 right-[52px] px-1 py-0.5 text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[24px] bg-white/10 dark:bg-white/5 border-borderColor/40 text-textPrimary shadow-sm"
-        >
+        <div className="absolute top-1.5 right-[52px] px-1 py-0.5 text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[24px] bg-white/10 dark:bg-white/5 border-borderColor/40 text-textPrimary shadow-sm">
           {promedio.toFixed(1)}
         </div>
       )}
 
-      {/* Pill button for academic relations (Network PR) */}
       <div
+        role="button"
+        tabIndex={0}
         onClick={(e) => {
           e.stopPropagation();
+          e.preventDefault();
+          onSelect?.(curso);
         }}
         onMouseDown={(e) => {
           e.stopPropagation();
         }}
         onMouseUp={(e) => {
           e.stopPropagation();
-          if (e.button === 0) {
-            onSelect(curso);
-          }
         }}
         onContextMenu={(e) => {
           e.preventDefault();
@@ -194,43 +220,57 @@ const Curso = ({
         }}
         onTouchStart={(e) => {
           e.stopPropagation();
-          setLongPressTriggered(false);
+          longPressTriggeredRef.current = false;
+          touchMovedRef.current = false;
+          const t = e.touches[0];
+          touchStartRef.current = { x: t.clientX, y: t.clientY };
+          clearPressTimer();
           timerRef.current = setTimeout(() => {
-            onContextMenu?.({
-              preventDefault: () => {},
-              clientX: e.touches[0].clientX,
-              clientY: e.touches[0].clientY,
-            }, curso);
-            setLongPressTriggered(true);
+            longPressTriggeredRef.current = true;
+            onContextMenu?.(
+              {
+                preventDefault: () => {},
+                clientX: touchStartRef.current.x,
+                clientY: touchStartRef.current.y,
+              },
+              curso
+            );
             if (typeof navigator !== "undefined" && navigator.vibrate) {
-              navigator.vibrate(50);
+              navigator.vibrate(40);
             }
-          }, 450);
+          }, 480);
+        }}
+        onTouchMove={(e) => {
+          e.stopPropagation();
+          const t = e.touches[0];
+          if (!t) return;
+          const dx = Math.abs(t.clientX - touchStartRef.current.x);
+          const dy = Math.abs(t.clientY - touchStartRef.current.y);
+          if (dx > 10 || dy > 10) {
+            touchMovedRef.current = true;
+            cancelPress();
+          }
         }}
         onTouchEnd={(e) => {
           e.stopPropagation();
-          if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
+          e.preventDefault();
+          clearPressTimer();
+          if (longPressTriggeredRef.current || touchMovedRef.current) {
+            longPressTriggeredRef.current = false;
+            touchMovedRef.current = false;
+            return;
           }
-          if (longPressTriggered) {
-            e.preventDefault();
-            setLongPressTriggered(false);
-          } else {
-            onSelect(curso);
-          }
+          onSelect?.(curso);
         }}
         onTouchCancel={(e) => {
           e.stopPropagation();
-          if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-          }
+          cancelPress();
         }}
-        className={`absolute top-1 right-1 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer
-          ${highlightStatus === "selected"
-            ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
-            : "bg-bgSecondary/90 border-borderColor/40 text-textSecondary hover:text-textPrimary hover:bg-borderColor/30 shadow-[0_1px_3px_rgba(0,0,0,0.05)]"
+        className={`absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer
+          ${
+            highlightStatus === "selected"
+              ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
+              : "bg-bgSecondary/90 border-borderColor/40 text-textSecondary hover:text-textPrimary hover:bg-borderColor/30 shadow-[0_1px_3px_rgba(0,0,0,0.05)]"
           }
         `}
         title="Ver prerrequisitos / Opciones"
@@ -239,12 +279,10 @@ const Curso = ({
         <span className="text-[9px] tracking-tight font-sans font-bold">PR</span>
       </div>
 
-      {/* Course Name */}
       <div className="font-semibold text-textPrimary text-xs sm:text-[12px] leading-tight line-clamp-2 pr-[80px] mb-1">
         {curso.nombre}
       </div>
 
-      {/* Meta details & status */}
       <div className="flex items-center justify-between gap-1.5 mt-auto w-full select-none">
         <div className="text-[9px] font-medium text-textSecondary leading-none">
           {curso.codigo} · {curso.sct || 0} SCT
