@@ -245,16 +245,15 @@ export default function App() {
 
       {/* CONTENIDO PRINCIPAL */}
       <div
-        className={`relative z-[10] transition-all duration-300 flex flex-col flex-1 min-h-0 ${
+        className={`relative z-[10] transition-all duration-300 flex flex-col flex-1 min-h-0 main-content-zoom ${
           mallaSeleccionada ? "mobile-main-content sm:pb-0 sm:flex-none" : ""
         }`}
         style={{
-          paddingTop: mallaSeleccionada && !isMobileLayout ? navbarHeight + 20 : undefined,
+          paddingTop: mallaSeleccionada && !isMobileLayout ? navbarHeight + 8 : undefined,
         }}
       >
         {mallaSeleccionada && vistaPrincipal === "malla" && (
           <StatsDisplay
-            totalCursos={progreso.total}
             cursosAprobados={progreso.aprobados}
             cursosCursando={cursosCursando}
             cursosEnCursoData={(() => {

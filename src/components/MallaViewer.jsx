@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
-import { Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X, AlertTriangle } from "lucide-react";
+import {
+  Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X, AlertTriangle,
+  Clock, Circle, CheckCircle2, NotebookPen
+} from "lucide-react";
 import Curso from "./Curso";
-import CourseDrawer from "./CourseDrawer";
 import {
   trackFullscreenMalla,
   trackToggleCursoEstado,
@@ -38,6 +41,8 @@ const MallaViewer = ({
   );
 
   const [selectedCurso, setSelectedCurso] = useState(null);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [paths, setPaths] = useState([]);
 
   // Ref y estados para drag horizontal
   const scrollRef = useRef(null);
@@ -340,6 +345,165 @@ const MallaViewer = ({
     });
   };
 
+  // Helper para obtener las coordenadas relativas de una tarjeta (soporta zoom del contenedor)
+  const getCardCoordinates = (cardEl, containerEl) => {
+    if (!cardEl || !containerEl) return null;
+    const cardRect = cardEl.getBoundingClientRect();
+    const containerRect = containerEl.getBoundingClientRect();
+    
+    // Obtener factor de zoom del contenedor
+    const zoomEl = document.querySelector('.main-content-zoom');
+    const zoom = zoomEl ? parseFloat(window.getComputedStyle(zoomEl).zoom) || 1 : 1;
+    
+    return {
+      left: (cardRect.left - containerRect.left) / zoom,
+      top: (cardRect.top - containerRect.top) / zoom,
+      width: cardRect.width / zoom,
+      height: cardRect.height / zoom,
+      right: ((cardRect.left - containerRect.left) + cardRect.width) / zoom,
+      bottom: ((cardRect.top - containerRect.top) + cardRect.height) / zoom,
+      centerX: ((cardRect.left - containerRect.left) + cardRect.width / 2) / zoom,
+      centerY: ((cardRect.top - containerRect.top) + cardRect.height / 2) / zoom,
+    };
+  };
+
+  // Recalcular las coordenadas de las líneas conectoras (SVG)
+  const recalculatePaths = useCallback(() => {
+    if (!selectedCurso || isMobileView) {
+      setPaths([]);
+      return;
+    }
+
+    const containerEl = document.getElementById("malla-grid-container");
+    const selectedEl = document.getElementById(`curso-card-${selectedCurso.id}`);
+    if (!containerEl || !selectedEl) return;
+
+    const coordsS = getCardCoordinates(selectedEl, containerEl);
+    if (!coordsS) return;
+
+    const newPaths = [];
+
+    // 1. Prerrequisitos (P -> S)
+    (selectedCurso.prerrequisitos || []).forEach((preId) => {
+      const preEl = document.getElementById(`curso-card-${preId}`);
+      if (!preEl) return;
+      const coordsP = getCardCoordinates(preEl, containerEl);
+      if (!coordsP) return;
+
+      newPaths.push({
+        id: `pre-${preId}-${selectedCurso.id}`,
+        type: "prereq",
+        x1: coordsP.right + 2,
+        y1: coordsP.centerY,
+        x2: coordsS.left - 6,
+        y2: coordsS.centerY,
+      });
+    });
+
+    // 2. Asignaturas que desbloquea (S -> U)
+    const todosLosCursos = getAllCursos();
+    todosLosCursos.forEach((c) => {
+      if (c.prerrequisitos?.includes(selectedCurso.id)) {
+        const unlockEl = document.getElementById(`curso-card-${c.id}`);
+        if (!unlockEl) return;
+        const coordsU = getCardCoordinates(unlockEl, containerEl);
+        if (!coordsU) return;
+
+        newPaths.push({
+          id: `unlock-${selectedCurso.id}-${c.id}`,
+          type: "unlock",
+          x1: coordsS.right + 2,
+          y1: coordsS.centerY,
+          x2: coordsU.left - 6,
+          y2: coordsU.centerY,
+        });
+      }
+    });
+
+    setPaths(newPaths);
+  }, [selectedCurso, isMobileView, getAllCursos]);
+
+  useEffect(() => {
+    recalculatePaths();
+
+    const timer = setTimeout(recalculatePaths, 150);
+
+    window.addEventListener("resize", recalculatePaths);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", recalculatePaths);
+    };
+  }, [selectedCurso, recalculatePaths]);
+
+  // Cerrar el menú contextual al hacer clic en cualquier parte
+  useEffect(() => {
+    if (!contextMenu) return;
+    const handleClose = () => setContextMenu(null);
+    window.addEventListener("click", handleClose);
+    window.addEventListener("contextmenu", handleClose);
+    return () => {
+      window.removeEventListener("click", handleClose);
+      window.removeEventListener("contextmenu", handleClose);
+    };
+  }, [contextMenu]);
+
+  // Manejar el clic derecho (evento ContextMenu) para abrir el menú
+  const handleCursoContextMenu = useCallback((e, curso) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      curso,
+    });
+  }, []);
+
+  // Manejar el cambio de estado de un curso desde el menú contextual
+  const handleStatusChange = useCallback((curso, newStatus) => {
+    const isAprobado = aprobados.includes(curso.id);
+    const isCursando = cursando.includes(curso.id);
+    const currentStatus = isAprobado ? "aprobado" : isCursando ? "cursando" : "pendiente";
+
+    if (newStatus === currentStatus) return;
+
+    if (newStatus === "aprobado") {
+      if (currentStatus === "cursando") {
+        toggleCursando(curso.id);
+      }
+      aprobar(curso.id);
+    } else if (newStatus === "cursando") {
+      if (currentStatus === "aprobado") {
+        aprobar(curso.id);
+      }
+      toggleCursando(curso.id);
+    } else if (newStatus === "pendiente") {
+      if (currentStatus === "aprobado") {
+        aprobar(curso.id);
+      } else if (currentStatus === "cursando") {
+        toggleCursando(curso.id);
+      }
+    }
+  }, [aprobados, cursando, aprobar, toggleCursando]);
+
+  // Alternar aprobado con clic izquierdo
+  const handleCursoLeftClick = useCallback((curso) => {
+    const isAprobado = aprobados.includes(curso.id);
+    if (isAprobado) {
+      handleStatusChange(curso, "pendiente");
+    } else {
+      handleStatusChange(curso, "aprobado");
+    }
+  }, [aprobados, handleStatusChange]);
+
+  // Alternar cursando con clic largo (hold / long-press)
+  const handleCursoLongPress = useCallback((curso) => {
+    const isCursando = cursando.includes(curso.id);
+    if (isCursando) {
+      handleStatusChange(curso, "pendiente");
+    } else {
+      handleStatusChange(curso, "cursando");
+    }
+  }, [cursando, handleStatusChange]);
+
   // Aprobar hasta semestre (evento global desde Navbar)
   const aprobarHastaSemestre = (semestreLimite) => {
     if (!malla) return;
@@ -569,7 +733,7 @@ const MallaViewer = ({
     return list;
   };
 
-  const renderSemestreCard = (info, semNumero, mobile = false) => {
+  const renderSemestreCard = (info, semNumero) => {
     let cursosList = [];
     let labelExtra = "";
 
@@ -585,7 +749,7 @@ const MallaViewer = ({
     return (
       <motion.div
         key={`sem-${semNumero}`}
-        className="flex flex-col gap-3.5 w-[85vw] sm:w-[270px] md:w-[290px] shrink-0 snap-center sm:snap-align-none py-1 px-0.5"
+        className="flex flex-col gap-2.5 w-[80vw] sm:w-[210px] md:w-[220px] shrink-0 snap-center sm:snap-align-none py-1 px-0.5"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
@@ -600,7 +764,7 @@ const MallaViewer = ({
           </span>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {cursosList.map((c) => (
             <Curso
               key={c.id}
@@ -609,7 +773,10 @@ const MallaViewer = ({
               excepcional={excepciones.includes(c.id)}
               disponible={cumplePrereqs(c)}
               enCurso={cursando.includes(c.id)}
-              onSelect={(cursoObj) => setSelectedCurso(cursoObj)}
+              onSelect={(cursoObj) => setSelectedCurso((prev) => prev?.id === cursoObj.id ? null : cursoObj)}
+              onLeftClick={handleCursoLeftClick}
+              onLongPress={handleCursoLongPress}
+              onContextMenu={handleCursoContextMenu}
               highlightStatus={getHighlightStatus(c.id)}
             />
           ))}
@@ -651,10 +818,10 @@ const MallaViewer = ({
       {/* ── Compact Statistics & Title Header ── */}
       {!fullscreenMalla && (
         <div className="flex flex-wrap items-center justify-between gap-4 py-3 px-4 mb-4 border border-borderColor/60 bg-bgSecondary/30 rounded-2xl select-none shrink-0">
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <h1 className="text-sm sm:text-base font-bold text-textPrimary leading-none">Mi malla curricular</h1>
-            <p className="text-[10px] text-textSecondary/80 font-bold mt-1 uppercase tracking-wide">
-              {malla.nombre} ({uni})
+            <p className="text-[10px] text-textSecondary/80 font-bold mt-1 uppercase tracking-wide truncate">
+              {/\([A-Za-z\s.]+\)$/.test(malla.nombre) ? malla.nombre : `${malla.nombre} (${uni})`}
             </p>
           </div>
 
@@ -677,17 +844,43 @@ const MallaViewer = ({
             <span className="text-textPrimary font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md">
               {stats.pct}% de avance
             </span>
+
+            {/* Actions: Ocultar Completados and Pantalla Completa buttons */}
+            <div className="flex items-center gap-1.5 ml-1.5 pl-2.5 border-l border-borderColor/60">
+              <button
+                onClick={() => setOcultarCompletados(!ocultarCompletados)}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer
+                  ${ocultarCompletados
+                    ? "bg-primary text-white border-primary"
+                    : "bg-bgPrimary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
+                `}
+                title={ocultarCompletados ? "Mostrar todos los semestres" : "Ocultar semestres completados"}
+              >
+                {ocultarCompletados ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">{ocultarCompletados ? "Mostrar todo" : "Ocultar completados"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={enterFullscreenMalla}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-borderColor bg-bgPrimary/60 text-textSecondary hover:text-primary hover:border-primary/40 transition-all cursor-pointer"
+                title="Ver malla en pantalla completa"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Pantalla completa</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Specialty and display filters bar */}
-      <div
-        ref={controlsRef}
-        className="mobile-malla-controls flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 sm:gap-3 mb-3 px-2 sm:pr-2 shrink-0 select-none"
-      >
-        {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
-          malla.mencionesDisponibles.length > 3 ? (
+      {/* Specialty and display filters bar (only if menciones exist) */}
+      {malla.isMencion && malla.mencionesDisponibles.length > 0 && (
+        <div
+          ref={controlsRef}
+          className="mobile-malla-controls flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-2 sm:gap-3 mb-3 px-2 sm:pr-2 shrink-0 select-none"
+        >
+          {malla.mencionesDisponibles.length > 3 ? (
             <div className="flex flex-col gap-1 w-full sm:w-auto sm:min-w-[240px] max-w-[min(100%,360px)]">
               <div
                 className="group flex items-center gap-2 pl-2.5 pr-2 py-1.5 rounded-xl border border-borderColor bg-bgPrimary shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:border-primary/35 transition-all duration-200"
@@ -724,36 +917,9 @@ const MallaViewer = ({
                 </button>
               ))}
             </div>
-          )
-        )}
-
-        {!fullscreenMalla && (
-          <button
-            onClick={() => setOcultarCompletados(!ocultarCompletados)}
-            className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-200
-              ${ocultarCompletados
-                ? "bg-primary text-white border-primary"
-                : "bg-bgSecondary/85 text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
-            `}
-          >
-            {ocultarCompletados
-              ? <><Eye className="w-3.5 h-3.5" /> Mostrar todo</>
-              : <><EyeOff className="w-3.5 h-3.5" /> Ocultar completados</>}
-          </button>
-        )}
-
-        {!fullscreenMalla && (
-          <button
-            type="button"
-            onClick={enterFullscreenMalla}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-borderColor bg-bgSecondary/85 text-textSecondary hover:text-primary hover:border-primary/40 shadow-sm transition-colors shrink-0"
-            aria-label="Ver malla en pantalla completa"
-          >
-            <Maximize2 className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="hidden sm:inline">Pantalla completa</span>
-          </button>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Main Grid Viewport */}
       {isMobileView ? (
@@ -801,12 +967,87 @@ const MallaViewer = ({
             }}
           >
             <div 
-              className="flex gap-8 sm:gap-10 md:gap-12 min-w-max py-2"
+              id="malla-grid-container"
+              onClick={(e) => {
+                if (!e.target.closest(".curso-card-base")) {
+                  setSelectedCurso(null);
+                }
+              }}
+              className="flex gap-4 sm:gap-5 md:gap-6 min-w-max py-2 relative"
               style={{ 
                  backfaceVisibility: "hidden",
-                 transform: "translateZ(0)"
+                 transform: "translateZ(0)",
+                 position: "relative"
               }}
             >
+              {/* Connection lines SVG overlay */}
+              {paths.length > 0 && (
+                <svg className="absolute inset-0 pointer-events-none w-full h-full z-10 overflow-visible">
+                  <defs>
+                    <marker
+                      id="arrow-prereq"
+                      viewBox="0 0 10 10"
+                      refX="6"
+                      refY="5"
+                      markerWidth="6"
+                      markerHeight="6"
+                      orient="auto-start-reverse"
+                    >
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f59e0b" className="opacity-80" />
+                    </marker>
+                    <marker
+                      id="arrow-unlock"
+                      viewBox="0 0 10 10"
+                      refX="6"
+                      refY="5"
+                      markerWidth="6"
+                      markerHeight="6"
+                      orient="auto-start-reverse"
+                    >
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#10b981" className="opacity-80" />
+                    </marker>
+                  </defs>
+
+                  {paths.map((p) => {
+                    const { x1, y1, x2, y2 } = p;
+                    
+                    // Camino más corto (curva Bezier directa)
+                    // Para columnas adyacentes, controlamos la curvatura a la mitad de la separación para que baje por el canal vacío.
+                    // Para columnas no adyacentes, trazamos un camino directo suave.
+                    const dx = Math.abs(x2 - x1) < 100 
+                      ? (x2 - x1) / 2 
+                      : Math.max(Math.abs(x2 - x1) * 0.4, 30);
+                      
+                    const pathD = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+                    
+                    const strokeColor = p.type === "prereq" ? "#f59e0b" : "#10b981";
+                    const markerId = p.type === "prereq" ? "url(#arrow-prereq)" : "url(#arrow-unlock)";
+
+                    return (
+                      <g key={p.id}>
+                        {/* Glowing backdrop path */}
+                        <path
+                          d={pathD}
+                          fill="none"
+                          stroke={strokeColor}
+                          strokeWidth="3.5"
+                          className="opacity-25 blur-[1.5px]"
+                        />
+                        {/* Main path */}
+                        <path
+                          d={pathD}
+                          fill="none"
+                          stroke={strokeColor}
+                          strokeWidth="2"
+                          strokeDasharray="4 4"
+                          markerEnd={markerId}
+                          className="opacity-80 transition-all duration-300 neon-flow-path"
+                        />
+                      </g>
+                    );
+                  })}
+                </svg>
+              )}
               <AnimatePresence mode="popLayout">
                 {Array.from({ length: Math.ceil(malla.totalSemestres / 2) }).map(
                   (_, i) => {
@@ -827,8 +1068,8 @@ const MallaViewer = ({
                         key={year}
                         className={`w-max sm:w-auto flex-shrink-0 transition-all duration-300 ${
                           showA && showB 
-                            ? "sm:min-w-[580px] md:min-w-[620px]" 
-                            : "sm:min-w-[280px] md:min-w-[300px]"
+                            ? "sm:min-w-[440px] md:min-w-[464px]" 
+                            : "sm:min-w-[210px] md:min-w-[220px]"
                         }`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -843,7 +1084,7 @@ const MallaViewer = ({
                           </div>
                         </div>
 
-                        <div className="flex gap-8">
+                        <div className="flex gap-4 sm:gap-5 md:gap-6">
                           {[
                             { info: semAInfo, show: showA, num: i * 2 + 1 },
                             { info: semBInfo, show: showB, num: i * 2 + 2 }
@@ -862,28 +1103,98 @@ const MallaViewer = ({
         </div>
       )}
 
-      {/* Reusable Course Drawer Details Panel */}
-      <CourseDrawer
-        isOpen={!!selectedCurso}
-        onClose={() => setSelectedCurso(null)}
-        curso={selectedCurso}
-        aprobado={selectedCurso ? aprobados.includes(selectedCurso.id) : false}
-        excepcional={selectedCurso ? excepciones.includes(selectedCurso.id) : false}
-        disponible={selectedCurso ? cumplePrereqs(selectedCurso) : false}
-        modoExcepcional={modoExcepcional}
-        enCurso={selectedCurso ? cursando.includes(selectedCurso.id) : false}
-        aprobar={() => selectedCurso && aprobar(selectedCurso.id)}
-        marcarExcepcional={() => selectedCurso && marcarExcepcional(selectedCurso.id)}
-        toggleCursando={() => selectedCurso && toggleCursando(selectedCurso.id)}
-        onAbrirNotas={(c) => {
-          setSelectedCurso(null); // close drawer to display notes modal cleanly
-          onAbrirNotas?.(c, cursando.includes(c.id), aprobados.includes(c.id));
-        }}
-        getCursoById={getCursoById}
-        aprobados={aprobados}
-        excepciones={excepciones}
-        allCursos={getAllCursos()}
-      />
+      {/* Context Menu Portal */}
+      {contextMenu && createPortal(
+        <div
+          className="fixed z-[99999] bg-bgSecondary/95 backdrop-blur-md border border-borderColor rounded-xl shadow-2xl p-1.5 min-w-[180px] flex flex-col gap-0.5"
+          style={{
+            left: Math.min(contextMenu.x, window.innerWidth - 200),
+            top: Math.min(contextMenu.y, window.innerHeight - 200),
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="px-2.5 py-1.5 text-[10px] font-bold text-textSecondary uppercase tracking-wider select-none border-b border-borderColor/50 mb-1">
+            {contextMenu.curso.nombre}
+          </div>
+          
+          <button
+            onClick={() => {
+              handleStatusChange(contextMenu.curso, "aprobado");
+              setContextMenu(null);
+            }}
+            className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
+              ${aprobados.includes(contextMenu.curso.id)
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "text-textPrimary hover:bg-bgPrimary"}`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Aprobado</span>
+          </button>
+
+          <button
+            onClick={() => {
+              handleStatusChange(contextMenu.curso, "cursando");
+              setContextMenu(null);
+            }}
+            className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
+              ${cursando.includes(contextMenu.curso.id)
+                ? "bg-primary/10 text-primary"
+                : "text-textPrimary hover:bg-bgPrimary"}`}
+          >
+            <Circle className="w-2.5 h-2.5 fill-primary/30" />
+            <span>Cursando</span>
+          </button>
+
+          <button
+            onClick={() => {
+              handleStatusChange(contextMenu.curso, "pendiente");
+              setContextMenu(null);
+            }}
+            className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
+              ${!aprobados.includes(contextMenu.curso.id) && !cursando.includes(contextMenu.curso.id)
+                ? "bg-borderColor/20 text-textSecondary"
+                : "text-textPrimary hover:bg-bgPrimary"}`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Pendiente</span>
+          </button>
+
+          {/* Exceptional status */}
+          {modoExcepcional && (
+            <button
+              onClick={() => {
+                marcarExcepcional(contextMenu.curso.id);
+                setContextMenu(null);
+              }}
+              className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
+                ${excepciones.includes(contextMenu.curso.id)
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "text-textPrimary hover:bg-bgPrimary"}`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>{excepciones.includes(contextMenu.curso.id) ? "Desmarcar Excepcional" : "Forzar Excepcional"}</span>
+            </button>
+          )}
+
+          {/* Grade management */}
+          {(cursando.includes(contextMenu.curso.id) || aprobados.includes(contextMenu.curso.id) || excepciones.includes(contextMenu.curso.id)) && (
+            <>
+              <div className="h-[1px] bg-borderColor/50 my-1" />
+              <button
+                onClick={() => {
+                  setContextMenu(null);
+                  onAbrirNotas?.(contextMenu.curso, cursando.includes(contextMenu.curso.id), aprobados.includes(contextMenu.curso.id));
+                }}
+                className="flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left text-textPrimary hover:bg-bgPrimary cursor-pointer"
+              >
+                <NotebookPen className="w-3.5 h-3.5" />
+                <span>Gestionar notas</span>
+              </button>
+            </>
+          )}
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

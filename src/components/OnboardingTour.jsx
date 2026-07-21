@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GraduationCap, MousePointerClick, BookOpen, Layers } from "lucide-react";
+import { GraduationCap, MousePointerClick, BookOpen, Network } from "lucide-react";
 
-export default function OnboardingTour({ isVisible, onClose, isMobile }) {
+export default function OnboardingTour({ isVisible, onClose }) {
   const [step, setStep] = useState(0);
 
   // Impide el scroll de fondo cuando el tour está abierto y reinicia el paso
@@ -18,34 +18,37 @@ export default function OnboardingTour({ isVisible, onClose, isMobile }) {
   const steps = [
     {
       title: "¡Bienvenido a Malla Pro!",
-      description: "Gestionar tu carrera nunca había sido tan fácil ni se había visto tan bien. Te daremos un recorrido rápido por las 4 herramientas principales para que domines tu malla.",
+      description: "Gestionar tu carrera nunca había sido tan fácil ni se había visto tan bien. Te daremos un recorrido rápido por las herramientas principales para que domines tu malla.",
       icon: <GraduationCap className="w-12 h-12 text-primary mx-auto mb-4" />,
     },
     {
+      title: "Ver Prerrequisitos y Desbloqueos",
+      description: "Haz clic sobre el botón de relaciones PR (icono de conexiones) en la esquina superior derecha de cualquier asignatura. Esto la seleccionará, mostrando visualmente mediante líneas de flujo sus prerrequisitos (Amarillo) y ramos que desbloquea (Verde), sin alterar su estado.",
+      icon: <Network className="w-12 h-12 text-amber-500 mx-auto mb-4" />,
+    },
+    {
       title: "Aprobar un Ramo",
-      description: "Hacer clic o tocar un ramo disponible lo marcará inmediatamente como aprobado (Verde), desbloqueando los ramos que le siguen.",
+      description: "Haz clic o toca sobre el cuerpo de cualquier ramo para marcarlo o desmarcarlo inmediatamente como Aprobado (Verde). Esto habilitará automáticamente los ramos que dependen de él.",
       icon: <MousePointerClick className="w-12 h-12 text-emerald-500 mx-auto mb-4" />,
     },
     {
-      title: "Ramos En Curso",
-      description: isMobile
-        ? "Para indicar que estás cursando un ramo actualmente, mantén presionado tu dedo sobre la tarjeta por medio segundo."
-        : "Para indicar que estás cursando un ramo actualmente, mantén presionada la tecla Ctrl y haz clic sobre la tarjeta.",
+      title: "Ramos en Curso",
+      description: "Mantén presionada cualquier asignatura (clic largo en PC o pulsación táctil prolongada en móvil) por medio segundo para marcarla como Cursando (Azul).",
       icon: <BookOpen className="w-12 h-12 text-blue-500 mx-auto mb-4" />,
     },
     {
       title: "Calcula tus Notas",
-      description: "Cada ramo tiene un botón de 'Notas' en la parte inferior. Haz clic ahí para abrir la calculadora avanzada, ingresar tus porcentajes y estimar cuánto necesitas para aprobar.",
-      icon: <Layers className="w-12 h-12 text-purple-500 mx-auto mb-4" />,
+      description: "Haz clic derecho sobre cualquier asignatura (o mantén presionado el botón PR en móvil) para abrir el menú de opciones y seleccionar 'Gestionar notas'. Esto abrirá la calculadora avanzada para ingresar tus evaluaciones y ponderaciones.",
+      icon: <span className="text-5xl mx-auto mb-4 block">🧮</span>,
     },
     {
       title: "Promedio en Vivo",
-      description: "Cuando ingreses notas a un ramo, aparecerá una pequeña insignia en su esquina superior derecha mostrándote tu promedio actual en tiempo real.",
+      description: "Al ingresar notas en una asignatura, aparecerá una pequeña insignia en su esquina superior derecha indicando tu promedio actual calculado en tiempo real.",
       icon: <span className="text-5xl mx-auto mb-4 block">📈</span>,
     },
     {
-      title: "Personalización y Excepciones",
-      description: "En la barra superior puedes cambiar el tema de la página a tu gusto. También encontrarás el 'Modo Excepcional' que te permite forzar la aprobación de un ramo aunque sus prerrequisitos estén bloqueados.",
+      title: "Tema y Modo Excepcional",
+      description: "En la barra superior puedes cambiar el tema visual de la página. También encontrarás el 'Modo Excepcional', el cual te permite forzar aprobaciones de asignaturas saltándote sus prerrequisitos bloqueados.",
       icon: <span className="text-5xl mx-auto mb-4 block">🎨</span>,
     }
   ];

@@ -185,39 +185,41 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
       )}
 
       <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20">
-        {/* Stepper Progress Bar */}
-        <div className="max-w-xl mx-auto mb-10 px-4 select-none">
-          <div className="flex items-center justify-between relative">
-            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-borderColor/60 -translate-y-1/2 z-0" />
-            <div 
-              className="absolute top-1/2 left-4 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-300"
-              style={{ width: "0%" }}
-            />
-            {[
-              { num: 1, label: "Cargar PDF" },
-              { num: 2, label: "Elegir Ramos" },
-              { num: 3, label: "Armar Horario" },
-              { num: 4, label: "Confirmar" },
-            ].map((s) => {
-              const isActive = s.num === 1;
-              return (
-                <div key={s.num} className="flex flex-col items-center gap-1.5 relative z-10">
-                  <div 
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border
-                      ${isActive
-                        ? "bg-bgSecondary border-primary text-primary ring-4 ring-primary/10"
-                        : "bg-bgSecondary border-borderColor text-textSecondary"}`}
-                  >
-                    {s.num}
+        {/* Stepper Progress Bar (Only visible when not ready, ScheduleBuilder handles its own stepper when ready) */}
+        {status !== "ready" && (
+          <div className="max-w-xl mx-auto mb-10 px-4 select-none">
+            <div className="flex items-center justify-between relative">
+              <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-borderColor/60 -translate-y-1/2 z-0" />
+              <div 
+                className="absolute top-1/2 left-4 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-300"
+                style={{ width: "0%" }}
+              />
+              {[
+                { num: 1, label: "Cargar PDF" },
+                { num: 2, label: "Elegir Ramos" },
+                { num: 3, label: "Armar Horario" },
+                { num: 4, label: "Confirmar" },
+              ].map((s) => {
+                const isActive = s.num === 1;
+                return (
+                  <div key={s.num} className="flex flex-col items-center gap-1.5 relative z-10">
+                    <div 
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border
+                        ${isActive
+                          ? "bg-bgSecondary border-primary text-primary ring-4 ring-primary/10"
+                          : "bg-bgSecondary border-borderColor text-textSecondary"}`}
+                    >
+                      {s.num}
+                    </div>
+                    <span className={`text-[10px] font-bold ${isActive ? "text-primary font-extrabold" : "text-textSecondary"}`}>
+                      {s.label}
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-bold ${isActive ? "text-primary font-extrabold" : "text-textSecondary"}`}>
-                    {s.label}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {(status === "idle" || status === "error") && (
           <div className="flex flex-col items-center justify-center min-h-[70vh] max-w-2xl mx-auto text-center space-y-6 fade-in">

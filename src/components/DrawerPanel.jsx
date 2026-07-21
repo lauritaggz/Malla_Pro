@@ -7,6 +7,7 @@
  * porque max-sm: no está disponible en esta versión de Tailwind.
  */
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
@@ -90,7 +91,9 @@ export default function DrawerPanel({
         overflow: "hidden",
       };
 
-  return (
+  if (typeof window === "undefined" || !document.body) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -155,6 +158,7 @@ export default function DrawerPanel({
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

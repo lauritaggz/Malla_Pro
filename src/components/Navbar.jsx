@@ -170,7 +170,7 @@ export default function Navbar({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 sm:h-14 flex items-center justify-between gap-4">
 
           {/* ── Left: Brand ── */}
-          <div className="flex items-center gap-2.5 min-w-0 flex-shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0 md:flex-1 md:max-w-[45%]">
             <div
               className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white"
               style={{ background: "var(--primary)" }}
@@ -180,17 +180,17 @@ export default function Navbar({
 
             <div className="flex flex-col min-w-0 leading-tight">
               <div className="flex items-baseline gap-1.5 min-w-0">
-                <span className="font-bold text-xs sm:text-sm text-textPrimary truncate">
+                <span className="font-bold text-xs sm:text-sm text-textPrimary truncate flex-shrink-0">
                   Malla Pro
                 </span>
                 {mallaSeleccionada && (
-                  <span className="hidden md:inline text-[10px] font-bold text-textSecondary/70 truncate">
-                    / {mallaSeleccionada.nombre}
+                  <span className="hidden md:inline text-[11px] sm:text-xs font-semibold text-textSecondary/80 truncate">
+                    / {mallaSeleccionada.nombre} ({uni})
                   </span>
                 )}
               </div>
               {mallaSeleccionada && (
-                <span className="text-[9px] font-bold text-textSecondary/80 uppercase tracking-wider">
+                <span className="text-[9px] font-bold text-textSecondary/80 uppercase tracking-wider md:hidden">
                   {uni}
                 </span>
               )}

@@ -204,6 +204,12 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+@media (min-width: 640px) {
+  .main-content-zoom {
+    zoom: 0.9;
+  }
+}
+
 /* ── Theme transition ─────────────────────────────────────────── */
 :root, .dark, .light {
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -836,13 +842,13 @@ body {
 .curso-card-base {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 8px 10px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 94px;
+  min-height: 72px;
   position: relative;
 }
 
@@ -885,4 +891,15 @@ body {
   border-color: rgba(245, 158, 11, 0.35) !important;
   color: #d97706 !important;
   border-left: 4px solid #d97706 !important;
+}
+
+/* SVG Prerequisites Line Flow Animation */
+@keyframes neonFlow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.neon-flow-path {
+  animation: neonFlow 0.8s linear infinite;
 }
