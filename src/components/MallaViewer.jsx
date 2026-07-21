@@ -11,6 +11,13 @@ import {
   trackFullscreenMalla,
   trackToggleCursoEstado,
 } from "../utils/analytics";
+import { safeStorage } from "../utils/safeStorage";
+import {
+  consumeConservedApprovedIds,
+  readAcademicProgress,
+  writeAcademicProgress,
+} from "../utils/academicProgressStorage";
+import { getUserSafeMessage, normalizeAppError } from "../utils/appErrors";
 
 const MallaViewer = ({
   mallaSeleccionada,
@@ -28,17 +35,31 @@ const MallaViewer = ({
   setOcultarCompletados
 }) => {
   const [malla, setMalla] = useState(null);
+  const [loadStatus, setLoadStatus] = useState("loading"); // loading | success | error
+  const [loadError, setLoadError] = useState(null);
   const [mencionActiva, setMencionActiva] = useState(null);
 
-  const [aprobados, setAprobados] = useState(
-    () => JSON.parse(localStorage.getItem("malla-aprobados")) || []
-  );
-  const [excepciones, setExcepciones] = useState(
-    () => JSON.parse(localStorage.getItem("malla-excepciones")) || []
-  );
-  const [cursando, setCursando] = useState(
-    () => JSON.parse(localStorage.getItem("malla-cursando")) || []
-  );
+  const [aprobados, setAprobados] = useState(() => {
+    try {
+      return readAcademicProgress(mallaSeleccionada).aprobados;
+    } catch {
+      return [];
+    }
+  });
+  const [excepciones, setExcepciones] = useState(() => {
+    try {
+      return readAcademicProgress(mallaSeleccionada).excepciones;
+    } catch {
+      return [];
+    }
+  });
+  const [cursando, setCursando] = useState(() => {
+    try {
+      return readAcademicProgress(mallaSeleccionada).cursando;
+    } catch {
+      return [];
+    }
+  });
 
   const [selectedCurso, setSelectedCurso] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
@@ -49,6 +70,7 @@ const MallaViewer = ({
   const controlsRef = useRef(null);
   const fullscreenShellRef = useRef(null);
   const dragMovedRef = useRef(0);
+  const loadIdRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [fullscreenMalla, setFullscreenMalla] = useState(false);
   const [isMobileView, setIsMobileView] = useState(
@@ -130,13 +152,22 @@ const MallaViewer = ({
   useEffect(() => {
     if (!mallaSeleccionada?.url) return;
 
+    const loadId = ++loadIdRef.current;
+
     async function cargar() {
       setMalla(null);
+      setLoadStatus("loading");
+      setLoadError(null);
       try {
         const res = await fetch(mallaSeleccionada.url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        
+        if (loadId !== loadIdRef.current) return;
+
+        if (!data || typeof data !== "object") {
+          throw new Error("Invalid malla JSON");
+        }
+
         const isMencion = !!data.menciones;
         const mencionesDisponibles = data.menciones_disponibles || [];
         const totalSemestres = data.totalSemestres || data.semestres?.length || 0;
@@ -150,22 +181,40 @@ const MallaViewer = ({
           mencionesDisponibles,
           totalSemestres,
         };
-        
+
+        // Migrar / cargar progreso de esta carrera
+        const progress = readAcademicProgress(mallaSeleccionada);
+        let nextAprobados = progress.aprobados;
+        const conserved = consumeConservedApprovedIds(mallaData);
+        if (conserved.length) {
+          nextAprobados = [...new Set([...nextAprobados, ...conserved])];
+        }
+        setAprobados(nextAprobados);
+        setExcepciones(progress.excepciones);
+        setCursando(progress.cursando);
+
         setMalla(mallaData);
+        setLoadStatus("success");
 
         // Inicializar mención activa si aplica
         if (isMencion && mencionesDisponibles.length > 0) {
-          const storedMencion = localStorage.getItem(`malla-mencion-${mallaData.nombre}`);
-          if (storedMencion && mencionesDisponibles.some(m => m.codigo === storedMencion)) {
+          const storedMencion = safeStorage.getRaw(
+            `malla-mencion-${mallaData.nombre}`
+          );
+          if (storedMencion && mencionesDisponibles.some((m) => m.codigo === storedMencion)) {
             setMencionActiva(storedMencion);
           } else {
             setMencionActiva(mencionesDisponibles[0].codigo);
           }
         }
-        
-        onMallaDataLoaded?.(data);
+
+        onMallaDataLoaded?.(mallaData);
       } catch (err) {
-        console.error("Error al cargar malla:", err);
+        if (loadId !== loadIdRef.current) return;
+        normalizeAppError(err, { context: "MallaViewer.cargar" });
+        setLoadStatus("error");
+        setLoadError(getUserSafeMessage("MALLA_LOAD_FAILED"));
+        setMalla(null);
       }
     }
     cargar();
@@ -174,7 +223,7 @@ const MallaViewer = ({
   // Guardar mención activa
   useEffect(() => {
     if (malla && mencionActiva) {
-      localStorage.setItem(`malla-mencion-${malla.nombre}`, mencionActiva);
+      safeStorage.setRaw(`malla-mencion-${malla.nombre}`, mencionActiva);
     }
   }, [mencionActiva, malla]);
 
@@ -188,25 +237,30 @@ const MallaViewer = ({
   // Persistencia del Scroll
   const handleScroll = () => {
     if (scrollRef.current && malla) {
-      localStorage.setItem(`malla-scroll-${malla.nombre}`, scrollRef.current.scrollLeft);
+      safeStorage.setRaw(
+        `malla-scroll-${malla.nombre}`,
+        String(scrollRef.current.scrollLeft)
+      );
     }
   };
 
   useEffect(() => {
     if (malla && scrollRef.current) {
-      const savedScroll = localStorage.getItem(`malla-scroll-${malla.nombre}`);
+      const savedScroll = safeStorage.getRaw(`malla-scroll-${malla.nombre}`);
       if (savedScroll) {
         scrollRef.current.scrollLeft = parseFloat(savedScroll);
       }
     }
   }, [malla]);
 
-  // Guardar en localStorage
+  // Guardar en localStorage (namespace por carrera + dual-write legacy)
   useEffect(() => {
     setExcepcionesActivas(excepciones.length);
-    localStorage.setItem("malla-aprobados", JSON.stringify(aprobados));
-    localStorage.setItem("malla-excepciones", JSON.stringify(excepciones));
-    localStorage.setItem("malla-cursando", JSON.stringify(cursando));
+    writeAcademicProgress(mallaSeleccionada, {
+      aprobados,
+      excepciones,
+      cursando,
+    });
 
     onCursandoChange?.(cursando.length);
     onAprobadosChange?.(aprobados);
@@ -218,6 +272,7 @@ const MallaViewer = ({
     aprobados,
     excepciones,
     cursando,
+    mallaSeleccionada,
     setExcepcionesActivas,
     onCursandoChange,
     onAprobadosChange,
@@ -785,8 +840,61 @@ const MallaViewer = ({
     );
   };
 
-  if (!malla)
+  if (loadStatus === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-10 px-4 text-center">
+        <p className="text-sm text-textSecondary">
+          {loadError || getUserSafeMessage("MALLA_LOAD_FAILED")}
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            // Re-trigger load by bumping effect via force state
+            setLoadStatus("loading");
+            setLoadError(null);
+            loadIdRef.current += 1;
+            const url = mallaSeleccionada?.url;
+            if (!url) return;
+            fetch(url)
+              .then((res) => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+              })
+              .then((data) => {
+                const isMencion = !!data.menciones;
+                const mencionesDisponibles = data.menciones_disponibles || [];
+                const totalSemestres =
+                  data.totalSemestres || data.semestres?.length || 0;
+                const mallaData = {
+                  nombre: data.carrera || "Malla sin nombre",
+                  semestres: data.semestres || [],
+                  semestresComunes: data.semestres_comunes || [],
+                  menciones: data.menciones || {},
+                  isMencion,
+                  mencionesDisponibles,
+                  totalSemestres,
+                };
+                setMalla(mallaData);
+                setLoadStatus("success");
+                onMallaDataLoaded?.(mallaData);
+              })
+              .catch((err) => {
+                normalizeAppError(err, { context: "MallaViewer.retry" });
+                setLoadStatus("error");
+                setLoadError(getUserSafeMessage("MALLA_LOAD_FAILED"));
+              });
+          }}
+          className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (!malla || loadStatus === "loading") {
     return <p className="text-center text-textSecondary py-4">Cargando malla...</p>;
+  }
 
   const visibleSemesters = getVisibleSemesters();
   const uni = mallaSeleccionada?.url?.includes("uch") ? "Universidad de Chile" : "UNAB";

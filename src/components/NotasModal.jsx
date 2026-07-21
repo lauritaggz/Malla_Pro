@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { parseGrade } from "../utils/gradeUtils";
 import DrawerPanel from "./DrawerPanel";
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 
 export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }) {
   const [evaluaciones, setEvaluaciones] = useState([]);
@@ -34,46 +36,38 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   // Cargar evaluaciones del curso desde localStorage
   useEffect(() => {
     if (curso) {
-      const notasGuardadas = JSON.parse(
-        localStorage.getItem("malla-notas") || "{}"
-      );
+      const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
       const evals = notasGuardadas[curso.id] || [];
       setEvaluaciones(evals);
       setOpenSubNotas([]);
       setSubNotaInputs({});
       setError("");
 
-      const configsGuardadas = JSON.parse(
-        localStorage.getItem("malla-configs") || "{}"
-      );
+      const configsGuardadas = safeStorage.get(LEGACY_KEYS.configs, {});
       setConfig(configsGuardadas[curso.id] || {
         notaEximicion: 5.0,
         ponderacionPresentacion: 70,
         ponderacionExamen: 30,
       });
 
-      const examenesGuardados = JSON.parse(
-        localStorage.getItem("malla-examenes") || "{}"
-      );
+      const examenesGuardados = safeStorage.get(LEGACY_KEYS.examenes, {});
       setNotaExamen(examenesGuardados[curso.id] || "");
     }
   }, [curso]);
 
   // Guardar evaluaciones en localStorage
   const guardarEvaluaciones = (evals) => {
-    const notasGuardadas = JSON.parse(
-      localStorage.getItem("malla-notas") || "{}"
-    );
+    const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
     notasGuardadas[curso.id] = evals;
-    localStorage.setItem("malla-notas", JSON.stringify(notasGuardadas));
+    safeStorage.set(LEGACY_KEYS.notas, notasGuardadas);
     setEvaluaciones(evals);
     window.dispatchEvent(new Event("notasModificadas"));
   };
 
   const guardarConfig = (newConfig) => {
-    const configs = JSON.parse(localStorage.getItem("malla-configs") || "{}");
+    const configs = safeStorage.get(LEGACY_KEYS.configs, {});
     configs[curso.id] = newConfig;
-    localStorage.setItem("malla-configs", JSON.stringify(configs));
+    safeStorage.set(LEGACY_KEYS.configs, configs);
     setConfig(newConfig);
   };
 
@@ -92,9 +86,9 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   const handleNotaExamenChange = (e) => {
     const value = e.target.value;
-    const examenes = JSON.parse(localStorage.getItem("malla-examenes") || "{}");
+    const examenes = safeStorage.get(LEGACY_KEYS.examenes, {});
     examenes[curso.id] = value;
-    localStorage.setItem("malla-examenes", JSON.stringify(examenes));
+    safeStorage.set(LEGACY_KEYS.examenes, examenes);
     setNotaExamen(value);
     window.dispatchEvent(new Event("notasModificadas"));
   };

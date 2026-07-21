@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Lock, CheckCircle2, Circle, Network } from "lucide-react";
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 
 const Curso = ({
   curso,
@@ -20,7 +22,7 @@ const Curso = ({
   useEffect(() => {
     const actualizarPromedio = () => {
       try {
-        const notasGuardadas = JSON.parse(localStorage.getItem("malla-notas") || "{}");
+        const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
         const evals = notasGuardadas[curso.id] || [];
         const conNota = evals.filter((e) => e.nota != null && !isNaN(e.nota));
         const pesoTotal = conNota.reduce((sum, e) => sum + (e.peso || 0), 0);

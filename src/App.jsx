@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import { listarMallas } from "./utils/mallasLoader";
-import { safeJsonParse } from "./utils/safeJsonParse";
 import MallaViewer from "./components/MallaViewer";
 import { MemoizedStatsDisplay as StatsDisplay } from "./components/StatsDisplay";
 import ResumenProgreso from "./components/ResumenProgreso";
@@ -13,6 +12,9 @@ import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
 import LoginSuggestion, { getStoredUser } from "./components/LoginSuggestion";
 import { trackOpenNotas, trackSelectMalla, inferUniversidadFromUrl } from "./utils/analytics";
+import { clearAcademicProgress } from "./utils/academicProgressStorage";
+import { safeStorage } from "./utils/safeStorage";
+import { LEGACY_KEYS } from "./utils/storageKeys";
 import { AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
 import { useLocation } from "react-router-dom";
@@ -20,12 +22,12 @@ import AcademicProgrammingPage from "./features/academicProgramming/components/A
 import PeriodoActualView from "./components/PeriodoActualView";
 
 function readMallaSeleccionadaFromStorage() {
-  const raw = safeJsonParse(localStorage.getItem("malla-seleccionada"), null);
+  const raw = safeStorage.get(LEGACY_KEYS.seleccionada, null);
   if (!raw || typeof raw !== "object") return null;
   const url = raw.url;
   const nombre = raw.nombre;
   if (typeof url !== "string" || !url.trim() || typeof nombre !== "string" || !nombre.trim()) {
-    localStorage.removeItem("malla-seleccionada");
+    safeStorage.remove(LEGACY_KEYS.seleccionada);
     return null;
   }
   return {
@@ -103,20 +105,18 @@ export default function App() {
     if (confirm("¿Deseas cambiar de malla? Tus ramos aprobados con el mismo nombre se mantendrán automáticamente.")) {
       // Analizar aprobados y guardar los nombres exactos antes de resetear
       if (mallaData && aprobados.length > 0) {
-        const nombresAprobados = mallaData.semestres
-          .flatMap((s) => s.cursos)
+        const nombresAprobados = (mallaData.semestres || [])
+          .flatMap((s) => s.cursos || [])
           .filter((c) => aprobados.includes(c.id))
           .map((c) => c.nombre.trim().toLowerCase());
-          
-        localStorage.setItem("malla-nombres-conservados", JSON.stringify(nombresAprobados));
+
+        safeStorage.set(LEGACY_KEYS.nombresConservados, nombresAprobados);
       }
 
+      clearAcademicProgress(mallaSeleccionada);
       setMallaSeleccionada(null);
-      localStorage.removeItem("malla-seleccionada");
-      localStorage.removeItem("malla-aprobados");
-      localStorage.removeItem("malla-excepciones");
-      localStorage.removeItem("malla-cursando");
-      
+      safeStorage.remove(LEGACY_KEYS.seleccionada);
+
       // Resetear estado general para que quede en 0
       setProgreso({ total: 0, aprobados: 0 });
       setCursosCursando(0);

@@ -26,6 +26,12 @@ export default function ProgrammingPdfDropzone({ onFileSelected, disabled = fals
         return;
       }
 
+      if (file.size === 0) {
+        setLocalError("El archivo seleccionado está vacío. Intenta descargarlo nuevamente.");
+        setFileName("");
+        return;
+      }
+
       if (file.size > MAX_BYTES) {
         setLocalError("El PDF supera el tamaño máximo permitido de 10 MB.");
         setFileName("");

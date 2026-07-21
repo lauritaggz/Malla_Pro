@@ -94,6 +94,27 @@ export function normalizeScheduleText(value) {
 }
 
 /**
+ * @param {string} raw
+ * @returns {string | null}
+ */
+function normalizeClock(raw) {
+  const m = String(raw || "").match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (!Number.isFinite(h) || !Number.isFinite(min) || h > 23 || min > 59) return null;
+  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+}
+
+/**
+ * @param {string} time
+ */
+function clockToMinutes(time) {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/**
  * @param {string} locationRaw
  * @returns {{ location: string | null, isOnline: boolean }}
  */
@@ -158,8 +179,22 @@ export function parseMeetings(value) {
       continue;
     }
 
-    const startTime = match[2];
-    const endTime = match[3];
+    const startTime = normalizeClock(match[2]);
+    const endTime = normalizeClock(match[3]);
+    if (!startTime || !endTime) {
+      warnings.push(`Horario con hora inválida: "${chunk}"`);
+      chunkFailures += 1;
+      continue;
+    }
+
+    const startMins = clockToMinutes(startTime);
+    const endMins = clockToMinutes(endTime);
+    if (startMins >= endMins) {
+      warnings.push(`Horario con hora inicial posterior o igual a la final: "${chunk}"`);
+      chunkFailures += 1;
+      continue;
+    }
+
     const { location, isOnline } = parseLocation(match[4] || "");
 
     meetings.push({

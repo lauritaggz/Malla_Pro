@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Check, Trash2, Save, Sparkles, ChevronDown, RefreshCw, Eye, Download, AlertTriangle } from "lucide-react";
 import CurricularScheduleSelector from "./CurricularScheduleSelector";
 import WeeklyScheduleGrid from "./WeeklyScheduleGrid";
@@ -6,12 +6,18 @@ import LoadedProgrammingBlock from "./LoadedProgrammingBlock";
 import CurricularProgressSummary from "./CurricularProgressSummary";
 import ParserWarningsPanel from "./ParserWarningsPanel";
 import CourseAccordionList from "./CourseAccordionList";
+import TomaDeRamosStepper from "./TomaDeRamosStepper";
+import MallaProgressHint from "./MallaProgressHint";
 import { getSelectionConflicts } from "../services/scheduleService";
-import { safeJsonParse } from "../../../utils/safeJsonParse";
 import { toDisplayCourse } from "../services/academicProgressIntegration";
 import { generateSchedulePdf } from "../utils/generateSchedulePdf";
-
-const STORAGE_KEY = "malla-programacion-propuesta";
+import {
+  buildRegistrationState,
+  clearCourseRegistration,
+  saveCourseRegistration,
+} from "../services/persistence";
+import { getPeriodId, getPeriodLabel } from "../../../utils/storageKeys";
+import { getUserSafeMessage } from "../../../utils/appErrors";
 
 export default function ScheduleBuilder({
   integration,
@@ -21,21 +27,33 @@ export default function ScheduleBuilder({
   setFilters,
   filterOptions,
   onChangePdf,
+  onClearSavedPlanning,
   mallaName,
+  mallaSeleccionada,
+  fileMetadata,
+  careerId,
   warningsOpen,
   setWarningsOpen,
   totalCourseCount,
   totalSectionCount,
   modalityCount,
   warningCount,
+  initialSelectedMap,
 }) {
-  const [selectedSectionsMap, setSelectedSectionsMap] = useState({});
+  const [selectedSectionsMap, setSelectedSectionsMap] = useState(() =>
+    initialSelectedMap && typeof initialSelectedMap === "object"
+      ? { ...initialSelectedMap }
+      : {}
+  );
   const showFullDay = false;
   const [activeMobileTab, setActiveMobileTab] = useState("SECTIONS");
   const [selectedMobileDay, setSelectedMobileDay] = useState("LU");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [proposalSaved, setProposalSaved] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const saveTimerRef = useRef(null);
+  const restoredOnceRef = useRef(false);
+  const periodLabel = getPeriodLabel(programming);
 
   // Acordeón exclusivo: solo una asignatura expandida a la vez
   const [expandedCourseCode, setExpandedCourseCode] = useState(null);
@@ -66,38 +84,65 @@ export default function ScheduleBuilder({
     setOpenSecInfo((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Cargar propuesta guardada al iniciar
+  // Restaurar selección inicial
   useEffect(() => {
-    const saved = safeJsonParse(localStorage.getItem(STORAGE_KEY), null);
-    if (saved && Array.isArray(saved.selectedSections)) {
-      const restored = {};
-      const missingAlerts = [];
+    if (!initialSelectedMap || restoredOnceRef.current) return;
+    const allPdfSections = allCourses.flatMap((c) => c.sections || []);
+    if (!allPdfSections.length) return;
 
-      const allPdfSections = allCourses.flatMap((c) => c.sections || []);
-
-      for (const item of saved.selectedSections) {
-        const found = allPdfSections.find((s) => s.id === item.sectionId);
-        if (found) {
-          restored[item.courseCode] = item.sectionId;
-        } else {
-          missingAlerts.push(
-            `La sección seleccionada del ramo ${item.courseCode} ya no está disponible.`
-          );
-        }
-      }
-
-      setSelectedSectionsMap(restored);
-
-      if (missingAlerts.length > 0) {
-        setFeedbackMessage(
-          `Propuesta restaurada. Nota: ${missingAlerts.length} ${
-            missingAlerts.length === 1 ? "sección" : "secciones"
-          } ya no está disponible.`
-        );
-        setTimeout(() => setFeedbackMessage(""), 6000);
+    const restored = {};
+    let missing = 0;
+    for (const [courseCode, sectionId] of Object.entries(initialSelectedMap)) {
+      if (allPdfSections.some((s) => s.id === sectionId)) {
+        restored[courseCode] = sectionId;
+      } else {
+        missing += 1;
       }
     }
-  }, [allCourses]);
+    setSelectedSectionsMap(restored);
+    restoredOnceRef.current = true;
+    if (Object.keys(restored).length > 0) {
+      setFeedbackMessage(
+        missing > 0
+          ? `Recuperamos tu planificación guardada. ${missing} sección(es) ya no están disponibles.`
+          : "Recuperamos tu planificación guardada en este navegador."
+      );
+      const t = setTimeout(() => setFeedbackMessage(""), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [initialSelectedMap, allCourses]);
+
+  // Autoguardado con debounce
+  useEffect(() => {
+    if (!programming || !mallaSeleccionada) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+
+    saveTimerRef.current = setTimeout(() => {
+      const draft = buildRegistrationState({
+        malla: mallaSeleccionada,
+        programming,
+        selectedSectionsMap,
+        activeFilters: filters,
+        fileMetadata,
+      });
+      if (!draft) return;
+      const result = saveCourseRegistration(
+        mallaSeleccionada,
+        getPeriodId(programming),
+        draft
+      );
+      if (!result.ok) {
+        setFeedbackMessage(result.userMessage || getUserSafeMessage("STORAGE_QUOTA"));
+        setTimeout(() => setFeedbackMessage(""), 5000);
+      } else {
+        setProposalSaved(true);
+      }
+    }, 450);
+
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [programming, mallaSeleccionada, selectedSectionsMap, filters, fileMetadata]);
 
   // Lista de objetos de sección seleccionados
   const selectedSectionsList = useMemo(() => {
@@ -268,39 +313,51 @@ export default function ScheduleBuilder({
   };
 
   const handleSaveProposal = () => {
-    const periodLabel =
-      programming?.periodLabel ||
-      (programming?.period
-        ? `${programming.period.year}-${programming.period.semester}`
-        : "Periodo Desconocido");
-    const curriculumCode =
-      programming?.curriculumCode ||
-      (programming?.curriculum ? programming.curriculum.code : "Malla");
+    const draft = buildRegistrationState({
+      malla: mallaSeleccionada,
+      programming,
+      selectedSectionsMap,
+      activeFilters: filters,
+      fileMetadata,
+    });
+    if (!draft) {
+      setFeedbackMessage(getUserSafeMessage("UNEXPECTED"));
+      setTimeout(() => setFeedbackMessage(""), 4500);
+      return;
+    }
 
-    const proposal = {
-      id: `proposal-${Date.now()}`,
-      name: `Propuesta ${periodLabel}`,
-      academicPeriod: periodLabel,
-      curriculumCode: curriculumCode,
-      selectedSections: selectedSectionsList.map((s) => ({
-        courseCode: s.courseCode,
-        sectionId: s.id,
-        nrc: s.nrc,
-        subjectName: s.subjectName || s.courseTitle,
-        teacher: s.teacher || s.professors,
-        modality: s.modality,
-        meetings: s.meetings,
-        scheduleSummary: s.scheduleSummary,
-        campus: s.campus,
-      })),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const result = saveCourseRegistration(
+      mallaSeleccionada,
+      getPeriodId(programming),
+      draft
+    );
+    if (!result.ok) {
+      setFeedbackMessage(result.userMessage || getUserSafeMessage("STORAGE_QUOTA"));
+      setTimeout(() => setFeedbackMessage(""), 4500);
+      return;
+    }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(proposal));
     setFeedbackMessage("Propuesta de horario guardada con éxito.");
     setProposalSaved(true);
     setTimeout(() => setFeedbackMessage(""), 4500);
+  };
+
+  const handleClearSavedPlanning = () => {
+    if (
+      !window.confirm(
+        "¿Eliminar la planificación guardada de este periodo? No se borrarán tus ramos aprobados ni el avance de la malla."
+      )
+    ) {
+      return;
+    }
+    clearCourseRegistration(mallaSeleccionada, getPeriodId(programming));
+    if (typeof onClearSavedPlanning === "function") {
+      onClearSavedPlanning();
+    } else {
+      setSelectedSectionsMap({});
+      setFeedbackMessage("Planificación guardada eliminada.");
+      setTimeout(() => setFeedbackMessage(""), 3500);
+    }
   };
 
   // Exportar horario a PDF vectorial
@@ -308,8 +365,8 @@ export default function ScheduleBuilder({
     if (selectedSectionsList.length === 0) return;
     setIsExportingPdf(true);
     try {
-      const careerName = programming?.curriculum?.careerName || mallaName || "Malla Pro";
-      const periodLabel = programming?.periodLabel || "2026-2";
+      const careerName =
+        programming?.curriculum?.careerName || mallaName || "Malla Pro";
 
       await generateSchedulePdf({
         selectedSectionsList,
@@ -323,8 +380,8 @@ export default function ScheduleBuilder({
       setFeedbackMessage("Horario exportado correctamente.");
       setTimeout(() => setFeedbackMessage(""), 4500);
     } catch (err) {
-      console.error(err);
-      setFeedbackMessage("Error al generar el PDF.");
+      if (import.meta.env.DEV) console.error(err);
+      setFeedbackMessage("No pudimos generar el PDF del horario. Intenta nuevamente.");
       setTimeout(() => setFeedbackMessage(""), 4500);
     } finally {
       setIsExportingPdf(false);
@@ -343,42 +400,8 @@ export default function ScheduleBuilder({
 
   return (
     <div className="space-y-6">
-      {/* Stepper Progress Bar */}
-      <div className="max-w-xl mx-auto mb-8 px-4 select-none">
-        <div className="flex items-center justify-between relative">
-          <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-borderColor/60 -translate-y-1/2 z-0" />
-          <div 
-            className="absolute top-1/2 left-4 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-300"
-            style={{ width: `${((step - 1) / 3) * 100}%` }}
-          />
-          {[
-            { num: 1, label: "Cargar PDF" },
-            { num: 2, label: "Elegir Ramos" },
-            { num: 3, label: "Armar Horario" },
-            { num: 4, label: "Confirmar" },
-          ].map((s) => {
-            const isCompleted = step > s.num || s.num === 1;
-            const isActive = step === s.num;
-            return (
-              <div key={s.num} className="flex flex-col items-center gap-1.5 relative z-10">
-                <div 
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border
-                    ${isCompleted
-                      ? "bg-primary border-primary text-white"
-                      : isActive
-                      ? "bg-bgSecondary border-primary text-primary ring-4 ring-primary/10"
-                      : "bg-bgSecondary border-borderColor text-textSecondary"}`}
-                >
-                  {isCompleted ? "✓" : s.num}
-                </div>
-                <span className={`text-[10px] font-bold ${isActive ? "text-primary font-extrabold" : "text-textSecondary"}`}>
-                  {s.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <TomaDeRamosStepper currentStep={step} />
+      <MallaProgressHint />
 
       {/* 1. Encabezado Compacto */}
       <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 pb-3 border-b border-borderColor select-none">
@@ -404,8 +427,8 @@ export default function ScheduleBuilder({
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-textSecondary self-end">
-          <span>{programming?.periodLabel || "2026-2"}</span>
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-textSecondary self-end">
+          <span>{periodLabel}</span>
           <button
             type="button"
             onClick={onChangePdf}
@@ -413,6 +436,14 @@ export default function ScheduleBuilder({
           >
             <RefreshCw className="h-3 w-3" />
             Cambiar programación
+          </button>
+          <button
+            type="button"
+            onClick={handleClearSavedPlanning}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-500/25 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors bg-bgSecondary"
+          >
+            <Trash2 className="h-3 w-3" />
+            Eliminar planificación guardada
           </button>
         </div>
       </div>

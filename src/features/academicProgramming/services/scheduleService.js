@@ -31,12 +31,12 @@ export const scheduleDays = [
  * @returns {number}
  */
 export function timeToMinutes(time) {
-  if (!time) return 0;
+  if (time == null || time === "") return 0;
   const parts = String(time).split(":");
-  if (parts.length < 2) return 0;
+  if (parts.length < 2) return Number.NaN;
   const h = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10);
-  if (isNaN(h) || isNaN(m)) return 0;
+  if (isNaN(h) || isNaN(m)) return Number.NaN;
   return h * 60 + m;
 }
 
@@ -140,6 +140,9 @@ export function hasMeetingConflict(meetingA, meetingB) {
   const endA = timeToMinutes(meetingA.endTime);
   const startB = timeToMinutes(meetingB.startTime);
   const endB = timeToMinutes(meetingB.endTime);
+
+  if ([startA, endA, startB, endB].some((n) => Number.isNaN(n))) return false;
+  if (startA >= endA || startB >= endB) return false;
 
   return startA < endB && endA > startB;
 }

@@ -40,7 +40,14 @@ export {
 function createParseError(message, code) {
   const error = new Error(message);
   error.code = code;
+  error.technicalMessage = message;
   return error;
+}
+
+function assertNotAborted(signal) {
+  if (signal?.aborted) {
+    throw createParseError("Processing aborted", "CANCELLED");
+  }
 }
 
 /**
@@ -96,10 +103,21 @@ export class UnabAcademicProgrammingParser {
 
   /**
    * @param {File} file
-   * @param {{ onProgress?: (p: object) => void }} [options]
+   * @param {{ onProgress?: (p: object) => void, signal?: AbortSignal }} [options]
    */
   async parse(file, options = {}) {
-    if (!file || file.type !== "application/pdf") {
+    const signal = options.signal || null;
+    assertNotAborted(signal);
+
+    if (!file) {
+      throw createParseError("No file provided", "INVALID_FILE");
+    }
+
+    if (file.size === 0) {
+      throw createParseError("Empty file", "FILE_EMPTY");
+    }
+
+    if (file.type !== "application/pdf") {
       if (!file?.name?.toLowerCase().endsWith(".pdf")) {
         throw createParseError(
           "El archivo seleccionado no es un PDF válido.",
@@ -116,12 +134,18 @@ export class UnabAcademicProgrammingParser {
     }
 
     const onProgress = options.onProgress || (() => {});
+    assertNotAborted(signal);
     const data = new Uint8Array(await file.arrayBuffer());
+    assertNotAborted(signal);
 
     let pdf;
     try {
-      pdf = await getDocument({ data, useSystemFonts: true }).promise;
-    } catch {
+      pdf = await getDocument({ data, useSystemFonts: true, password: "" }).promise;
+    } catch (err) {
+      const msg = String(err?.message || err?.name || "").toLowerCase();
+      if (msg.includes("password") || msg.includes("encrypted")) {
+        throw createParseError("PDF password protected", "PDF_PROTECTED");
+      }
       throw createParseError(
         "El archivo seleccionado no es un PDF válido.",
         "INVALID_FILE"
@@ -129,6 +153,7 @@ export class UnabAcademicProgrammingParser {
     }
 
     try {
+      assertNotAborted(signal);
       const numPages = pdf.numPages;
       let fullTextSample = "";
       let totalTextChars = 0;
@@ -151,6 +176,7 @@ export class UnabAcademicProgrammingParser {
       let pendingPage = 1;
 
       for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        assertNotAborted(signal);
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 1 });
         const textContent = await page.getTextContent();

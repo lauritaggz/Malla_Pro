@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Clock, MapPin } from "lucide-react";
 import { DAYS, getItemEndMinutes, timeToMinutes } from "../utils/scheduleUtils";
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 
 /* ─── Lógica próxima clase ─── */
-const SCHEDULE_KEY = "malla-horario-v1";
+const SCHEDULE_KEY = LEGACY_KEYS.horario;
 
 function loadItems() {
-  try {
-    const data = JSON.parse(localStorage.getItem(SCHEDULE_KEY) || "{}");
-    return Array.isArray(data.items) ? data.items : [];
-  } catch { return []; }
+  const data = safeStorage.get(SCHEDULE_KEY, {});
+  return Array.isArray(data?.items) ? data.items : [];
 }
 
 function findNextClass(items, now = new Date()) {
@@ -102,7 +102,7 @@ export default function StatsDisplay({
 
   useEffect(() => {
     if (!cursosEnCursoData?.length) { setPromedioEnCurso(null); return; }
-    const notasGuardadas = JSON.parse(localStorage.getItem("malla-notas") || "{}");
+    const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
     let sumaPonderada = 0, totalSct = 0;
     cursosEnCursoData.forEach((curso) => {
       const evaluaciones = (notasGuardadas[curso.id] || []).filter((e) => e.nota != null);

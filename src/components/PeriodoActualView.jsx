@@ -2,10 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { BookOpen, CalendarDays, ClipboardCheck, Clock, MapPin, User, Copy, HelpCircle, CheckCircle2, ChevronRight, NotebookPen } from "lucide-react";
 import { DAYS, buildSlots, getScheduleBounds } from "../utils/scheduleUtils";
 import CourseDrawer from "./CourseDrawer";
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 
-const SCHEDULE_KEY = "malla-horario-v1";
-const NOTES_KEY = "malla-notas";
-const PROPOSAL_KEY = "malla-programacion-propuesta";
+const SCHEDULE_KEY = LEGACY_KEYS.horario;
+const NOTES_KEY = LEGACY_KEYS.notas;
+const PROPOSAL_KEY = LEGACY_KEYS.propuesta;
 
 export default function PeriodoActualView({
   cursando = [],
@@ -29,24 +31,13 @@ export default function PeriodoActualView({
 
   // Load schedule data
   const loadData = useCallback(() => {
-    try {
-      const sch = JSON.parse(localStorage.getItem(SCHEDULE_KEY) || "{}");
-      setScheduleItems(Array.isArray(sch.items) ? sch.items : []);
-    } catch {
-      setScheduleItems([]);
-    }
+    const sch = safeStorage.get(SCHEDULE_KEY, {});
+    setScheduleItems(Array.isArray(sch?.items) ? sch.items : []);
 
-    try {
-      setNotas(JSON.parse(localStorage.getItem(NOTES_KEY) || "{}"));
-    } catch {
-      setNotas({});
-    }
+    const notes = safeStorage.get(NOTES_KEY, {});
+    setNotas(notes && typeof notes === "object" ? notes : {});
 
-    try {
-      setProposal(JSON.parse(localStorage.getItem(PROPOSAL_KEY) || "null"));
-    } catch {
-      setProposal(null);
-    }
+    setProposal(safeStorage.get(PROPOSAL_KEY, null));
   }, []);
 
   useEffect(() => {
@@ -92,11 +83,11 @@ export default function PeriodoActualView({
       : [...aprobados, id];
     
     setAprobados?.(nextAprobados);
-    localStorage.setItem("malla-aprobados", JSON.stringify(nextAprobados));
+    safeStorage.set(LEGACY_KEYS.aprobados, nextAprobados);
     
     const nextCursando = cursando.filter((c) => c !== id);
     setCursando?.(nextCursando);
-    localStorage.setItem("malla-cursando", JSON.stringify(nextCursando));
+    safeStorage.set(LEGACY_KEYS.cursando, nextCursando);
     
     window.dispatchEvent(new CustomEvent("malla-progress-changed"));
   };
@@ -108,18 +99,18 @@ export default function PeriodoActualView({
       : [...excepciones, id];
     
     setExcepciones?.(nextExcepciones);
-    localStorage.setItem("malla-excepciones", JSON.stringify(nextExcepciones));
+    safeStorage.set(LEGACY_KEYS.excepciones, nextExcepciones);
 
     const nextAprobados = isRemoving
       ? aprobados.filter((a) => a !== id)
       : [...aprobados, id];
     setAprobados?.(nextAprobados);
-    localStorage.setItem("malla-aprobados", JSON.stringify(nextAprobados));
+    safeStorage.set(LEGACY_KEYS.aprobados, nextAprobados);
 
     if (!isRemoving) {
       const nextCursando = cursando.filter((c) => c !== id);
       setCursando?.(nextCursando);
-      localStorage.setItem("malla-cursando", JSON.stringify(nextCursando));
+      safeStorage.set(LEGACY_KEYS.cursando, nextCursando);
     }
     
     window.dispatchEvent(new CustomEvent("malla-progress-changed"));
@@ -131,7 +122,7 @@ export default function PeriodoActualView({
       : [...cursando, id];
     
     setCursando?.(nextCursando);
-    localStorage.setItem("malla-cursando", JSON.stringify(nextCursando));
+    safeStorage.set(LEGACY_KEYS.cursando, nextCursando);
     
     window.dispatchEvent(new CustomEvent("malla-progress-changed"));
   };

@@ -4,7 +4,7 @@ const parsers = [new UnabAcademicProgrammingParser()];
 
 /**
  * @param {File} file
- * @param {{ onProgress?: (p: object) => void }} [options]
+ * @param {{ onProgress?: (p: object) => void, signal?: AbortSignal }} [options]
  */
 export async function parseAcademicProgrammingFile(file, options = {}) {
   // En esta versión solo UNAB; se prueba con canParse tras lectura interna.

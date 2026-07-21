@@ -1,5 +1,10 @@
 import { normalizeCourseCode } from "../features/academicProgramming/utils/normalizeCourseCode";
-import { safeJsonParse } from "./safeJsonParse";
+import { safeStorage } from "./safeStorage";
+import {
+  LEGACY_KEYS,
+  getCareerId,
+} from "./storageKeys";
+import { migrateAcademicProgressIfNeeded } from "./academicProgressStorage";
 
 /**
  * @typedef {Object} ProgressState
@@ -21,13 +26,23 @@ import { safeJsonParse } from "./safeJsonParse";
 
 /**
  * Lee el avance desde localStorage (fuente de verdad de la malla).
+ * @param {{ url?: string, nombre?: string } | null} [malla]
  * @returns {ProgressState}
  */
-export function readProgressStateFromStorage() {
+export function readProgressStateFromStorage(malla = null) {
+  if (malla) {
+    const progress = migrateAcademicProgressIfNeeded(getCareerId(malla));
+    return {
+      aprobados: progress.aprobados,
+      excepciones: progress.excepciones,
+      cursando: progress.cursando,
+    };
+  }
+
   return {
-    aprobados: normalizeIdList(safeJsonParse(localStorage.getItem("malla-aprobados"), [])),
-    excepciones: normalizeIdList(safeJsonParse(localStorage.getItem("malla-excepciones"), [])),
-    cursando: normalizeIdList(safeJsonParse(localStorage.getItem("malla-cursando"), [])),
+    aprobados: normalizeIdList(safeStorage.get(LEGACY_KEYS.aprobados, [])),
+    excepciones: normalizeIdList(safeStorage.get(LEGACY_KEYS.excepciones, [])),
+    cursando: normalizeIdList(safeStorage.get(LEGACY_KEYS.cursando, [])),
   };
 }
 

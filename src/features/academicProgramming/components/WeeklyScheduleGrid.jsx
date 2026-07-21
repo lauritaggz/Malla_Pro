@@ -15,6 +15,41 @@ import { MODALITY_LABELS } from "../services/filterCourses";
 
 const PIXELS_PER_MINUTE = 1.15; // Altura en píxeles por minuto
 
+function useIsDarkMode() {
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : true
+  );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains("dark"));
+    sync();
+    const obs = new MutationObserver(sync);
+    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
+  return isDark;
+}
+
+function resolveCourseColors(courseCode, isDark) {
+  const colors = getStableCourseColor(courseCode);
+  if (isDark) {
+    return {
+      bg: colors.bgDark,
+      border: colors.borderDark,
+      text: colors.textDark,
+    };
+  }
+  return {
+    bg: colors.bgLight,
+    border: colors.borderLight,
+    text: colors.textLight,
+  };
+}
+
 export default function WeeklyScheduleGrid({
   selectedSectionsList,
   onDeselectSection,
@@ -24,6 +59,7 @@ export default function WeeklyScheduleGrid({
   setSelectedMobileDay,
   integration
 }) {
+  const isDark = useIsDarkMode();
   const [activePopover, setActivePopover] = useState(null);
   const popoverRefs = useRef(new Map());
 
@@ -298,7 +334,7 @@ export default function WeeklyScheduleGrid({
                     }`}
                   >
                     {dayMeetings.map((m) => {
-                      const colors = getStableCourseColor(m.courseCode);
+                      const colors = resolveCourseColors(m.courseCode, isDark);
                       const isConflicting = conflicts.some(
                         (col) =>
                           (col.meetingA.courseCode === m.courseCode && col.meetingA.meeting.dayCode === m.dayCode && col.meetingA.meeting.startTime === m.startTime) ||
@@ -318,16 +354,16 @@ export default function WeeklyScheduleGrid({
                           className={`absolute rounded-lg border p-2 flex flex-col justify-between select-none shadow-sm transition-all focus-within:ring-1 focus-within:ring-primary/30 cursor-pointer ${
                             isConflicting
                               ? "border-red-500 text-red-700 dark:text-red-300"
-                              : "border-borderColor/80"
+                              : ""
                           }`}
                           style={{
                             top: m.top + 2,
                             height: m.height - 4,
                             left: `${m.leftPercentage + 2}%`,
                             width: `${m.widthPercentage - 4}%`,
-                            backgroundColor: !isConflicting ? colors.bgLight : "rgba(239, 68, 68, 0.08)",
-                            borderColor: !isConflicting ? colors.borderLight : undefined,
-                            color: !isConflicting ? colors.textLight : undefined,
+                            backgroundColor: !isConflicting ? colors.bg : "rgba(239, 68, 68, 0.12)",
+                            borderColor: !isConflicting ? colors.border : undefined,
+                            color: !isConflicting ? colors.text : undefined,
                             backgroundImage: isConflicting
                               ? "repeating-linear-gradient(45deg, rgba(239, 68, 68, 0.04), rgba(239, 68, 68, 0.04) 8px, rgba(239, 68, 68, 0.08) 8px, rgba(239, 68, 68, 0.08) 16px)"
                               : undefined,
@@ -424,23 +460,25 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
 
   const numSlots = getOccupiedUnabSlots(m, unabTimeSlots).length;
 
+  // Hereda color del contenedor (paleta light/dark del ramo).
+  // No usar text-textPrimary aquí: en dark mode chocaría con fondos pastel.
   if (view === "FULL") {
     return (
       <div className="h-full flex flex-col justify-between overflow-hidden text-left relative z-10 pointer-events-none">
         <div className="space-y-0.5">
           <div className="flex items-center gap-1 font-bold text-[9px] uppercase tracking-wider opacity-85">
-            {isConflicting && <AlertTriangle className="h-3 w-3 text-red-600 shrink-0" />}
+            {isConflicting && <AlertTriangle className="h-3 w-3 shrink-0" />}
             <span className="truncate">{isConflicting ? "Tope" : m.courseCode}</span>
           </div>
-          <p className="text-[11px] font-black leading-snug line-clamp-2 text-textPrimary">
+          <p className="text-[11px] font-black leading-snug line-clamp-2">
             {m.courseTitle}
           </p>
         </div>
 
         <div className="space-y-0.5 text-[9px] opacity-90 font-bold">
-          <p className="text-textSecondary font-semibold">Sec. {m.section.sectionNumber} {numSlots > 1 && `· ${numSlots} mód.`}</p>
-          <p className="text-textSecondary font-semibold">Hora: {m.startTime}–{m.endTime}</p>
-          <p className="truncate font-black text-textPrimary/80">Sala: {m.locations.join(" / ") || "no inf."}</p>
+          <p className="font-semibold opacity-85">Sec. {m.section.sectionNumber} {numSlots > 1 && `· ${numSlots} mód.`}</p>
+          <p className="font-semibold opacity-85">Hora: {m.startTime}–{m.endTime}</p>
+          <p className="truncate font-black opacity-90">Sala: {m.locations.join(" / ") || "no inf."}</p>
         </div>
       </div>
     );
@@ -451,16 +489,16 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
       <div className="h-full flex flex-col justify-between overflow-hidden text-left relative z-10 pointer-events-none">
         <div className="space-y-0.5">
           <div className="flex items-center gap-1 font-bold text-[8.5px] uppercase opacity-85">
-            {isConflicting && <AlertTriangle className="h-2.5 w-2.5 text-red-600 shrink-0" />}
+            {isConflicting && <AlertTriangle className="h-2.5 w-2.5 shrink-0" />}
             <span className="truncate">{isConflicting ? "Tope" : m.courseCode}</span>
           </div>
-          <p className="text-[10px] font-black leading-tight truncate text-textPrimary">
+          <p className="text-[10px] font-black leading-tight truncate">
             {m.courseTitle}
           </p>
         </div>
         <div className="text-[8.5px] opacity-95 flex items-center justify-between gap-1 flex-wrap font-bold">
           <span>{m.startTime}–{m.endTime}</span>
-          <span className="truncate text-textSecondary font-semibold">Sec. {m.section.sectionNumber}</span>
+          <span className="truncate font-semibold opacity-85">Sec. {m.section.sectionNumber}</span>
         </div>
       </div>
     );
@@ -470,7 +508,7 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
   return (
     <div className="h-full flex items-center justify-between overflow-hidden text-left relative z-10 pointer-events-none gap-1 py-0.5 font-bold">
       <div className="flex items-center gap-1 min-w-0">
-        {isConflicting && <AlertTriangle className="h-2.5 w-2.5 text-red-600 shrink-0" />}
+        {isConflicting && <AlertTriangle className="h-2.5 w-2.5 shrink-0" />}
         <p className="text-[9.5px] truncate leading-none">
           {m.courseCode} <span className="opacity-75 font-normal">({m.startTime})</span>
         </p>

@@ -20,6 +20,13 @@ export function joinHyphenatedFragments(fragments) {
       result += part;
     } else if (part.startsWith("-") && !result.endsWith(" ")) {
       result += part;
+    } else if (
+      // Continuación tipográfica del PDF: "CIBERSEGURIDA" + "D" → "CIBERSEGURIDAD"
+      part.length === 1 &&
+      /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]$/.test(result) &&
+      /[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(part)
+    ) {
+      result += part;
     } else {
       result += ` ${part}`;
     }

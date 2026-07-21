@@ -64,6 +64,11 @@ describe("títulos y celdas", () => {
     );
   });
 
+  it("une letra final partida por salto de línea del PDF", () => {
+    expect(joinHyphenatedFragments(["CIBERSEGURIDA", "D"])).toBe("CIBERSEGURIDAD");
+    expect(normalizeCourseTitle(["CIBERSEGURIDA", "D"])).toBe("CIBERSEGURIDAD");
+  });
+
   it("une salas partidas por guion", () => {
     expect(joinHyphenatedFragments(["VM-", "COM413"])).toBe("VM-COM413");
     expect(joinHyphenatedFragments(["VM-E-", "SAL129"])).toBe("VM-E-SAL129");
