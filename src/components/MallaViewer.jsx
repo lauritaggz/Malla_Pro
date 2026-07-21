@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import {
   Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X, AlertTriangle,
-  Clock, Circle, CheckCircle2, NotebookPen
+  Clock, Circle, CheckCircle2, NotebookPen, ListChecks
 } from "lucide-react";
 import Curso from "./Curso";
 import CourseDrawer from "./CourseDrawer";
@@ -71,10 +71,13 @@ const MallaViewer = ({
   const scrollRef = useRef(null);
   const controlsRef = useRef(null);
   const fullscreenShellRef = useRef(null);
+  const marcarHastaRef = useRef(null);
   const dragMovedRef = useRef(0);
   const loadIdRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [fullscreenMalla, setFullscreenMalla] = useState(false);
+  const [marcarHastaOpen, setMarcarHastaOpen] = useState(false);
+  const [marcarHastaFlash, setMarcarHastaFlash] = useState(false);
   const [isMobileView, setIsMobileView] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
   );
@@ -570,11 +573,11 @@ const MallaViewer = ({
     }
   }, [cursando, handleStatusChange]);
 
-  // Aprobar hasta semestre (evento global desde Navbar)
-  const aprobarHastaSemestre = (semestreLimite) => {
+  // Aprobar hasta semestre (UI local + evento global por compatibilidad)
+  const aprobarHastaSemestre = useCallback((semestreLimite) => {
     if (!malla) return;
     const nuevosAprobados = [];
-    
+
     if (!malla.isMencion) {
       malla.semestres.forEach((sem) => {
         if (sem.numero <= semestreLimite) {
@@ -600,13 +603,33 @@ const MallaViewer = ({
     setAprobados([...aprobadosSet]);
     setExcepciones([]);
     setCursando((prev) => prev.filter((id) => !aprobadosSet.has(id)));
-  };
+    setMarcarHastaFlash(true);
+    window.setTimeout(() => setMarcarHastaFlash(false), 700);
+  }, [malla, mencionActiva]);
 
   useEffect(() => {
     const handler = (e) => aprobarHastaSemestre(e.detail);
     window.addEventListener("aprobarHastaSemestre", handler);
     return () => window.removeEventListener("aprobarHastaSemestre", handler);
-  }, [malla, mencionActiva]);
+  }, [aprobarHastaSemestre]);
+
+  useEffect(() => {
+    if (!marcarHastaOpen) return;
+    const onPointerDown = (e) => {
+      if (marcarHastaRef.current && !marcarHastaRef.current.contains(e.target)) {
+        setMarcarHastaOpen(false);
+      }
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMarcarHastaOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [marcarHastaOpen]);
 
   // Drag horizontal (solo desktop; en móvil usamos scroll nativo del carrusel)
   const bind = useDrag(
@@ -961,39 +984,102 @@ const MallaViewer = ({
       
       {/* ── Compact Statistics & Title Header ── */}
       {!fullscreenMalla && (
-        <div className="flex flex-wrap items-center justify-between gap-4 py-3 px-4 mb-4 border border-borderColor/60 bg-bgSecondary/30 rounded-2xl select-none shrink-0">
-          <div className="flex flex-col min-w-0">
+        <div className="malla-toolbar flex flex-col gap-2 py-2 px-3 mb-3 border border-borderColor/60 bg-bgSecondary/30 rounded-2xl select-none shrink-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-2 sm:px-3.5">
+          <div className="flex flex-col min-w-0 sm:max-w-[38%] lg:max-w-[42%]">
             <h1 className="text-sm sm:text-base font-bold text-textPrimary leading-none">Mi malla curricular</h1>
-            <p className="text-[10px] text-textSecondary/80 font-bold mt-1 uppercase tracking-wide truncate">
+            <p className="text-[10px] text-textSecondary/80 font-bold mt-0.5 uppercase tracking-wide truncate">
               {/\([A-Za-z\s.]+\)$/.test(malla.nombre) ? malla.nombre : `${malla.nombre} (${uni})`}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-textSecondary font-semibold">
-            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              {stats.aprobados} aprobados
-            </span>
-            <span className="opacity-45">•</span>
-            <span className="flex items-center gap-1 text-primary">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              {stats.cursando} cursando
-            </span>
-            <span className="opacity-45">•</span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-borderColor" />
-              {stats.pendientes} pendientes
-            </span>
-            <span className="opacity-45">•</span>
-            <span className="text-textPrimary font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md">
-              {stats.pct}% de avance
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 text-xs text-textSecondary font-semibold sm:justify-end sm:flex-nowrap min-w-0">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                {stats.aprobados} aprobados
+              </span>
+              <span className="opacity-45">•</span>
+              <span className="flex items-center gap-1 text-primary whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                {stats.cursando} cursando
+              </span>
+              <span className="opacity-45">•</span>
+              <span className="flex items-center gap-1 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-borderColor" />
+                {stats.pendientes} pendientes
+              </span>
+              <span className="opacity-45">•</span>
+              <span className="text-textPrimary font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md whitespace-nowrap">
+                {stats.pct}% de avance
+              </span>
+            </div>
 
-            {/* Actions: Ocultar Completados and Pantalla Completa buttons */}
-            <div className="flex items-center gap-1.5 ml-1.5 pl-2.5 border-l border-borderColor/60">
+            {/* Actions: Marcar Hasta, Ocultar Completados, Pantalla Completa */}
+            <div className="flex items-center gap-1.5 sm:ml-1 sm:pl-2.5 sm:border-l border-borderColor/60 shrink-0">
+              {malla?.totalSemestres > 0 && (
+                <div ref={marcarHastaRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setMarcarHastaOpen((v) => !v)}
+                    aria-expanded={marcarHastaOpen}
+                    aria-haspopup="listbox"
+                    aria-label="Marcar aprobados hasta un semestre"
+                    className={`marcar-hasta-btn btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer
+                      ${marcarHastaOpen || marcarHastaFlash
+                        ? "bg-primary text-white border-primary shadow-[0_0_0_3px_color-mix(in_srgb,var(--primary)_22%,transparent)]"
+                        : "bg-bgPrimary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
+                      ${marcarHastaFlash ? "marcar-hasta-flash" : ""}
+                    `}
+                    title="Marcar como aprobados todos los ramos hasta un semestre"
+                  >
+                    <ListChecks className={`w-3.5 h-3.5 transition-transform duration-300 ${marcarHastaOpen ? "scale-110" : ""}`} />
+                    <span className="hidden md:inline">Marcar hasta</span>
+                    <ChevronDown
+                      className={`w-3 h-3 transition-transform duration-300 ease-out ${marcarHastaOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {marcarHastaOpen && (
+                      <motion.div
+                        role="listbox"
+                        aria-label="Semestres"
+                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                        transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
+                        className="marcar-hasta-menu absolute right-0 top-full mt-2 z-50 min-w-[188px] max-h-[min(60vh,320px)] overflow-y-auto rounded-xl border border-borderColor/80 bg-bgSecondary/95 backdrop-blur-md shadow-[0_12px_32px_rgba(0,0,0,0.14)] py-1.5"
+                      >
+                        <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-textSecondary/70">
+                          Aprobar hasta
+                        </p>
+                        {Array.from({ length: malla.totalSemestres }).map((_, i) => (
+                          <motion.button
+                            key={i}
+                            type="button"
+                            role="option"
+                            initial={{ opacity: 0, x: 8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: Math.min(i * 0.025, 0.2), duration: 0.15 }}
+                            onClick={() => {
+                              aprobarHastaSemestre(i + 1);
+                              setMarcarHastaOpen(false);
+                            }}
+                            className="marcar-hasta-item group w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-sm text-textSecondary hover:text-textPrimary hover:bg-primary/10 transition-colors"
+                          >
+                            <span className="font-medium">Semestre {i + 1}</span>
+                            <CheckCircle2 className="w-3.5 h-3.5 opacity-0 -translate-x-1 text-primary transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
               <button
                 onClick={() => setOcultarCompletados(!ocultarCompletados)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer
+                className={`btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer
                   ${ocultarCompletados
                     ? "bg-primary text-white border-primary"
                     : "bg-bgPrimary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
@@ -1001,17 +1087,17 @@ const MallaViewer = ({
                 title={ocultarCompletados ? "Mostrar todos los semestres" : "Ocultar semestres completados"}
               >
                 {ocultarCompletados ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{ocultarCompletados ? "Mostrar todo" : "Ocultar completados"}</span>
+                <span className="hidden md:inline">{ocultarCompletados ? "Mostrar todo" : "Ocultar completados"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={enterFullscreenMalla}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-borderColor bg-bgPrimary/60 text-textSecondary hover:text-primary hover:border-primary/40 transition-all cursor-pointer"
+                className="btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-borderColor bg-bgPrimary/60 text-textSecondary hover:text-primary hover:border-primary/40 transition-all cursor-pointer"
                 title="Ver malla en pantalla completa"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Pantalla completa</span>
+                <span className="hidden md:inline">Pantalla completa</span>
               </button>
             </div>
           </div>
