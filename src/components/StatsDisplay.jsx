@@ -119,42 +119,24 @@ export default function StatsDisplay({
 
   const hasDesktopContent = nextClass !== null || promedioEnCurso !== null;
 
+  if (!hasDesktopContent) return null;
+
   return (
-    <>
-      {/* Mobile: chips compactos */}
-      <div className="mobile-progress-chips sm:hidden">
-        <span className="mobile-progress-chip mobile-progress-chip--aprobados">
-          ✓ {cursosAprobados} aprobado{cursosAprobados !== 1 ? "s" : ""}
-        </span>
-        <span className="text-textSecondary/40 text-[11px]">·</span>
-        <span className="mobile-progress-chip mobile-progress-chip--encurso">
-          ● {cursosCursando} en curso
-        </span>
-      </div>
+    <div className="hidden sm:block w-full max-w-7xl mx-auto px-6 py-3">
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
+        <ProximaClase nextClass={nextClass} />
 
-      {/* Desktop / tablet: tarjetas completas */}
-      {hasDesktopContent && (
-        <div className="hidden sm:block w-full max-w-7xl mx-auto px-6 py-3">
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
-
-            {/* Próxima clase */}
-            <ProximaClase nextClass={nextClass} />
-
-            {/* Promedio en curso */}
-            {promedioEnCurso !== null && (
-              <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
-                <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm" />
-                <div className="flex flex-col">
-                  <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Promedio En Curso</span>
-                  <span className="text-textPrimary text-xl font-bold leading-tight">{promedioEnCurso.toFixed(1)}</span>
-                </div>
-              </div>
-            )}
-
+        {promedioEnCurso !== null && (
+          <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
+            <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm" />
+            <div className="flex flex-col">
+              <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Promedio En Curso</span>
+              <span className="text-textPrimary text-xl font-bold leading-tight">{promedioEnCurso.toFixed(1)}</span>
+            </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 }
 

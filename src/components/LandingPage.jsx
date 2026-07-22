@@ -88,8 +88,8 @@ function scrollToId(id) {
 function MockBrowser({ activeTab, onTabChange, children }) {
   return (
     <div className="lp-browser lp-glass-strong w-full rounded-2xl overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10 bg-black/25">
-        <span className="flex gap-1.5 shrink-0" aria-hidden>
+      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 border-b border-white/10 bg-black/25">
+        <span className="hidden sm:flex gap-1.5 shrink-0" aria-hidden>
           <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
           <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
           <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
@@ -100,7 +100,7 @@ function MockBrowser({ activeTab, onTabChange, children }) {
               key={t.id}
               type="button"
               onClick={() => onTabChange(t.id)}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold transition-colors truncate ${
+              className={`flex-1 sm:flex-none px-1.5 sm:px-3 py-1.5 rounded-md text-[10px] sm:text-xs font-semibold transition-colors text-center leading-tight ${
                 activeTab === t.id
                   ? "bg-sky-400/20 text-sky-300"
                   : "text-white/55 hover:text-white/90"
@@ -111,7 +111,7 @@ function MockBrowser({ activeTab, onTabChange, children }) {
           ))}
         </div>
       </div>
-      <div className="relative aspect-[16/10] sm:aspect-[16/9] bg-[#0D1117]/80 overflow-hidden">
+      <div className="relative aspect-[10/11] sm:aspect-[16/9] bg-[#0D1117]/80 overflow-hidden">
         {children}
       </div>
     </div>
@@ -133,45 +133,46 @@ function MockTomaDeRamos() {
   ];
 
   return (
-    <div className="absolute inset-0 flex select-none">
-      <div className="w-[44%] sm:w-[40%] border-r border-[var(--borderColor)] p-3 sm:p-4 flex flex-col gap-2 bg-[var(--bgSecondary)] min-w-0">
+    <div className="absolute inset-0 flex flex-col sm:flex-row select-none min-h-0">
+      {/* Lista de ramos: chips en móvil, panel en desktop */}
+      <div className="sm:w-[40%] border-b sm:border-b-0 sm:border-r border-[var(--borderColor)] p-2.5 sm:p-4 flex flex-col gap-2 bg-[var(--bgSecondary)] min-w-0 shrink-0 sm:shrink sm:min-h-0 sm:h-full">
         <div className="flex items-center justify-between gap-2 shrink-0">
-          <span className="font-bold text-[var(--textPrimary)] uppercase tracking-wide text-[11px] sm:text-xs">
+          <span className="font-bold text-[var(--textPrimary)] uppercase tracking-wide text-[10px] sm:text-xs">
             Tus asignaturas
           </span>
-          <span className="text-[var(--primary)] font-extrabold text-[11px] sm:text-xs shrink-0">
+          <span className="text-[var(--primary)] font-extrabold text-[10px] sm:text-xs shrink-0">
             4 de 4
           </span>
         </div>
-        <div className="flex-1 min-h-0 flex flex-col gap-1.5 sm:gap-2 overflow-hidden">
+        <div className="flex sm:flex-col gap-1.5 sm:gap-2 overflow-x-auto sm:overflow-hidden sm:flex-1 sm:min-h-0 pb-0.5 sm:pb-0">
           {courses.map((c) => (
             <div
               key={c.name}
-              className={`rounded-lg border px-2.5 py-2 sm:px-3 sm:py-2.5 min-w-0 ${
+              className={`rounded-lg border px-2.5 py-1.5 sm:px-3 sm:py-2.5 min-w-[9.5rem] sm:min-w-0 shrink-0 sm:shrink ${
                 c.sel
                   ? "border-[var(--primary)] bg-[var(--primaryMuted)]"
                   : "border-[var(--borderColor)] bg-[var(--bgPrimary)]"
               }`}
             >
-              <p className="font-bold text-[12px] sm:text-[13px] text-[var(--textPrimary)] truncate leading-tight">
+              <p className="font-bold text-[11px] sm:text-[13px] text-[var(--textPrimary)] truncate leading-tight">
                 {c.name}
               </p>
-              <p className="text-[11px] text-[var(--textSecondary)] flex items-center gap-1 mt-1">
+              <p className="text-[10px] sm:text-[11px] text-[var(--textSecondary)] flex items-center gap-1 mt-0.5 sm:mt-1">
                 {c.sel && <CheckCircle2 className="w-3 h-3 text-[var(--primary)] shrink-0" />}
-                <span className="truncate">Sección {c.sec} seleccionada</span>
+                <span className="truncate">Sec. {c.sec}</span>
               </p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex-1 p-3 sm:p-4 flex flex-col gap-2.5 min-w-0">
+      <div className="flex-1 p-2.5 sm:p-4 flex flex-col gap-2 sm:gap-2.5 min-w-0 min-h-0">
         <div className="flex items-start justify-between gap-2 shrink-0">
           <div className="min-w-0">
-            <p className="font-black text-[var(--textPrimary)] uppercase tracking-wider text-[11px] sm:text-xs">
+            <p className="font-black text-[var(--textPrimary)] uppercase tracking-wider text-[10px] sm:text-xs">
               Tu horario
             </p>
-            <p className="text-[11px] sm:text-xs text-[var(--textSecondary)] mt-0.5">
+            <p className="text-[10px] sm:text-xs text-[var(--textSecondary)] mt-0.5">
               4 ramos · Sin topes
             </p>
           </div>
@@ -182,18 +183,18 @@ function MockTomaDeRamos() {
           </span>
         </div>
 
-        <div className="flex-1 min-h-0 grid grid-cols-4 gap-1.5 sm:gap-2">
+        <div className="flex-1 min-h-0 grid grid-cols-4 gap-1 sm:gap-2">
           {days.map((day) => (
             <div
               key={day.d}
-              className="relative rounded-lg border border-[var(--borderColor)] bg-[var(--bgSecondary)] p-1.5 flex flex-col min-h-0"
+              className="relative rounded-lg border border-[var(--borderColor)] bg-[var(--bgSecondary)] p-1 sm:p-1.5 flex flex-col min-h-0 min-w-0"
             >
-              <span className="text-center font-extrabold text-[var(--textSecondary)] text-[10px] sm:text-[11px] mb-1.5 shrink-0">
+              <span className="text-center font-extrabold text-[var(--textSecondary)] text-[9px] sm:text-[11px] mb-1 shrink-0">
                 {day.d}
               </span>
               <div className="relative flex-1 min-h-0">
                 <div
-                  className={`absolute left-0 right-0 rounded-md px-1 py-1.5 ${
+                  className={`absolute left-0 right-0 rounded-md px-0.5 sm:px-1 py-1 sm:py-1.5 overflow-hidden ${
                     day.tone === "blue"
                       ? "bg-[var(--primaryMuted)] border border-[var(--primary)]/40"
                       : "bg-emerald-500/10 border border-emerald-500/35"
@@ -201,13 +202,15 @@ function MockTomaDeRamos() {
                   style={{ top: day.top || "8%", height: day.h }}
                 >
                   <p
-                    className={`font-bold text-[10px] sm:text-[11px] leading-tight ${
+                    className={`font-bold text-[9px] sm:text-[11px] leading-tight truncate ${
                       day.tone === "blue" ? "text-[var(--primary)]" : "text-emerald-400"
                     }`}
                   >
                     {day.label}
                   </p>
-                  <p className="text-[10px] text-[var(--textSecondary)] mt-0.5">{day.time}</p>
+                  <p className="text-[9px] sm:text-[10px] text-[var(--textSecondary)] mt-0.5 truncate">
+                    {day.time}
+                  </p>
                 </div>
               </div>
             </div>
@@ -234,18 +237,22 @@ function MockMalla() {
   const label = { ok: "Aprobada", sel: "Seleccionada", pre: "Prerrequisito", un: "Desbloquea" };
 
   const Card = ({ name, st }) => (
-    <div className={`relative h-full rounded-xl border px-2.5 py-2.5 sm:px-3 sm:py-3 ${cls[st]}`}>
-      <span className="absolute top-2 right-2 text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-white/10 bg-black/30 text-white/60 inline-flex items-center gap-0.5">
-        <Network className="w-2.5 h-2.5" />
+    <div className={`relative h-full rounded-xl border px-2 py-2 sm:px-3 sm:py-3 min-w-0 ${cls[st]}`}>
+      <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded-md border border-white/10 bg-black/30 text-white/60 inline-flex items-center gap-0.5">
+        <Network className="w-2.5 h-2.5 hidden sm:block" />
         PR
       </span>
-      <p className="text-[12px] sm:text-[13px] font-bold text-white pr-10 leading-snug">{name}</p>
-      <p className={`text-[11px] mt-1.5 font-semibold ${labelCls[st]}`}>{label[st]}</p>
+      <p className="text-[11px] sm:text-[13px] font-bold text-white pr-7 sm:pr-10 leading-snug break-words">
+        {name}
+      </p>
+      <p className={`text-[10px] sm:text-[11px] mt-1 sm:mt-1.5 font-semibold ${labelCls[st]}`}>
+        {label[st]}
+      </p>
     </div>
   );
 
   const Conn = ({ from }) => (
-    <div className="flex items-center self-center w-5 sm:w-7 shrink-0" aria-hidden>
+    <div className="hidden sm:flex items-center self-center w-5 sm:w-7 shrink-0" aria-hidden>
       <div
         className={`h-[2px] flex-1 rounded-full ${
           from === "sel"
@@ -258,12 +265,12 @@ function MockMalla() {
   );
 
   return (
-    <div className="absolute inset-0 p-3 sm:p-5 select-none overflow-hidden">
-      <div className="grid grid-cols-[1fr_1fr_auto_1fr] gap-x-1.5 sm:gap-x-2 gap-y-2 h-full content-start">
-        <p className="text-[11px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Semestre 1</p>
-        <p className="text-[11px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Semestre 2</p>
-        <span aria-hidden />
-        <p className="text-[11px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Semestre 3</p>
+    <div className="absolute inset-0 p-2.5 sm:p-5 select-none overflow-hidden">
+      <div className="grid grid-cols-3 sm:grid-cols-[1fr_1fr_auto_1fr] gap-x-1.5 sm:gap-x-2 gap-y-2 h-full content-start">
+        <p className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Sem. 1</p>
+        <p className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Sem. 2</p>
+        <span className="hidden sm:block" aria-hidden />
+        <p className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Sem. 3</p>
 
         <Card name="Cálculo I" st="ok" />
         <Card name="Intro Prog." st="sel" />
@@ -281,28 +288,38 @@ function MockMalla() {
 
 function MockNotas() {
   return (
-    <div className="absolute inset-0 p-4 sm:p-6 flex items-center justify-center select-none">
-      <div className="w-full max-w-md rounded-xl border border-[var(--borderColor)] bg-[var(--bgSecondary)] p-4 sm:p-5 space-y-3">
-        <div>
-          <p className="text-sm font-black text-[var(--textPrimary)]">Cálculo II</p>
-          <p className="text-xs text-[var(--textSecondary)] mt-0.5">MAT210 · Evaluaciones</p>
+    <div className="absolute inset-0 p-2.5 sm:p-5 flex items-center justify-center select-none overflow-hidden">
+      <div className="w-full max-w-md h-full max-h-full rounded-xl border border-[var(--borderColor)] bg-[var(--bgSecondary)] p-2.5 sm:p-5 flex flex-col min-h-0 gap-1.5 sm:gap-3">
+        <div className="shrink-0">
+          <p className="text-[13px] sm:text-sm font-black text-[var(--textPrimary)] leading-tight">
+            Cálculo II
+          </p>
+          <p className="text-[10px] sm:text-xs text-[var(--textSecondary)] mt-0.5">
+            MAT210 · Evaluaciones
+          </p>
         </div>
-        {[
-          ["Solemne 1", "30%", "5.4"],
-          ["Solemne 2", "30%", "—"],
-          ["Controles", "20%", "5.8"],
-          ["Examen", "20%", "—"],
-        ].map(([n, p, v]) => (
-          <div
-            key={n}
-            className="flex items-center justify-between text-xs sm:text-[13px] border-b border-[var(--borderColor)] pb-2"
-          >
-            <span className="text-[var(--textPrimary)] font-semibold">{n}</span>
-            <span className="text-[var(--textSecondary)]">{p}</span>
-            <span className="font-bold text-[var(--textPrimary)] w-8 text-right">{v}</span>
-          </div>
-        ))}
-        <div className="grid grid-cols-3 gap-2 pt-1">
+
+        <div className="flex-1 min-h-0 flex flex-col justify-evenly gap-0.5">
+          {[
+            ["Solemne 1", "30%", "5.4"],
+            ["Solemne 2", "30%", "—"],
+            ["Controles", "20%", "5.8"],
+            ["Examen", "20%", "—"],
+          ].map(([n, p, v]) => (
+            <div
+              key={n}
+              className="flex items-center justify-between gap-2 text-[11px] sm:text-[13px] border-b border-[var(--borderColor)] py-1 sm:py-1.5 last:border-0"
+            >
+              <span className="text-[var(--textPrimary)] font-semibold truncate min-w-0">{n}</span>
+              <span className="text-[var(--textSecondary)] shrink-0">{p}</span>
+              <span className="font-bold text-[var(--textPrimary)] w-7 sm:w-8 text-right shrink-0">
+                {v}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-3 gap-1 sm:gap-2 shrink-0">
           {[
             ["Promedio", "5.6"],
             ["Próxima nota", "4.8"],
@@ -310,12 +327,14 @@ function MockNotas() {
           ].map(([l, v]) => (
             <div
               key={l}
-              className="rounded-lg bg-[var(--bgPrimary)] border border-[var(--borderColor)] p-2.5 text-center"
+              className="rounded-lg bg-[var(--bgPrimary)] border border-[var(--borderColor)] px-1.5 py-1.5 sm:p-2.5 text-center min-w-0"
             >
-              <p className="text-[10px] sm:text-[11px] text-[var(--textSecondary)] font-semibold leading-tight">
+              <p className="text-[8px] sm:text-[11px] text-[var(--textSecondary)] font-semibold leading-tight">
                 {l}
               </p>
-              <p className="mt-1 text-base sm:text-lg font-black text-[var(--primary)]">{v}</p>
+              <p className="mt-0.5 sm:mt-1 text-[13px] sm:text-lg font-black text-[var(--primary)] leading-none">
+                {v}
+              </p>
             </div>
           ))}
         </div>
@@ -585,7 +604,7 @@ export default function LandingPage() {
               ))}
             </nav>
 
-            <div className="hidden sm:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
               {!hasMalla && (
                 <button
                   type="button"
@@ -598,7 +617,7 @@ export default function LandingPage() {
               <button
                 type="button"
                 onClick={openApp}
-                className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-sky-500 hover:bg-sky-400 transition min-h-[44px] shadow-[0_0_24px_rgba(56,189,248,0.28)]"
+                className="px-4 py-2 rounded-lg text-sm font-bold text-white bg-sky-500 hover:bg-sky-400 transition min-h-[44px] shadow-[0_0_24px_rgba(56,189,248,0.28)] max-w-[220px] truncate"
               >
                 {primaryLabel}
               </button>
@@ -677,9 +696,9 @@ export default function LandingPage() {
                 <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
                 Hecho para estudiantes UNAB
               </p>
-              <h1 className="text-[1.85rem] sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight leading-[1.15] text-white">
+              <h1 className="text-[1.65rem] sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight leading-[1.15] text-white">
                 <span className="block">Malla Pro</span>
-                <span className="block mt-2 font-semibold text-white/95">
+                <span className="block mt-2 font-semibold text-white/95 text-[1.15rem] sm:text-[inherit] leading-snug">
                   Tu malla, tus notas y tu toma de ramos.{" "}
                   <span className="text-sky-400">Todo en un solo lugar.</span>
                 </span>
@@ -692,15 +711,15 @@ export default function LandingPage() {
                 <button
                   type="button"
                   onClick={openApp}
-                  className="inline-flex items-center justify-center gap-2 min-h-[48px] px-5 rounded-xl bg-sky-500 text-white font-bold text-sm hover:bg-sky-400 transition shadow-[0_8px_28px_rgba(56,189,248,0.3)]"
+                  className="inline-flex items-center justify-center gap-2 min-h-[48px] px-5 rounded-xl bg-sky-500 text-white font-bold text-sm hover:bg-sky-400 transition shadow-[0_8px_28px_rgba(56,189,248,0.3)] text-center"
                 >
-                  {primaryLabel}
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="truncate">{primaryLabel}</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
                 <a
                   href="#como-funciona"
                   onClick={(e) => onNavClick(e, "#como-funciona")}
-                  className="inline-flex items-center justify-center min-h-[48px] px-5 rounded-xl text-sm font-semibold text-white lp-glass-chip hover:bg-white/[0.08] transition"
+                  className="inline-flex items-center justify-center min-h-[48px] px-5 rounded-xl text-sm font-semibold text-white lp-glass-chip hover:bg-white/[0.08] transition text-center"
                 >
                   Ver cómo funciona
                 </a>
@@ -783,7 +802,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="mt-8 relative rounded-2xl lp-glass-strong overflow-hidden">
-            <div className="aspect-[16/10] sm:aspect-[16/9] relative max-h-[420px] mx-auto">
+            <div className="aspect-[5/4] sm:aspect-[16/9] relative max-h-[480px] mx-auto">
               <MockTomaDeRamos />
             </div>
             <div className="flex flex-wrap gap-2 p-3 sm:p-4 border-t border-[var(--borderColor)] bg-[var(--bgPrimary)]/50">
@@ -797,7 +816,7 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-          <ol className="mt-6 grid grid-cols-2 sm:grid-cols-5 gap-2 text-[11px] font-semibold text-[var(--textSecondary)]">
+          <ol className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-[12px] sm:text-[11px] font-semibold text-[var(--textSecondary)]">
             {[
               "Avance registrado",
               "Programación cargada",
@@ -805,11 +824,11 @@ export default function LandingPage() {
               "Secciones disponibles",
               "Horario construido",
             ].map((s, i) => (
-              <li key={s} className="flex items-center gap-2">
+              <li key={s} className="flex items-center gap-2 min-w-0">
                 <span className="w-5 h-5 rounded-full bg-[var(--primaryMuted)] text-[var(--primary)] flex items-center justify-center text-[10px] font-black shrink-0">
                   {i + 1}
                 </span>
-                {s}
+                <span className="leading-snug">{s}</span>
               </li>
             ))}
           </ol>
@@ -835,7 +854,7 @@ export default function LandingPage() {
                 <FeaturePoint>Modo excepcional y ocultar completados</FeaturePoint>
               </ul>
             </div>
-            <div className="rounded-2xl lp-glass-strong overflow-hidden aspect-[16/11] sm:aspect-[5/4] relative max-h-[380px]">
+            <div className="rounded-2xl lp-glass-strong overflow-hidden aspect-[5/4] sm:aspect-[5/4] relative max-h-[380px]">
               <MockMalla />
             </div>
           </div>
@@ -847,8 +866,8 @@ export default function LandingPage() {
           className="lp-container py-14 sm:py-16 border-t border-[var(--borderColor)]"
         >
           <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div className="order-2 lg:order-1 rounded-2xl lp-glass-strong overflow-hidden relative min-h-[320px] sm:min-h-[360px]">
-              <div className="absolute inset-0 p-4 sm:p-5 select-none overflow-hidden">
+            <div className="order-2 lg:order-1 rounded-2xl lp-glass-strong overflow-hidden relative min-h-0">
+              <div className="p-4 sm:p-5 select-none">
                 <p className="font-black text-[var(--textPrimary)] text-sm mb-3">Ciberseguridad</p>
                 {[
                   { sec: "300", sel: true, h: "LU 8:30 · VI 10:00", p: "Prof. Rivas · Presencial" },
@@ -857,19 +876,19 @@ export default function LandingPage() {
                 ].map((s) => (
                   <div
                     key={s.sec}
-                    className={`mb-2.5 rounded-xl border p-3 ${
+                    className={`mb-2.5 last:mb-0 rounded-xl border p-3 ${
                       s.sel
                         ? "border-[var(--primary)] bg-[var(--primaryMuted)]"
                         : "border-[var(--borderColor)] bg-[var(--bgPrimary)]"
                     }`}
                   >
-                    <div className="flex justify-between font-bold text-[13px] text-[var(--textPrimary)]">
-                      <span>Sección {s.sec}</span>
-                      <span className="text-[var(--textSecondary)] font-semibold">NRC 12{s.sec}</span>
+                    <div className="flex justify-between gap-2 font-bold text-[13px] text-[var(--textPrimary)]">
+                      <span className="min-w-0 truncate">Sección {s.sec}</span>
+                      <span className="text-[var(--textSecondary)] font-semibold shrink-0">NRC 12{s.sec}</span>
                     </div>
                     <p className="text-xs text-[var(--textSecondary)] mt-1.5">{s.h}</p>
-                    <p className="text-xs text-[var(--textSecondary)] mt-0.5">
-                      {s.p} · Cupos informados 28
+                    <p className="text-xs text-[var(--textSecondary)] mt-0.5 leading-snug">
+                      {s.p} · Cupos 28
                     </p>
                   </div>
                 ))}
@@ -919,49 +938,51 @@ export default function LandingPage() {
                 <FeaturePoint>Resumen de NRC y créditos</FeaturePoint>
               </ul>
             </div>
-            <div className="rounded-2xl lp-glass-strong p-3 sm:p-4 select-none">
+            <div className="rounded-2xl lp-glass-strong p-3 sm:p-4 select-none min-w-0">
               <div className="flex items-center justify-between mb-3 gap-2">
                 <span className="text-xs font-black uppercase tracking-wider">Semana</span>
                 <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1 shrink-0">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Sin topes
                 </span>
               </div>
-              <div className="grid grid-cols-6 gap-1.5 text-[11px]">
-                {[
-                  { d: "LU", block: { t: "Ramo 1", h: "8:30", c: "blue" } },
-                  { d: "MA", block: { t: "Ramo 2", h: "10:00", c: "green" } },
-                  { d: "MI", block: { t: "Tope", h: "8:30", c: "amber" } },
-                  { d: "JU", block: { t: "Ramo 3", h: "10:00", c: "blue" } },
-                  { d: "VI", block: null },
-                  { d: "SA", block: null },
-                ].map(({ d, block }) => (
-                  <div
-                    key={d}
-                    className="rounded-lg border border-[var(--borderColor)] bg-[var(--bgPrimary)] min-h-[100px] p-1.5 flex flex-col"
-                  >
-                    <p className="text-center font-extrabold text-[var(--textSecondary)] text-[10px] mb-1.5">
-                      {d}
-                    </p>
-                    {block && (
-                      <div
-                        className={`rounded-md p-1.5 mt-1 ${
-                          block.c === "amber"
-                            ? "bg-amber-500/15 border border-amber-500/40"
-                            : block.c === "green"
-                              ? "bg-emerald-500/10 border border-emerald-500/35"
-                              : "bg-[var(--primaryMuted)] border border-[var(--primary)]/35"
-                        }`}
-                      >
-                        <p className="font-bold text-[var(--textPrimary)] text-[10px] leading-tight">
-                          {block.t}
-                        </p>
-                        <p className="text-[var(--textSecondary)] text-[10px] mt-0.5">{block.h}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="overflow-x-auto -mx-0.5 px-0.5">
+                <div className="grid grid-cols-6 gap-1.5 text-[11px] min-w-[22rem] sm:min-w-0">
+                  {[
+                    { d: "LU", block: { t: "Ramo 1", h: "8:30", c: "blue" } },
+                    { d: "MA", block: { t: "Ramo 2", h: "10:00", c: "green" } },
+                    { d: "MI", block: { t: "Tope", h: "8:30", c: "amber" } },
+                    { d: "JU", block: { t: "Ramo 3", h: "10:00", c: "blue" } },
+                    { d: "VI", block: null },
+                    { d: "SA", block: null },
+                  ].map(({ d, block }) => (
+                    <div
+                      key={d}
+                      className="rounded-lg border border-[var(--borderColor)] bg-[var(--bgPrimary)] min-h-[100px] p-1.5 flex flex-col min-w-0"
+                    >
+                      <p className="text-center font-extrabold text-[var(--textSecondary)] text-[10px] mb-1.5">
+                        {d}
+                      </p>
+                      {block && (
+                        <div
+                          className={`rounded-md p-1.5 mt-1 overflow-hidden ${
+                            block.c === "amber"
+                              ? "bg-amber-500/15 border border-amber-500/40"
+                              : block.c === "green"
+                                ? "bg-emerald-500/10 border border-emerald-500/35"
+                                : "bg-[var(--primaryMuted)] border border-[var(--primary)]/35"
+                          }`}
+                        >
+                          <p className="font-bold text-[var(--textPrimary)] text-[10px] leading-tight truncate">
+                            {block.t}
+                          </p>
+                          <p className="text-[var(--textSecondary)] text-[10px] mt-0.5">{block.h}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--textSecondary)] font-semibold">
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--textSecondary)] font-semibold">
                 <span>4 ramos · 16 créditos</span>
                 <span className="inline-flex items-center gap-1 text-[var(--textPrimary)]">
                   <Download className="w-3.5 h-3.5" /> Exportar PDF
@@ -1140,16 +1161,21 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
-            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2 text-sm font-semibold">
+            <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-sm font-semibold">
               {["PDF", "Tu navegador", "Malla Pro"].map((step, i) => (
                 <div key={step} className="contents">
                   <div className="flex-1 rounded-xl border border-[var(--borderColor)] bg-[var(--bgPrimary)] px-4 py-3 text-center text-[var(--textPrimary)]">
                     {step}
                   </div>
                   {i < 2 && (
-                    <span className="hidden sm:block text-[var(--textSecondary)] px-1" aria-hidden>
-                      →
-                    </span>
+                    <>
+                      <span className="hidden sm:flex items-center justify-center text-[var(--textSecondary)] px-1" aria-hidden>
+                        →
+                      </span>
+                      <span className="sm:hidden flex items-center justify-center text-[var(--textSecondary)] text-xs py-0.5" aria-hidden>
+                        ↓
+                      </span>
+                    </>
                   )}
                 </div>
               ))}
@@ -1296,9 +1322,22 @@ export default function LandingPage() {
           max-width: 1280px;
           margin-inline: auto;
           padding-inline: 24px;
+          width: 100%;
+          box-sizing: border-box;
         }
         @media (max-width: 640px) {
           .lp-container { padding-inline: 16px; }
+        }
+
+        /* Evita desbordes de mockups en pantallas muy angostas */
+        .lp-root img,
+        .lp-root svg {
+          max-width: 100%;
+        }
+        .lp-browser,
+        .lp-glass,
+        .lp-glass-strong {
+          max-width: 100%;
         }
 
         .lp-glass-nav {
