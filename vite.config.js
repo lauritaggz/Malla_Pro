@@ -17,6 +17,7 @@ export default defineConfig({
           vendor: ["react", "react-dom"],
           motion: ["framer-motion"],
           icons: ["lucide-react"],
+          pdf: ["pdfjs-dist"],
         },
       },
     },
@@ -30,7 +31,13 @@ export default defineConfig({
   },
 
   server: {
-    port: 5173,
+    port: 5174,
     host: true,
+  },
+
+  test: {
+    globals: true,
+    environment: "node",
+    include: ["src/**/*.{test,spec}.{js,jsx}"],
   },
 });

@@ -1,223 +1,72 @@
-import React, { useState } from "react";
-import { Sun, Moon, FileText, CheckCircle, Menu, HelpCircle, CalendarDays, Heart } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { BookMarked, CalendarDays, CalendarRange, MessageCircle } from "lucide-react";
 
 export default function MobileBottomNav({
-  theme,
-  setTheme,
-  darkMode,
-  setDarkMode,
-  modoExcepcional,
-  setModoExcepcional,
-  excepcionesActivas,
-  cantidadSemestres,
-  onVerProgreso,
-  mostrarResumen,
-  ocultarCompletados,
-  setOcultarCompletados,
-  onShowTour,
-  onShowHorario,
-  onShowContacto,
-  onChangeMalla
+  vistaPrincipal = "malla",
+  setVistaPrincipal,
 }) {
-  const [showMore, setShowMore] = useState(false);
+  const navigate = useNavigate();
+
+  const navItems = [
+    {
+      label: "Mi malla",
+      value: "malla",
+      icon: <BookMarked className="w-5.5 h-5.5" />,
+      onClick: () => {
+        setVistaPrincipal("malla");
+        navigate("/app");
+      }
+    },
+    {
+      label: "Periodo actual",
+      value: "periodo-actual",
+      icon: <CalendarDays className="w-5.5 h-5.5" />,
+      onClick: () => {
+        setVistaPrincipal("periodo-actual");
+        navigate("/app");
+      }
+    },
+    {
+      label: "Toma de Ramos",
+      value: "toma-de-ramos",
+      icon: <CalendarRange className="w-5.5 h-5.5" />,
+      onClick: () => {
+        setVistaPrincipal("toma-de-ramos");
+        navigate("/programacion-academica");
+      }
+    },
+    {
+      label: "Tutorías",
+      value: "tutorias",
+      icon: <MessageCircle className="w-5.5 h-5.5" />,
+      onClick: () => {
+        setVistaPrincipal("tutorias");
+        navigate("/app");
+      }
+    }
+  ];
 
   return (
-    <>
-      {showMore && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-[80] sm:hidden" 
-          onClick={() => setShowMore(false)}
-        />
-      )}
-
-      {/* Menú expandido (Más opciones) */}
-      <AnimatePresence>
-        {showMore && (
-          <motion.div
-            initial={{ y: "100%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100%", opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-[var(--mobile-bottom-nav-h,4rem)] left-2 right-2 p-4 bg-bgSecondary border border-borderColor/50 rounded-2xl shadow-xl z-[90] sm:hidden flex flex-col gap-4 backdrop-blur-md"
+    <div className="fixed bottom-0 left-0 right-0 h-[calc(4rem+env(safe-area-inset-bottom,0px))] bg-bgSecondary/90 backdrop-blur-xl border-t border-borderColor/50 z-[90] sm:hidden grid grid-cols-4 items-center px-1 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
+      {navItems.map((item) => {
+        const isActive = vistaPrincipal === item.value;
+        return (
+          <button
+            key={item.value}
+            onClick={item.onClick}
+            className={`flex flex-col items-center justify-center p-1 transition-all duration-200 gap-1
+              ${isActive ? "text-primary font-bold scale-105" : "text-textSecondary"}`}
           >
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-xs font-bold text-textSecondary uppercase tracking-wider">Más Opciones</h3>
-              <button
-                onClick={() => {
-                  onShowTour();
-                  setShowMore(false);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-bold border border-primary/20"
-              >
-                <HelpCircle className="w-4 h-4" />
-                Ayuda / Tour
-              </button>
+            <div className={`transition-transform duration-200 ${isActive ? "scale-105 text-primary" : "text-textSecondary/80"}`}>
+              {item.icon}
             </div>
-            
-            {/* Tema y Modo Oscuro */}
-            <div className="flex flex-col gap-3 bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Modo Oscuro</span>
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="w-10 h-10 rounded-full bg-bgSecondary flex items-center justify-center border border-borderColor/50 text-primary transition-colors"
-                >
-                  {darkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-                </button>
-              </div>
-              <div className="border-t border-borderColor/30 pt-3">
-                 <label className="text-sm font-medium mb-2 block">Tema de color:</label>
-                 <select
-                    value={theme}
-                    onChange={(e) => {
-                       setTheme(e.target.value);
-                       setShowMore(false);
-                    }}
-                    className="w-full appearance-none rounded-lg px-3 py-2 border border-borderColor bg-bgSecondary text-textPrimary text-sm font-medium outline-none"
-                 >
-                    <option value="aurora">Aurora Blue</option>
-                    <option value="sunset">Sunset Pink</option>
-                    <option value="emerald">Emerald Mist</option>
-                    <option value="midnight">Midnight Purple</option>
-                    <option value="golden">Golden Carbon</option>
-                 </select>
-              </div>
-            </div>
-
-            {/* Horario */}
-            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
-              <button
-                onClick={() => {
-                  onShowHorario();
-                  setShowMore(false);
-                }}
-                className="w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm
-                           bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15"
-              >
-                <CalendarDays className="w-5 h-5" />
-                Horario
-              </button>
-            </div>
-
-            {/* Enviar malla */}
-            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
-              <button
-                onClick={() => {
-                  onShowContacto();
-                  setShowMore(false);
-                }}
-                className="w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm
-                           bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/15"
-              >
-                <Heart className="w-5 h-5" />
-                Enviar mi malla
-              </button>
-            </div>
-
-            {/* Ocultar semestres completados */}
-            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
-              <button 
-                onClick={() => {
-                  setOcultarCompletados(!ocultarCompletados);
-                  setShowMore(false);
-                }}
-                className={`w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center transition-colors shadow-sm ${
-                  ocultarCompletados 
-                    ? "bg-primary text-white border border-primary/50" 
-                    : "bg-bgSecondary text-textSecondary border border-borderColor/50"
-                }`}
-              >
-                {ocultarCompletados ? "👁️ Mostrar semestres listos" : "🫣 Ocultar semestres listos"}
-              </button>
-            </div>
-
-            {/* Aprobar hasta semestre */}
-            <div className="bg-bgPrimary p-3 rounded-xl border border-borderColor/30">
-              <label className="text-sm font-medium mb-2 block">Marcar aprobados hasta:</label>
-              <select
-                className="w-full appearance-none rounded-lg px-3 py-2 border border-borderColor bg-bgSecondary text-textPrimary text-sm font-medium outline-none"
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (value) {
-                    window.dispatchEvent(new CustomEvent("aprobarHastaSemestre", { detail: value }));
-                    e.target.value = "";
-                    setShowMore(false);
-                  }
-                }}
-              >
-                <option value="">Seleccionar Semestre</option>
-                {Array.from({ length: cantidadSemestres }).map((_, i) => (
-                  <option key={i} value={i + 1}>
-                    Semestre {i + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            {/* Cambiar Malla */}
-            <button
-              onClick={() => {
-                setShowMore(false);
-                onChangeMalla();
-              }}
-              className="w-full py-2.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-sm font-bold transition-colors mt-2"
-            >
-              🔄 Cambiar Malla
-            </button>
-
-            <button  
-              onClick={() => setShowMore(false)}
-              className="w-full py-2 bg-textSecondary/10 rounded-lg text-sm font-medium mt-2"
-            >
-              Cerrar
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Bottom Nav Bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-[var(--mobile-bottom-nav-h,4rem)] bg-bgSecondary/90 backdrop-blur-xl border-t border-borderColor/30 z-[90] sm:hidden flex justify-around items-center px-1 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
-        
-        {/* Progreso */}
-        <button 
-          onClick={() => {
-            onVerProgreso();
-            setShowMore(false);
-          }}
-          className={`flex flex-col items-center justify-center p-1.5 transition-colors ${mostrarResumen ? "text-primary scale-105" : "text-textSecondary hover:text-primary"}`}
-        >
-          <CheckCircle className="w-5 h-5 mb-0.5" />
-          <span className="text-[9px] font-medium">Resumen</span>
-        </button>
-
-        {/* Excepcional */}
-        <button 
-          onClick={() => setModoExcepcional(!modoExcepcional)}
-          className={`flex flex-col items-center justify-center p-1.5 relative transition-all duration-300 ${
-             modoExcepcional 
-               ? "text-amber-500 scale-105 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" 
-               : "text-textSecondary hover:text-primary"
-          }`}
-        >
-          <FileText className={`w-5 h-5 mb-0.5 ${modoExcepcional ? "animate-pulse" : ""}`} />
-          <span className="text-[9px] font-medium">{modoExcepcional ? "Activo" : "Excepcional"}</span>
-          {excepcionesActivas > 0 && (
-            <span className="absolute top-0.5 right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
-              {excepcionesActivas}
+            <span className="text-[9.5px] font-semibold leading-none truncate w-full text-center">
+              {item.label}
             </span>
-          )}
-        </button>
-
-        {/* Más Opciones */}
-        <button 
-          onClick={() => setShowMore(!showMore)}
-          className={`flex flex-col items-center justify-center p-1.5 transition-colors ${showMore ? "text-primary" : "text-textSecondary hover:text-primary"}`}
-        >
-          <Menu className="w-5 h-5 mb-0.5" />
-          <span className="text-[9px] font-medium">Opciones</span>
-        </button>
-      </div>
-    </>
+          </button>
+        );
+      })}
+    </div>
   );
 }

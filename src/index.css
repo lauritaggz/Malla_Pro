@@ -133,6 +133,55 @@
   --primaryMuted:   rgba(252,211,77,0.10);
 }
 
+/* ── Design tokens system mappings ────────────────────────────── */
+:root {
+  --brand-primary: var(--primary);
+  --brand-soft: var(--primaryMuted);
+  --brand-contrast: #ffffff;
+  --focus-ring: var(--primary);
+
+  --background: var(--bgPrimary);
+  --surface: var(--bgSecondary);
+  --surface-subtle: var(--bgPrimary);
+  --surface-raised: var(--bgSurface);
+  --border: var(--borderColor);
+  --border-strong: var(--textSecondary);
+  --text-primary: var(--textPrimary);
+  --text-secondary: var(--textSecondary);
+  --text-muted: var(--textSecondary);
+
+  /* Semantic status colors (fixed color meanings!) */
+  --status-approved-bg: rgba(16, 185, 129, 0.08);
+  --status-approved-border: rgba(16, 185, 129, 0.35);
+  --status-approved-text: #059669;
+
+  --status-current-bg: rgba(37, 99, 235, 0.08);
+  --status-current-border: rgba(37, 99, 235, 0.4);
+  --status-current-text: #2563eb;
+
+  --status-available-bg: transparent;
+  --status-available-border: var(--borderColor);
+  --status-available-text: var(--textPrimary);
+
+  --status-blocked-bg: rgba(148, 163, 184, 0.06);
+  --status-blocked-border: var(--borderColor);
+  --status-blocked-text: var(--textSecondary);
+}
+
+.dark {
+  --status-approved-text: #34d399;
+  --status-current-text: #60a5fa;
+  --status-approved-bg: rgba(52, 211, 153, 0.1);
+  --status-current-bg: rgba(96, 165, 250, 0.1);
+}
+
+.light {
+  --status-approved-text: #059669;
+  --status-current-text: #2563eb;
+  --status-approved-bg: rgba(16, 185, 129, 0.08);
+  --status-current-bg: rgba(37, 99, 235, 0.08);
+}
+
 /* ── Utility classes ──────────────────────────────────────────── */
 .bg-primary         { background-color: var(--primary); }
 .text-primary       { color: var(--primary); }
@@ -153,6 +202,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .main-content-zoom {
+    zoom: 0.9;
+  }
 }
 
 /* ── Theme transition ─────────────────────────────────────────── */
@@ -255,6 +310,14 @@ body {
   -webkit-overflow-scrolling: touch;
   contain: paint;
 }
+
+@media (min-width: 768px) {
+  .malla-wheel-scroll {
+    overflow-y: hidden;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+  }
+}
 .scroll-container::-webkit-scrollbar       { height: 6px; }
 .scroll-container::-webkit-scrollbar-thumb { background-color: var(--borderColor); border-radius: 8px; transition: background-color 0.2s ease; }
 .scroll-container::-webkit-scrollbar-thumb:hover { background-color: var(--primary); }
@@ -268,6 +331,9 @@ body {
   .scroll-container        { padding-bottom: 1.5rem; }
   .min-w-\[460px\]         { min-width: 380px !important; }
   .min-w-\[210px\]         { min-width: 180px !important; }
+}
+@media (max-width: 640px) {
+  .scroll-container        { padding-bottom: 0.35rem; }
 }
 @media (max-width: 480px) {
   .min-w-\[460px\]         { min-width: 320px !important; }
@@ -415,7 +481,7 @@ body {
 :root {
   --mobile-navbar-h: 3rem;
   --mobile-bottom-nav-h: 4rem;
-  --mobile-stats-h: 1.75rem;
+  --mobile-stats-h: 0px;
   --mobile-controls-h: 0px;
   --mobile-hint-h: 1.125rem;
 }
@@ -461,43 +527,6 @@ body {
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
-  }
-
-  .mobile-progress-chips {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.2rem 0.75rem 0.3rem;
-    min-height: var(--mobile-stats-h);
-    flex-shrink: 0;
-  }
-
-  .mobile-progress-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.125rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1.2;
-    white-space: nowrap;
-    border: 1px solid var(--borderColor);
-    background: var(--bgSecondary);
-    color: var(--textSecondary);
-  }
-
-  .mobile-progress-chip--aprobados {
-    color: #059669;
-    border-color: rgba(16, 185, 129, 0.25);
-    background: rgba(16, 185, 129, 0.08);
-  }
-
-  .mobile-progress-chip--encurso {
-    color: var(--primary);
-    border-color: var(--shadowPrimary);
-    background: var(--primaryMuted);
   }
 
   .mobile-semester-carousel {
@@ -650,4 +679,221 @@ body {
   .scroll-container {
     padding-bottom: 0.25rem;
   }
+}
+
+/* ── Modo pantalla completa / enfoque malla ───────────────────── */
+.malla-fullscreen-shell {
+  --malla-fs-header-h: 2.75rem;
+}
+
+.malla-fullscreen-shell .mobile-malla-controls {
+  flex-shrink: 0;
+}
+
+.malla-fullscreen-shell .malla-fullscreen-viewport {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 640px) {
+  .malla-fullscreen-shell .mobile-semester-card {
+    min-height: calc(
+      100dvh
+      - var(--malla-fs-header-h)
+      - var(--mobile-controls-h)
+      - var(--mobile-hint-h)
+      - 0.5rem
+    );
+    height: calc(
+      100dvh
+      - var(--malla-fs-header-h)
+      - var(--mobile-controls-h)
+      - var(--mobile-hint-h)
+      - 0.5rem
+    );
+  }
+}
+
+/* ================================================================
+   Malla Pro — Animations & Transitions (UI/UX Improvement)
+   ================================================================ */
+
+/* Accordion Grid Animation */
+.accordion-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    grid-template-rows 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.accordion-grid[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.accordion-content {
+  overflow: hidden;
+}
+
+.accordion-chevron {
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-open="true"] .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+/* Popover & Filter Drawer animations */
+.popover-animate {
+  animation: popoverFadeIn 200ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes marcarHastaFlash {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+}
+
+.marcar-hasta-btn {
+  position: relative;
+}
+
+.marcar-hasta-flash {
+  animation: marcarHastaFlash 0.7s ease-out;
+}
+
+.marcar-hasta-menu {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.marcar-hasta-item + .marcar-hasta-item {
+  border-top: 1px solid color-mix(in srgb, var(--borderColor) 55%, transparent);
+}
+
+/* Button & Active scaling */
+.btn-interactive {
+  transition: all 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.btn-interactive:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn-interactive:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .accordion-grid,
+  .accordion-chevron,
+  .popover-animate,
+  .btn-interactive,
+  .marcar-hasta-flash {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .accordion-grid {
+    grid-template-rows: 1fr !important;
+    opacity: 1 !important;
+  }
+  [data-open="true"] .accordion-chevron {
+    transform: rotate(180deg) !important;
+  }
+  .accordion-grid[data-open="false"] {
+    grid-template-rows: 0fr !important;
+    opacity: 0 !important;
+  }
+}
+
+/* ── Redesigned Course Cards ─────────────────────────────────── */
+.curso-card-base {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 72px;
+  position: relative;
+}
+
+.curso-card-base:hover {
+  transform: translateY(-1px);
+  border-color: var(--brand-primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Statuses */
+.curso-card-aprobado {
+  background: var(--status-approved-bg) !important;
+  border-color: var(--status-approved-border) !important;
+  color: var(--status-approved-text) !important;
+  border-left: 4px solid var(--status-approved-text) !important;
+}
+
+.curso-card-encurso {
+  background: var(--status-current-bg) !important;
+  border-color: var(--status-current-border) !important;
+  color: var(--status-current-text) !important;
+  border-left: 4px solid var(--status-current-text) !important;
+}
+
+.curso-card-disponible {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.curso-card-bloqueado {
+  background: var(--surface-subtle) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.65;
+}
+
+.curso-card-excepcional {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #d97706 !important;
+  border-left: 4px solid #d97706 !important;
+}
+
+/* SVG Prerequisites Line Flow Animation */
+@keyframes neonFlow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.neon-flow-path {
+  animation: neonFlow 0.8s linear infinite;
 }

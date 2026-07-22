@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Clock, MapPin } from "lucide-react";
 import { DAYS, getItemEndMinutes, timeToMinutes } from "../utils/scheduleUtils";
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 
 /* ─── Lógica próxima clase ─── */
-const SCHEDULE_KEY = "malla-horario-v1";
+const SCHEDULE_KEY = LEGACY_KEYS.horario;
 
 function loadItems() {
-  try {
-    const data = JSON.parse(localStorage.getItem(SCHEDULE_KEY) || "{}");
-    return Array.isArray(data.items) ? data.items : [];
-  } catch { return []; }
+  const data = safeStorage.get(SCHEDULE_KEY, {});
+  return Array.isArray(data?.items) ? data.items : [];
 }
 
 function findNextClass(items, now = new Date()) {
@@ -40,26 +40,7 @@ function findNextClass(items, now = new Date()) {
 }
 
 /* ─── Widget próxima clase ─── */
-function ProximaClase() {
-  const [nextClass, setNextClass] = useState(null);
-
-  const refresh = () => setNextClass(findNextClass(loadItems()));
-
-  useEffect(() => {
-    refresh();
-    const interval = setInterval(refresh, 60_000);
-    const onStorage = (e) => { if (!e.key || e.key === SCHEDULE_KEY) refresh(); };
-    const onHorarioUpdated = () => refresh();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("horario-updated", onHorarioUpdated);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("horario-updated", onHorarioUpdated);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+function ProximaClase({ nextClass }) {
   if (!nextClass) return null;
 
   return (
@@ -97,18 +78,31 @@ function ProximaClase() {
 
 /* ─── StatsDisplay ─── */
 export default function StatsDisplay({
-  totalCursos,
   cursosAprobados,
   cursosCursando,
   cursosEnCursoData = [],
 }) {
   const [promedioEnCurso, setPromedioEnCurso] = useState(null);
-  const porcentajeAprobados = totalCursos > 0 ? Math.round((cursosAprobados / totalCursos) * 100) : 0;
-  const totalSctEnCurso = cursosEnCursoData.reduce((total, curso) => total + (curso.sct || 0), 0);
+  const [nextClass, setNextClass] = useState(null);
+
+  useEffect(() => {
+    const refresh = () => setNextClass(findNextClass(loadItems()));
+    refresh();
+    const interval = setInterval(refresh, 60_000);
+    const onStorage = (e) => { if (!e.key || e.key === SCHEDULE_KEY) refresh(); };
+    const onHorarioUpdated = () => refresh();
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("horario-updated", onHorarioUpdated);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("horario-updated", onHorarioUpdated);
+    };
+  }, []);
 
   useEffect(() => {
     if (!cursosEnCursoData?.length) { setPromedioEnCurso(null); return; }
-    const notasGuardadas = JSON.parse(localStorage.getItem("malla-notas") || "{}");
+    const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
     let sumaPonderada = 0, totalSct = 0;
     cursosEnCursoData.forEach((curso) => {
       const evaluaciones = (notasGuardadas[curso.id] || []).filter((e) => e.nota != null);
@@ -123,79 +117,26 @@ export default function StatsDisplay({
     setPromedioEnCurso(totalSct > 0 ? sumaPonderada / totalSct : null);
   }, [cursosEnCursoData]);
 
+  const hasDesktopContent = nextClass !== null || promedioEnCurso !== null;
+
+  if (!hasDesktopContent) return null;
+
   return (
-    <>
-      {/* Mobile: chips compactos */}
-      <div className="mobile-progress-chips sm:hidden">
-        <span className="mobile-progress-chip mobile-progress-chip--aprobados">
-          ✓ {cursosAprobados} aprobado{cursosAprobados !== 1 ? "s" : ""}
-        </span>
-        <span className="text-textSecondary/40 text-[11px]">·</span>
-        <span className="mobile-progress-chip mobile-progress-chip--encurso">
-          ● {cursosCursando} en curso
-        </span>
-      </div>
+    <div className="hidden sm:block w-full max-w-7xl mx-auto px-6 py-3">
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
+        <ProximaClase nextClass={nextClass} />
 
-      {/* Desktop / tablet: tarjetas completas */}
-      <div className="hidden sm:block w-full max-w-7xl mx-auto px-6 py-3">
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
-
-          {/* Próxima clase */}
-          <ProximaClase />
-
-          {/* Aprobados */}
-          <div className="stat-card-aprobados flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-emerald-500/95 backdrop-blur-md border border-emerald-400/20 shadow-lg shadow-emerald-500/20 transition-all hover:scale-105">
-            <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
-            <div className="flex flex-col">
-              <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">Aprobados</span>
-              <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
-                {cursosAprobados}
-                <span className="text-sm font-medium opacity-80">ramos ({porcentajeAprobados}%)</span>
-              </span>
-            </div>
-          </div>
-
-          {/* En Curso */}
-          <div className="stat-card-encurso flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-primary backdrop-blur-md border border-primary/20 shadow-lg shadow-primary/25 transition-all hover:scale-105">
-            <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
-            <div className="flex flex-col">
-              <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">En Curso</span>
-              <span className="text-white text-xl font-bold leading-tight flex items-baseline gap-1">
-                {cursosCursando}
-                <span className="text-sm font-medium opacity-80">ramos</span>
-                {totalSctEnCurso > 0 && (
-                  <>
-                    <span className="text-sm font-medium opacity-60 mx-1">•</span>
-                    <span className="text-sm font-medium opacity-90">{totalSctEnCurso} SCT</span>
-                  </>
-                )}
-              </span>
-            </div>
-          </div>
-
-          {/* Promedio en curso */}
-          {promedioEnCurso !== null && (
-            <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
-              <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm" />
-              <div className="flex flex-col">
-                <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Promedio En Curso</span>
-                <span className="text-textPrimary text-xl font-bold leading-tight">{promedioEnCurso.toFixed(1)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Total */}
+        {promedioEnCurso !== null && (
           <div className="flex items-center gap-3 px-5 py-2.5 rounded-2xl glass-card border border-borderColor/60 shadow-md transition-all hover:scale-105">
-            <div className="w-3 h-3 rounded-full bg-primary shadow-sm" />
+            <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm" />
             <div className="flex flex-col">
-              <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Total Cursos</span>
-              <span className="text-textPrimary text-xl font-bold leading-tight">{totalCursos}</span>
+              <span className="text-textSecondary text-xs font-semibold uppercase tracking-wider">Promedio En Curso</span>
+              <span className="text-textPrimary text-xl font-bold leading-tight">{promedioEnCurso.toFixed(1)}</span>
             </div>
           </div>
-
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
 

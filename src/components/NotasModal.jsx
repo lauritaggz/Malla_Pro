@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Settings2, Plus, ChevronDown } from "lucide-react";
 import { parseGrade } from "../utils/gradeUtils";
 import DrawerPanel from "./DrawerPanel";
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 
 export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }) {
   const [evaluaciones, setEvaluaciones] = useState([]);
@@ -11,6 +14,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
     nota: "",
   });
   const [error, setError] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   // Configuración de Eximición y Examen
   const [config, setConfig] = useState({
@@ -34,46 +38,40 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   // Cargar evaluaciones del curso desde localStorage
   useEffect(() => {
     if (curso) {
-      const notasGuardadas = JSON.parse(
-        localStorage.getItem("malla-notas") || "{}"
-      );
+      const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
       const evals = notasGuardadas[curso.id] || [];
       setEvaluaciones(evals);
       setOpenSubNotas([]);
       setSubNotaInputs({});
       setError("");
+      setShowAddForm(false);
+      setShowConfig(false);
 
-      const configsGuardadas = JSON.parse(
-        localStorage.getItem("malla-configs") || "{}"
-      );
+      const configsGuardadas = safeStorage.get(LEGACY_KEYS.configs, {});
       setConfig(configsGuardadas[curso.id] || {
         notaEximicion: 5.0,
         ponderacionPresentacion: 70,
         ponderacionExamen: 30,
       });
 
-      const examenesGuardados = JSON.parse(
-        localStorage.getItem("malla-examenes") || "{}"
-      );
+      const examenesGuardados = safeStorage.get(LEGACY_KEYS.examenes, {});
       setNotaExamen(examenesGuardados[curso.id] || "");
     }
   }, [curso]);
 
   // Guardar evaluaciones en localStorage
   const guardarEvaluaciones = (evals) => {
-    const notasGuardadas = JSON.parse(
-      localStorage.getItem("malla-notas") || "{}"
-    );
+    const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
     notasGuardadas[curso.id] = evals;
-    localStorage.setItem("malla-notas", JSON.stringify(notasGuardadas));
+    safeStorage.set(LEGACY_KEYS.notas, notasGuardadas);
     setEvaluaciones(evals);
     window.dispatchEvent(new Event("notasModificadas"));
   };
 
   const guardarConfig = (newConfig) => {
-    const configs = JSON.parse(localStorage.getItem("malla-configs") || "{}");
+    const configs = safeStorage.get(LEGACY_KEYS.configs, {});
     configs[curso.id] = newConfig;
-    localStorage.setItem("malla-configs", JSON.stringify(configs));
+    safeStorage.set(LEGACY_KEYS.configs, configs);
     setConfig(newConfig);
   };
 
@@ -92,9 +90,9 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   const handleNotaExamenChange = (e) => {
     const value = e.target.value;
-    const examenes = JSON.parse(localStorage.getItem("malla-examenes") || "{}");
+    const examenes = safeStorage.get(LEGACY_KEYS.examenes, {});
     examenes[curso.id] = value;
-    localStorage.setItem("malla-examenes", JSON.stringify(examenes));
+    safeStorage.set(LEGACY_KEYS.examenes, examenes);
     setNotaExamen(value);
     window.dispatchEvent(new Event("notasModificadas"));
   };
@@ -204,6 +202,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
     guardarEvaluaciones([...evaluaciones, nuevaEvaluacion]);
     setNuevaEval({ nombre: "", peso: "", nota: "" });
     setError("");
+    setShowAddForm(false);
   };
 
   // Eliminar evaluación
@@ -277,457 +276,463 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   if (!isOpen || !curso) return null;
 
+  const estadoColor =
+    estado.includes("Aprobado") || estado.includes("Eximido")
+      ? "text-emerald-500"
+      : estado.includes("Reprobado")
+        ? "text-red-500"
+        : estado === "Rinde Examen"
+          ? "text-amber-500"
+          : estado === "Cursando"
+            ? "text-primary"
+            : "text-amber-500";
+
   return (
     <DrawerPanel
       isOpen={isOpen}
       onClose={onClose}
       title={curso.nombre}
       subtitle={`${curso.codigo} · ${curso.sct} SCT`}
-      width="max-w-3xl"
+      variant="modal"
     >
-      <div className="flex flex-col md:flex-row h-full">
-        {/* Main content */}
-        <div className="flex-1 overflow-y-auto p-5">
+      <div className="flex flex-col h-full min-h-0 overflow-y-auto p-4 sm:p-5 gap-4">
+        {/* Toolbar: config discreet */}
+        <div className="flex items-center justify-between gap-3 shrink-0">
+          <p className="text-[11px] text-textSecondary m-0 font-medium">
+            {evaluaciones.length} {evaluaciones.length === 1 ? "evaluación" : "evaluaciones"}
+            {pesoRestante > 0 ? ` · ${pesoRestante}% libre` : pesoTotal === 100 ? " · 100% asignado" : ""}
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowConfig(!showConfig)}
+            aria-expanded={showConfig}
+            aria-controls="notas-eximicion-config"
+            className={`text-xs px-2.5 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border cursor-pointer
+              ${showConfig
+                ? "bg-primary text-white border-primary"
+                : "bg-transparent text-textSecondary hover:text-textPrimary border-borderColor hover:bg-bgPrimary"
+              }`}
+          >
+            <Settings2 size={14} aria-hidden="true" />
+            <span className="hidden sm:inline">Eximición</span>
+          </button>
+        </div>
 
-            {/* SubHeader / Stats Toolbar */}
-            <div className="border border-borderColor rounded-xl px-4 py-2 flex flex-wrap items-center justify-between gap-3 mb-4 bg-bgSurface">
-               <div className="flex items-center gap-2 text-xs text-textSecondary font-medium">
-                 <span>{curso.codigo}</span>
-                 <span className="opacity-50">•</span>
-                 <span>{curso.sct} SCT</span>
-               </div>
-               
-               <button 
-                  onClick={() => setShowConfig(!showConfig)}
-                  className={`text-xs px-3 py-1.5 rounded-md font-semibold transition-colors flex items-center gap-2 border
-                    ${showConfig 
-                      ? "bg-primary text-white border-primary" 
-                      : "bg-bgPrimary text-textPrimary hover:bg-bgSecondary border-borderColor"
-                    }`}
-                >
-                  ⚙️ <span className="hidden sm:inline">Configuración Eximición</span>
-               </button>
-            </div>
-
-            {/* Contenido analítico */}
-            <div className="flex flex-col gap-6">
-              
-              {/* Columna Izquierda: Métricas y Evaluaciones */}
-              <div className="flex-1">
-                
-                {/* Panel de Configuración Animado */}
-                <AnimatePresence>
-                  {showConfig && (
-                    <motion.div 
-                      initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                      animate={{ height: "auto", opacity: 1, marginBottom: 24 }}
-                      exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                        <h4 className="font-bold text-primary mb-3 text-sm flex items-center gap-2">
-                          Parámetros de Evaluación Final
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-[11px] font-bold text-textPrimary mb-1">Nota Eximición</label>
-                            <input
-                              type="text"
-                              inputMode="decimal"
-                              name="notaEximicion"
-                              value={config.notaEximicion}
-                              onChange={handleConfigChange}
-                              className="w-full px-3 py-1.5 rounded border border-borderColor bg-bgPrimary text-textPrimary text-sm font-semibold focus:border-primary outline-none"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[11px] font-bold text-textPrimary mb-1">% Presentación</label>
-                            <div className="relative">
-                              <input
-                                type="number"
-                                value={config.ponderacionPresentacion}
-                                onChange={(e) => {
-                                  let val = parseFloat(e.target.value);
-                                  if (isNaN(val)) val = 0;
-                                  guardarConfig({ ...config, ponderacionPresentacion: val, ponderacionExamen: 100 - val });
-                                }}
-                                className="w-full pl-3 pr-7 py-1.5 rounded border border-borderColor bg-bgPrimary text-textPrimary text-sm font-semibold focus:border-primary outline-none"
-                              />
-                              <span className="absolute right-3 top-1.5 text-textSecondary text-xs">%</span>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-[11px] font-bold text-textPrimary mb-1">% Examen</label>
-                            <div className="relative">
-                              <input
-                                type="number"
-                                value={config.ponderacionExamen}
-                                onChange={(e) => {
-                                  let val = parseFloat(e.target.value);
-                                  if (isNaN(val)) val = 0;
-                                  guardarConfig({ ...config, ponderacionExamen: val, ponderacionPresentacion: 100 - val });
-                                }}
-                                className="w-full pl-3 pr-7 py-1.5 rounded border border-borderColor bg-bgPrimary text-textPrimary text-sm font-semibold focus:border-primary outline-none"
-                              />
-                              <span className="absolute right-3 top-1.5 text-textSecondary text-xs">%</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Resumen */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                  <div className="bg-bgSecondary rounded-lg p-3 border border-borderColor flex flex-col justify-center items-center text-center">
-                    <p className="text-[10px] sm:text-[11px] text-textSecondary uppercase tracking-wider mb-1">Estado</p>
-                    <p
-                      className={`text-sm sm:text-base md:text-lg font-bold leading-tight ${
-                        estado.includes("Aprobado") || estado.includes("Eximido")
-                          ? "text-emerald-500"
-                          : estado.includes("Reprobado")
-                          ? "text-red-500"
-                          : estado === "Rinde Examen"
-                          ? "text-amber-500"
-                          : estado === "Cursando"
-                          ? "text-primary"
-                          : "text-amber-500"
-                      }`}
-                    >
-                      {estado}
-                    </p>
+        {/* Config panel (collapsible, secondary) */}
+        <AnimatePresence>
+          {showConfig && (
+            <motion.div
+              id="notas-eximicion-config"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden shrink-0"
+            >
+              <div className="bg-bgPrimary/60 border border-borderColor rounded-lg p-3">
+                <p className="text-[11px] font-semibold text-textSecondary m-0 mb-2.5 uppercase tracking-wide">
+                  Parámetros de evaluación final
+                </p>
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div>
+                    <label className="block text-[10px] font-bold text-textSecondary mb-1">Nota eximición</label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      name="notaEximicion"
+                      value={config.notaEximicion}
+                      onChange={handleConfigChange}
+                      className="w-full px-2.5 py-1.5 rounded border border-borderColor bg-bgSecondary text-textPrimary text-sm font-semibold focus:border-primary outline-none"
+                    />
                   </div>
-                  <div className="bg-bgSecondary rounded-lg p-3 border border-borderColor flex flex-col justify-center items-center text-center">
-                    <p className="text-[10px] sm:text-[11px] text-textSecondary uppercase tracking-wider mb-1">
-                      % Evaluado
-                    </p>
-                    <p className="text-xl font-bold text-textPrimary">
-                      {pesoTotal}%
-                    </p>
-                  </div>
-                  <div className="bg-bgSecondary rounded-lg p-3 border border-borderColor flex flex-col justify-center items-center text-center">
-                    <p className="text-[10px] sm:text-[11px] text-textSecondary uppercase tracking-wider mb-1">Nota Presentación</p>
-                    <p className="text-2xl font-bold text-textPrimary">
-                       {pesoConNota > 0 ? safeToFixed(promedioPresentacion, 2) : "--"}
-                    </p>
-                  </div>
-                  <div className={`bg-bgSecondary rounded-lg p-3 border flex flex-col justify-center items-center text-center ${rindeExamen ? "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/20" : "border-borderColor"}`}>
-                    <p className={`text-[10px] sm:text-[11px] uppercase tracking-wider mb-1 ${rindeExamen ? "text-amber-600 font-bold" : "text-textSecondary"}`}>Nota Final</p>
-                    <p className={`text-2xl font-bold ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
-                       {(pesoTotal === 100 || rindeExamen) ? safeToFixed(promedioFinal, 2) : "--"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Estimaciones Eximicion / Examen */}
-                {!rindeExamen && notaNecesariaPresentacion !== null && pesoRestante > 0 && (
-                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6 flex items-start gap-3">
-                    <span className="text-xl">💡</span>
-                    <div>
-                      <p className="text-sm font-semibold text-textPrimary mb-0.5">
-                        Proyección para Eximición
-                      </p>
-                      <p className="text-textSecondary text-sm">
-                        Para eximirte ({safeToFixed(config.notaEximicion, 1)}), necesitas mantener un promedio de{" "}
-                        <strong className="text-primary font-bold">
-                          {safeToFixed(notaNecesariaPresentacion, 2)}
-                        </strong>{" "}
-                        en el {pesoRestante}% restante.
-                        {notaNecesariaPresentacion > 7.0 && (
-                          <span className="text-red-500 ml-1 font-medium block mt-1">
-                            (⚠️ Matemáticamente inalcanzable. Irás a examen.)
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {rindeExamen && (
-                  <motion.div 
-                    initial={{ scale: 0.98, opacity: 0 }} 
-                    animate={{ scale: 1, opacity: 1 }} 
-                    className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6 flex flex-col gap-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-xl">⚠️</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-amber-600 dark:text-amber-500 mb-0.5">
-                          Modo Examen Activado
-                        </p>
-                        <p className="text-textSecondary text-sm mb-3">
-                          Tu presentación (<strong className="text-textPrimary">{safeToFixed(promedioPresentacion, 2)}</strong>) no alcanza para la eximición ({safeToFixed(config.notaEximicion, 1)}).
-                          Tu nota calculada ahora equivale al <strong>{config.ponderacionPresentacion}%</strong> y el examen al <strong>{config.ponderacionExamen}%</strong>.
-                        </p>
-                        
-                        <div className="flex flex-col sm:flex-row items-center gap-4 bg-bgPrimary p-3 rounded-lg border border-borderColor/50 shadow-sm">
-                          <div className="flex-1 w-full border-r border-transparent sm:border-borderColor/50 pr-0 sm:pr-4">
-                            <p className="text-xs text-textSecondary font-medium mb-1">
-                              Nota necesaria en el Examen para aprobar (4.0):
-                            </p>
-                            <p className={`text-2xl font-bold tracking-tight ${notaNecesariaExamen > 7.0 ? "text-red-500" : "text-amber-500"}`}>
-                              {safeToFixed(notaNecesariaExamen, 2)}
-                              {notaNecesariaExamen > 7.0 && <span className="text-[10px] ml-2 uppercase text-red-500/80">(Ramo Irrecuperable)</span>}
-                            </p>
-                          </div>
-                          <div className="w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-borderColor/50 sm:border-t-0 pl-0 sm:pl-2 shrink-0">
-                            <label className="block text-[10px] font-bold text-textSecondary mb-1.5 uppercase text-center sm:text-left">Registrar Examen</label>
-                            <input
-                              type="text"
-                              inputMode="decimal"
-                              placeholder="Ej: 5.5"
-                              value={notaExamen}
-                              onChange={handleNotaExamenChange}
-                              className="w-full sm:w-28 px-3 py-2 rounded-md border-2 border-amber-500/40 bg-bgPrimary focus:border-amber-500 text-textPrimary font-bold text-center outline-none transition-colors mx-auto block"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Tabla de evaluaciones */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-4 text-textPrimary border-b border-borderColor/50 pb-2">
-                    Registro de Evaluaciones
-                  </h3>
-                  
-                  {evaluaciones.length === 0 ? (
-                    <div className="text-center py-10 bg-bgSecondary/50 rounded-lg border border-dashed border-borderColor">
-                      <p className="text-textSecondary text-sm">
-                        No hay evaluaciones registradas en el sistema.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto rounded-lg border border-borderColor">
-                      <table className="w-full text-left border-collapse text-sm">
-                        <thead>
-                          <tr className="bg-bgSecondary border-b border-borderColor">
-                            <th className="py-2.5 px-4 font-semibold text-textSecondary w-1/3">Evaluación</th>
-                            <th className="py-2.5 px-4 font-semibold text-textSecondary text-center w-1/6">Porcentaje</th>
-                            <th className="py-2.5 px-4 font-semibold text-textSecondary text-center w-1/4">Calificación</th>
-                            <th className="py-2.5 px-4 font-semibold text-textSecondary text-right w-1/4">Acciones</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-borderColor/50">
-                          {evaluaciones.map((evaluacion) => {
-                            const tieneSubNotas = evaluacion.subNotas && evaluacion.subNotas.length > 0;
-                            const promedioSub =
-                              tieneSubNotas && typeof evaluacion.nota === "number"
-                                ? evaluacion.nota.toFixed(2)
-                                : null;
-
-                            return (
-                              <React.Fragment key={evaluacion.id}>
-                                <tr className="hover:bg-bgPrimary transition-colors">
-                                  <td className="py-3 px-4 font-medium text-textPrimary">
-                                    {evaluacion.nombre}
-                                    {tieneSubNotas && (
-                                       <span className="block text-[10px] text-textSecondary mt-0.5 uppercase tracking-wide">
-                                         Promediado por controles
-                                       </span>
-                                    )}
-                                  </td>
-                                  <td className="py-3 px-4 text-center text-textSecondary font-medium">
-                                    {evaluacion.peso}%
-                                  </td>
-                                  <td className="py-3 px-4 text-center">
-                                    <div className="flex flex-col items-center gap-1">
-                                      <input
-                                        type="text"
-                                        inputMode="decimal"
-                                        value={evaluacion.nota ?? ""}
-                                        onChange={(e) =>
-                                          actualizarNota(evaluacion.id, e.target.value)
-                                        }
-                                        placeholder="-"
-                                        className="w-16 px-1.5 py-1 rounded border border-borderColor bg-bgPrimary focus:bg-bgSecondary hover:border-primary/50 text-textPrimary text-center text-sm font-semibold transition-colors mx-auto"
-                                      />
-                                      {tieneSubNotas && (
-                                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                                          Prom: {safeToFixed(evaluacion.nota, 2)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="py-3 px-4 text-right">
-                                    <div className="flex items-center justify-end gap-1 sm:gap-2">
-                                      <button
-                                        onClick={() => toggleSubNotasPanel(evaluacion.id)}
-                                        className={`text-xs px-2 py-1.5 rounded transition-colors font-medium ${
-                                          openSubNotas.includes(evaluacion.id)
-                                            ? "bg-primary text-white"
-                                            : "text-textSecondary hover:bg-bgSecondary border border-transparent hover:border-borderColor"
-                                        }`}
-                                      >
-                                        Sub-Notas
-                                      </button>
-                                      <button
-                                        onClick={() => eliminarEvaluacion(evaluacion.id)}
-                                        className="text-red-500/70 hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded transition-colors"
-                                        title="Eliminar evaluación"
-                                      >
-                                        ✕
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-
-                                {/* Fila expandible de Sub-notas */}
-                                {openSubNotas.includes(evaluacion.id) && (
-                                  <tr className="bg-bgSurface border-b border-borderColor/50">
-                                    <td colSpan="4" className="p-4">
-                                      <div className="flex flex-col sm:flex-row gap-4 items-start">
-                                        {/* Input agregador */}
-                                        <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                                          <input
-                                            type="text"
-                                            inputMode="decimal"
-                                            placeholder="Ingresar nota"
-                                            value={subNotaInputs[evaluacion.id] || ""}
-                                            onChange={(e) =>
-                                              handleSubNotaInputChange(evaluacion.id, e.target.value)
-                                            }
-                                            onKeyDown={(e) => {
-                                              if (e.key === "Enter") agregarSubNota(evaluacion.id);
-                                            }}
-                                            className="w-28 px-2.5 py-1.5 rounded border border-borderColor bg-bgPrimary text-textPrimary text-sm font-medium"
-                                          />
-                                          <button
-                                            onClick={() => agregarSubNota(evaluacion.id)}
-                                            className="bg-primary text-white px-3 py-1.5 rounded text-sm font-medium hover:opacity-90 transition-opacity"
-                                          >
-                                            +
-                                          </button>
-                                        </div>
-
-                                        {/* Lista de subnotas actuales */}
-                                        <div className="flex-1">
-                                          {tieneSubNotas ? (
-                                            <div className="flex flex-wrap gap-1.5">
-                                              {evaluacion.subNotas.map((sub) => (
-                                                <div
-                                                  key={sub.id}
-                                                  className="flex items-center gap-1.5 bg-bgPrimary border border-borderColor/80 shadow-sm rounded px-2.5 py-1 text-xs"
-                                                >
-                                                  <span className="font-semibold text-textPrimary">{safeToFixed(sub.nota, 1)}</span>
-                                                  <button
-                                                    onClick={() => eliminarSubNota(evaluacion.id, sub.id)}
-                                                    className="text-textSecondary hover:text-red-500 border-l border-borderColor/50 pl-1.5"
-                                                  >
-                                                    ✕
-                                                  </button>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          ) : (
-                                            <p className="text-xs text-textSecondary italic pt-2 sm:pt-0">
-                                              No se han ingresado sub-notas. El promedio general es directo.
-                                            </p>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                )}
-                              </React.Fragment>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Agregar evaluación */}
-              <div className="w-full shrink-0">
-                <div className="bg-bgSurface rounded-xl p-5 border border-borderColor">
-                  <h3 className="text-base font-bold mb-4 text-textPrimary flex items-center gap-2">
-                    <span className="bg-primary/20 text-primary w-6 h-6 rounded flex items-center justify-center text-sm">+</span>
-                    Agregar Item
-                  </h3>
-                  
-                  {error && (
-                    <div className="bg-red-500/10 border-l-2 border-red-500 p-2 mb-4 text-red-600 text-xs font-medium">
-                      {error}
-                    </div>
-                  )}
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-textSecondary mb-1 uppercase tracking-wider">Concepto</label>
+                  <div>
+                    <label className="block text-[10px] font-bold text-textSecondary mb-1">% Presentación</label>
+                    <div className="relative">
                       <input
-                        type="text"
-                        placeholder="Ej: Examen, Solemne 1"
-                        value={nuevaEval.nombre}
-                        onChange={(e) =>
-                          setNuevaEval({ ...nuevaEval, nombre: e.target.value })
-                        }
-                        className="w-full px-3 py-2 rounded border border-borderColor bg-bgPrimary focus:border-primary text-textPrimary text-sm transition-colors outline-none"
+                        type="number"
+                        value={config.ponderacionPresentacion}
+                        onChange={(e) => {
+                          let val = parseFloat(e.target.value);
+                          if (isNaN(val)) val = 0;
+                          guardarConfig({ ...config, ponderacionPresentacion: val, ponderacionExamen: 100 - val });
+                        }}
+                        className="w-full pl-2.5 pr-6 py-1.5 rounded border border-borderColor bg-bgSecondary text-textPrimary text-sm font-semibold focus:border-primary outline-none"
                       />
+                      <span className="absolute right-2 top-1.5 text-textSecondary text-xs">%</span>
                     </div>
-                    
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">Porcentaje (%)</label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            placeholder="0-100"
-                            min="1"
-                            max="100"
-                            value={nuevaEval.peso}
-                            onChange={(e) =>
-                              setNuevaEval({ ...nuevaEval, peso: e.target.value })
-                            }
-                            className="w-full pl-3 pr-6 py-2 rounded border border-borderColor bg-bgPrimary focus:border-primary text-textPrimary text-sm transition-colors outline-none"
-                          />
-                          <span className="absolute right-2.5 top-2 text-textSecondary text-sm font-medium">%</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex-1">
-                        <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">Calificación</label>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          placeholder="(Opcional)"
-                          value={nuevaEval.nota}
-                          onChange={(e) =>
-                            setNuevaEval({ ...nuevaEval, nota: e.target.value })
-                          }
-                          className="w-full px-3 py-2 rounded border border-borderColor bg-bgPrimary focus:border-primary text-textPrimary text-sm transition-colors outline-none"
-                        />
-                      </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-textSecondary mb-1">% Examen</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={config.ponderacionExamen}
+                        onChange={(e) => {
+                          let val = parseFloat(e.target.value);
+                          if (isNaN(val)) val = 0;
+                          guardarConfig({ ...config, ponderacionExamen: val, ponderacionPresentacion: 100 - val });
+                        }}
+                        className="w-full pl-2.5 pr-6 py-1.5 rounded border border-borderColor bg-bgSecondary text-textPrimary text-sm font-semibold focus:border-primary outline-none"
+                      />
+                      <span className="absolute right-2 top-1.5 text-textSecondary text-xs">%</span>
                     </div>
-
-                    <button
-                      onClick={agregarEvaluacion}
-                      disabled={pesoRestante === 0}
-                      className="w-full bg-primary text-white mt-2 px-4 py-2.5 rounded-lg hover:bg-primary-hover 
-                                 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-sm shadow-sm"
-                    >
-                      Registrar Evaluación
-                    </button>
-                    
-                    {pesoRestante === 0 ? (
-                      <p className="text-xs text-emerald-500 font-medium mt-3 text-center bg-emerald-500/10 py-1.5 rounded">
-                        100% distribuido correctamente.
-                      </p>
-                    ) : (
-                      <p className="text-[11px] text-textSecondary mt-3 text-center">
-                        Queda un <strong className="text-textPrimary">{pesoRestante}%</strong> por distribuir en el curso.
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Compact metrics strip */}
+        <div
+          className="grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0"
+          role="group"
+          aria-label="Resumen de notas"
+        >
+          <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
+            <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">Estado</p>
+            <p className={`text-xs sm:text-sm font-bold leading-tight m-0 ${estadoColor}`}>{estado}</p>
+          </div>
+          <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
+            <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">% Evaluado</p>
+            <p className="text-sm font-bold text-textPrimary m-0 tabular-nums">{pesoTotal}%</p>
+          </div>
+          <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
+            <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">Presentación</p>
+            <p className="text-sm font-bold text-textPrimary m-0 tabular-nums">
+              {pesoConNota > 0 ? safeToFixed(promedioPresentacion, 2) : "—"}
+            </p>
+          </div>
+          <div
+            className={`rounded-lg border px-2.5 py-2 text-center ${
+              rindeExamen ? "border-amber-500/45 bg-amber-500/5" : "border-borderColor bg-bgPrimary/40"
+            }`}
+          >
+            <p className={`text-[9px] uppercase tracking-wider m-0 mb-0.5 ${rindeExamen ? "text-amber-600 font-bold" : "text-textSecondary"}`}>
+              Nota final
+            </p>
+            <p className={`text-sm font-bold m-0 tabular-nums ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
+              {pesoTotal === 100 || rindeExamen ? safeToFixed(promedioFinal, 2) : "—"}
+            </p>
           </div>
         </div>
+
+        {/* Projections */}
+        {!rindeExamen && notaNecesariaPresentacion !== null && pesoRestante > 0 && (
+          <div className="bg-primary/5 border border-primary/20 rounded-lg px-3 py-2.5 text-sm shrink-0">
+            <p className="text-textSecondary text-xs m-0 leading-relaxed">
+              Para eximirte ({safeToFixed(config.notaEximicion, 1)}), necesitas promedio{" "}
+              <strong className="text-primary font-bold">{safeToFixed(notaNecesariaPresentacion, 2)}</strong>{" "}
+              en el {pesoRestante}% restante.
+              {notaNecesariaPresentacion > 7.0 && (
+                <span className="text-red-500 ml-1 font-medium">Matemáticamente inalcanzable; irás a examen.</span>
+              )}
+            </p>
+          </div>
+        )}
+
+        {rindeExamen && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex flex-col gap-2.5 shrink-0"
+          >
+            <p className="text-xs font-bold text-amber-600 dark:text-amber-500 m-0">Modo examen</p>
+            <p className="text-textSecondary text-xs m-0 leading-relaxed">
+              Presentación <strong className="text-textPrimary">{safeToFixed(promedioPresentacion, 2)}</strong> bajo
+              eximición ({safeToFixed(config.notaEximicion, 1)}). Ponderación: {config.ponderacionPresentacion}% /{" "}
+              {config.ponderacionExamen}% examen.
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-bgPrimary/70 p-2.5 rounded-lg border border-borderColor/50">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-textSecondary font-medium m-0 mb-0.5">
+                  Nota necesaria en examen para aprobar (4.0)
+                </p>
+                <p className={`text-xl font-bold m-0 tabular-nums ${notaNecesariaExamen > 7.0 ? "text-red-500" : "text-amber-500"}`}>
+                  {safeToFixed(notaNecesariaExamen, 2)}
+                </p>
+              </div>
+              <div className="shrink-0">
+                <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">Examen</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Ej: 5.5"
+                  value={notaExamen}
+                  onChange={handleNotaExamenChange}
+                  className="w-full sm:w-24 px-2.5 py-1.5 rounded-md border border-amber-500/40 bg-bgSecondary focus:border-amber-500 text-textPrimary font-bold text-center outline-none text-sm"
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Evaluations list */}
+        <div className="flex flex-col gap-2.5 min-h-0">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-bold text-textPrimary m-0">Evaluaciones</h3>
+            {!showAddForm && pesoRestante > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowAddForm(true)}
+                className="text-xs font-bold text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg flex items-center gap-1 border-0 bg-transparent cursor-pointer transition-colors"
+              >
+                <Plus size={14} aria-hidden="true" />
+                Agregar
+              </button>
+            )}
+          </div>
+
+          {evaluaciones.length === 0 ? (
+            <div className="text-center py-5 px-3 rounded-lg border border-dashed border-borderColor bg-bgPrimary/30">
+              <p className="text-textSecondary text-xs m-0">Aún no hay evaluaciones.</p>
+              {!showAddForm && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(true)}
+                  className="mt-2 text-xs font-bold text-primary bg-transparent border-0 cursor-pointer hover:underline"
+                >
+                  Agregar la primera
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-borderColor">
+              <table className="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr className="bg-bgPrimary/50 border-b border-borderColor">
+                    <th className="py-2 px-3 font-semibold text-textSecondary text-[11px] w-[36%]">Concepto</th>
+                    <th className="py-2 px-2 font-semibold text-textSecondary text-[11px] text-center w-[16%]">%</th>
+                    <th className="py-2 px-2 font-semibold text-textSecondary text-[11px] text-center w-[22%]">Nota</th>
+                    <th className="py-2 px-2 font-semibold text-textSecondary text-[11px] text-right w-[26%]"> </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-borderColor/50">
+                  {evaluaciones.map((evaluacion) => {
+                    const tieneSubNotas = evaluacion.subNotas && evaluacion.subNotas.length > 0;
+
+                    return (
+                      <React.Fragment key={evaluacion.id}>
+                        <tr className="hover:bg-bgPrimary/40 transition-colors">
+                          <td className="py-2.5 px-3 font-medium text-textPrimary text-xs sm:text-sm">
+                            {evaluacion.nombre}
+                            {tieneSubNotas && (
+                              <span className="block text-[10px] text-textSecondary mt-0.5">Con sub-notas</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-2 text-center text-textSecondary font-medium text-xs tabular-nums">
+                            {evaluacion.peso}%
+                          </td>
+                          <td className="py-2.5 px-2 text-center">
+                            <div className="flex flex-col items-center gap-1">
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                value={evaluacion.nota ?? ""}
+                                onChange={(e) => actualizarNota(evaluacion.id, e.target.value)}
+                                placeholder="—"
+                                aria-label={`Nota de ${evaluacion.nombre}`}
+                                className="w-14 px-1 py-1 rounded border border-borderColor bg-bgPrimary focus:border-primary text-textPrimary text-center text-sm font-semibold outline-none"
+                              />
+                              {tieneSubNotas && (
+                                <span className="text-[10px] font-bold text-primary">
+                                  Prom: {safeToFixed(evaluacion.nota, 2)}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-2 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                type="button"
+                                onClick={() => toggleSubNotasPanel(evaluacion.id)}
+                                className={`text-[10px] px-1.5 py-1 rounded transition-colors font-medium border-0 cursor-pointer ${
+                                  openSubNotas.includes(evaluacion.id)
+                                    ? "bg-primary text-white"
+                                    : "text-textSecondary hover:bg-bgPrimary"
+                                }`}
+                              >
+                                Sub
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => eliminarEvaluacion(evaluacion.id)}
+                                className="text-red-500/70 hover:text-red-500 hover:bg-red-500/10 w-7 h-7 rounded transition-colors border-0 bg-transparent cursor-pointer text-sm"
+                                aria-label={`Eliminar ${evaluacion.nombre}`}
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {openSubNotas.includes(evaluacion.id) && (
+                          <tr className="bg-bgPrimary/30">
+                            <td colSpan="4" className="p-3">
+                              <div className="flex flex-col sm:flex-row gap-3 items-start">
+                                <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                                  <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    placeholder="Sub-nota"
+                                    value={subNotaInputs[evaluacion.id] || ""}
+                                    onChange={(e) => handleSubNotaInputChange(evaluacion.id, e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") agregarSubNota(evaluacion.id);
+                                    }}
+                                    className="w-24 px-2 py-1.5 rounded border border-borderColor bg-bgSecondary text-textPrimary text-sm font-medium outline-none focus:border-primary"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => agregarSubNota(evaluacion.id)}
+                                    className="bg-primary text-white px-2.5 py-1.5 rounded text-sm font-medium hover:opacity-90 border-0 cursor-pointer"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                                <div className="flex-1">
+                                  {tieneSubNotas ? (
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {evaluacion.subNotas.map((sub) => (
+                                        <div
+                                          key={sub.id}
+                                          className="flex items-center gap-1.5 bg-bgSecondary border border-borderColor/80 rounded px-2 py-1 text-xs"
+                                        >
+                                          <span className="font-semibold text-textPrimary">{safeToFixed(sub.nota, 1)}</span>
+                                          <button
+                                            type="button"
+                                            onClick={() => eliminarSubNota(evaluacion.id, sub.id)}
+                                            className="text-textSecondary hover:text-red-500 border-0 bg-transparent cursor-pointer p-0 pl-1"
+                                            aria-label="Eliminar sub-nota"
+                                          >
+                                            ✕
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-xs text-textSecondary m-0">Sin sub-notas; la nota es directa.</p>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Add form (collapsed by default) */}
+        <AnimatePresence>
+          {showAddForm && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden shrink-0"
+            >
+              <div className="bg-bgPrimary/50 rounded-xl p-3.5 border border-borderColor">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setError("");
+                  }}
+                  className="w-full flex items-center justify-between gap-2 mb-3 bg-transparent border-0 cursor-pointer p-0"
+                >
+                  <span className="text-sm font-bold text-textPrimary flex items-center gap-2">
+                    <Plus size={14} className="text-primary" aria-hidden="true" />
+                    Nueva evaluación
+                  </span>
+                  <ChevronDown size={16} className="text-textSecondary rotate-180" aria-hidden="true" />
+                </button>
+
+                {error && (
+                  <div className="bg-red-500/10 border-l-2 border-red-500 p-2 mb-3 text-red-600 text-xs font-medium" role="alert">
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] font-semibold text-textSecondary mb-1 uppercase tracking-wider">
+                      Concepto
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Examen, Solemne 1"
+                      value={nuevaEval.nombre}
+                      onChange={(e) => setNuevaEval({ ...nuevaEval, nombre: e.target.value })}
+                      className="w-full px-3 py-2 rounded border border-borderColor bg-bgSecondary focus:border-primary text-textPrimary text-sm outline-none"
+                    />
+                  </div>
+
+                  <div className="flex gap-2.5">
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">
+                        Porcentaje (%)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="0-100"
+                        min="1"
+                        max="100"
+                        value={nuevaEval.peso}
+                        onChange={(e) => setNuevaEval({ ...nuevaEval, peso: e.target.value })}
+                        className="w-full px-3 py-2 rounded border border-borderColor bg-bgSecondary focus:border-primary text-textPrimary text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">
+                        Calificación
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Opcional"
+                        value={nuevaEval.nota}
+                        onChange={(e) => setNuevaEval({ ...nuevaEval, nota: e.target.value })}
+                        className="w-full px-3 py-2 rounded border border-borderColor bg-bgSecondary focus:border-primary text-textPrimary text-sm outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddForm(false);
+                        setError("");
+                      }}
+                      className="flex-1 px-3 py-2 rounded-lg border border-borderColor text-textSecondary text-sm font-semibold hover:bg-bgSecondary bg-transparent cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={agregarEvaluacion}
+                      disabled={pesoRestante === 0}
+                      className="flex-[1.4] bg-primary text-white px-3 py-2 rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-sm border-0 cursor-pointer"
+                    >
+                      Registrar
+                    </button>
+                  </div>
+
+                  {pesoRestante > 0 && (
+                    <p className="text-[11px] text-textSecondary m-0 text-center">
+                      Queda <strong className="text-textPrimary">{pesoRestante}%</strong> por distribuir.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </DrawerPanel>
   );
 }

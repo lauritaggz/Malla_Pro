@@ -7,11 +7,36 @@ import ResumenProgreso from "./components/ResumenProgreso";
 import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
 import MobileBottomNav from "./components/MobileBottomNav";
+import TutorModule from "./components/tutors/TutorModule";
 import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
-import LoginSuggestion, { shouldShowLogin, getStoredUser } from "./components/LoginSuggestion";
-import { motion, AnimatePresence } from "framer-motion";
+import LoginSuggestion, { getStoredUser } from "./components/LoginSuggestion";
+import { trackOpenNotas, trackSelectMalla, inferUniversidadFromUrl } from "./utils/analytics";
+import { clearAcademicProgress } from "./utils/academicProgressStorage";
+import { safeStorage } from "./utils/safeStorage";
+import { LEGACY_KEYS } from "./utils/storageKeys";
+import { AnimatePresence } from "framer-motion";
 import { GraduationCap } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import AcademicProgrammingPage from "./features/academicProgramming/components/AcademicProgrammingPage";
+import PeriodoActualView from "./components/PeriodoActualView";
+
+function readMallaSeleccionadaFromStorage() {
+  const raw = safeStorage.get(LEGACY_KEYS.seleccionada, null);
+  if (!raw || typeof raw !== "object") return null;
+  const url = raw.url;
+  const nombre = raw.nombre;
+  if (typeof url !== "string" || !url.trim() || typeof nombre !== "string" || !nombre.trim()) {
+    safeStorage.remove(LEGACY_KEYS.seleccionada);
+    return null;
+  }
+  return {
+    ...raw,
+    url: url.trim(),
+    nombre: nombre.trim(),
+    universidad: raw.universidad || inferUniversidadFromUrl(url.trim()),
+  };
+}
 
 export default function App() {
   const [navbarHeight, setNavbarHeight] = useState(48);
@@ -32,7 +57,7 @@ export default function App() {
   const [modoExcepcional, setModoExcepcional] = useState(false);
   const [mallasDisponibles, setMallasDisponibles] = useState([]);
   const [mallaSeleccionada, setMallaSeleccionada] = useState(
-    JSON.parse(localStorage.getItem("malla-seleccionada")) || null
+    readMallaSeleccionadaFromStorage
   );
 
   const [excepcionesActivas, setExcepcionesActivas] = useState(0);
@@ -51,7 +76,25 @@ export default function App() {
   const [mostrarHorario, setMostrarHorario] = useState(false);
   const [mostrarContacto, setMostrarContacto] = useState(false);
   const [mostrarLogin, setMostrarLogin] = useState(false);
-  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+  const [, setCurrentUser] = useState(() => getStoredUser());
+  
+  const location = useLocation();
+
+  const [vistaPrincipal, setVistaPrincipal] = useState(() => {
+    if (typeof window !== "undefined" && window.location.pathname === "/programacion-academica") {
+      return "toma-de-ramos";
+    }
+    return "malla";
+  });
+
+  // Sync React State with React Router URL path updates
+  useEffect(() => {
+    if (location.pathname === "/programacion-academica") {
+      setVistaPrincipal("toma-de-ramos");
+    } else if (location.pathname === "/app") {
+      setVistaPrincipal((prev) => (prev === "toma-de-ramos" ? "malla" : prev));
+    }
+  }, [location.pathname]);
 
   // Detectar si es dispositivo touch
   const isMobile = typeof window !== 'undefined' && 
@@ -62,26 +105,25 @@ export default function App() {
     if (confirm("¿Deseas cambiar de malla? Tus ramos aprobados con el mismo nombre se mantendrán automáticamente.")) {
       // Analizar aprobados y guardar los nombres exactos antes de resetear
       if (mallaData && aprobados.length > 0) {
-        const nombresAprobados = mallaData.semestres
-          .flatMap((s) => s.cursos)
+        const nombresAprobados = (mallaData.semestres || [])
+          .flatMap((s) => s.cursos || [])
           .filter((c) => aprobados.includes(c.id))
           .map((c) => c.nombre.trim().toLowerCase());
-          
-        localStorage.setItem("malla-nombres-conservados", JSON.stringify(nombresAprobados));
+
+        safeStorage.set(LEGACY_KEYS.nombresConservados, nombresAprobados);
       }
 
+      clearAcademicProgress(mallaSeleccionada);
       setMallaSeleccionada(null);
-      localStorage.removeItem("malla-seleccionada");
-      localStorage.removeItem("malla-aprobados");
-      localStorage.removeItem("malla-excepciones");
-      localStorage.removeItem("malla-cursando");
-      
+      safeStorage.remove(LEGACY_KEYS.seleccionada);
+
       // Resetear estado general para que quede en 0
       setProgreso({ total: 0, aprobados: 0 });
       setCursosCursando(0);
       setCursando([]);
       setAprobados([]);
       setExcepciones([]);
+      setVistaPrincipal("malla");
     }
   };
 
@@ -136,9 +178,12 @@ export default function App() {
     listarMallas().then(setMallasDisponibles);
   }, []);
 
-  const seleccionarMalla = useCallback((malla) => {
-    setMallaSeleccionada(malla);
-    localStorage.setItem("malla-seleccionada", JSON.stringify(malla));
+  const seleccionarMalla = useCallback((malla, universidad) => {
+    const payload = universidad ? { ...malla, universidad } : malla;
+    setMallaSeleccionada(payload);
+    setVistaPrincipal("malla");
+    localStorage.setItem("malla-seleccionada", JSON.stringify(payload));
+    trackSelectMalla(payload);
   }, []);
 
   const handleSemestresLoaded = useCallback(
@@ -146,12 +191,18 @@ export default function App() {
     []
   );
 
+  const handleVerProgresoNav = useCallback(() => {
+    setVistaPrincipal("malla");
+    setMostrarResumen((prev) => !prev);
+  }, []);
+
   const handleAbrirNotas = useCallback((curso, esEnCurso, esAprobado) => {
     setCursoSeleccionado(curso);
     setCursoEsEnCurso(esEnCurso);
     setCursoEsAprobado(esAprobado);
     setMostrarNotas(true);
-  }, []);
+    trackOpenNotas(mallaSeleccionada, curso);
+  }, [mallaSeleccionada]);
 
   const handleSetProgreso = useCallback((val) => setProgreso(val), []);
   const handleSetCursosCursando = useCallback((val) => setCursosCursando(val), []);
@@ -178,43 +229,31 @@ export default function App() {
           onShowTour={() => setMostrarTour(true)}
           onShowHorario={() => setMostrarHorario(true)}
           onShowContacto={() => setMostrarContacto(true)}
+          onChangeMalla={handleCambiarMalla}
           mostrarResumen={mostrarResumen}
+          vistaPrincipal={vistaPrincipal}
+          setVistaPrincipal={setVistaPrincipal}
         />
       )}
 
       {mallaSeleccionada && (
         <MobileBottomNav
-          theme={theme}
-          setTheme={setTheme}
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-          modoExcepcional={modoExcepcional}
-          setModoExcepcional={setModoExcepcional}
-          excepcionesActivas={excepcionesActivas}
-          cantidadSemestres={cantidadSemestres}
-          onVerProgreso={() => setMostrarResumen(prev => !prev)}
-          mostrarResumen={mostrarResumen}
-          ocultarCompletados={ocultarCompletados}
-          setOcultarCompletados={setOcultarCompletados}
-          onShowTour={() => setMostrarTour(true)}
-          onShowHorario={() => setMostrarHorario(true)}
-          onShowContacto={() => setMostrarContacto(true)}
-          onChangeMalla={handleCambiarMalla}
+          vistaPrincipal={vistaPrincipal}
+          setVistaPrincipal={setVistaPrincipal}
         />
       )}
 
       {/* CONTENIDO PRINCIPAL */}
       <div
-        className={`relative z-[10] transition-all duration-300 flex flex-col flex-1 min-h-0 ${
+        className={`relative z-[10] transition-all duration-300 flex flex-col flex-1 min-h-0 main-content-zoom ${
           mallaSeleccionada ? "mobile-main-content sm:pb-0 sm:flex-none" : ""
         }`}
         style={{
-          paddingTop: mallaSeleccionada && !isMobileLayout ? navbarHeight + 20 : undefined,
+          paddingTop: mallaSeleccionada && !isMobileLayout ? navbarHeight + 8 : undefined,
         }}
       >
-        {mallaSeleccionada && (
+        {mallaSeleccionada && vistaPrincipal === "malla" && (
           <StatsDisplay
-            totalCursos={progreso.total}
             cursosAprobados={progreso.aprobados}
             cursosCursando={cursosCursando}
             cursosEnCursoData={(() => {
@@ -252,7 +291,7 @@ export default function App() {
                       {uni.mallas.map((m) => (
                         <button
                           key={m.nombre}
-                          onClick={() => seleccionarMalla(m)}
+                          onClick={() => seleccionarMalla(m, uni.universidad)}
                           className="p-4 rounded-xl border border-borderColor bg-bgPrimary hover:bg-primary hover:text-white transition-all text-sm font-medium shadow-sm hover:shadow-md active:scale-[0.98] text-left sm:text-center leading-snug"
                         >
                           {m.nombre}
@@ -283,6 +322,42 @@ export default function App() {
               </div>
             </div>
           </div>
+        ) : vistaPrincipal === "toma-de-ramos" ? (
+          <main className="flex flex-col flex-1 min-h-0 sm:max-w-7xl sm:mx-auto sm:w-full">
+            <AcademicProgrammingPage isEmbedded={true} />
+          </main>
+        ) : vistaPrincipal === "periodo-actual" ? (
+          <main className="flex flex-col flex-1 min-h-0 sm:max-w-7xl sm:mx-auto sm:w-full">
+            <PeriodoActualView
+              cursando={cursando}
+              aprobados={aprobados}
+              excepciones={excepciones}
+              setCursando={setCursando}
+              setAprobados={setAprobados}
+              setExcepciones={setExcepciones}
+              getCursoById={(id) => {
+                if (!mallaData) return null;
+                const semestresEfectivos = mallaData.isMencion
+                  ? [
+                      ...(mallaData.semestresComunes || []),
+                      ...Object.values(mallaData.menciones || {}).flatMap((m) => m.semestres || []),
+                    ]
+                  : mallaData.semestres || [];
+                for (const sem of semestresEfectivos) {
+                  const found = sem.cursos.find((c) => c.id === id);
+                  if (found) return found;
+                }
+                return null;
+              }}
+              onAbrirNotas={(c) => handleAbrirNotas(c, true, aprobados.includes(c.id))}
+              modoExcepcional={modoExcepcional}
+              mallaData={mallaData}
+            />
+          </main>
+        ) : vistaPrincipal === "tutorias" ? (
+          <main>
+            <TutorModule onVolver={() => setVistaPrincipal("malla")} />
+          </main>
         ) : (
           <main className="flex flex-col flex-1 min-h-0 max-sm:px-0 sm:max-w-7xl sm:mx-auto sm:w-full">
             <MallaViewer

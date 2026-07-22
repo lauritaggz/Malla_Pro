@@ -1,25 +1,32 @@
-import React, { useState, useRef, useEffect } from "react";
-import { NotebookPen } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Lock, CheckCircle2, Circle, Network } from "lucide-react";
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 
 const Curso = ({
   curso,
   aprobado,
   excepcional,
   disponible,
-  modoExcepcional,
-  aprobar,
-  marcarExcepcional,
   enCurso,
-  toggleCursando,
-  onAbrirNotas,
+  onSelect,
+  onLeftClick,
+  onLongPress,
+  onContextMenu,
+  highlightStatus = "normal",
 }) => {
-  const [shake, setShake] = useState(false);
   const [promedio, setPromedio] = useState(null);
-  
+  const timerRef = useRef(null);
+  const longPressTriggeredRef = useRef(false);
+  const touchMovedRef = useRef(false);
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  // Evita el doble toggle: en móvil touchend + mouse sintético anulan el cambio de estado
+  const suppressMouseRef = useRef(false);
+
   useEffect(() => {
     const actualizarPromedio = () => {
       try {
-        const notasGuardadas = JSON.parse(localStorage.getItem("malla-notas") || "{}");
+        const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
         const evals = notasGuardadas[curso.id] || [];
         const conNota = evals.filter((e) => e.nota != null && !isNaN(e.nota));
         const pesoTotal = conNota.reduce((sum, e) => sum + (e.peso || 0), 0);
@@ -33,27 +40,71 @@ const Curso = ({
         setPromedio(null);
       }
     };
-    
+
     actualizarPromedio();
     window.addEventListener("notasModificadas", actualizarPromedio);
     return () => window.removeEventListener("notasModificadas", actualizarPromedio);
   }, [curso.id]);
-  
-  const timerRef = useRef(null);
-  const isLongPressRef = useRef(false);
 
-  const startPressTimer = () => {
-    isLongPressRef.current = false;
-    if (!disponible && !modoExcepcional && !enCurso) return;
-    
-    timerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      if (window.navigator?.vibrate) {
-        window.navigator.vibrate(50);
-      }
-      toggleCursando();
-    }, 500);
-  };
+  let cardStatusClass = "curso-card-disponible";
+  let statusBadge = null;
+
+  if (aprobado) {
+    cardStatusClass = "curso-card-aprobado";
+    statusBadge = (
+      <div className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+        <span>Aprobada</span>
+      </div>
+    );
+  } else if (excepcional) {
+    cardStatusClass = "curso-card-excepcional";
+    statusBadge = (
+      <div className="flex items-center gap-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-500">
+        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+        <span>Forzada</span>
+      </div>
+    );
+  } else if (enCurso) {
+    cardStatusClass = "curso-card-encurso";
+    statusBadge = (
+      <div className="flex items-center gap-0.5 text-[9px] font-bold text-primary">
+        <Circle className="w-2 h-2 fill-primary/30 flex-shrink-0" />
+        <span>Cursando</span>
+      </div>
+    );
+  } else if (!disponible) {
+    cardStatusClass = "curso-card-bloqueado";
+    statusBadge = (
+      <div className="flex items-center gap-0.5 text-[9px] font-semibold text-textSecondary/70">
+        <Lock className="w-2.5 h-2.5 flex-shrink-0" />
+        <span>Bloqueada</span>
+      </div>
+    );
+  } else {
+    cardStatusClass = "curso-card-disponible border-dashed border-borderColor/80";
+    statusBadge = (
+      <div className="text-[9px] font-semibold text-textSecondary">
+        <span>Disponible</span>
+      </div>
+    );
+  }
+
+  let highlightStyles = "";
+  if (highlightStatus === "fade") {
+    // Solo desktop (cuando MallaViewer envía "fade"): atenúa y bloquea interacción.
+    highlightStyles =
+      "opacity-30 scale-[0.98] blur-[0.2px] saturate-50 pointer-events-none";
+  } else if (highlightStatus === "selected") {
+    highlightStyles =
+      "ring-2 ring-primary ring-offset-2 ring-offset-bgPrimary scale-[1.02] shadow-md z-30";
+  } else if (highlightStatus === "prereq") {
+    highlightStyles =
+      "ring-2 ring-amber-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+  } else if (highlightStatus === "unlock") {
+    highlightStyles =
+      "ring-2 ring-emerald-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+  }
 
   const clearPressTimer = () => {
     if (timerRef.current) {
@@ -62,121 +113,217 @@ const Curso = ({
     }
   };
 
-  const handleClick = (e) => {
-    if (isLongPressRef.current) return;
-    if (!disponible && !modoExcepcional) {
-      if (e.ctrlKey && enCurso) {
-        toggleCursando();
-        return;
+  const startPress = () => {
+    longPressTriggeredRef.current = false;
+    touchMovedRef.current = false;
+    clearPressTimer();
+
+    timerRef.current = setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      onLongPress?.(curso);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(40);
       }
-      setShake(true);
-      setTimeout(() => setShake(false), 400);
-      return;
-    }
-
-    if (e.ctrlKey) {
-      toggleCursando();
-      return;
-    }
-
-    if (modoExcepcional) {
-      marcarExcepcional();
-      return;
-    }
-
-    aprobar();
+    }, 480);
   };
 
-  const hasTopRightBadge = promedio !== null;
+  const endPress = () => {
+    clearPressTimer();
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false;
+      return true;
+    }
+    return false;
+  };
+
+  const cancelPress = () => {
+    clearPressTimer();
+    longPressTriggeredRef.current = false;
+  };
+
+  const markMovedIfNeeded = (clientX, clientY) => {
+    const dx = Math.abs(clientX - touchStartRef.current.x);
+    const dy = Math.abs(clientY - touchStartRef.current.y);
+    if (dx > 12 || dy > 12) {
+      touchMovedRef.current = true;
+      cancelPress();
+      return true;
+    }
+    return false;
+  };
 
   return (
-    <div
-      onClick={handleClick}
-      onPointerDown={startPressTimer}
-      onPointerUp={clearPressTimer}
-      onPointerLeave={clearPressTimer}
-      onPointerCancel={clearPressTimer}
-      className={`mobile-course-card relative cursor-pointer select-none p-3 text-[13px] rounded-2xl border shadow-sm text-left group
-        transition-[background-color,border-color,opacity,transform] duration-200 ease-out
-        max-sm:pb-9
-        ${shake ? "shake" : ""}
-        ${
-          aprobado
-            ? "curso-aprobado text-white border-emerald-400/50 shadow-md"
-            : excepcional
-            ? "curso-excepcional text-white border-amber-400/50 shadow-md"
-            : enCurso
-            ? "curso-encurso text-white border-primary shadow-md encurso-glow"
-            : !disponible
-            ? "bg-bgSecondary/50 text-textSecondary opacity-70 border-dashed border-borderColor/80"
-            : "curso-disponible text-textPrimary border-borderColor hover:border-primary/40"
+    <button
+      type="button"
+      id={`curso-card-${curso.id}`}
+      onMouseDown={(e) => {
+        if (suppressMouseRef.current) return;
+        if (e.button !== 0) return;
+        touchStartRef.current = { x: e.clientX, y: e.clientY };
+        startPress();
+      }}
+      onMouseMove={(e) => {
+        if (suppressMouseRef.current || !timerRef.current) return;
+        markMovedIfNeeded(e.clientX, e.clientY);
+      }}
+      onMouseUp={(e) => {
+        if (suppressMouseRef.current) {
+          suppressMouseRef.current = false;
+          clearPressTimer();
+          return;
         }
+        if (e.button !== 0) return;
+        const handled = endPress();
+        if (handled || touchMovedRef.current) {
+          touchMovedRef.current = false;
+          return;
+        }
+        onLeftClick?.(curso);
+      }}
+      onMouseLeave={cancelPress}
+      onTouchStart={(e) => {
+        suppressMouseRef.current = true;
+        const t = e.touches[0];
+        touchStartRef.current = { x: t.clientX, y: t.clientY };
+        startPress();
+      }}
+      onTouchMove={(e) => {
+        const t = e.touches[0];
+        if (!t) return;
+        markMovedIfNeeded(t.clientX, t.clientY);
+      }}
+      onTouchEnd={() => {
+        const handled = endPress();
+        const moved = touchMovedRef.current;
+        touchMovedRef.current = false;
+        // Mantener suppress un instante para ignorar mouse sintético post-touch
+        window.setTimeout(() => {
+          suppressMouseRef.current = false;
+        }, 500);
+        if (handled || moved) return;
+        onLeftClick?.(curso);
+      }}
+      onTouchCancel={() => {
+        cancelPress();
+        window.setTimeout(() => {
+          suppressMouseRef.current = false;
+        }, 500);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onContextMenu?.(e, curso);
+      }}
+      className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-primary/45 group select-none touch-manipulation
+        ${cardStatusClass} ${highlightStyles}
       `}
       style={{
         backfaceVisibility: "hidden",
-        WebkitBackfaceVisibility: "hidden",
         transform: "translateZ(0)",
-        contain: "layout"
+        WebkitUserSelect: "none",
+        userSelect: "none",
+        WebkitTouchCallout: "none",
+        touchAction: "manipulation",
       }}
     >
       {promedio !== null && (
-        <div 
-          className={`absolute top-2 right-2 max-sm:top-1.5 max-sm:right-8 px-1.5 py-0.5 text-[10px] max-sm:text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[30px] max-sm:min-w-[26px] shadow-sm transition-all
-            ${
-              aprobado || excepcional || enCurso
-                ? "bg-white/20 border-white/30 text-white"
-                : "bg-primary/15 border-primary/30 text-primary"
-            }`}
-        >
+        <div className="absolute top-1.5 right-[52px] px-1 py-0.5 text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[24px] bg-white/10 dark:bg-white/5 border-borderColor/40 text-textPrimary shadow-sm">
           {promedio.toFixed(1)}
         </div>
       )}
 
-      <div className={`mobile-course-name font-semibold leading-tight mb-1.5 line-clamp-2 ${hasTopRightBadge ? "max-sm:pr-14 sm:pr-8" : "max-sm:pr-9"}`}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onSelect?.(curso);
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+        }}
+        onMouseUp={(e) => {
+          e.stopPropagation();
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onContextMenu?.(e, curso);
+        }}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          suppressMouseRef.current = true;
+          longPressTriggeredRef.current = false;
+          touchMovedRef.current = false;
+          const t = e.touches[0];
+          touchStartRef.current = { x: t.clientX, y: t.clientY };
+          clearPressTimer();
+          timerRef.current = setTimeout(() => {
+            longPressTriggeredRef.current = true;
+            onContextMenu?.(
+              {
+                preventDefault: () => {},
+                clientX: touchStartRef.current.x,
+                clientY: touchStartRef.current.y,
+              },
+              curso
+            );
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              navigator.vibrate(40);
+            }
+          }, 480);
+        }}
+        onTouchMove={(e) => {
+          e.stopPropagation();
+          const t = e.touches[0];
+          if (!t) return;
+          markMovedIfNeeded(t.clientX, t.clientY);
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          clearPressTimer();
+          const longPressed = longPressTriggeredRef.current;
+          const moved = touchMovedRef.current;
+          longPressTriggeredRef.current = false;
+          touchMovedRef.current = false;
+          window.setTimeout(() => {
+            suppressMouseRef.current = false;
+          }, 500);
+          if (longPressed || moved) return;
+          onSelect?.(curso);
+        }}
+        onTouchCancel={(e) => {
+          e.stopPropagation();
+          cancelPress();
+          window.setTimeout(() => {
+            suppressMouseRef.current = false;
+          }, 500);
+        }}
+        className={`absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer touch-manipulation
+          ${
+            highlightStatus === "selected"
+              ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
+              : "bg-bgSecondary/90 border-borderColor/40 text-textSecondary hover:text-textPrimary hover:bg-borderColor/30 shadow-[0_1px_3px_rgba(0,0,0,0.05)]"
+          }
+        `}
+        title="Ver prerrequisitos / Opciones"
+      >
+        <Network className="w-3 h-3" />
+        <span className="text-[9px] tracking-tight font-sans font-bold">PR</span>
+      </div>
+
+      <div className="font-semibold text-textPrimary text-xs sm:text-[12px] leading-tight line-clamp-2 pr-[80px] mb-1">
         {curso.nombre}
       </div>
 
-      <div className="mobile-course-meta text-[10.5px] font-medium opacity-75">
-        <span>{curso.codigo}</span>
-        <span className="opacity-50 mx-1">·</span>
-        <span>{curso.sct} SCT</span>
+      <div className="flex items-center justify-between gap-1.5 mt-auto w-full select-none">
+        <div className="text-[9px] font-medium text-textSecondary leading-none">
+          {curso.codigo} · {curso.sct || 0} SCT
+        </div>
+        {statusBadge}
       </div>
-
-      {/* Desktop: botón Notas completo */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onAbrirNotas(curso);
-        }}
-        aria-label="Notas"
-        className={`hidden sm:flex mt-2 w-full py-1.5 rounded-lg items-center justify-center gap-1.5 transition-all text-[11px] font-medium border
-          ${
-            enCurso || aprobado || excepcional
-              ? "bg-black/15 hover:bg-black/25 text-white border-white/20"
-              : "bg-bgPrimary/50 hover:bg-primary/10 text-textSecondary hover:text-primary border-borderColor/30 hover:border-primary/30"
-          }
-        `}
-      >
-        <NotebookPen className="w-3.5 h-3.5" /> Notas
-      </button>
-
-      {/* Mobile: ícono compacto */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onAbrirNotas(curso);
-        }}
-        aria-label="Notas"
-        className={`mobile-notes-button sm:hidden
-          ${
-            enCurso || aprobado || excepcional
-              ? "!bg-black/15 !border-white/20 !text-white"
-              : ""
-          }`}
-      >
-        <NotebookPen />
-      </button>
-    </div>
+    </button>
   );
 };
 
@@ -186,7 +333,7 @@ export default React.memo(Curso, (prevProps, nextProps) => {
     prevProps.aprobado === nextProps.aprobado &&
     prevProps.excepcional === nextProps.excepcional &&
     prevProps.disponible === nextProps.disponible &&
-    prevProps.modoExcepcional === nextProps.modoExcepcional &&
-    prevProps.enCurso === nextProps.enCurso
+    prevProps.enCurso === nextProps.enCurso &&
+    prevProps.highlightStatus === nextProps.highlightStatus
   );
 });

@@ -1,3 +1,5 @@
+import { safeStorage } from "../utils/safeStorage";
+import { LEGACY_KEYS } from "../utils/storageKeys";
 import { useState, useEffect } from "react";
 import { CheckCircle2, Hourglass, GraduationCap, BookOpen, BarChart3 } from "lucide-react";
 import DrawerPanel from "./DrawerPanel";
@@ -49,7 +51,7 @@ export default function ResumenProgreso({
     let sumaNotasPonderadas = 0;
     let creditosConNota = 0;
 
-    const notasGuardadas = JSON.parse(localStorage.getItem("malla-notas") || "{}");
+    const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
 
     semestresEfectivos.forEach((semestre) => {
       semestre.cursos.forEach((c) => {
