@@ -44,15 +44,15 @@ export default function CurricularScheduleSelector({
   ).length;
 
   return (
-    <aside className="w-full flex flex-col h-full bg-bgSecondary overflow-hidden select-none">
+    <aside className="w-full flex flex-col h-full min-h-0 bg-bgSecondary overflow-hidden select-none">
       {/* Cabecera Fija */}
-      <div className="p-4 border-b border-borderColor space-y-3 shrink-0 bg-bgSecondary relative">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="p-3 sm:p-4 border-b border-borderColor space-y-2.5 sm:space-y-3 shrink-0 bg-bgSecondary relative z-20">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
             <h2 className="text-sm font-black text-textPrimary uppercase tracking-wider">
               Tus asignaturas
             </h2>
-            <p className="text-[11px] text-textSecondary font-medium leading-none mt-1">
+            <p className="text-[11px] text-textSecondary font-medium leading-snug mt-0.5">
               Selecciona una sección por ramo.
             </p>
           </div>
@@ -62,20 +62,20 @@ export default function CurricularScheduleSelector({
         </div>
 
         {/* Buscador y Botón de Filtros */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="relative flex-1 min-w-0">
             <input
               type="text"
               value={filters.query}
               onChange={(e) => setFilters(prev => ({ ...prev, query: e.target.value }))}
               placeholder="Buscar asignatura..."
-              className="w-full pl-3 pr-8 py-1.5 rounded-lg border border-borderColor bg-bgPrimary text-xs focus:ring-1 focus:ring-primary focus:border-primary text-textPrimary font-semibold"
+              className="w-full min-w-0 pl-3 pr-3 py-1.5 rounded-lg border border-borderColor bg-bgPrimary text-xs focus:ring-1 focus:ring-primary focus:border-primary text-textPrimary font-semibold"
             />
           </div>
           <button
             type="button"
             onClick={() => setShowFilters(prev => !prev)}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-colors select-none btn-interactive ${
+            className={`shrink-0 px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-colors select-none btn-interactive ${
               showFilters
                 ? "border-primary bg-primary/5 text-primary"
                 : "border-borderColor bg-bgPrimary text-textSecondary hover:text-textPrimary"
@@ -166,7 +166,7 @@ export default function CurricularScheduleSelector({
       </div>
 
       {/* Listas con Scroll Independiente */}
-      <div className="flex-1 divide-y divide-borderColor overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 min-h-0 divide-y divide-borderColor overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-3 sm:space-y-4">
         {/* 1. Ramos Recomendados */}
         {filteredRecommended.length > 0 && (
           <GroupSection
@@ -313,19 +313,19 @@ function SelectableCourseAccordion({
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={onToggle}
-          className="w-full flex items-center justify-between text-left p-3.5 focus-visible:outline-none focus:ring-1 focus:ring-primary/30 btn-interactive"
+          className="w-full flex items-start justify-between gap-2 text-left p-3 sm:p-3.5 focus-visible:outline-none focus:ring-1 focus:ring-primary/30 btn-interactive"
         >
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-black text-textPrimary leading-snug">
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="text-[13px] sm:text-sm font-black text-textPrimary leading-snug break-words hyphens-auto pr-1">
               {courseTitle}
             </div>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[10px] font-bold text-textSecondary uppercase tracking-wider">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1">
+              <span className="text-[10px] font-bold text-textSecondary uppercase tracking-wider shrink-0">
                 {courseCode}
               </span>
               <span className="text-textSecondary/40 text-[9px]">•</span>
               <span
-                className={`text-[10px] font-bold flex items-center gap-1 ${
+                className={`text-[10px] font-bold inline-flex items-center gap-1 min-w-0 ${
                   selectedSection
                     ? hasConflict
                       ? "text-red-600 dark:text-red-400"
@@ -337,12 +337,12 @@ function SelectableCourseAccordion({
                 {!hasConflict && selectedSection && (
                   <CheckCircle className="h-3 w-3 shrink-0 text-primary" />
                 )}
-                {statusLabel}
+                <span className="truncate">{statusLabel}</span>
               </span>
             </div>
           </div>
           <ChevronDown
-            className="h-4 w-4 shrink-0 text-textSecondary accordion-chevron"
+            className="h-4 w-4 shrink-0 text-textSecondary accordion-chevron mt-0.5"
             style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
           />
         </button>

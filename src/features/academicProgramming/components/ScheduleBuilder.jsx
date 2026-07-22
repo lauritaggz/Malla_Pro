@@ -397,65 +397,66 @@ export default function ScheduleBuilder({
   );
 
   const step = proposalSaved ? 4 : selectedSectionsList.length > 0 ? 3 : 2;
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 md:space-y-6">
       <TomaDeRamosStepper currentStep={step} />
       <MallaProgressHint />
 
       {/* 1. Encabezado Compacto */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 pb-3 border-b border-borderColor select-none">
-        <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-black text-textPrimary tracking-tight">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between sm:gap-3 pb-2.5 md:pb-3 border-b border-borderColor select-none">
+        <div className="space-y-0.5 min-w-0">
+          <h1 className="text-lg sm:text-2xl font-black text-textPrimary tracking-tight">
             Arma tu horario
           </h1>
-          <p className="text-xs sm:text-sm text-textSecondary leading-none">
+          <p className="text-[11px] sm:text-sm text-textSecondary leading-snug">
             Selecciona una sección para cada asignatura.
+            {integration && (
+              <span className="text-textSecondary/80">
+                {" "}
+                · {integration.primarySemester}.º semestre ·{" "}
+                {integration.primarySemesterCourses?.length || 0} recomendados
+                {integration.previousPendingCourses?.length > 0
+                  ? ` · ${integration.previousPendingCourses.length} arrastre`
+                  : ""}
+              </span>
+            )}
           </p>
-          {integration && (
-            <p className="text-xs text-textSecondary pt-1 flex items-center gap-1.5 font-medium">
-              <span>{integration.primarySemester}.º semestre</span>
-              <span className="text-borderColor">•</span>
-              <span>{integration.primarySemesterCourses?.length || 0} recomendados</span>
-              {integration.previousPendingCourses?.length > 0 && (
-                <>
-                  <span className="text-borderColor">•</span>
-                  <span>{integration.previousPendingCourses.length} arrastre</span>
-                </>
-              )}
-            </p>
-          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-textSecondary self-end">
-          <span>{periodLabel}</span>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-semibold text-textSecondary">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-textSecondary/80 mr-0.5">
+            {periodLabel}
+          </span>
           <button
             type="button"
             onClick={onChangePdf}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[11px] font-bold text-textSecondary transition-colors hover:text-textPrimary bg-bgSecondary btn-interactive"
+            className="inline-flex items-center gap-1 px-2 py-1.5 sm:px-2.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[11px] font-bold text-textSecondary transition-colors hover:text-textPrimary bg-bgSecondary btn-interactive"
           >
-            <RefreshCw className="h-3 w-3" />
-            Cambiar programación
+            <RefreshCw className="h-3 w-3 shrink-0" />
+            <span className="sm:hidden">Cambiar PDF</span>
+            <span className="hidden sm:inline">Cambiar programación</span>
           </button>
           <button
             type="button"
             onClick={handleClearSavedPlanning}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-500/25 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors bg-bgSecondary"
+            className="inline-flex items-center gap-1 px-2 py-1.5 sm:px-2.5 rounded-lg border border-red-500/25 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors bg-bgSecondary"
+            title="Eliminar planificación guardada"
           >
-            <Trash2 className="h-3 w-3" />
-            Eliminar planificación guardada
+            <Trash2 className="h-3 w-3 shrink-0" />
+            <span className="sm:hidden">Eliminar</span>
+            <span className="hidden sm:inline">Eliminar planificación guardada</span>
           </button>
         </div>
       </div>
 
       {/* Alerta de Feedback */}
       {feedbackMessage && (
-        <div className="bg-primary/10 border border-primary/20 text-primary px-4 py-2.5 rounded-xl text-xs font-semibold animate-fade-in relative flex items-center justify-between">
-          <span>{feedbackMessage}</span>
+        <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-semibold animate-fade-in relative flex items-start sm:items-center justify-between gap-2">
+          <span className="min-w-0 leading-snug">{feedbackMessage}</span>
           <button
             type="button"
             onClick={() => setFeedbackMessage("")}
-            className="text-textSecondary hover:text-textPrimary font-bold underline"
+            className="shrink-0 text-textSecondary hover:text-textPrimary font-bold underline"
           >
             Cerrar
           </button>
@@ -463,13 +464,13 @@ export default function ScheduleBuilder({
       )}
 
       {/* Tabs Móviles */}
-      <div className="md:hidden flex border-b border-borderColor bg-bgSecondary rounded-t-xl select-none">
+      <div className="md:hidden flex border border-borderColor bg-bgSecondary rounded-xl select-none overflow-hidden">
         <button
           type="button"
           onClick={() => setActiveMobileTab("SECTIONS")}
           className={`flex-1 py-2.5 text-xs font-bold text-center border-b-2 transition-all ${
             activeMobileTab === "SECTIONS"
-              ? "border-primary text-primary"
+              ? "border-primary text-primary bg-primary/5"
               : "border-transparent text-textSecondary hover:text-textPrimary"
           }`}
         >
@@ -480,21 +481,25 @@ export default function ScheduleBuilder({
           onClick={() => setActiveMobileTab("SCHEDULE")}
           className={`flex-1 py-2.5 text-xs font-bold text-center border-b-2 transition-all relative ${
             activeMobileTab === "SCHEDULE"
-              ? "border-primary text-primary"
+              ? "border-primary text-primary bg-primary/5"
               : "border-transparent text-textSecondary hover:text-textPrimary"
           }`}
         >
           Mi horario
           {selectedSectionsList.length > 0 && (
-            <span className="ml-1.5 inline-flex items-center justify-center bg-primary text-white text-[10px] font-extrabold h-4 w-4 rounded-full">
+            <span className="ml-1.5 inline-flex items-center justify-center bg-primary text-white text-[10px] font-extrabold h-4 min-w-4 px-1 rounded-full">
               {selectedSectionsList.length}
             </span>
           )}
         </button>
       </div>
 
-      {/* 2. Área Principal de Trabajo (Contenedor Delimitado) */}
-      <div className="border border-borderColor bg-bgSecondary rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[minmax(350px,410px)_minmax(0,1fr)] divide-y md:divide-y-0 md:divide-x divide-borderColor h-[72vh] min-h-[620px] max-h-[850px]">
+      {/* 2. Área Principal de Trabajo */}
+      <div
+        className="border border-borderColor bg-bgSecondary rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[minmax(320px,410px)_minmax(0,1fr)] divide-y md:divide-y-0 md:divide-x divide-borderColor
+          max-md:h-[min(62dvh,520px)] max-md:min-h-[280px]
+          md:h-[72vh] md:min-h-[560px] md:max-h-[850px]"
+      >
         {/* Columna Izquierda: Tus Asignaturas */}
         <div
           className={`h-full flex flex-col overflow-hidden ${
@@ -523,7 +528,7 @@ export default function ScheduleBuilder({
           }`}
         >
           {/* Header del horario sticky unificado */}
-          <div className="bg-bgSecondary border-b border-borderColor px-4 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 z-10 shrink-0 select-none">
+          <div className="bg-bgSecondary border-b border-borderColor px-3 py-2.5 sm:px-4 sm:py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3 z-10 shrink-0 select-none">
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-sm font-black text-textPrimary uppercase tracking-wider">
@@ -536,8 +541,16 @@ export default function ScheduleBuilder({
                   </span>
                 )}
               </div>
-              <p className="text-[11px] font-semibold text-textSecondary">
-                {selectedSectionsList.length} {selectedSectionsList.length === 1 ? "ramo" : "ramos"} · {totalCredits} créditos · {busyDays.size} {busyDays.size === 1 ? "día con clase" : "días con clases"} · {conflicts.length === 0 ? "Sin conflictos" : `${conflicts.length} conflicto(s)`}
+              <p className="text-[11px] font-semibold text-textSecondary leading-snug">
+                {selectedSectionsList.length} {selectedSectionsList.length === 1 ? "ramo" : "ramos"}
+                <span className="text-borderColor mx-1">·</span>
+                {totalCredits} créditos
+                <span className="text-borderColor mx-1">·</span>
+                {busyDays.size} {busyDays.size === 1 ? "día" : "días"}
+                <span className="hidden sm:inline">
+                  <span className="text-borderColor mx-1">·</span>
+                  {conflicts.length === 0 ? "Sin conflictos" : `${conflicts.length} conflicto(s)`}
+                </span>
               </p>
             </div>
 
@@ -594,21 +607,8 @@ export default function ScheduleBuilder({
         </div>
       </div>
 
-      {/* Botón flotante inferior para móvil */}
-      {selectedSectionsList.length > 0 && activeMobileTab === "SECTIONS" && (
-        <div className="fixed bottom-18 left-4 right-4 z-40 md:hidden select-none">
-          <button
-            type="button"
-            onClick={() => setActiveMobileTab("SCHEDULE")}
-            className="w-full bg-primary hover:brightness-110 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 text-sm btn-interactive"
-          >
-            Ver mi horario ({selectedSectionsList.length} {selectedSectionsList.length === 1 ? "ramo" : "ramos"})
-          </button>
-        </div>
-      )}
-
       {/* 3. Información Secundaria Colapsada */}
-      <div className="pt-8 border-t border-borderColor mt-8 space-y-4">
+      <div className="pt-4 md:pt-8 border-t border-borderColor mt-4 md:mt-8 space-y-3 md:space-y-4">
         <h2 className="text-xs font-bold text-textSecondary uppercase tracking-widest flex items-center gap-1.5">
           <Eye className="h-4 w-4" /> Más información y otras asignaturas
         </h2>

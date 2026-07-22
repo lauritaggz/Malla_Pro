@@ -232,9 +232,9 @@ export default function WeeklyScheduleGrid({
         </div>
       ) : (
         <div className="flex-1 overflow-auto relative flex flex-col min-h-0 bg-bgPrimary/10">
-          <div className="min-w-[650px] flex flex-col flex-1 relative">
+          <div className="min-w-0 md:min-w-[650px] flex flex-col flex-1 relative">
             {/* Cabecera de días (Fijo arriba) */}
-            <div className="grid grid-cols-[64px_repeat(6,1fr)] border-b border-borderColor bg-bgSecondary sticky top-0 z-20 text-center select-none text-[10px] font-extrabold text-textSecondary">
+            <div className="grid grid-cols-[56px_repeat(6,minmax(0,1fr))] md:grid-cols-[64px_repeat(6,1fr)] border-b border-borderColor bg-bgSecondary sticky top-0 z-20 text-center select-none text-[10px] font-extrabold text-textSecondary">
               <div className="border-r border-borderColor" />
               {scheduleDays.map((day) => {
                 const isSelected = selectedMobileDay === day.code;
@@ -261,7 +261,7 @@ export default function WeeklyScheduleGrid({
 
             {/* Cuerpo del horario */}
             <div
-              className="grid grid-cols-[64px_repeat(6,1fr)] relative"
+              className="grid grid-cols-[56px_minmax(0,1fr)] md:grid-cols-[64px_repeat(6,1fr)] relative"
               style={{ height: gridHeight }}
             >
               {/* Eje de Horas */}
@@ -285,7 +285,7 @@ export default function WeeklyScheduleGrid({
               </div>
 
               {/* Líneas horizontales de inicio de módulo */}
-              <div className="absolute left-[64px] right-0 top-0 bottom-0 pointer-events-none z-0">
+              <div className="absolute left-[56px] md:left-[64px] right-0 top-0 bottom-0 pointer-events-none z-0">
                 {unabTimeSlots.map((slot) => {
                   const slotStart = timeToMinutes(slot.start);
                   if (slotStart < scheduleStartMinutes || slotStart >= scheduleEndMinutes) return null;
@@ -302,7 +302,7 @@ export default function WeeklyScheduleGrid({
               </div>
 
               {/* Pausas de 10 minutos (visualizadas con fondo ligeramente diferente) */}
-              <div className="absolute left-[64px] right-0 top-0 bottom-0 pointer-events-none z-0">
+              <div className="absolute left-[56px] md:left-[64px] right-0 top-0 bottom-0 pointer-events-none z-0">
                 {unabTimeSlots.slice(0, -1).map((slot, idx) => {
                   const endVal = timeToMinutes(slot.end);
                   const nextStartVal = timeToMinutes(unabTimeSlots[idx + 1].start);

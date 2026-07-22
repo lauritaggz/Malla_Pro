@@ -390,7 +390,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
           </div>
         )}
 
-        <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20">
+        <main className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-[calc(var(--mobile-bottom-nav-h,4rem)+1rem)] sm:pb-20">
           {!showBuilder && (
             <>
               <TomaDeRamosStepper currentStep={1} />
