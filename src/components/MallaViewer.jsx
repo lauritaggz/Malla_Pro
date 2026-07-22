@@ -78,6 +78,7 @@ const MallaViewer = ({
   const [fullscreenMalla, setFullscreenMalla] = useState(false);
   const [marcarHastaOpen, setMarcarHastaOpen] = useState(false);
   const [marcarHastaFlash, setMarcarHastaFlash] = useState(false);
+  const [marcarHastaPos, setMarcarHastaPos] = useState({ top: 0, left: 0, width: 200 });
   const [isMobileView, setIsMobileView] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
   );
@@ -615,18 +616,45 @@ const MallaViewer = ({
 
   useEffect(() => {
     if (!marcarHastaOpen) return;
-    const onPointerDown = (e) => {
-      if (marcarHastaRef.current && !marcarHastaRef.current.contains(e.target)) {
-        setMarcarHastaOpen(false);
+
+    const updatePos = () => {
+      const el = marcarHastaRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const menuWidth = Math.min(220, window.innerWidth - 16);
+      let left = rect.left;
+      // Evitar que el menú se corte por la izquierda o derecha
+      if (left + menuWidth > window.innerWidth - 8) {
+        left = window.innerWidth - menuWidth - 8;
       }
+      if (left < 8) left = 8;
+      setMarcarHastaPos({
+        top: rect.bottom + 8,
+        left,
+        width: menuWidth,
+      });
+    };
+
+    updatePos();
+    window.addEventListener("resize", updatePos);
+    window.addEventListener("scroll", updatePos, true);
+
+    const onPointerDown = (e) => {
+      if (marcarHastaRef.current?.contains(e.target)) return;
+      if (e.target?.closest?.("[data-marcar-hasta-menu]")) return;
+      setMarcarHastaOpen(false);
     };
     const onKeyDown = (e) => {
       if (e.key === "Escape") setMarcarHastaOpen(false);
     };
     document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown, { passive: true });
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      window.removeEventListener("resize", updatePos);
+      window.removeEventListener("scroll", updatePos, true);
       document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [marcarHastaOpen]);
@@ -984,7 +1012,7 @@ const MallaViewer = ({
       
       {/* ── Compact Statistics & Title Header ── */}
       {!fullscreenMalla && (
-        <div className="malla-toolbar flex flex-col gap-2 py-2 px-3 mb-3 border border-borderColor/60 bg-bgSecondary/30 rounded-2xl select-none shrink-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-2 sm:px-3.5">
+        <div className="malla-toolbar overflow-visible flex flex-col gap-2 py-2 px-3 mb-3 border border-borderColor/60 bg-bgSecondary/30 rounded-2xl select-none shrink-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-2 sm:px-3.5">
           <div className="flex flex-col min-w-0 sm:max-w-[38%] lg:max-w-[42%]">
             <h1 className="text-sm sm:text-base font-bold text-textPrimary leading-none">Mi malla curricular</h1>
             <p className="text-[10px] text-textSecondary/80 font-bold mt-0.5 uppercase tracking-wide truncate">
@@ -1039,41 +1067,63 @@ const MallaViewer = ({
                     />
                   </button>
 
-                  <AnimatePresence>
-                    {marcarHastaOpen && (
-                      <motion.div
-                        role="listbox"
-                        aria-label="Semestres"
-                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                        transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
-                        className="marcar-hasta-menu absolute right-0 top-full mt-2 z-50 min-w-[188px] max-h-[min(60vh,320px)] overflow-y-auto rounded-xl border border-borderColor/80 bg-bgSecondary/95 backdrop-blur-md shadow-[0_12px_32px_rgba(0,0,0,0.14)] py-1.5"
-                      >
-                        <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-textSecondary/70">
-                          Aprobar hasta
-                        </p>
-                        {Array.from({ length: malla.totalSemestres }).map((_, i) => (
-                          <motion.button
-                            key={i}
-                            type="button"
-                            role="option"
-                            initial={{ opacity: 0, x: 8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: Math.min(i * 0.025, 0.2), duration: 0.15 }}
-                            onClick={() => {
-                              aprobarHastaSemestre(i + 1);
-                              setMarcarHastaOpen(false);
-                            }}
-                            className="marcar-hasta-item group w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-sm text-textSecondary hover:text-textPrimary hover:bg-primary/10 transition-colors"
-                          >
-                            <span className="font-medium">Semestre {i + 1}</span>
-                            <CheckCircle2 className="w-3.5 h-3.5 opacity-0 -translate-x-1 text-primary transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
-                          </motion.button>
-                        ))}
-                      </motion.div>
+                  {typeof document !== "undefined" &&
+                    createPortal(
+                      <AnimatePresence>
+                        {marcarHastaOpen && (
+                          <>
+                            <motion.button
+                              type="button"
+                              aria-label="Cerrar menú marcar hasta"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.12 }}
+                              className="fixed inset-0 z-[9998] bg-black/25 sm:bg-transparent"
+                              onClick={() => setMarcarHastaOpen(false)}
+                            />
+                            <motion.div
+                              data-marcar-hasta-menu
+                              role="listbox"
+                              aria-label="Semestres"
+                              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                              transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
+                              style={{
+                                top: marcarHastaPos.top,
+                                left: marcarHastaPos.left,
+                                width: marcarHastaPos.width,
+                              }}
+                              className="marcar-hasta-menu fixed z-[9999] max-h-[min(60vh,320px)] overflow-y-auto rounded-xl border border-borderColor/80 bg-bgSecondary shadow-[0_12px_32px_rgba(0,0,0,0.22)] py-1.5"
+                            >
+                              <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-textSecondary/70">
+                                Aprobar hasta
+                              </p>
+                              {Array.from({ length: malla.totalSemestres }).map((_, i) => (
+                                <motion.button
+                                  key={i}
+                                  type="button"
+                                  role="option"
+                                  initial={{ opacity: 0, x: 8 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: Math.min(i * 0.025, 0.2), duration: 0.15 }}
+                                  onClick={() => {
+                                    aprobarHastaSemestre(i + 1);
+                                    setMarcarHastaOpen(false);
+                                  }}
+                                  className="marcar-hasta-item group w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left text-sm text-textSecondary hover:text-textPrimary hover:bg-primary/10 active:bg-primary/15 transition-colors"
+                                >
+                                  <span className="font-medium">Semestre {i + 1}</span>
+                                  <CheckCircle2 className="w-3.5 h-3.5 opacity-40 text-primary sm:opacity-0 sm:-translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
+                                </motion.button>
+                              ))}
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>,
+                      document.body
                     )}
-                  </AnimatePresence>
                 </div>
               )}
 

@@ -20,6 +20,8 @@ const Curso = ({
   const longPressTriggeredRef = useRef(false);
   const touchMovedRef = useRef(false);
   const touchStartRef = useRef({ x: 0, y: 0 });
+  // Evita el doble toggle: en móvil touchend + mouse sintético anulan el cambio de estado
+  const suppressMouseRef = useRef(false);
 
   useEffect(() => {
     const actualizarPromedio = () => {
@@ -111,8 +113,7 @@ const Curso = ({
     }
   };
 
-  const startPress = (e, isTouch) => {
-    if (!isTouch && e.button !== 0) return;
+  const startPress = () => {
     longPressTriggeredRef.current = false;
     touchMovedRef.current = false;
     clearPressTimer();
@@ -126,11 +127,9 @@ const Curso = ({
     }, 480);
   };
 
-  const endPress = (e) => {
+  const endPress = () => {
     clearPressTimer();
     if (longPressTriggeredRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
       longPressTriggeredRef.current = false;
       return true;
     }
@@ -142,56 +141,88 @@ const Curso = ({
     longPressTriggeredRef.current = false;
   };
 
+  const markMovedIfNeeded = (clientX, clientY) => {
+    const dx = Math.abs(clientX - touchStartRef.current.x);
+    const dy = Math.abs(clientY - touchStartRef.current.y);
+    if (dx > 12 || dy > 12) {
+      touchMovedRef.current = true;
+      cancelPress();
+      return true;
+    }
+    return false;
+  };
+
   return (
     <button
       type="button"
       id={`curso-card-${curso.id}`}
-      onMouseDown={(e) => startPress(e, false)}
+      onMouseDown={(e) => {
+        if (suppressMouseRef.current) return;
+        if (e.button !== 0) return;
+        touchStartRef.current = { x: e.clientX, y: e.clientY };
+        startPress();
+      }}
+      onMouseMove={(e) => {
+        if (suppressMouseRef.current || !timerRef.current) return;
+        markMovedIfNeeded(e.clientX, e.clientY);
+      }}
       onMouseUp={(e) => {
-        const handled = endPress(e);
-        if (!handled && e.button === 0) {
-          onLeftClick?.(curso);
+        if (suppressMouseRef.current) {
+          suppressMouseRef.current = false;
+          clearPressTimer();
+          return;
         }
-      }}
-      onMouseLeave={cancelPress}
-      onTouchStart={(e) => {
-        const t = e.touches[0];
-        touchStartRef.current = { x: t.clientX, y: t.clientY };
-        startPress(e, true);
-      }}
-      onTouchMove={(e) => {
-        const t = e.touches[0];
-        if (!t) return;
-        const dx = Math.abs(t.clientX - touchStartRef.current.x);
-        const dy = Math.abs(t.clientY - touchStartRef.current.y);
-        if (dx > 10 || dy > 10) {
-          touchMovedRef.current = true;
-          cancelPress();
-        }
-      }}
-      onTouchEnd={(e) => {
-        const handled = endPress(e);
+        if (e.button !== 0) return;
+        const handled = endPress();
         if (handled || touchMovedRef.current) {
           touchMovedRef.current = false;
           return;
         }
         onLeftClick?.(curso);
       }}
-      onTouchCancel={cancelPress}
+      onMouseLeave={cancelPress}
+      onTouchStart={(e) => {
+        suppressMouseRef.current = true;
+        const t = e.touches[0];
+        touchStartRef.current = { x: t.clientX, y: t.clientY };
+        startPress();
+      }}
+      onTouchMove={(e) => {
+        const t = e.touches[0];
+        if (!t) return;
+        markMovedIfNeeded(t.clientX, t.clientY);
+      }}
+      onTouchEnd={() => {
+        const handled = endPress();
+        const moved = touchMovedRef.current;
+        touchMovedRef.current = false;
+        // Mantener suppress un instante para ignorar mouse sintético post-touch
+        window.setTimeout(() => {
+          suppressMouseRef.current = false;
+        }, 500);
+        if (handled || moved) return;
+        onLeftClick?.(curso);
+      }}
+      onTouchCancel={() => {
+        cancelPress();
+        window.setTimeout(() => {
+          suppressMouseRef.current = false;
+        }, 500);
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         onContextMenu?.(e, curso);
       }}
-      className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-primary/45 group select-none
+      className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-primary/45 group select-none touch-manipulation
         ${cardStatusClass} ${highlightStyles}
       `}
       style={{
         backfaceVisibility: "hidden",
         transform: "translateZ(0)",
-        contain: "layout",
         WebkitUserSelect: "none",
         userSelect: "none",
         WebkitTouchCallout: "none",
+        touchAction: "manipulation",
       }}
     >
       {promedio !== null && (
@@ -221,6 +252,7 @@ const Curso = ({
         }}
         onTouchStart={(e) => {
           e.stopPropagation();
+          suppressMouseRef.current = true;
           longPressTriggeredRef.current = false;
           touchMovedRef.current = false;
           const t = e.touches[0];
@@ -245,29 +277,30 @@ const Curso = ({
           e.stopPropagation();
           const t = e.touches[0];
           if (!t) return;
-          const dx = Math.abs(t.clientX - touchStartRef.current.x);
-          const dy = Math.abs(t.clientY - touchStartRef.current.y);
-          if (dx > 10 || dy > 10) {
-            touchMovedRef.current = true;
-            cancelPress();
-          }
+          markMovedIfNeeded(t.clientX, t.clientY);
         }}
         onTouchEnd={(e) => {
           e.stopPropagation();
           e.preventDefault();
           clearPressTimer();
-          if (longPressTriggeredRef.current || touchMovedRef.current) {
-            longPressTriggeredRef.current = false;
-            touchMovedRef.current = false;
-            return;
-          }
+          const longPressed = longPressTriggeredRef.current;
+          const moved = touchMovedRef.current;
+          longPressTriggeredRef.current = false;
+          touchMovedRef.current = false;
+          window.setTimeout(() => {
+            suppressMouseRef.current = false;
+          }, 500);
+          if (longPressed || moved) return;
           onSelect?.(curso);
         }}
         onTouchCancel={(e) => {
           e.stopPropagation();
           cancelPress();
+          window.setTimeout(() => {
+            suppressMouseRef.current = false;
+          }, 500);
         }}
-        className={`absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer
+        className={`absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer touch-manipulation
           ${
             highlightStatus === "selected"
               ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
