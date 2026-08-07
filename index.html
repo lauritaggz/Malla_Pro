@@ -23,17 +23,18 @@
     <meta name="application-name" content="Malla Pro" />
 
     <!-- Open Graph — WhatsApp, Facebook, LinkedIn, iMessage -->
+    <!-- VITE_SITE_URL se inyecta en build (Netlify o cPanel) -->
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_CL" />
     <meta property="og:site_name" content="Malla Pro" />
-    <meta property="og:url" content="https://mallapro.cl/" />
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
     <meta property="og:title" content="Malla Pro | Organiza tu malla y calcula tus notas" />
     <meta
       property="og:description"
       content="Organiza tu malla, arma tu horario y calcula tus notas en un solo lugar. Hecho para estudiantes universitarios."
     />
-    <meta property="og:image" content="https://mallapro.cl/og-image.jpg" />
-    <meta property="og:image:secure_url" content="https://mallapro.cl/og-image.jpg" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.jpg" />
+    <meta property="og:image:secure_url" content="%VITE_SITE_URL%/og-image.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -49,7 +50,7 @@
       name="twitter:description"
       content="Organiza tu malla, arma tu horario y calcula tus notas en un solo lugar. Hecho para estudiantes universitarios."
     />
-    <meta name="twitter:image" content="https://mallapro.cl/og-image.jpg" />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.jpg" />
     <meta
       name="twitter:image:alt"
       content="Malla Pro — organiza tu malla curricular, arma tu horario y calcula tus notas"
@@ -60,7 +61,7 @@
     <link rel="apple-touch-icon" href="/favicon.png" />
 
     <!-- Canonical -->
-    <link rel="canonical" href="https://mallapro.cl/" />
+    <link rel="canonical" href="%VITE_SITE_URL%/" />
 
     <!-- Structured data (Google / rich results) -->
     <script type="application/ld+json">
@@ -68,7 +69,7 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Malla Pro",
-        "url": "https://mallapro.cl/",
+        "url": "%VITE_SITE_URL%/",
         "description": "Organiza tu malla curricular, arma tu horario y calcula tus notas. Herramienta para estudiantes universitarios.",
         "applicationCategory": "EducationalApplication",
         "operatingSystem": "Web",
@@ -78,7 +79,7 @@
           "priceCurrency": "CLP"
         },
         "inLanguage": "es-CL",
-        "image": "https://mallapro.cl/og-image.jpg"
+        "image": "%VITE_SITE_URL%/og-image.jpg"
       }
     </script>
 

@@ -1,1 +1,2 @@
+# SPA fallback. Netlify sirve primero archivos que existen (og-image.jpg, favicon, etc.).
 /*    /index.html   200
