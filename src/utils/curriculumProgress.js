@@ -85,11 +85,13 @@ export function isCourseInProgress(courseId, progressState) {
  */
 export function meetsPrerequisites(course, progressState) {
   if (!course?.prerrequisitos?.length) return true;
-  return course.prerrequisitos.every(
-    (pre) =>
-      (progressState.aprobados || []).includes(pre) ||
-      (progressState.excepciones || []).includes(pre)
-  );
+  return course.prerrequisitos.every((pre) => {
+    const preId = Number(pre);
+    return (
+      (progressState.aprobados || []).some((id) => Number(id) === preId) ||
+      (progressState.excepciones || []).some((id) => Number(id) === preId)
+    );
+  });
 }
 
 /**

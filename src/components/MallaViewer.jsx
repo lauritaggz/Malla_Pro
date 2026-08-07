@@ -19,6 +19,7 @@ import {
   writeAcademicProgress,
 } from "../utils/academicProgressStorage";
 import { getUserSafeMessage, normalizeAppError } from "../utils/appErrors";
+import { fetchMallaJson, mapMallaData } from "../utils/mallasLoader";
 
 const MallaViewer = ({
   mallaSeleccionada,
@@ -66,6 +67,8 @@ const MallaViewer = ({
   const [courseDrawerOpen, setCourseDrawerOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [paths, setPaths] = useState([]);
+  const [shakeCursoId, setShakeCursoId] = useState(null);
+  const shakeTimerRef = useRef(null);
 
   // Ref y estados para drag horizontal
   const scrollRef = useRef(null);
@@ -165,28 +168,10 @@ const MallaViewer = ({
       setLoadStatus("loading");
       setLoadError(null);
       try {
-        const res = await fetch(mallaSeleccionada.url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await fetchMallaJson(mallaSeleccionada.url);
         if (loadId !== loadIdRef.current) return;
 
-        if (!data || typeof data !== "object") {
-          throw new Error("Invalid malla JSON");
-        }
-
-        const isMencion = !!data.menciones;
-        const mencionesDisponibles = data.menciones_disponibles || [];
-        const totalSemestres = data.totalSemestres || data.semestres?.length || 0;
-
-        const mallaData = {
-          nombre: data.carrera || "Malla sin nombre",
-          semestres: data.semestres || [],
-          semestresComunes: data.semestres_comunes || [],
-          menciones: data.menciones || {},
-          isMencion,
-          mencionesDisponibles,
-          totalSemestres,
-        };
+        const mallaData = mapMallaData(data);
 
         // Migrar / cargar progreso de esta carrera
         const progress = readAcademicProgress(mallaSeleccionada);
@@ -203,14 +188,17 @@ const MallaViewer = ({
         setLoadStatus("success");
 
         // Inicializar mención activa si aplica
-        if (isMencion && mencionesDisponibles.length > 0) {
+        if (mallaData.isMencion && mallaData.mencionesDisponibles.length > 0) {
           const storedMencion = safeStorage.getRaw(
             `malla-mencion-${mallaData.nombre}`
           );
-          if (storedMencion && mencionesDisponibles.some((m) => m.codigo === storedMencion)) {
+          if (
+            storedMencion &&
+            mallaData.mencionesDisponibles.some((m) => m.codigo === storedMencion)
+          ) {
             setMencionActiva(storedMencion);
           } else {
-            setMencionActiva(mencionesDisponibles[0].codigo);
+            setMencionActiva(mallaData.mencionesDisponibles[0].codigo);
           }
         }
 
@@ -225,6 +213,33 @@ const MallaViewer = ({
     }
     cargar();
   }, [mallaSeleccionada, onMallaDataLoaded]);
+
+  // En desarrollo: al volver a la pestaña, recargar JSON por si se editó public/mallas
+  useEffect(() => {
+    if (!import.meta.env.DEV || !mallaSeleccionada?.url) return;
+
+    const reloadOnFocus = () => {
+      if (document.visibilityState !== "visible") return;
+      loadIdRef.current += 1;
+      const loadId = loadIdRef.current;
+      fetchMallaJson(mallaSeleccionada.url)
+        .then((data) => {
+          if (loadId !== loadIdRef.current) return;
+          setMalla(mapMallaData(data));
+          setLoadStatus("success");
+        })
+        .catch(() => {
+          /* silencioso en hot-reload de edición */
+        });
+    };
+
+    document.addEventListener("visibilitychange", reloadOnFocus);
+    window.addEventListener("focus", reloadOnFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", reloadOnFocus);
+      window.removeEventListener("focus", reloadOnFocus);
+    };
+  }, [mallaSeleccionada?.url]);
 
   // Guardar mención activa
   useEffect(() => {
@@ -327,21 +342,93 @@ const MallaViewer = ({
     return [...malla.semestresComunes.flatMap((s) => s.cursos), ...fromMenciones];
   }, [malla]);
 
-  const getCursoById = useCallback((id) => getAllCursos().find((c) => c.id === id), [getAllCursos]);
+  const getCursoById = useCallback(
+    (id) => getAllCursos().find((c) => Number(c.id) === Number(id)),
+    [getAllCursos]
+  );
 
   const getDescendientes = (id, todasLasMallas) => {
-    const hijos = todasLasMallas.filter(c => c.prerrequisitos?.includes(id));
-    let descendientes = [...hijos.map(h => h.id)];
-    hijos.forEach(h => {
+    const idNum = Number(id);
+    const hijos = todasLasMallas.filter((c) =>
+      (c.prerrequisitos || []).some((pre) => Number(pre) === idNum)
+    );
+    let descendientes = [...hijos.map((h) => h.id)];
+    hijos.forEach((h) => {
       descendientes = [...descendientes, ...getDescendientes(h.id, todasLasMallas)];
     });
     return Array.from(new Set(descendientes));
   };
 
+  // Mantener selectedCurso alineado con la malla cargada (prerreqs actualizados)
+  useEffect(() => {
+    if (!selectedCurso || !malla) return;
+    const fresh = getAllCursos().find(
+      (c) => Number(c.id) === Number(selectedCurso.id)
+    );
+    if (!fresh) {
+      setSelectedCurso(null);
+      setPaths([]);
+      return;
+    }
+    const prevKey = JSON.stringify(selectedCurso.prerrequisitos || []);
+    const nextKey = JSON.stringify(fresh.prerrequisitos || []);
+    if (
+      prevKey !== nextKey ||
+      selectedCurso.nombre !== fresh.nombre ||
+      selectedCurso.codigo !== fresh.codigo
+    ) {
+      setSelectedCurso(fresh);
+    }
+  }, [malla, selectedCurso, getAllCursos]);
+
+  // Cumple prerrequisitos (IDs normalizados para evitar fallos string/number)
+  const cumplePrereqs = useCallback((curso) => {
+    if (!curso?.prerrequisitos?.length) return true;
+    return curso.prerrequisitos.every((pre) => {
+      const preId = Number(pre);
+      return (
+        aprobados.some((id) => Number(id) === preId) ||
+        excepciones.some((id) => Number(id) === preId)
+      );
+    });
+  }, [aprobados, excepciones]);
+
+  const triggerBlockedShake = useCallback((cursoId) => {
+    if (cursoId == null) return;
+    if (shakeTimerRef.current) {
+      window.clearTimeout(shakeTimerRef.current);
+    }
+    setShakeCursoId(cursoId);
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate([35, 45, 35]);
+    }
+    shakeTimerRef.current = window.setTimeout(() => {
+      setShakeCursoId((current) => (current === cursoId ? null : current));
+      shakeTimerRef.current = null;
+    }, 420);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimerRef.current) window.clearTimeout(shakeTimerRef.current);
+    };
+  }, []);
+
+  const canMarkProgress = useCallback(
+    (curso) => Boolean(modoExcepcional || cumplePrereqs(curso)),
+    [modoExcepcional, cumplePrereqs]
+  );
+
   // Aprobar o desmarcar ramo
-  const aprobar = (id) => {
+  const aprobar = useCallback((id) => {
     const curso = getCursoById(id);
     const willApprove = !aprobados.includes(id);
+
+    if (willApprove && curso && !canMarkProgress(curso)) {
+      triggerBlockedShake(id);
+      return false;
+    }
+
     trackToggleCursoEstado(mallaSeleccionada, curso, willApprove ? "aprobado" : "desaprobado");
 
     setAprobados((prevAprobados) => {
@@ -352,14 +439,22 @@ const MallaViewer = ({
       }
       return [...prevAprobados, id];
     });
-    
+
     setCursando((prevCursando) => {
       if (prevCursando.includes(id)) {
         return prevCursando.filter((c) => c !== id);
       }
       return prevCursando;
     });
-  };
+    return true;
+  }, [
+    aprobados,
+    canMarkProgress,
+    getAllCursos,
+    getCursoById,
+    mallaSeleccionada,
+    triggerBlockedShake,
+  ]);
 
   // Marcar / desmarcar como excepcional
   const marcarExcepcional = (id) => {
@@ -388,9 +483,15 @@ const MallaViewer = ({
   };
 
   // En curso
-  const toggleCursando = (id) => {
+  const toggleCursando = useCallback((id) => {
     const curso = getCursoById(id);
     const willEnable = !cursando.includes(id);
+
+    if (willEnable && curso && !canMarkProgress(curso)) {
+      triggerBlockedShake(id);
+      return false;
+    }
+
     trackToggleCursoEstado(
       mallaSeleccionada,
       curso,
@@ -400,11 +501,17 @@ const MallaViewer = ({
     setCursando((prevCursando) => {
       if (prevCursando.includes(id)) {
         return prevCursando.filter((c) => c !== id);
-      } else {
-        return [...prevCursando, id];
       }
+      return [...prevCursando, id];
     });
-  };
+    return true;
+  }, [
+    canMarkProgress,
+    cursando,
+    getCursoById,
+    mallaSeleccionada,
+    triggerBlockedShake,
+  ]);
 
   // Helper para obtener las coordenadas relativas de una tarjeta (soporta zoom del contenedor)
   const getCardCoordinates = (cardEl, containerEl) => {
@@ -435,8 +542,12 @@ const MallaViewer = ({
       return;
     }
 
+    // Siempre leer prerreqs desde la malla actual (no el snapshot viejo)
+    const liveCurso = getCursoById(selectedCurso.id) || selectedCurso;
+    const selectedId = Number(liveCurso.id);
+
     const containerEl = document.getElementById("malla-grid-container");
-    const selectedEl = document.getElementById(`curso-card-${selectedCurso.id}`);
+    const selectedEl = document.getElementById(`curso-card-${liveCurso.id}`);
     if (!containerEl || !selectedEl) return;
 
     const coordsS = getCardCoordinates(selectedEl, containerEl);
@@ -445,14 +556,16 @@ const MallaViewer = ({
     const newPaths = [];
 
     // 1. Prerrequisitos (P -> S)
-    (selectedCurso.prerrequisitos || []).forEach((preId) => {
-      const preEl = document.getElementById(`curso-card-${preId}`);
+    (liveCurso.prerrequisitos || []).forEach((preId) => {
+      const preEl =
+        document.getElementById(`curso-card-${preId}`) ||
+        document.getElementById(`curso-card-${Number(preId)}`);
       if (!preEl) return;
       const coordsP = getCardCoordinates(preEl, containerEl);
       if (!coordsP) return;
 
       newPaths.push({
-        id: `pre-${preId}-${selectedCurso.id}`,
+        id: `pre-${preId}-${liveCurso.id}`,
         type: "prereq",
         x1: coordsP.right + 2,
         y1: coordsP.centerY,
@@ -464,25 +577,27 @@ const MallaViewer = ({
     // 2. Asignaturas que desbloquea (S -> U)
     const todosLosCursos = getAllCursos();
     todosLosCursos.forEach((c) => {
-      if (c.prerrequisitos?.includes(selectedCurso.id)) {
-        const unlockEl = document.getElementById(`curso-card-${c.id}`);
-        if (!unlockEl) return;
-        const coordsU = getCardCoordinates(unlockEl, containerEl);
-        if (!coordsU) return;
+      const unlocks = (c.prerrequisitos || []).some(
+        (pre) => Number(pre) === selectedId
+      );
+      if (!unlocks) return;
+      const unlockEl = document.getElementById(`curso-card-${c.id}`);
+      if (!unlockEl) return;
+      const coordsU = getCardCoordinates(unlockEl, containerEl);
+      if (!coordsU) return;
 
-        newPaths.push({
-          id: `unlock-${selectedCurso.id}-${c.id}`,
-          type: "unlock",
-          x1: coordsS.right + 2,
-          y1: coordsS.centerY,
-          x2: coordsU.left - 6,
-          y2: coordsU.centerY,
-        });
-      }
+      newPaths.push({
+        id: `unlock-${liveCurso.id}-${c.id}`,
+        type: "unlock",
+        x1: coordsS.right + 2,
+        y1: coordsS.centerY,
+        x2: coordsU.left - 6,
+        y2: coordsU.centerY,
+      });
     });
 
     setPaths(newPaths);
-  }, [selectedCurso, isMobileView, getAllCursos]);
+  }, [selectedCurso, isMobileView, getAllCursos, getCursoById]);
 
   useEffect(() => {
     recalculatePaths();
@@ -494,7 +609,7 @@ const MallaViewer = ({
       clearTimeout(timer);
       window.removeEventListener("resize", recalculatePaths);
     };
-  }, [selectedCurso, recalculatePaths]);
+  }, [selectedCurso, malla, recalculatePaths]);
 
   // Cerrar el menú contextual al hacer clic en cualquier parte
   useEffect(() => {
@@ -527,32 +642,48 @@ const MallaViewer = ({
     });
   }, []);
 
-  // Manejar el cambio de estado de un curso desde el menú contextual
+  // Manejar el cambio de estado de un curso desde el menú contextual / gestos
   const handleStatusChange = useCallback((curso, newStatus) => {
     const isAprobado = aprobados.includes(curso.id);
     const isCursando = cursando.includes(curso.id);
     const currentStatus = isAprobado ? "aprobado" : isCursando ? "cursando" : "pendiente";
 
-    if (newStatus === currentStatus) return;
+    if (newStatus === currentStatus) return false;
+
+    // Bloquear subir a aprobado/cursando si faltan prerrequisitos
+    if (
+      (newStatus === "aprobado" || newStatus === "cursando") &&
+      !canMarkProgress(curso)
+    ) {
+      triggerBlockedShake(curso.id);
+      return false;
+    }
 
     if (newStatus === "aprobado") {
       if (currentStatus === "cursando") {
         toggleCursando(curso.id);
       }
-      aprobar(curso.id);
-    } else if (newStatus === "cursando") {
+      return aprobar(curso.id);
+    }
+
+    if (newStatus === "cursando") {
       if (currentStatus === "aprobado") {
         aprobar(curso.id);
       }
-      toggleCursando(curso.id);
-    } else if (newStatus === "pendiente") {
+      return toggleCursando(curso.id);
+    }
+
+    if (newStatus === "pendiente") {
       if (currentStatus === "aprobado") {
-        aprobar(curso.id);
-      } else if (currentStatus === "cursando") {
-        toggleCursando(curso.id);
+        return aprobar(curso.id);
+      }
+      if (currentStatus === "cursando") {
+        return toggleCursando(curso.id);
       }
     }
-  }, [aprobados, cursando, aprobar, toggleCursando]);
+
+    return false;
+  }, [aprobados, cursando, canMarkProgress, aprobar, toggleCursando, triggerBlockedShake]);
 
   // Alternar aprobado con clic izquierdo
   const handleCursoLeftClick = useCallback((curso) => {
@@ -767,26 +898,26 @@ const MallaViewer = ({
     };
   }, [isMobileView, malla]);
 
-  // Cumple prerrequisitos
-  const cumplePrereqs = useCallback((curso) => {
-    if (!curso.prerrequisitos?.length) return true;
-    return curso.prerrequisitos.every(
-      (pre) => aprobados.includes(pre) || excepciones.includes(pre)
-    );
-  }, [aprobados, excepciones]);
-
   // Path highlight status
   const getHighlightStatus = (cursoId) => {
     if (!selectedCurso) return "normal";
     // En móvil el panel PR reemplaza las flechas: no atenuamos ni bloqueamos ramos.
     if (isMobileView) return "normal";
-    if (selectedCurso.id === cursoId) return "selected";
-    if (selectedCurso.prerrequisitos?.includes(cursoId)) return "prereq";
+    const liveSelected = getCursoById(selectedCurso.id) || selectedCurso;
+    const selectedId = Number(liveSelected.id);
+    const targetId = Number(cursoId);
+
+    if (selectedId === targetId) return "selected";
+    if (
+      (liveSelected.prerrequisitos || []).some((pre) => Number(pre) === targetId)
+    ) {
+      return "prereq";
+    }
 
     // Check if immediate unlock
-    const isImmediateUnlock =
-      selectedCurso.id &&
-      getCursoById(cursoId)?.prerrequisitos?.includes(selectedCurso.id);
+    const isImmediateUnlock = (getCursoById(cursoId)?.prerrequisitos || []).some(
+      (pre) => Number(pre) === selectedId
+    );
     if (isImmediateUnlock) return "unlock";
 
     return "fade";
@@ -915,6 +1046,7 @@ const MallaViewer = ({
               excepcional={excepciones.includes(c.id)}
               disponible={cumplePrereqs(c)}
               enCurso={cursando.includes(c.id)}
+              shake={shakeCursoId === c.id}
               onSelect={openCourseRelations}
               onLeftClick={handleCursoLeftClick}
               onLongPress={handleCursoLongPress}
@@ -936,36 +1068,22 @@ const MallaViewer = ({
         <button
           type="button"
           onClick={() => {
-            // Re-trigger load by bumping effect via force state
             setLoadStatus("loading");
             setLoadError(null);
             loadIdRef.current += 1;
+            const loadId = loadIdRef.current;
             const url = mallaSeleccionada?.url;
             if (!url) return;
-            fetch(url)
-              .then((res) => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.json();
-              })
+            fetchMallaJson(url)
               .then((data) => {
-                const isMencion = !!data.menciones;
-                const mencionesDisponibles = data.menciones_disponibles || [];
-                const totalSemestres =
-                  data.totalSemestres || data.semestres?.length || 0;
-                const mallaData = {
-                  nombre: data.carrera || "Malla sin nombre",
-                  semestres: data.semestres || [],
-                  semestresComunes: data.semestres_comunes || [],
-                  menciones: data.menciones || {},
-                  isMencion,
-                  mencionesDisponibles,
-                  totalSemestres,
-                };
+                if (loadId !== loadIdRef.current) return;
+                const mallaData = mapMallaData(data);
                 setMalla(mallaData);
                 setLoadStatus("success");
                 onMallaDataLoaded?.(mallaData);
               })
               .catch((err) => {
+                if (loadId !== loadIdRef.current) return;
                 normalizeAppError(err, { context: "MallaViewer.retry" });
                 setLoadStatus("error");
                 setLoadError(getUserSafeMessage("MALLA_LOAD_FAILED"));
@@ -1406,10 +1524,17 @@ const MallaViewer = ({
             className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
               ${aprobados.includes(contextMenu.curso.id)
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : !canMarkProgress(contextMenu.curso)
+                ? "text-textSecondary/70 hover:bg-bgPrimary"
                 : "text-textPrimary hover:bg-bgPrimary"}`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Aprobado</span>
+            <span>
+              Aprobado
+              {!canMarkProgress(contextMenu.curso) && !aprobados.includes(contextMenu.curso.id)
+                ? " (bloqueado)"
+                : ""}
+            </span>
           </button>
 
           <button
@@ -1420,10 +1545,17 @@ const MallaViewer = ({
             className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
               ${cursando.includes(contextMenu.curso.id)
                 ? "bg-primary/10 text-primary"
+                : !canMarkProgress(contextMenu.curso)
+                ? "text-textSecondary/70 hover:bg-bgPrimary"
                 : "text-textPrimary hover:bg-bgPrimary"}`}
           >
             <Circle className="w-2.5 h-2.5 fill-primary/30" />
-            <span>Cursando</span>
+            <span>
+              Cursando
+              {!canMarkProgress(contextMenu.curso) && !cursando.includes(contextMenu.curso.id)
+                ? " (bloqueado)"
+                : ""}
+            </span>
           </button>
 
           <button
@@ -1492,6 +1624,7 @@ const MallaViewer = ({
         aprobar={() => selectedCurso && aprobar(selectedCurso.id)}
         marcarExcepcional={() => selectedCurso && marcarExcepcional(selectedCurso.id)}
         toggleCursando={() => selectedCurso && toggleCursando(selectedCurso.id)}
+        onBlockedAttempt={() => selectedCurso && triggerBlockedShake(selectedCurso.id)}
         onAbrirNotas={(c) =>
           onAbrirNotas?.(
             c,

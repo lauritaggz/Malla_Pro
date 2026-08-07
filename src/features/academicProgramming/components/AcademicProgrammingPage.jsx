@@ -28,6 +28,7 @@ import {
   readActiveMentionCode,
   readProgressStateFromStorage,
 } from "../../../utils/curriculumProgress";
+import { fetchMallaJson, mapMallaData } from "../../../utils/mallasLoader";
 import { safeStorage } from "../../../utils/safeStorage";
 import { LEGACY_KEYS, getCareerId, getPeriodId } from "../../../utils/storageKeys";
 import { normalizeAppError } from "../../../utils/appErrors";
@@ -83,26 +84,10 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
     if (!savedMalla?.url) return;
 
     let cancelled = false;
-    fetch(savedMalla.url)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
+    fetchMallaJson(savedMalla.url)
       .then((data) => {
         if (cancelled) return;
-        const isMencion = !!data.menciones;
-        const mencionesDisponibles = data.menciones_disponibles || [];
-        const totalSemestres = data.totalSemestres || data.semestres?.length || 0;
-        const mapped = {
-          nombre: data.carrera || "Malla sin nombre",
-          semestres: data.semestres || [],
-          semestresComunes: data.semestres_comunes || [],
-          menciones: data.menciones || {},
-          courseCodeAliases: data.courseCodeAliases || data.course_code_aliases || {},
-          isMencion,
-          mencionesDisponibles,
-          totalSemestres,
-        };
+        const mapped = mapMallaData(data);
         setMallaData(mapped);
         setMentionCode(readActiveMentionCode(mapped.nombre));
       })

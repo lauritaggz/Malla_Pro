@@ -14,6 +14,7 @@ export default function CourseDrawer({
   aprobar,
   marcarExcepcional,
   toggleCursando,
+  onBlockedAttempt,
   onAbrirNotas,
   getCursoById,
   aprobados = [],
@@ -29,8 +30,19 @@ export default function CourseDrawer({
     ? "cursando"
     : "pendiente";
 
+  const isLocked = !disponible && !modoExcepcional;
+
   const handleStatusChange = (newStatus) => {
     if (newStatus === currentStatus) return;
+
+    if (
+      (newStatus === "aprobado" || newStatus === "cursando") &&
+      isLocked &&
+      !aprobado
+    ) {
+      onBlockedAttempt?.();
+      return;
+    }
 
     if (newStatus === "aprobado") {
       if (currentStatus === "cursando") {
@@ -54,17 +66,22 @@ export default function CourseDrawer({
   // Find prerequisite courses details
   const prereqCursos = (curso.prerrequisitos || []).map((preId) => {
     const preCurso = getCursoById?.(preId);
+    const preNum = Number(preId);
     return {
       id: preId,
       nombre: preCurso?.nombre || preId,
       codigo: preCurso?.codigo || preId,
-      cumplido: aprobados.includes(preId) || excepciones.includes(preId),
+      cumplido:
+        aprobados.some((id) => Number(id) === preNum) ||
+        excepciones.some((id) => Number(id) === preNum),
     };
   });
 
   // Find immediate unlocks
   const desbloqueaCursos = allCursos
-    .filter((c) => c.prerrequisitos?.includes(curso.id))
+    .filter((c) =>
+      (c.prerrequisitos || []).some((pre) => Number(pre) === Number(curso.id))
+    )
     .map((c) => ({
       id: c.id,
       nombre: c.nombre,
@@ -99,8 +116,14 @@ export default function CourseDrawer({
               className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-borderColor bg-bgPrimary text-textPrimary text-xs font-semibold outline-none cursor-pointer appearance-none hover:border-primary/45 transition-colors focus:ring-2 focus:ring-primary/25"
             >
               <option value="pendiente">Pendiente</option>
-              <option value="cursando">Cursando actualmente</option>
-              {(!disponible && !modoExcepcional && !aprobado) ? (
+              {isLocked && !enCurso ? (
+                <option value="cursando" disabled>
+                  Cursando (Bloqueado por prerrequisitos)
+                </option>
+              ) : (
+                <option value="cursando">Cursando actualmente</option>
+              )}
+              {(isLocked && !aprobado) ? (
                 <option value="aprobado" disabled>
                   Aprobada (Bloqueado por prerrequisitos)
                 </option>

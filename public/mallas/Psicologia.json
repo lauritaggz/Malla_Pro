@@ -1,426 +1,532 @@
 {
-    "carrera": "Psicología (UNAB)",
-    "codigo_programa": "UNAB11900",
-    "total_creditos": 0,
-    "totalSemestres": 10,
-    "semestres": [
+  "carrera": "Psicología (UNAB)",
+  "codigo_programa": "UNAB11900",
+  "total_creditos": 0,
+  "totalSemestres": 10,
+  "semestres": [
+    {
+      "numero": 1,
+      "cursos": [
         {
-            "numero": 1,
-            "cursos": [
-                {
-                    "id": 1,
-                    "codigo": "BIOL080",
-                    "nombre": "Tópicos de neurobiología",
-                    "sct": 14,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 2,
-                    "codigo": "FHCS211",
-                    "nombre": "Eje de formación interdisciplinaria I",
-                    "sct": 12,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 3,
-                    "codigo": "ING119",
-                    "nombre": "Inglés I",
-                    "sct": 12,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 4,
-                    "codigo": "PSIC111",
-                    "nombre": "Historia y fundamentos de la psicología",
-                    "sct": 15,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 5,
-                    "codigo": "PSIC112",
-                    "nombre": "Psicología y sociedad",
-                    "sct": 15,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                }
-            ]
+          "id": 1,
+          "codigo": "BIOL080",
+          "nombre": "Tópicos de neurobiología",
+          "sct": 14,
+          "prerrequisitos": [],
+          "prereq_expr": ""
         },
         {
-            "numero": 2,
-            "cursos": [
-                {
-                    "id": 6,
-                    "codigo": "CEGHC11",
-                    "nombre": "Habilidades comunicativas",
-                    "sct": 8,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 7,
-                    "codigo": "ING129",
-                    "nombre": "Inglés II",
-                    "sct": 12,
-                    "prerrequisitos": [3],
-                    "prereq_expr": "ING119 o ING111 o ING110 o ING116 o ING117 o CNT021 o (ING050 y ING051) o (FLG301 y FLG302) o (BMA281 y BMA282) o (ETU081 y ETU082)"
-                },
-                {
-                    "id": 8,
-                    "codigo": "PSIC121",
-                    "nombre": "Sistemas psicológicos",
-                    "sct": 16,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 9,
-                    "codigo": "PSIC122",
-                    "nombre": "Procesos psicológicos y neurociencias",
-                    "sct": 16,
-                    "prerrequisitos": [1],
-                    "prereq_expr": "BIOL080 o BIO036"
-                },
-                {
-                    "id": 10,
-                    "codigo": "PSIC123",
-                    "nombre": "Psicología y epistemología",
-                    "sct": 15,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                }
-            ]
+          "id": 2,
+          "codigo": "FHCS211",
+          "nombre": "Eje de formación interdisciplinaria I",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
         },
         {
-            "numero": 3,
-            "cursos": [
-                {
-                    "id": 11,
-                    "codigo": "CEGCT12",
-                    "nombre": "Razonamiento científico y tecnologías de información",
-                    "sct": 6,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 12,
-                    "codigo": "ING239",
-                    "nombre": "Inglés III",
-                    "sct": 12,
-                    "prerrequisitos": [7],
-                    "prereq_expr": "ING129 o ING121 o ING120 o ING216 o ING126 o ING134 o ING127 o CNT026 o (ETU181 y ETU182) o ING229"
-                },
-                {
-                    "id": 13,
-                    "codigo": "PSIC211",
-                    "nombre": "Psicoanálisis I",
-                    "sct": 15,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 14,
-                    "codigo": "PSIC212",
-                    "nombre": "Psicología del desarrollo I",
-                    "sct": 16,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 15,
-                    "codigo": "PSIC213",
-                    "nombre": "Investigación I",
-                    "sct": 18,
-                    "prerrequisitos": [10],
-                    "prereq_expr": "PSIC123 o HUF136 o PSL006"
-                }
-            ]
+          "id": 3,
+          "codigo": "ING119",
+          "nombre": "Inglés I",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
         },
         {
-            "numero": 4,
-            "cursos": [
-                {
-                    "id": 16,
-                    "codigo": "FHCS221",
-                    "nombre": "Eje de formación interdisciplinaria II",
-                    "sct": 11,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 17,
-                    "codigo": "ING249",
-                    "nombre": "Inglés IV",
-                    "sct": 12,
-                    "prerrequisitos": [12],
-                    "prereq_expr": "ING239 o ING210 o ING216 o ING224 o ING126 o CNT126 o (ETU281 y ETU282) o ING217"
-                },
-                {
-                    "id": 18,
-                    "codigo": "PSIC221",
-                    "nombre": "Psicoanálisis II",
-                    "sct": 12,
-                    "prerrequisitos": [13],
-                    "prereq_expr": "PSIC211 o PSL104"
-                },
-                {
-                    "id": 19,
-                    "codigo": "PSIC222",
-                    "nombre": "Psicología del desarrollo II",
-                    "sct": 14,
-                    "prerrequisitos": [14],
-                    "prereq_expr": "PSIC212 o PSL111"
-                },
-                {
-                    "id": 20,
-                    "codigo": "PSIC223",
-                    "nombre": "Investigación II",
-                    "sct": 17,
-                    "prerrequisitos": [15],
-                    "prereq_expr": "PSIC213 o FMS180"
-                }
-            ]
+          "id": 4,
+          "codigo": "PSIC111",
+          "nombre": "Historia y fundamentos de la psicología",
+          "sct": 15,
+          "prerrequisitos": [],
+          "prereq_expr": ""
         },
         {
-            "numero": 5,
-            "cursos": [
-                {
-                    "id": 21,
-                    "codigo": "FHCS311",
-                    "nombre": "Eje de formación interdisciplinaria III",
-                    "sct": 12,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 22,
-                    "codigo": "PSIC311",
-                    "nombre": "Psicodiagnóstico clínico I",
-                    "sct": 12,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 23,
-                    "codigo": "PSIC312",
-                    "nombre": "Psicopatología y psiquiatría I",
-                    "sct": 14,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 24,
-                    "codigo": "PSIC313",
-                    "nombre": "Taller de integración",
-                    "sct": 16,
-                    "prerrequisitos": [13, 19, 20],
-                    "prereq_expr": "(PSIC211 o PSL104) y (PSIC222 o PSL112) y (PSIC223 o PSL105)"
-                },
-                {
-                    "id": 25,
-                    "codigo": "PSIC314",
-                    "nombre": "Psicología social",
-                    "sct": 15,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                }
-            ]
-        },
-        {
-            "numero": 6,
-            "cursos": [
-                {
-                    "id": 26,
-                    "codigo": "PSIC321",
-                    "nombre": "Psicodiagnóstico clínico II",
-                    "sct": 12,
-                    "prerrequisitos": [22],
-                    "prereq_expr": "PSIC311 o PSL131 o PSL233"
-                },
-                {
-                    "id": 27,
-                    "codigo": "PSIC322",
-                    "nombre": "Psicopatología y psiquiatría II",
-                    "sct": 12,
-                    "prerrequisitos": [23],
-                    "prereq_expr": "PSIC312 o PSL232"
-                },
-                {
-                    "id": 28,
-                    "codigo": "PSIC323",
-                    "nombre": "Psicología educacional",
-                    "sct": 15,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 29,
-                    "codigo": "PSIC324",
-                    "nombre": "Diagnóstico e intervención social",
-                    "sct": 15,
-                    "prerrequisitos": [25],
-                    "prereq_expr": "PSIC314 o PSL240"
-                },
-                {
-                    "id": 30,
-                    "codigo": "PSIC325",
-                    "nombre": "Psicología del trabajo y las organizaciones",
-                    "sct": 14,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                }
-            ]
-        },
-        {
-            "numero": 7,
-            "cursos": [
-                {
-                    "id": 31,
-                    "codigo": "PSIC411",
-                    "nombre": "Clínica sistémica",
-                    "sct": 10,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 32,
-                    "codigo": "PSIC412",
-                    "nombre": "Psicopatología infanto juvenil",
-                    "sct": 12,
-                    "prerrequisitos": [23],
-                    "prereq_expr": "PSIC312 o PSL232"
-                },
-                {
-                    "id": 33,
-                    "codigo": "PSIC413",
-                    "nombre": "Diagnóstico e intervención educacional",
-                    "sct": 15,
-                    "prerrequisitos": [28],
-                    "prereq_expr": "PSIC323 o PSL213"
-                },
-                {
-                    "id": 34,
-                    "codigo": "PSIC414",
-                    "nombre": "Psicología jurídica",
-                    "sct": 15,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 35,
-                    "codigo": "PSIC415",
-                    "nombre": "Diagnóstico e intervención organizacional",
-                    "sct": 15,
-                    "prerrequisitos": [30],
-                    "prereq_expr": "PSIC325 o PSL344"
-                }
-            ]
-        },
-        {
-            "numero": 8,
-            "cursos": [
-                {
-                    "id": 36,
-                    "codigo": "PSIC421",
-                    "nombre": "Clínica psicoanalítica",
-                    "sct": 11,
-                    "prerrequisitos": [],
-                    "prereq_expr": ""
-                },
-                {
-                    "id": 37,
-                    "codigo": "PSIC422",
-                    "nombre": "Clínica infanto juvenil",
-                    "sct": 11,
-                    "prerrequisitos": [32],
-                    "prereq_expr": "PSIC412 o PSL314"
-                },
-                {
-                    "id": 38,
-                    "codigo": "PSIC423",
-                    "nombre": "Taller de investigación",
-                    "sct": 16,
-                    "prerrequisitos": [24, 26, 27, 28, 30, 34],
-                    "prereq_expr": "PSIC313 y (PSIC321 o PSL234) y (PSIC322 o PSL235) y (PSIC323 o PSL213) y (PSIC325 o PSL344) y (PSIC414 o PSL242)"
-                },
-                {
-                    "id": 39,
-                    "codigo": "PSIC424",
-                    "nombre": "Diagnóstico e intervención jurídica",
-                    "sct": 15,
-                    "prerrequisitos": [34],
-                    "prereq_expr": "PSIC414 o PSL242"
-                },
-                {
-                    "id": 40,
-                    "codigo": "PSIC425",
-                    "nombre": "Intervención clínica sistémica",
-                    "sct": 13,
-                    "prerrequisitos": [31],
-                    "prereq_expr": "PSIC411 o PSL206"
-                }
-            ]
-        },
-        {
-            "numero": 9,
-            "cursos": [
-                {
-                    "id": 41,
-                    "codigo": "PSIC511",
-                    "nombre": "Taller de intervención clínica",
-                    "sct": 20,
-                    "prerrequisitos": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
-                    "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
-                },
-                {
-                    "id": 42,
-                    "codigo": "PSIC512",
-                    "nombre": "Psicología y salud",
-                    "sct": 11,
-                    "prerrequisitos": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
-                    "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
-                },
-                {
-                    "id": 43,
-                    "codigo": "PSIC513",
-                    "nombre": "Taller de diagnóstico e intervención psicosocial",
-                    "sct": 22,
-                    "prerrequisitos": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
-                    "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
-                },
-                {
-                    "id": 44,
-                    "codigo": "PSIC514",
-                    "nombre": "Electivo de formación profesional I",
-                    "sct": 7,
-                    "prerrequisitos": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
-                    "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
-                },
-                {
-                    "id": 45,
-                    "codigo": "PSIC515",
-                    "nombre": "Electivo de formación profesional II",
-                    "sct": 7,
-                    "prerrequisitos": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
-                    "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
-                }
-            ]
-        },
-        {
-            "numero": 10,
-            "cursos": [
-                {
-                    "id": 46,
-                    "codigo": "PSIC521",
-                    "nombre": "Práctica profesional",
-                    "sct": 66,
-                    "prerrequisitos": [41, 42, 43, 44, 45],
-                    "prereq_expr": "(PSIC511 o MPC531) y (PSIC512 o MPC532) y PSIC513 y (PSIC514 o PSL323 o PSIC P011 o PSIC P012 o PSIC P036 o PSIC P097 o PSIC P098) y (PSIC515 o PSL332 o PSIC P007 o PSIC P008 o PSIC P009 o PSIC P010 o PSIC P049 o PSIC P096)"
-                }
-            ]
+          "id": 5,
+          "codigo": "PSIC112",
+          "nombre": "Psicología y sociedad",
+          "sct": 15,
+          "prerrequisitos": [],
+          "prereq_expr": ""
         }
-    ]
+      ]
+    },
+    {
+      "numero": 2,
+      "cursos": [
+        {
+          "id": 6,
+          "codigo": "CEGHC11",
+          "nombre": "Habilidades comunicativas",
+          "sct": 8,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 7,
+          "codigo": "ING129",
+          "nombre": "Inglés II",
+          "sct": 12,
+          "prerrequisitos": [
+            3
+          ],
+          "prereq_expr": "ING119 o ING111 o ING110 o ING116 o ING117 o CNT021 o (ING050 y ING051) o (FLG301 y FLG302) o (BMA281 y BMA282) o (ETU081 y ETU082)"
+        },
+        {
+          "id": 8,
+          "codigo": "PSIC121",
+          "nombre": "Sistemas psicológicos",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 9,
+          "codigo": "PSIC122",
+          "nombre": "Procesos psicológicos y neurociencias",
+          "sct": 16,
+          "prerrequisitos": [
+            1
+          ],
+          "prereq_expr": "BIOL080 o BIO036"
+        },
+        {
+          "id": 10,
+          "codigo": "PSIC123",
+          "nombre": "Psicología y epistemología",
+          "sct": 15,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 3,
+      "cursos": [
+        {
+          "id": 11,
+          "codigo": "CEGCT12",
+          "nombre": "Razonamiento científico y tecnologías de información",
+          "sct": 6,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 12,
+          "codigo": "ING239",
+          "nombre": "Inglés III",
+          "sct": 12,
+          "prerrequisitos": [
+            7
+          ],
+          "prereq_expr": "ING129 o ING121 o ING120 o ING216 o ING126 o ING134 o ING127 o CNT026 o (ETU181 y ETU182) o ING229"
+        },
+        {
+          "id": 13,
+          "codigo": "PSIC211",
+          "nombre": "Psicoanálisis I",
+          "sct": 15,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 14,
+          "codigo": "PSIC212",
+          "nombre": "Psicología del desarrollo I",
+          "sct": 16,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 15,
+          "codigo": "PSIC213",
+          "nombre": "Investigación I",
+          "sct": 18,
+          "prerrequisitos": [
+            10
+          ],
+          "prereq_expr": "PSIC123 o HUF136 o PSL006"
+        }
+      ]
+    },
+    {
+      "numero": 4,
+      "cursos": [
+        {
+          "id": 16,
+          "codigo": "FHCS221",
+          "nombre": "Eje de formación interdisciplinaria II",
+          "sct": 11,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 17,
+          "codigo": "ING249",
+          "nombre": "Inglés IV",
+          "sct": 12,
+          "prerrequisitos": [
+            12
+          ],
+          "prereq_expr": "ING239 o ING210 o ING216 o ING224 o ING126 o CNT126 o (ETU281 y ETU282) o ING217"
+        },
+        {
+          "id": 18,
+          "codigo": "PSIC221",
+          "nombre": "Psicoanálisis II",
+          "sct": 12,
+          "prerrequisitos": [
+            13
+          ],
+          "prereq_expr": "PSIC211 o PSL104"
+        },
+        {
+          "id": 19,
+          "codigo": "PSIC222",
+          "nombre": "Psicología del desarrollo II",
+          "sct": 14,
+          "prerrequisitos": [
+            14
+          ],
+          "prereq_expr": "PSIC212 o PSL111"
+        },
+        {
+          "id": 20,
+          "codigo": "PSIC223",
+          "nombre": "Investigación II",
+          "sct": 17,
+          "prerrequisitos": [
+            15
+          ],
+          "prereq_expr": "PSIC213 o FMS180"
+        }
+      ]
+    },
+    {
+      "numero": 5,
+      "cursos": [
+        {
+          "id": 21,
+          "codigo": "FHCS311",
+          "nombre": "Eje de formación interdisciplinaria III",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 22,
+          "codigo": "PSIC311",
+          "nombre": "Psicodiagnóstico clínico I",
+          "sct": 12,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 23,
+          "codigo": "PSIC312",
+          "nombre": "Psicopatología y psiquiatría I",
+          "sct": 14,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 24,
+          "codigo": "PSIC313",
+          "nombre": "Taller de integración",
+          "sct": 16,
+          "prerrequisitos": [
+            13,
+            19,
+            20
+          ],
+          "prereq_expr": "(PSIC211 o PSL104) y (PSIC222 o PSL112) y (PSIC223 o PSL105)"
+        },
+        {
+          "id": 25,
+          "codigo": "PSIC314",
+          "nombre": "Psicología social",
+          "sct": 15,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 6,
+      "cursos": [
+        {
+          "id": 26,
+          "codigo": "PSIC321",
+          "nombre": "Psicodiagnóstico clínico II",
+          "sct": 12,
+          "prerrequisitos": [
+            22
+          ],
+          "prereq_expr": "PSIC311 o PSL131 o PSL233"
+        },
+        {
+          "id": 27,
+          "codigo": "PSIC322",
+          "nombre": "Psicopatología y psiquiatría II",
+          "sct": 12,
+          "prerrequisitos": [
+            23
+          ],
+          "prereq_expr": "PSIC312 o PSL232"
+        },
+        {
+          "id": 28,
+          "codigo": "PSIC323",
+          "nombre": "Psicología educacional",
+          "sct": 15,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 29,
+          "codigo": "PSIC324",
+          "nombre": "Diagnóstico e intervención social",
+          "sct": 15,
+          "prerrequisitos": [
+            25
+          ],
+          "prereq_expr": "PSIC314 o PSL240"
+        },
+        {
+          "id": 30,
+          "codigo": "PSIC325",
+          "nombre": "Psicología del trabajo y las organizaciones",
+          "sct": 14,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        }
+      ]
+    },
+    {
+      "numero": 7,
+      "cursos": [
+        {
+          "id": 31,
+          "codigo": "PSIC411",
+          "nombre": "Clínica sistémica",
+          "sct": 10,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 32,
+          "codigo": "PSIC412",
+          "nombre": "Psicopatología infanto juvenil",
+          "sct": 12,
+          "prerrequisitos": [
+            23
+          ],
+          "prereq_expr": "PSIC312 o PSL232"
+        },
+        {
+          "id": 33,
+          "codigo": "PSIC413",
+          "nombre": "Diagnóstico e intervención educacional",
+          "sct": 15,
+          "prerrequisitos": [
+            28
+          ],
+          "prereq_expr": "PSIC323 o PSL213"
+        },
+        {
+          "id": 34,
+          "codigo": "PSIC414",
+          "nombre": "Psicología jurídica",
+          "sct": 15,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 35,
+          "codigo": "PSIC415",
+          "nombre": "Diagnóstico e intervención organizacional",
+          "sct": 15,
+          "prerrequisitos": [
+            30
+          ],
+          "prereq_expr": "PSIC325 o PSL344"
+        }
+      ]
+    },
+    {
+      "numero": 8,
+      "cursos": [
+        {
+          "id": 36,
+          "codigo": "PSIC421",
+          "nombre": "Clínica psicoanalítica",
+          "sct": 11,
+          "prerrequisitos": [],
+          "prereq_expr": ""
+        },
+        {
+          "id": 37,
+          "codigo": "PSIC422",
+          "nombre": "Clínica infanto juvenil",
+          "sct": 11,
+          "prerrequisitos": [
+            32
+          ],
+          "prereq_expr": "PSIC412 o PSL314"
+        },
+        {
+          "id": 38,
+          "codigo": "PSIC423",
+          "nombre": "Taller de investigación",
+          "sct": 16,
+          "prerrequisitos": [
+            24,
+            26,
+            27,
+            28,
+            30,
+            34
+          ],
+          "prereq_expr": "PSIC313 y (PSIC321 o PSL234) y (PSIC322 o PSL235) y (PSIC323 o PSL213) y (PSIC325 o PSL344) y (PSIC414 o PSL242)"
+        },
+        {
+          "id": 39,
+          "codigo": "PSIC424",
+          "nombre": "Diagnóstico e intervención jurídica",
+          "sct": 15,
+          "prerrequisitos": [
+            34
+          ],
+          "prereq_expr": "PSIC414 o PSL242"
+        },
+        {
+          "id": 40,
+          "codigo": "PSIC425",
+          "nombre": "Intervención clínica sistémica",
+          "sct": 13,
+          "prerrequisitos": [
+            31
+          ],
+          "prereq_expr": "PSIC411 o PSL206"
+        }
+      ]
+    },
+    {
+      "numero": 9,
+      "cursos": [
+        {
+          "id": 41,
+          "codigo": "PSIC511",
+          "nombre": "Taller de intervención clínica",
+          "sct": 20,
+          "prerrequisitos": [
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
+        },
+        {
+          "id": 42,
+          "codigo": "PSIC512",
+          "nombre": "Psicología y salud",
+          "sct": 11,
+          "prerrequisitos": [
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
+        },
+        {
+          "id": 43,
+          "codigo": "PSIC513",
+          "nombre": "Taller de diagnóstico e intervención psicosocial",
+          "sct": 22,
+          "prerrequisitos": [
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
+        },
+        {
+          "id": 44,
+          "codigo": "PSIC514",
+          "nombre": "Electivo de formación profesional I",
+          "sct": 7,
+          "prerrequisitos": [
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
+        },
+        {
+          "id": 45,
+          "codigo": "PSIC515",
+          "nombre": "Electivo de formación profesional II",
+          "sct": 7,
+          "prerrequisitos": [
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40
+          ],
+          "prereq_expr": "(PSIC411 o PSL206) y (PSIC412 o PSL314) y (PSIC413 o PSL204) y (PSIC414 o PSL242) y (PSIC415 o PSL345) y (PSIC421 o PSL334 o (PSL331 y PSL335)) y (PSIC422 o PSL315) y (PSIC423 o PSL348) y PSIC424 y (PSIC425 o PSL333)"
+        }
+      ]
+    },
+    {
+      "numero": 10,
+      "cursos": [
+        {
+          "id": 46,
+          "codigo": "PSIC521",
+          "nombre": "Práctica profesional",
+          "sct": 66,
+          "prerrequisitos": [
+            41,
+            42,
+            43,
+            44,
+            45
+          ],
+          "prereq_expr": "(PSIC511 o MPC531) y (PSIC512 o MPC532) y PSIC513 y (PSIC514 o PSL323 o PSIC P011 o PSIC P012 o PSIC P036 o PSIC P097 o PSIC P098) y (PSIC515 o PSL332 o PSIC P007 o PSIC P008 o PSIC P009 o PSIC P010 o PSIC P049 o PSIC P096)"
+        }
+      ]
+    }
+  ]
 }

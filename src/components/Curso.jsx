@@ -9,6 +9,7 @@ const Curso = ({
   excepcional,
   disponible,
   enCurso,
+  shake = false,
   onSelect,
   onLeftClick,
   onLongPress,
@@ -214,11 +215,11 @@ const Curso = ({
         onContextMenu?.(e, curso);
       }}
       className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-primary/45 group select-none touch-manipulation
-        ${cardStatusClass} ${highlightStyles}
+        ${cardStatusClass} ${highlightStyles} ${shake ? "curso-card-shake" : ""}
       `}
       style={{
         backfaceVisibility: "hidden",
-        transform: "translateZ(0)",
+        ...(shake ? {} : { transform: "translateZ(0)" }),
         WebkitUserSelect: "none",
         userSelect: "none",
         WebkitTouchCallout: "none",
@@ -334,6 +335,7 @@ export default React.memo(Curso, (prevProps, nextProps) => {
     prevProps.excepcional === nextProps.excepcional &&
     prevProps.disponible === nextProps.disponible &&
     prevProps.enCurso === nextProps.enCurso &&
+    prevProps.shake === nextProps.shake &&
     prevProps.highlightStatus === nextProps.highlightStatus
   );
 });

@@ -110,7 +110,29 @@ export default function PeriodoActualView({
   };
 
   // State mutations
+  const cumplePrereqs = useCallback((curso) => {
+    if (!curso?.prerrequisitos?.length) return true;
+    return curso.prerrequisitos.every((pre) => {
+      const preId = Number(pre);
+      return (
+        aprobados.some((id) => Number(id) === preId) ||
+        excepciones.some((id) => Number(id) === preId)
+      );
+    });
+  }, [aprobados, excepciones]);
+
+  const canMarkProgress = useCallback(
+    (curso) => Boolean(modoExcepcional || cumplePrereqs(curso)),
+    [modoExcepcional, cumplePrereqs]
+  );
+
   const handleAprobar = (id) => {
+    const curso = getCursoById?.(id);
+    const willApprove = !aprobados.includes(id);
+    if (willApprove && curso && !canMarkProgress(curso)) {
+      return;
+    }
+
     const nextAprobados = aprobados.includes(id)
       ? aprobados.filter((a) => a !== id && !getDescendientes(id, getAllCursos()).includes(a))
       : [...aprobados, id];
@@ -150,6 +172,12 @@ export default function PeriodoActualView({
   };
 
   const handleToggleCursando = (id) => {
+    const willEnable = !cursando.includes(id);
+    const curso = getCursoById?.(id);
+    if (willEnable && curso && !canMarkProgress(curso)) {
+      return;
+    }
+
     const nextCursando = cursando.includes(id)
       ? cursando.filter((c) => c !== id)
       : [...cursando, id];
@@ -159,14 +187,6 @@ export default function PeriodoActualView({
     
     window.dispatchEvent(new CustomEvent("malla-progress-changed"));
   };
-
-  const cumplePrereqs = useCallback((curso) => {
-    if (!curso?.prerrequisitos?.length) return true;
-    return curso.prerrequisitos.every(
-      (pre) => aprobados.includes(pre) || excepciones.includes(pre)
-    );
-  }, [aprobados, excepciones]);
-
   // Cursando courses details calculation
   const cursandoDetails = useMemo(() => {
     return cursando.map((courseId) => {

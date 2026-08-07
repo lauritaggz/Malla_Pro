@@ -48,7 +48,9 @@
           "codigo": "ACAD101",
           "nombre": "Taller de Innovación y Emprendimiento I",
           "sct": 10,
-          "prerrequisitos": [3],
+          "prerrequisitos": [
+            3
+          ],
           "prereq_expr": ""
         },
         {
@@ -64,7 +66,10 @@
           "codigo": "CFIS328",
           "nombre": "Física Experimental",
           "sct": 16,
-          "prerrequisitos": [],
+          "prerrequisitos": [
+            1,
+            2
+          ],
           "prereq_expr": "CFIS310"
         },
         {
@@ -72,7 +77,9 @@
           "codigo": "FMMP112",
           "nombre": "Cálculo Diferencial",
           "sct": 16,
-          "prerrequisitos": [2],
+          "prerrequisitos": [
+            2
+          ],
           "prereq_expr": "FMMP012"
         },
         {
@@ -80,7 +87,9 @@
           "codigo": "TDFI103",
           "nombre": "Base de Datos",
           "sct": 15,
-          "prerrequisitos": [4],
+          "prerrequisitos": [
+            4
+          ],
           "prereq_expr": "TDFI102"
         }
       ]
@@ -93,7 +102,9 @@
           "codigo": "ACAD102",
           "nombre": "Taller de Innovación y Emprendimiento II",
           "sct": 10,
-          "prerrequisitos": [5],
+          "prerrequisitos": [
+            5
+          ],
           "prereq_expr": "ACAD101"
         },
         {
@@ -101,7 +112,10 @@
           "codigo": "CFIS332",
           "nombre": "Mecánica",
           "sct": 18,
-          "prerrequisitos": [1, 7],
+          "prerrequisitos": [
+            7,
+            8
+          ],
           "prereq_expr": "CFIS310"
         },
         {
@@ -109,7 +123,9 @@
           "codigo": "FMMP212",
           "nombre": "Cálculo Integral",
           "sct": 16,
-          "prerrequisitos": [8],
+          "prerrequisitos": [
+            8
+          ],
           "prereq_expr": "FMMP112"
         },
         {
@@ -125,7 +141,9 @@
           "codigo": "TDFI104",
           "nombre": "Compliance & Accountability",
           "sct": 10,
-          "prerrequisitos": [3],
+          "prerrequisitos": [
+            3
+          ],
           "prereq_expr": ""
         }
       ]
@@ -138,7 +156,9 @@
           "codigo": "FMSP316",
           "nombre": "Métodos Cuantitativos",
           "sct": 20,
-          "prerrequisitos": [12],
+          "prerrequisitos": [
+            12
+          ],
           "prereq_expr": ""
         },
         {
@@ -146,7 +166,9 @@
           "codigo": "ING129",
           "nombre": "Inglés II",
           "sct": 12,
-          "prerrequisitos": [13],
+          "prerrequisitos": [
+            13
+          ],
           "prereq_expr": "ING119"
         },
         {
@@ -154,15 +176,27 @@
           "codigo": "INSW220",
           "nombre": "Práctica I",
           "sct": 16,
-          "prerrequisitos": [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14],
-          "prereq_expr": ""
+          "prerrequisitos": [
+            10,
+            14
+          ],
+          "prereq_expr": "",
+          "correquisitos": [
+            15,
+            16,
+            18,
+            19
+          ],
+          "correq_expr": "FMSP316 y ING129 y INSW221 y PTEC101"
         },
         {
           "id": 18,
           "codigo": "INSW221",
           "nombre": "Tecnologías Disruptivas",
           "sct": 8,
-          "prerrequisitos": [9],
+          "prerrequisitos": [
+            9
+          ],
           "prereq_expr": ""
         },
         {
@@ -170,7 +204,9 @@
           "codigo": "PTEC101",
           "nombre": "Algoritmos y Estructuras de Datos",
           "sct": 12,
-          "prerrequisitos": [4],
+          "prerrequisitos": [
+            4
+          ],
           "prereq_expr": "TDFI102"
         }
       ]
@@ -183,7 +219,9 @@
           "codigo": "ING239",
           "nombre": "Inglés III",
           "sct": 12,
-          "prerrequisitos": [16],
+          "prerrequisitos": [
+            16
+          ],
           "prereq_expr": "ING129"
         },
         {
@@ -191,7 +229,9 @@
           "codigo": "INSW311",
           "nombre": "Disrupción Empresarial",
           "sct": 18,
-          "prerrequisitos": [18],
+          "prerrequisitos": [
+            18
+          ],
           "prereq_expr": ""
         },
         {
@@ -199,7 +239,9 @@
           "codigo": "INSW312",
           "nombre": "Conectividad y Soluciones Móviles",
           "sct": 18,
-          "prerrequisitos": [18],
+          "prerrequisitos": [
+            18
+          ],
           "prereq_expr": ""
         },
         {
@@ -207,7 +249,9 @@
           "codigo": "PTEC102",
           "nombre": "Paradigmas de Programación",
           "sct": 8,
-          "prerrequisitos": [19],
+          "prerrequisitos": [
+            19
+          ],
           "prereq_expr": "PTEC101"
         },
         {
@@ -215,7 +259,10 @@
           "codigo": "TDFI105",
           "nombre": "Minería de Datos",
           "sct": 12,
-          "prerrequisitos": [15, 9],
+          "prerrequisitos": [
+            15,
+            9
+          ],
           "prereq_expr": ""
         }
       ]
@@ -228,7 +275,9 @@
           "codigo": "ACAD103",
           "nombre": "Taller de Innovación y Emprendimiento III",
           "sct": 10,
-          "prerrequisitos": [10],
+          "prerrequisitos": [
+            10
+          ],
           "prereq_expr": "ACAD102"
         },
         {
@@ -236,7 +285,9 @@
           "codigo": "ING249",
           "nombre": "Inglés IV",
           "sct": 12,
-          "prerrequisitos": [20],
+          "prerrequisitos": [
+            20
+          ],
           "prereq_expr": "ING239"
         },
         {
@@ -244,7 +295,9 @@
           "codigo": "INSW321",
           "nombre": "Desafío Tecnológico",
           "sct": 5,
-          "prerrequisitos": [21],
+          "prerrequisitos": [
+            21
+          ],
           "prereq_expr": ""
         },
         {
@@ -252,7 +305,9 @@
           "codigo": "PTEC103",
           "nombre": "Desarrollo Web y Móvil",
           "sct": 14,
-          "prerrequisitos": [23],
+          "prerrequisitos": [
+            23
+          ],
           "prereq_expr": "PTEC102"
         },
         {
@@ -260,7 +315,9 @@
           "codigo": "PTEC105",
           "nombre": "Ingeniería de Software I",
           "sct": 15,
-          "prerrequisitos": [12],
+          "prerrequisitos": [
+            23
+          ],
           "prereq_expr": ""
         },
         {
@@ -268,7 +325,9 @@
           "codigo": "TDFI106",
           "nombre": "Gestión de la Transformación Digital",
           "sct": 12,
-          "prerrequisitos": [14],
+          "prerrequisitos": [
+            14
+          ],
           "prereq_expr": ""
         }
       ]
@@ -289,15 +348,25 @@
           "codigo": "INSW410",
           "nombre": "Portafolio de Proyectos",
           "sct": 10,
-          "prerrequisitos": [27, 28, 29],
-          "prereq_expr": "INSW321"
+          "prerrequisitos": [
+            27,
+            28,
+            29
+          ],
+          "prereq_expr": "INSW321",
+          "correquisitos": [
+            36
+          ],
+          "correq_expr": "PTEC106"
         },
         {
           "id": 33,
           "codigo": "INSW411",
           "nombre": "Tópico de Especialidad I",
           "sct": 10,
-          "prerrequisitos": [21],
+          "prerrequisitos": [
+            21
+          ],
           "prereq_expr": ""
         },
         {
@@ -305,7 +374,9 @@
           "codigo": "INSW412",
           "nombre": "Tópico de Especialidad II",
           "sct": 10,
-          "prerrequisitos": [22],
+          "prerrequisitos": [
+            22
+          ],
           "prereq_expr": ""
         },
         {
@@ -313,7 +384,9 @@
           "codigo": "PTEC104",
           "nombre": "Infraestructura TI",
           "sct": 12,
-          "prerrequisitos": [23],
+          "prerrequisitos": [
+            23
+          ],
           "prereq_expr": ""
         },
         {
@@ -321,7 +394,10 @@
           "codigo": "PTEC106",
           "nombre": "Ingeniería de Software II",
           "sct": 15,
-          "prerrequisitos": [29, 28],
+          "prerrequisitos": [
+            29,
+            28
+          ],
           "prereq_expr": "PTEC105"
         }
       ]
@@ -334,7 +410,11 @@
           "codigo": "INSW420",
           "nombre": "Práctica II",
           "sct": 26,
-          "prerrequisitos": [17],
+          "prerrequisitos": [
+            25,
+            27,
+            28
+          ],
           "prereq_expr": "INSW220"
         },
         {
@@ -342,15 +422,24 @@
           "codigo": "INSW421",
           "nombre": "Seminario de Licenciatura en Ingeniería",
           "sct": 14,
-          "prerrequisitos": [36, 32],
-          "prereq_expr": ""
+          "prerrequisitos": [
+            36,
+            32
+          ],
+          "prereq_expr": "",
+          "correquisitos": [
+            39
+          ],
+          "correq_expr": "INSW422"
         },
         {
           "id": 39,
           "codigo": "INSW422",
           "nombre": "Proyecto de Título",
           "sct": 14,
-          "prerrequisitos": [32],
+          "prerrequisitos": [
+            32
+          ],
           "prereq_expr": "INSW421"
         },
         {
@@ -358,7 +447,9 @@
           "codigo": "PTEC107",
           "nombre": "Ciberseguridad",
           "sct": 14,
-          "prerrequisitos": [35],
+          "prerrequisitos": [
+            35
+          ],
           "prereq_expr": ""
         }
       ]

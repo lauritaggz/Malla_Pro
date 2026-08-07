@@ -70,7 +70,10 @@
           "codigo": "CFIS328",
           "nombre": "Física Experimental",
           "sct": 16,
-          "prerrequisitos": [2, 3],
+          "prerrequisitos": [
+            2,
+            3
+          ],
           "prereq_expr": "CFIS310 y FMMP012 (o equivalentes)"
         },
         {
@@ -78,7 +81,9 @@
           "codigo": "FMMP112",
           "nombre": "Cálculo Diferencial",
           "sct": 16,
-          "prerrequisitos": [3],
+          "prerrequisitos": [
+            3
+          ],
           "prereq_expr": "FMMP012 (o equivalentes)"
         },
         {
@@ -86,7 +91,9 @@
           "codigo": "IMMC102",
           "nombre": "Procesos de Ingeniería en Marina Mercante",
           "sct": 14,
-          "prerrequisitos": [2],
+          "prerrequisitos": [
+            2
+          ],
           "prereq_expr": "CFIS310 (o equivalentes)"
         },
         {
@@ -94,7 +101,9 @@
           "codigo": "IMMC103",
           "nombre": "Reglamentación y Legislación",
           "sct": 12,
-          "prerrequisitos": [4],
+          "prerrequisitos": [
+            4
+          ],
           "prereq_expr": "IMMC101 (más equivalencias antiguas en la malla)"
         },
         {
@@ -102,7 +111,9 @@
           "codigo": "ING129",
           "nombre": "Inglés II",
           "sct": 12,
-          "prerrequisitos": [5],
+          "prerrequisitos": [
+            5
+          ],
           "prereq_expr": "ING119 (o equivalentes)"
         }
       ]
@@ -115,7 +126,9 @@
           "codigo": "IMMC201",
           "nombre": "Interpretación de Planos y Dibujo Técnico",
           "sct": 12,
-          "prerrequisitos": [8],
+          "prerrequisitos": [
+            8
+          ],
           "prereq_expr": "IMMC102"
         },
         {
@@ -123,7 +136,9 @@
           "codigo": "IMMC202",
           "nombre": "Mecánica Técnica Naval",
           "sct": 14,
-          "prerrequisitos": [6],
+          "prerrequisitos": [
+            6
+          ],
           "prereq_expr": "CFIS328"
         },
         {
@@ -131,7 +146,9 @@
           "codigo": "IMMC203",
           "nombre": "Incendio y Abandono (OMI 1.19-1.23-1.20-2.03)",
           "sct": 16,
-          "prerrequisitos": [9],
+          "prerrequisitos": [
+            9
+          ],
           "prereq_expr": "IMMC103 (más equivalencias antiguas en la malla)"
         },
         {
@@ -139,7 +156,9 @@
           "codigo": "IMMC204",
           "nombre": "Electricidad",
           "sct": 16,
-          "prerrequisitos": [6],
+          "prerrequisitos": [
+            6
+          ],
           "prereq_expr": "CFIS328"
         },
         {
@@ -147,7 +166,9 @@
           "codigo": "ING239",
           "nombre": "Inglés III",
           "sct": 12,
-          "prerrequisitos": [10],
+          "prerrequisitos": [
+            10
+          ],
           "prereq_expr": "ING129 (o equivalentes)"
         }
       ]
@@ -165,7 +186,10 @@
               "codigo": "IMMC205",
               "nombre": "Construcción Naval y Flotabilidad",
               "sct": 9,
-              "prerrequisitos": [11, 12],
+              "prerrequisitos": [
+                11,
+                12
+              ],
               "prereq_expr": "IMMC201 e IMMC202 (o equivalentes)"
             },
             {
@@ -173,7 +197,10 @@
               "codigo": "IMMQ201",
               "nombre": "Termodinámica Aplicada",
               "sct": 9,
-              "prerrequisitos": [7, 12],
+              "prerrequisitos": [
+                7,
+                12
+              ],
               "prereq_expr": "FMMP112 e IMMC202 (o equivalentes)"
             },
             {
@@ -181,7 +208,10 @@
               "codigo": "IMMQ202",
               "nombre": "Elasticidad y Resistencia de Materiales",
               "sct": 9,
-              "prerrequisitos": [7, 12],
+              "prerrequisitos": [
+                7,
+                12
+              ],
               "prereq_expr": "FMMP112 e IMMC202 (o equivalentes)"
             },
             {
@@ -189,7 +219,9 @@
               "codigo": "IMMQ203",
               "nombre": "Electrotecnia",
               "sct": 7,
-              "prerrequisitos": [14],
+              "prerrequisitos": [
+                14
+              ],
               "prereq_expr": "IMMC204 (o equivalentes)"
             },
             {
@@ -197,7 +229,9 @@
               "codigo": "IMMQ204",
               "nombre": "Práctica I",
               "sct": 66,
-              "prerrequisitos": [4],
+              "prerrequisitos": [
+                4
+              ],
               "prereq_expr": "IMMC101 (más equivalencias antiguas en la malla)"
             },
             {
@@ -205,7 +239,9 @@
               "codigo": "ING249",
               "nombre": "Inglés IV",
               "sct": 12,
-              "prerrequisitos": [15],
+              "prerrequisitos": [
+                15
+              ],
               "prereq_expr": "ING239 (o equivalentes)"
             }
           ]
@@ -226,7 +262,10 @@
               "codigo": "IMMC301",
               "nombre": "Cuidado del Medio Ambiente (OMI I.01)",
               "sct": 10,
-              "prerrequisitos": [13, 16],
+              "prerrequisitos": [
+                13,
+                16
+              ],
               "prereq_expr": "IMMC203 y/o IMMC205 (según equivalencias indicadas en la malla)"
             },
             {
@@ -234,7 +273,9 @@
               "codigo": "IMMQ301",
               "nombre": "Taller de Máquinas y Herramientas",
               "sct": 13,
-              "prerrequisitos": [18],
+              "prerrequisitos": [
+                18
+              ],
               "prereq_expr": "IMMQ202"
             },
             {
@@ -242,7 +283,9 @@
               "codigo": "IMMQ302",
               "nombre": "Máquinas Eléctricas I",
               "sct": 10,
-              "prerrequisitos": [19],
+              "prerrequisitos": [
+                19
+              ],
               "prereq_expr": "IMMQ203"
             },
             {
@@ -250,7 +293,10 @@
               "codigo": "IMMQ303",
               "nombre": "Engine Room Management",
               "sct": 14,
-              "prerrequisitos": [19, 17],
+              "prerrequisitos": [
+                19,
+                17
+              ],
               "prereq_expr": "IMMQ203 e IMMQ201 (o equivalentes)"
             },
             {
@@ -258,7 +304,9 @@
               "codigo": "IMMQ304",
               "nombre": "Combustión Interna I",
               "sct": 13,
-              "prerrequisitos": [17],
+              "prerrequisitos": [
+                17
+              ],
               "prereq_expr": "IMMQ201 (o equivalentes)"
             }
           ]
@@ -271,7 +319,9 @@
               "codigo": "IMMC302",
               "nombre": "Primeros Auxilios y Cuidados Médicos a Bordo (OMI 1.13-1.14)",
               "sct": 10,
-              "prerrequisitos": [23],
+              "prerrequisitos": [
+                23
+              ],
               "prereq_expr": "IMMC301"
             },
             {
@@ -279,7 +329,9 @@
               "codigo": "IMMC303",
               "nombre": "Costos y Finanzas",
               "sct": 10,
-              "prerrequisitos": [7],
+              "prerrequisitos": [
+                7
+              ],
               "prereq_expr": "FMMP112 (o equivalentes)"
             },
             {
@@ -287,7 +339,10 @@
               "codigo": "IMMQ305",
               "nombre": "Mantención de Motores I",
               "sct": 12,
-              "prerrequisitos": [24, 26],
+              "prerrequisitos": [
+                24,
+                26
+              ],
               "prereq_expr": "IMMQ301 e IMMQ303"
             },
             {
@@ -295,7 +350,9 @@
               "codigo": "IMMQ306",
               "nombre": "Electrónica",
               "sct": 12,
-              "prerrequisitos": [25],
+              "prerrequisitos": [
+                25
+              ],
               "prereq_expr": "IMMQ302 (o equivalentes)"
             },
             {
@@ -303,7 +360,9 @@
               "codigo": "IMMQ307",
               "nombre": "Plantas a Vapor",
               "sct": 10,
-              "prerrequisitos": [27],
+              "prerrequisitos": [
+                27
+              ],
               "prereq_expr": "IMMQ304 (o equivalentes)"
             },
             {
@@ -311,7 +370,9 @@
               "codigo": "IMMQ308",
               "nombre": "Combustión Interna II",
               "sct": 12,
-              "prerrequisitos": [27],
+              "prerrequisitos": [
+                27
+              ],
               "prereq_expr": "IMMQ304 (o equivalentes)"
             }
           ]
@@ -324,7 +385,9 @@
               "codigo": "IMMC401",
               "nombre": "Seguridad de las Personas y Medio Ambiente (OMI 1.21, 3.26, 1.39, 1.38)",
               "sct": 10,
-              "prerrequisitos": [28],
+              "prerrequisitos": [
+                28
+              ],
               "prereq_expr": "IMMC302"
             },
             {
@@ -332,7 +395,9 @@
               "codigo": "IMMC402",
               "nombre": "Evaluación de Inversiones Marítimo Portuario",
               "sct": 12,
-              "prerrequisitos": [29],
+              "prerrequisitos": [
+                29
+              ],
               "prereq_expr": "IMMC303"
             },
             {
@@ -340,7 +405,9 @@
               "codigo": "IMMQ401",
               "nombre": "Mantención de Motores II",
               "sct": 12,
-              "prerrequisitos": [30],
+              "prerrequisitos": [
+                30
+              ],
               "prereq_expr": "IMMQ305"
             },
             {
@@ -348,7 +415,9 @@
               "codigo": "IMMQ402",
               "nombre": "Control Automático",
               "sct": 12,
-              "prerrequisitos": [31],
+              "prerrequisitos": [
+                31
+              ],
               "prereq_expr": "IMMQ306"
             },
             {
@@ -356,7 +425,9 @@
               "codigo": "IMMQ403",
               "nombre": "Máquinas Marinas",
               "sct": 10,
-              "prerrequisitos": [33],
+              "prerrequisitos": [
+                33
+              ],
               "prereq_expr": "IMMQ308"
             },
             {
@@ -364,7 +435,12 @@
               "codigo": "IMMQ404",
               "nombre": "Portafolio de Proyecto",
               "sct": 10,
-              "prerrequisitos": [30, 27, 31, 33],
+              "prerrequisitos": [
+                30,
+                27,
+                31,
+                33
+              ],
               "prereq_expr": "IMMQ305, IMMQ304, IMMQ306 e IMMQ308 (según equivalencias de la malla)"
             }
           ]
@@ -377,7 +453,9 @@
               "codigo": "IMMC403",
               "nombre": "Sistemas de Gestión Integrado",
               "sct": 8,
-              "prerrequisitos": [34],
+              "prerrequisitos": [
+                34
+              ],
               "prereq_expr": "IMMC401"
             },
             {
@@ -385,7 +463,9 @@
               "codigo": "IMMC404",
               "nombre": "Seminario de Licenciatura en Ingeniería",
               "sct": 4,
-              "prerrequisitos": [35],
+              "prerrequisitos": [
+                35
+              ],
               "prereq_expr": "IMMC402 (o equivalentes)"
             },
             {
@@ -393,9 +473,14 @@
               "codigo": "IMMQ405",
               "nombre": "Inglés Técnico Marítimo",
               "sct": 9,
-              "prerrequisitos": [21, 37],
+              "prerrequisitos": [
+                21,
+                37
+              ],
               "prereq_expr": "ING249 e IMMQ402",
-              "correquisitos": [44],
+              "correquisitos": [
+                44
+              ],
               "correq_expr": "IMMQ407"
             },
             {
@@ -403,7 +488,9 @@
               "codigo": "IMMQ406",
               "nombre": "Máquinas Eléctricas II",
               "sct": 9,
-              "prerrequisitos": [37],
+              "prerrequisitos": [
+                37
+              ],
               "prereq_expr": "IMMQ402 (según equivalencias de la malla)"
             },
             {
@@ -411,7 +498,10 @@
               "codigo": "IMMQ407",
               "nombre": "Engine Room Resource Management (ERM - OMI 2.07)",
               "sct": 8,
-              "prerrequisitos": [26, 38],
+              "prerrequisitos": [
+                26,
+                38
+              ],
               "prereq_expr": "IMMQ303 e IMMQ403"
             },
             {
@@ -419,7 +509,9 @@
               "codigo": "IMMQ408",
               "nombre": "Proyecto de Título",
               "sct": 4,
-              "prerrequisitos": [41],
+              "prerrequisitos": [
+                41
+              ],
               "prereq_expr": "IMMC404"
             },
             {
@@ -427,7 +519,9 @@
               "codigo": "IMMQ409",
               "nombre": "Práctica II",
               "sct": 66,
-              "prerrequisitos": [20],
+              "prerrequisitos": [
+                20
+              ],
               "prereq_expr": "IMMQ204"
             }
           ]
@@ -445,7 +539,10 @@
               "codigo": "IMMC205",
               "nombre": "Construcción Naval y Flotabilidad",
               "sct": 9,
-              "prerrequisitos": [11, 12],
+              "prerrequisitos": [
+                11,
+                12
+              ],
               "prereq_expr": "IMMC201 e IMMC202 (o equivalentes)"
             },
             {
@@ -453,7 +550,9 @@
               "codigo": "IMMP201",
               "nombre": "Meteorología y Oceanografía",
               "sct": 7,
-              "prerrequisitos": [7],
+              "prerrequisitos": [
+                7
+              ],
               "prereq_expr": "FMMP112 (o equivalentes)"
             },
             {
@@ -461,7 +560,10 @@
               "codigo": "IMMP202",
               "nombre": "Fundamentos de Navegación",
               "sct": 8,
-              "prerrequisitos": [14, 7],
+              "prerrequisitos": [
+                14,
+                7
+              ],
               "prereq_expr": "IMMC204 y FMMP112 (o equivalentes)"
             },
             {
@@ -469,7 +571,9 @@
               "codigo": "IMMP203",
               "nombre": "Planificación y Estiba de la Carga",
               "sct": 9,
-              "prerrequisitos": [12],
+              "prerrequisitos": [
+                12
+              ],
               "prereq_expr": "IMMC202 (o equivalentes)"
             },
             {
@@ -477,7 +581,9 @@
               "codigo": "IMMP204",
               "nombre": "Práctica I",
               "sct": 66,
-              "prerrequisitos": [4],
+              "prerrequisitos": [
+                4
+              ],
               "prereq_expr": "IMMC101 (más equivalencias antiguas en la malla)"
             },
             {
@@ -485,7 +591,9 @@
               "codigo": "ING249",
               "nombre": "Inglés IV",
               "sct": 12,
-              "prerrequisitos": [15],
+              "prerrequisitos": [
+                15
+              ],
               "prereq_expr": "ING239 (o equivalentes)"
             }
           ]
@@ -506,7 +614,10 @@
               "codigo": "IMMC301",
               "nombre": "Cuidado del Medio Ambiente (OMI I.01)",
               "sct": 10,
-              "prerrequisitos": [13, 47],
+              "prerrequisitos": [
+                13,
+                47
+              ],
               "prereq_expr": "IMMC203 y/o IMMC205 (según equivalencias indicadas en la malla)"
             },
             {
@@ -514,7 +625,9 @@
               "codigo": "IMMP301",
               "nombre": "Posicionamiento y Pilotaje",
               "sct": 10,
-              "prerrequisitos": [49],
+              "prerrequisitos": [
+                49
+              ],
               "prereq_expr": "IMMP202"
             },
             {
@@ -522,9 +635,13 @@
               "codigo": "IMMP302",
               "nombre": "Comunicaciones I",
               "sct": 16,
-              "prerrequisitos": [49],
+              "prerrequisitos": [
+                49
+              ],
               "prereq_expr": "IMMP202",
-              "correquisitos": [55],
+              "correquisitos": [
+                55
+              ],
               "correq_expr": "IMMP301"
             },
             {
@@ -532,7 +649,10 @@
               "codigo": "IMMP303",
               "nombre": "Estiba de los Pesos a Bordo",
               "sct": 13,
-              "prerrequisitos": [50, 47],
+              "prerrequisitos": [
+                50,
+                47
+              ],
               "prereq_expr": "IMMP203 e IMMC205 (según equivalencias de la malla)"
             },
             {
@@ -540,7 +660,9 @@
               "codigo": "IMMP304",
               "nombre": "Navegación Electrónica (OMI 1.07-1.27)",
               "sct": 10,
-              "prerrequisitos": [49],
+              "prerrequisitos": [
+                49
+              ],
               "prereq_expr": "IMMP202"
             }
           ]
@@ -553,7 +675,9 @@
               "codigo": "IMMC302",
               "nombre": "Primeros Auxilios y Cuidados Médicos a Bordo (OMI 1.13-1.14)",
               "sct": 10,
-              "prerrequisitos": [54],
+              "prerrequisitos": [
+                54
+              ],
               "prereq_expr": "IMMC301"
             },
             {
@@ -561,7 +685,9 @@
               "codigo": "IMMC303",
               "nombre": "Costos y Finanzas",
               "sct": 10,
-              "prerrequisitos": [7],
+              "prerrequisitos": [
+                7
+              ],
               "prereq_expr": "FMMP112 (o equivalentes)"
             },
             {
@@ -569,7 +695,9 @@
               "codigo": "IMMP305",
               "nombre": "Navegación Ortodrómica y Loxodrómica",
               "sct": 11,
-              "prerrequisitos": [55],
+              "prerrequisitos": [
+                55
+              ],
               "prereq_expr": "IMMP301"
             },
             {
@@ -577,7 +705,9 @@
               "codigo": "IMMP306",
               "nombre": "Comunicaciones II",
               "sct": 12,
-              "prerrequisitos": [56],
+              "prerrequisitos": [
+                56
+              ],
               "prereq_expr": "IMMP302"
             },
             {
@@ -585,7 +715,10 @@
               "codigo": "IMMP307",
               "nombre": "Maniobrabilidad de la Nave",
               "sct": 11,
-              "prerrequisitos": [48, 55],
+              "prerrequisitos": [
+                48,
+                55
+              ],
               "prereq_expr": "IMMP201 e IMMP301 (según equivalencias indicadas en la malla)"
             },
             {
@@ -593,7 +726,9 @@
               "codigo": "IMMP308",
               "nombre": "Esfuerzos y Averías Estructurales",
               "sct": 11,
-              "prerrequisitos": [57],
+              "prerrequisitos": [
+                57
+              ],
               "prereq_expr": "IMMP303 (según equivalencias indicadas en la malla)"
             }
           ]
@@ -606,7 +741,9 @@
               "codigo": "IMMC401",
               "nombre": "Seguridad de las Personas y Medio Ambiente (OMI 1.21, 3.26, 1.39, 1.38)",
               "sct": 10,
-              "prerrequisitos": [59],
+              "prerrequisitos": [
+                59
+              ],
               "prereq_expr": "IMMC302"
             },
             {
@@ -614,7 +751,9 @@
               "codigo": "IMMC402",
               "nombre": "Evaluación de Inversiones Marítimo Portuario",
               "sct": 12,
-              "prerrequisitos": [60],
+              "prerrequisitos": [
+                60
+              ],
               "prereq_expr": "IMMC303"
             },
             {
@@ -622,7 +761,9 @@
               "codigo": "IMMP401",
               "nombre": "Navegación Astronómica",
               "sct": 10,
-              "prerrequisitos": [61],
+              "prerrequisitos": [
+                61
+              ],
               "prereq_expr": "IMMP305"
             },
             {
@@ -630,7 +771,9 @@
               "codigo": "IMMP402",
               "nombre": "Búsqueda y Salvamento (OMI 1.08)",
               "sct": 12,
-              "prerrequisitos": [58],
+              "prerrequisitos": [
+                58
+              ],
               "prereq_expr": "IMMP304"
             },
             {
@@ -638,7 +781,11 @@
               "codigo": "IMMP403",
               "nombre": "Portafolio de Proyecto",
               "sct": 10,
-              "prerrequisitos": [61, 64, 60],
+              "prerrequisitos": [
+                61,
+                64,
+                60
+              ],
               "prereq_expr": "IMMP305, IMMP308 e IMMC303 (según equivalencias indicadas en la malla)"
             },
             {
@@ -646,7 +793,9 @@
               "codigo": "IMMP404",
               "nombre": "Seguros del Transporte Marítimo",
               "sct": 10,
-              "prerrequisitos": [57],
+              "prerrequisitos": [
+                57
+              ],
               "prereq_expr": "IMMP303 (según equivalencias indicadas en la malla)"
             }
           ]
@@ -659,7 +808,9 @@
               "codigo": "IMMC403",
               "nombre": "Sistemas de Gestión Integrado",
               "sct": 8,
-              "prerrequisitos": [65],
+              "prerrequisitos": [
+                65
+              ],
               "prereq_expr": "IMMC401"
             },
             {
@@ -667,7 +818,9 @@
               "codigo": "IMMC404",
               "nombre": "Seminario de Licenciatura en Ingeniería",
               "sct": 4,
-              "prerrequisitos": [66],
+              "prerrequisitos": [
+                66
+              ],
               "prereq_expr": "IMMC402 (o equivalentes)"
             },
             {
@@ -675,7 +828,10 @@
               "codigo": "IMMP405",
               "nombre": "Inglés Marítimo Portuario",
               "sct": 9,
-              "prerrequisitos": [52, 68],
+              "prerrequisitos": [
+                52,
+                68
+              ],
               "prereq_expr": "ING249 e IMMP402"
             },
             {
@@ -683,7 +839,11 @@
               "codigo": "IMMP406",
               "nombre": "Bridge Resource Management (OMI 1.22-BRM)",
               "sct": 8,
-              "prerrequisitos": [68, 63, 62],
+              "prerrequisitos": [
+                68,
+                63,
+                62
+              ],
               "prereq_expr": "IMMP402, IMMP307 e IMMP306 (según equivalencias indicadas en la malla)"
             },
             {
@@ -691,7 +851,9 @@
               "codigo": "IMMP407",
               "nombre": "Gestión del Transporte Marítimo",
               "sct": 8,
-              "prerrequisitos": [70],
+              "prerrequisitos": [
+                70
+              ],
               "prereq_expr": "IMMP404 (o equivalentes)"
             },
             {
@@ -699,7 +861,10 @@
               "codigo": "IMMP408",
               "nombre": "Proyecto de Título",
               "sct": 4,
-              "prerrequisitos": [69, 66],
+              "prerrequisitos": [
+                69,
+                66
+              ],
               "prereq_expr": "IMMP403 e IMMC402 (o equivalentes)"
             },
             {
@@ -707,7 +872,10 @@
               "codigo": "IMMP409",
               "nombre": "Práctica II",
               "sct": 66,
-              "prerrequisitos": [51, 55],
+              "prerrequisitos": [
+                51,
+                55
+              ],
               "prereq_expr": "IMMP204 e IMMP301 (o equivalentes)"
             }
           ]
