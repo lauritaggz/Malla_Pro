@@ -1,6 +1,6 @@
 /**
  * Capa segura de eventos para Google Analytics 4 (gtag.js en index.html).
- * No envía datos personales — solo uso agregado de la app.
+ * Métricas de uso agregado — sin códigos de asignatura ni datos académicos detallados.
  */
 
 export function generarSlug(texto = "") {
@@ -102,18 +102,16 @@ export function trackFullscreenMalla(malla, opening) {
   });
 }
 
-export function trackOpenNotas(malla, curso) {
+export function trackOpenNotas(malla) {
   trackEvent("open_notas", {
     ...buildMallaParams(malla),
-    curso_codigo: curso?.codigo || "sin_codigo",
     device_context: getDeviceContext(),
   });
 }
 
-export function trackToggleCursoEstado(malla, curso, estado) {
+export function trackToggleCursoEstado(malla, estado) {
   trackEvent("toggle_curso_estado", {
     ...buildMallaParams(malla),
-    curso_codigo: curso?.codigo || "sin_codigo",
     estado,
     device_context: getDeviceContext(),
   });

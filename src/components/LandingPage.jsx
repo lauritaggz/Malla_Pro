@@ -42,6 +42,10 @@ const FAQ_ITEMS = [
     a: "No. Malla Pro es una herramienta independiente creada para ayudar a estudiantes a organizar su semestre.",
   },
   {
+    q: "¿Malla Pro sirve para cualquier modalidad?",
+    a: "Por ahora, Malla Pro está enfocado exclusivamente en mallas de Pregrado Diurno de las carreras disponibles. Los planes vespertinos, online, Advance, continuidad de estudios, postgrado u otras modalidades pueden tener estructuras diferentes y no están cubiertos salvo que se indiquen expresamente.",
+  },
+  {
     q: "¿Qué pasa con el PDF que cargo?",
     a: "La programación se procesa directamente en tu dispositivo y el archivo no se envía a un servidor.",
   },
@@ -730,7 +734,7 @@ export default function LandingPage() {
               <ul className="mt-6 flex flex-col gap-2 text-[13px] text-white/65">
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  Pensado para carreras UNAB.
+                  Actualmente disponible para Pregrado Diurno.
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -846,6 +850,11 @@ export default function LandingPage() {
               </p>
               <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
                 Selecciona un ramo para ver qué prerrequisitos necesita y cuáles desbloquea.
+              </p>
+              <p className="mt-3 text-sm text-[var(--textSecondary)] leading-relaxed rounded-xl border border-[var(--borderColor)] bg-[var(--bgPrimary)]/40 px-3.5 py-2.5">
+                <span className="font-semibold text-[var(--textPrimary)]">Mallas de Pregrado Diurno.</span>{" "}
+                Actualmente Malla Pro está enfocado en planes de estudio de pregrado diurno de las
+                carreras disponibles.
               </p>
               <ul className="mt-6 space-y-2.5">
                 <FeaturePoint>Pendiente, cursando y aprobado</FeaturePoint>
@@ -1154,10 +1163,13 @@ export default function LandingPage() {
             <div className="flex items-start gap-3">
               <Shield className="w-6 h-6 text-[var(--primary)] shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <h2 className="text-2xl font-bold tracking-tight">Tu información queda contigo</h2>
+                <h2 className="text-2xl font-bold tracking-tight">
+                  Tus datos académicos principales se quedan contigo
+                </h2>
                 <p className="mt-2 text-[var(--textSecondary)] leading-relaxed max-w-2xl">
-                  El PDF se procesa directamente en tu dispositivo y tu avance se guarda localmente
-                  para que puedas continuar después.
+                  Tus notas, progreso, horarios y los PDF que importas se procesan y almacenan
+                  localmente en tu dispositivo. Malla Pro utiliza analítica de uso para entender de
+                  forma general cómo se utiliza la plataforma y seguir mejorándola.
                 </p>
               </div>
             </div>
@@ -1183,7 +1195,7 @@ export default function LandingPage() {
             <ul className="mt-6 grid sm:grid-cols-2 gap-2 text-sm text-[var(--textSecondary)]">
               <FeaturePoint>La programación no se envía a un servidor</FeaturePoint>
               <FeaturePoint>Tu avance queda en tu navegador</FeaturePoint>
-              <FeaturePoint>No se comparte información académica con terceros</FeaturePoint>
+              <FeaturePoint>Analítica de uso general para mejorar la plataforma</FeaturePoint>
               <FeaturePoint>Puedes borrar tus datos locales desde el navegador</FeaturePoint>
             </ul>
           </div>
@@ -1268,9 +1280,14 @@ export default function LandingPage() {
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li>
-                    <a href="#privacidad" onClick={(e) => onNavClick(e, "#privacidad")} className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
+                    <Link to="/privacidad" className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
                       Privacidad
-                    </a>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/terminos" className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
+                      Términos de uso
+                    </Link>
                   </li>
                   <li>
                     <a
@@ -1288,10 +1305,17 @@ export default function LandingPage() {
                 </ul>
               </div>
             </div>
-            <div className="mt-10 pt-6 border-t border-[var(--borderColor)] space-y-2">
+            <div className="mt-10 pt-6 border-t border-[var(--borderColor)] space-y-3">
+              <p className="text-[12px] text-[var(--textSecondary)] leading-relaxed">
+                <Link to="/privacidad" className="hover:text-[var(--primary)]">Privacidad</Link>
+                <span className="mx-1.5 opacity-50">·</span>
+                <Link to="/terminos" className="hover:text-[var(--primary)]">Términos de uso</Link>
+                <span className="mx-1.5 opacity-50">·</span>
+                <a href="mailto:contacto@mallapro.cl" className="hover:text-[var(--primary)]">Contacto</a>
+              </p>
               <p className="text-[12px] text-[var(--textSecondary)] leading-relaxed max-w-2xl">
-                Herramienta independiente. No corresponde a una plataforma oficial de la Universidad
-                Andrés Bello.
+                Malla Pro es una herramienta independiente y no oficial. No corresponde a una
+                plataforma oficial de la Universidad Andrés Bello ni de otras instituciones.
               </p>
               <p className="text-[12px] text-[var(--textSecondary)]">
                 © {year} Malla Pro · De estudiantes para estudiantes.

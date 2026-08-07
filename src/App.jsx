@@ -201,7 +201,7 @@ export default function App() {
     setCursoEsEnCurso(esEnCurso);
     setCursoEsAprobado(esAprobado);
     setMostrarNotas(true);
-    trackOpenNotas(mallaSeleccionada, curso);
+    trackOpenNotas(mallaSeleccionada);
   }, [mallaSeleccionada]);
 
   const handleSetProgreso = useCallback((val) => setProgreso(val), []);
@@ -253,29 +253,21 @@ export default function App() {
         }}
       >
         {mallaSeleccionada && vistaPrincipal === "malla" && (
-          <StatsDisplay
-            cursosAprobados={progreso.aprobados}
-            cursosCursando={cursosCursando}
-            cursosEnCursoData={(() => {
-              if (!mallaData) return [];
-              const semestres = mallaData.isMencion
-                ? [
-                    ...(mallaData.semestresComunes || []),
-                    ...Object.values(mallaData.menciones || {}).flatMap((m) => m.semestres || []),
-                  ]
-                : (mallaData.semestres || []);
-              return semestres.flatMap((s) => s.cursos.filter((c) => cursando.includes(c.id)));
-            })()}
-          />
+          <StatsDisplay />
         )}
 
         {!mallaSeleccionada ? (
           <div className="flex items-center justify-center min-h-[80vh] py-10">
             <div className="bg-bgSecondary p-6 sm:p-10 rounded-2xl shadow-xl max-w-2xl w-full mx-4 border border-borderColor/50">
-              <h2 className="text-xl font-semibold mb-4 text-center">
+              <h2 className="text-xl font-semibold mb-2 text-center">
                 <GraduationCap className="inline-block w-6 h-6 mr-2" />
                 Selecciona una malla para comenzar
               </h2>
+              <p className="text-center text-sm text-textSecondary mb-5 leading-relaxed max-w-md mx-auto">
+                Actualmente disponibles para{" "}
+                <span className="font-semibold text-textPrimary">Pregrado Diurno</span>
+                {" "}de las carreras e instituciones incorporadas.
+              </p>
 
               {mallasDisponibles.length === 0 ? (
                 <p className="text-textSecondary text-center">
@@ -409,6 +401,7 @@ export default function App() {
           enCurso={cursoEsEnCurso}
           aprobado={cursoEsAprobado}
           isOpen={mostrarNotas}
+          mallaSeleccionada={mallaSeleccionada}
           onClose={() => {
             setMostrarNotas(false);
             setCursoSeleccionado(null);
