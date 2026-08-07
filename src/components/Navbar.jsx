@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   GraduationCap, Moon, Sun, FileText, HelpCircle,
   CalendarDays, ChevronDown, BookMarked, Heart, MessageCircle, CalendarRange,
-  ChevronUp, Settings
+  ChevronUp, Settings, ArrowLeft, Shield, Scale, Mail
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import GooeyNav from "./GooeyNav";
@@ -169,8 +169,17 @@ export default function Navbar({
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-12 sm:h-14 flex items-center justify-between gap-4">
 
-          {/* ── Left: Brand ── */}
-          <div className="flex items-center gap-2.5 min-w-0 md:flex-1 md:max-w-[45%]">
+          {/* ── Left: Back + Brand ── */}
+          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 md:flex-1 md:max-w-[45%]">
+            <Link
+              to="/"
+              aria-label="Volver al inicio"
+              title="Volver al inicio"
+              className="w-9 h-9 sm:w-8 sm:h-8 flex-shrink-0 rounded-lg flex items-center justify-center text-textSecondary hover:text-textPrimary hover:bg-borderColor/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            >
+              <ArrowLeft className="w-4 h-4" aria-hidden />
+            </Link>
+
             <div
               className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white"
               style={{ background: "var(--primary)" }}
@@ -341,6 +350,37 @@ export default function Navbar({
                             <span>Cambiar de malla</span>
                           </button>
                         )}
+                      </div>
+
+                      {/* Información legal / institucional */}
+                      <div className="pt-2.5 border-t border-borderColor/60 flex flex-col gap-0.5">
+                        <p className="text-[9.5px] font-bold text-textSecondary/90 uppercase tracking-widest px-2 mb-1.5 select-none">
+                          Información
+                        </p>
+                        <Link
+                          to="/privacidad"
+                          onClick={() => setSettingsOpen(false)}
+                          className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        >
+                          <Shield className="w-3.5 h-3.5 opacity-70" aria-hidden />
+                          <span>Privacidad</span>
+                        </Link>
+                        <Link
+                          to="/terminos"
+                          onClick={() => setSettingsOpen(false)}
+                          className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        >
+                          <Scale className="w-3.5 h-3.5 opacity-70" aria-hidden />
+                          <span>Términos de uso</span>
+                        </Link>
+                        <a
+                          href="mailto:contacto@mallapro.cl"
+                          onClick={() => setSettingsOpen(false)}
+                          className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        >
+                          <Mail className="w-3.5 h-3.5 opacity-70" aria-hidden />
+                          <span>Contacto</span>
+                        </a>
                       </div>
                     </div>
                   </motion.div>

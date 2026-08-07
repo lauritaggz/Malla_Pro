@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings2, Plus, ChevronDown } from "lucide-react";
+import { Settings2, Plus, ChevronDown, Share2, Download } from "lucide-react";
 import { parseGrade } from "../utils/gradeUtils";
 import DrawerPanel from "./DrawerPanel";
+import ShareCourseConfigModal from "./ShareCourseConfigModal";
+import ImportCourseConfigModal from "./ImportCourseConfigModal";
 import { safeStorage } from "../utils/safeStorage";
 import { LEGACY_KEYS } from "../utils/storageKeys";
+import { formatPeso, isFullWeight, roundPeso } from "../utils/shareCourseConfig";
 
-export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }) {
+export default function NotasModal({
+  curso,
+  enCurso,
+  aprobado,
+  onClose,
+  isOpen,
+  mallaSeleccionada = null,
+}) {
   const [evaluaciones, setEvaluaciones] = useState([]);
   const [nuevaEval, setNuevaEval] = useState({
     nombre: "",
@@ -15,6 +25,12 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   });
   const [error, setError] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importFeedback, setImportFeedback] = useState("");
+  const shareOpenRef = useRef(false);
+  const importOpenRef = useRef(false);
+  const importFeedbackTimerRef = useRef(null);
 
   // Configuración de Eximición y Examen
   const [config, setConfig] = useState({
@@ -28,6 +44,28 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   // Para manejar el panel de sub-notas (controles)
   const [openSubNotas, setOpenSubNotas] = useState([]); // ids de evaluaciones abiertas
   const [subNotaInputs, setSubNotaInputs] = useState({}); // { [evalId]: "valor" }
+
+  useEffect(() => {
+    return () => {
+      if (importFeedbackTimerRef.current) {
+        window.clearTimeout(importFeedbackTimerRef.current);
+      }
+    };
+  }, []);
+
+  const openShare = () => {
+    importOpenRef.current = false;
+    setImportOpen(false);
+    shareOpenRef.current = true;
+    setShareOpen(true);
+  };
+
+  const openImport = () => {
+    shareOpenRef.current = false;
+    setShareOpen(false);
+    importOpenRef.current = true;
+    setImportOpen(true);
+  };
 
   // Helper para mostrar decimales sin crashear si el valor no es número
   const safeToFixed = (val, dec = 2) => {
@@ -46,6 +84,14 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
       setError("");
       setShowAddForm(false);
       setShowConfig(false);
+      setShareOpen(false);
+      shareOpenRef.current = false;
+      setImportOpen(false);
+      importOpenRef.current = false;
+      setImportFeedback("");
+      if (importFeedbackTimerRef.current) {
+        window.clearTimeout(importFeedbackTimerRef.current);
+      }
 
       const configsGuardadas = safeStorage.get(LEGACY_KEYS.configs, {});
       setConfig(configsGuardadas[curso.id] || {
@@ -180,9 +226,11 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
       return;
     }
 
-    const pesoTotal = evaluaciones.reduce((sum, e) => sum + e.peso, 0) + peso;
-    if (pesoTotal > 100) {
-      setError(`El porcentaje total excede 100% (actual: ${pesoTotal}%)`);
+    const pesoTotalNuevo = roundPeso(
+      evaluaciones.reduce((sum, e) => sum + e.peso, 0) + peso
+    );
+    if (pesoTotalNuevo > 100) {
+      setError(`El porcentaje total excede 100% (actual: ${formatPeso(pesoTotalNuevo)}%)`);
       return;
     }
 
@@ -225,8 +273,13 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
   // ---------- CÁLCULOS GENERALES ----------
 
-  const pesoTotal = evaluaciones.reduce((sum, e) => sum + e.peso, 0);
-  const pesoRestante = 100 - pesoTotal;
+  const pesoTotalRaw = evaluaciones.reduce(
+    (sum, e) => sum + (typeof e.peso === "number" ? e.peso : 0),
+    0
+  );
+  const pesoTotal = roundPeso(pesoTotalRaw);
+  const pesoRestante = roundPeso(100 - pesoTotalRaw);
+  const pesoCompleto = isFullWeight(pesoTotalRaw);
 
   const evaluacionesConNota = evaluaciones.filter(
     (e) => e.nota !== null && e.nota !== undefined
@@ -245,7 +298,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
   let estado = aprobado ? "Aprobado" : enCurso ? "Cursando" : "Pendiente";
   let promedioFinal = promedioPresentacion;
 
-  if (pesoTotal === 100) {
+  if (pesoCompleto) {
     if (promedioPresentacion >= config.notaEximicion) {
       estado = "Eximido (Aprobado)";
       promedioFinal = promedioPresentacion;
@@ -288,35 +341,94 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
             : "text-amber-500";
 
   return (
+    <>
     <DrawerPanel
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        // Si un modal hijo está abierto, Escape/backdrop cierran solo ese
+        if (shareOpenRef.current) {
+          shareOpenRef.current = false;
+          setShareOpen(false);
+          return;
+        }
+        if (importOpenRef.current) {
+          importOpenRef.current = false;
+          setImportOpen(false);
+          return;
+        }
+        onClose?.();
+      }}
       title={curso.nombre}
       subtitle={`${curso.codigo} · ${curso.sct} SCT`}
       variant="modal"
     >
       <div className="flex flex-col h-full min-h-0 overflow-y-auto p-4 sm:p-5 gap-4">
         {/* Toolbar: config discreet */}
-        <div className="flex items-center justify-between gap-3 shrink-0">
-          <p className="text-[11px] text-textSecondary m-0 font-medium">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 shrink-0 min-w-0">
+          <p className="text-[11px] text-textSecondary m-0 font-medium min-w-0 truncate">
             {evaluaciones.length} {evaluaciones.length === 1 ? "evaluación" : "evaluaciones"}
-            {pesoRestante > 0 ? ` · ${pesoRestante}% libre` : pesoTotal === 100 ? " · 100% asignado" : ""}
+            {pesoRestante > 0
+              ? ` · ${formatPeso(pesoRestante)}% libre`
+              : pesoCompleto
+                ? " · 100% asignado"
+                : ""}
           </p>
-          <button
-            type="button"
-            onClick={() => setShowConfig(!showConfig)}
-            aria-expanded={showConfig}
-            aria-controls="notas-eximicion-config"
-            className={`text-xs px-2.5 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border cursor-pointer
-              ${showConfig
-                ? "bg-primary text-white border-primary"
-                : "bg-transparent text-textSecondary hover:text-textPrimary border-borderColor hover:bg-bgPrimary"
-              }`}
-          >
-            <Settings2 size={14} aria-hidden="true" />
-            <span className="hidden sm:inline">Eximición</span>
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={openImport}
+              title="Importar configuración de evaluaciones"
+              aria-label="Importar configuración"
+              className="text-xs px-2.5 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border cursor-pointer bg-transparent text-textSecondary hover:text-textPrimary border-borderColor hover:bg-bgPrimary"
+            >
+              <Download size={14} aria-hidden="true" />
+              <span className="hidden sm:inline">Importar</span>
+            </button>
+            <button
+              type="button"
+              onClick={openShare}
+              disabled={evaluaciones.length === 0}
+              title={
+                evaluaciones.length === 0
+                  ? "Configura al menos una evaluación para poder compartir."
+                  : "Compartir configuración de evaluaciones"
+              }
+              aria-label="Compartir configuración"
+              aria-disabled={evaluaciones.length === 0}
+              className={`text-xs px-2.5 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border cursor-pointer
+                ${evaluaciones.length === 0
+                  ? "opacity-45 cursor-not-allowed bg-transparent text-textSecondary border-borderColor"
+                  : "bg-transparent text-textSecondary hover:text-textPrimary border-borderColor hover:bg-bgPrimary"
+                }`}
+            >
+              <Share2 size={14} aria-hidden="true" />
+              <span className="hidden sm:inline">Compartir</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConfig(!showConfig)}
+              aria-expanded={showConfig}
+              aria-controls="notas-eximicion-config"
+              className={`text-xs px-2.5 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border cursor-pointer
+                ${showConfig
+                  ? "bg-primary text-white border-primary"
+                  : "bg-transparent text-textSecondary hover:text-textPrimary border-borderColor hover:bg-bgPrimary"
+                }`}
+            >
+              <Settings2 size={14} aria-hidden="true" />
+              <span className="hidden sm:inline">Eximición</span>
+            </button>
+          </div>
         </div>
+
+        {importFeedback && (
+          <div
+            role="status"
+            className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs px-3.5 py-2.5 font-semibold"
+          >
+            {importFeedback}
+          </div>
+        )}
 
         {/* Config panel (collapsible, secondary) */}
         <AnimatePresence>
@@ -394,7 +506,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
           </div>
           <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
             <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">% Evaluado</p>
-            <p className="text-sm font-bold text-textPrimary m-0 tabular-nums">{pesoTotal}%</p>
+            <p className="text-sm font-bold text-textPrimary m-0 tabular-nums">{formatPeso(pesoTotal)}%</p>
           </div>
           <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
             <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">Presentación</p>
@@ -411,7 +523,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
               Nota final
             </p>
             <p className={`text-sm font-bold m-0 tabular-nums ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
-              {pesoTotal === 100 || rindeExamen ? safeToFixed(promedioFinal, 2) : "—"}
+              {pesoCompleto || rindeExamen ? safeToFixed(promedioFinal, 2) : "—"}
             </p>
           </div>
         </div>
@@ -422,7 +534,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
             <p className="text-textSecondary text-xs m-0 leading-relaxed">
               Para eximirte ({safeToFixed(config.notaEximicion, 1)}), necesitas promedio{" "}
               <strong className="text-primary font-bold">{safeToFixed(notaNecesariaPresentacion, 2)}</strong>{" "}
-              en el {pesoRestante}% restante.
+              en el {formatPeso(pesoRestante)}% restante.
               {notaNecesariaPresentacion > 7.0 && (
                 <span className="text-red-500 ml-1 font-medium">Matemáticamente inalcanzable; irás a examen.</span>
               )}
@@ -520,7 +632,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                             )}
                           </td>
                           <td className="py-2.5 px-2 text-center text-textSecondary font-medium text-xs tabular-nums">
-                            {evaluacion.peso}%
+                            {formatPeso(evaluacion.peso)}%
                           </td>
                           <td className="py-2.5 px-2 text-center">
                             <div className="flex flex-col items-center gap-1">
@@ -545,6 +657,8 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
                               <button
                                 type="button"
                                 onClick={() => toggleSubNotasPanel(evaluacion.id)}
+                                title="Agregar o gestionar sub-notas de esta evaluación"
+                                aria-label="Sub-notas de la evaluación"
                                 className={`text-[10px] px-1.5 py-1 rounded transition-colors font-medium border-0 cursor-pointer ${
                                   openSubNotas.includes(evaluacion.id)
                                     ? "bg-primary text-white"
@@ -724,7 +838,7 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
 
                   {pesoRestante > 0 && (
                     <p className="text-[11px] text-textSecondary m-0 text-center">
-                      Queda <strong className="text-textPrimary">{pesoRestante}%</strong> por distribuir.
+                      Queda <strong className="text-textPrimary">{formatPeso(pesoRestante)}%</strong> por distribuir.
                     </p>
                   )}
                 </div>
@@ -734,5 +848,44 @@ export default function NotasModal({ curso, enCurso, aprobado, onClose, isOpen }
         </AnimatePresence>
       </div>
     </DrawerPanel>
+
+    <ShareCourseConfigModal
+      isOpen={shareOpen}
+      onClose={() => {
+        shareOpenRef.current = false;
+        setShareOpen(false);
+      }}
+      curso={curso}
+      evaluations={evaluaciones}
+      institutionSource={mallaSeleccionada}
+    />
+    <ImportCourseConfigModal
+      isOpen={importOpen}
+      onClose={() => {
+        importOpenRef.current = false;
+        setImportOpen(false);
+      }}
+      curso={curso}
+      evaluations={evaluaciones}
+      institutionSource={mallaSeleccionada}
+      onApply={(newEvaluations) => {
+        guardarEvaluaciones(newEvaluations);
+        setOpenSubNotas([]);
+        setSubNotaInputs({});
+        setShowAddForm(false);
+        setError("");
+        const n = Array.isArray(newEvaluations) ? newEvaluations.length : 0;
+        setImportFeedback(
+          n === 1 ? "1 evaluación importada" : `${n} evaluaciones importadas`
+        );
+        if (importFeedbackTimerRef.current) {
+          window.clearTimeout(importFeedbackTimerRef.current);
+        }
+        importFeedbackTimerRef.current = window.setTimeout(() => {
+          setImportFeedback("");
+        }, 2500);
+      }}
+    />
+    </>
   );
 }

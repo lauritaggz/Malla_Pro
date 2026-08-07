@@ -23,6 +23,15 @@ const Curso = ({
   const touchStartRef = useRef({ x: 0, y: 0 });
   // Evita el doble toggle: en móvil touchend + mouse sintético anulan el cambio de estado
   const suppressMouseRef = useRef(false);
+  // Tras long-press (cursando), ignorar contextmenu del navegador que abre el panel
+  const ignoreContextMenuUntilRef = useRef(0);
+
+  const shouldIgnoreContextMenu = () => {
+    if (longPressTriggeredRef.current) return true;
+    if (suppressMouseRef.current) return true;
+    if (Date.now() < ignoreContextMenuUntilRef.current) return true;
+    return false;
+  };
 
   useEffect(() => {
     const actualizarPromedio = () => {
@@ -121,6 +130,8 @@ const Curso = ({
 
     timerRef.current = setTimeout(() => {
       longPressTriggeredRef.current = true;
+      // Bloquear el contextmenu nativo que suele dispararse tras el hold
+      ignoreContextMenuUntilRef.current = Date.now() + 900;
       onLongPress?.(curso);
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate(40);
@@ -212,6 +223,10 @@ const Curso = ({
       }}
       onContextMenu={(e) => {
         e.preventDefault();
+        // El hold del cuerpo del ramo marca "cursando"; no abrir el panel de opciones.
+        if (shouldIgnoreContextMenu()) return;
+        // Solo clic derecho real (desktop). El long-press táctil no debe abrir menú aquí.
+        if (e.pointerType === "touch" || e.pointerType === "pen") return;
         onContextMenu?.(e, curso);
       }}
       className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-primary/45 group select-none touch-manipulation

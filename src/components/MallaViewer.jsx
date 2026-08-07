@@ -429,7 +429,7 @@ const MallaViewer = ({
       return false;
     }
 
-    trackToggleCursoEstado(mallaSeleccionada, curso, willApprove ? "aprobado" : "desaprobado");
+    trackToggleCursoEstado(mallaSeleccionada, willApprove ? "aprobado" : "desaprobado");
 
     setAprobados((prevAprobados) => {
       if (prevAprobados.includes(id)) {
@@ -459,10 +459,8 @@ const MallaViewer = ({
   // Marcar / desmarcar como excepcional
   const marcarExcepcional = (id) => {
     const isRemoving = excepciones.includes(id);
-    const curso = getCursoById(id);
     trackToggleCursoEstado(
       mallaSeleccionada,
-      curso,
       isRemoving ? "excepcional_off" : "excepcional_on"
     );
 
@@ -494,7 +492,6 @@ const MallaViewer = ({
 
     trackToggleCursoEstado(
       mallaSeleccionada,
-      curso,
       willEnable ? "en_curso_on" : "en_curso_off"
     );
 
