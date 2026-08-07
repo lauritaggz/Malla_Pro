@@ -27,4 +27,13 @@ DirectoryIndex index.html
   ExpiresActive On
   ExpiresByType text/css "access plus 1 year"
   ExpiresByType application/javascript "access plus 1 year"
+  # Preview social: caché corta para poder actualizar og-image sin pelear con CDN vieja
+  ExpiresByType image/jpeg "access plus 7 days"
+  ExpiresByType image/png "access plus 7 days"
+</IfModule>
+
+# Asegura MIME correcto de la imagen Open Graph
+<IfModule mod_mime.c>
+  AddType image/jpeg .jpg .jpeg
+  AddType image/png .png
 </IfModule>
