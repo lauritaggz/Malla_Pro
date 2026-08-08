@@ -85,6 +85,15 @@ export function getPeriodId(programming) {
     return `${programming.period.year}-${programming.period.semester}`;
   }
 
+  // Horario del alumno sin periodo académico explícito
+  if (
+    programming.source?.parser === "UNAB_STUDENT_SCHEDULE" ||
+    (programming.source?.sources?.horarioAlumno &&
+      !programming.source?.sources?.programacionAcademica)
+  ) {
+    return "student-schedule";
+  }
+
   return "unknown";
 }
 

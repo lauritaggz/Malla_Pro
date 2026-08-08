@@ -18,6 +18,7 @@ export default function CurricularScheduleSelector({
   setFilters,
   expandedCourseCode,
   onToggleCourse,
+  enrolledNrcs = [],
 }) {
   const [openGroups, setOpenGroups] = useState({
     recommended: true,
@@ -25,8 +26,52 @@ export default function CurricularScheduleSelector({
   });
 
   const [showFilters, setShowFilters] = useState(false);
+  const enrolledNrcSet = new Set(
+    (enrolledNrcs || []).map((n) => String(n).replace(/\D/g, ""))
+  );
 
-  if (!integration) return null;
+  // Sin malla: mostrar todos los cursos del PDF / horario
+  if (!integration) {
+    const fallbackCourses = (allCourses || []).map((c) => ({
+      ...c,
+      displayCategory: "Importados",
+    }));
+    const filtered = filterAndSortCourses(fallbackCourses, filters);
+    return (
+      <aside className="w-full flex flex-col h-full min-h-0 bg-bgSecondary overflow-hidden select-none">
+        <div className="p-3 sm:p-4 border-b border-borderColor shrink-0">
+          <h2 className="text-sm font-black text-textPrimary uppercase tracking-wider">
+            Tus asignaturas
+          </h2>
+          <p className="text-[11px] text-textSecondary mt-1">
+            {filtered.length} ramo{filtered.length === 1 ? "" : "s"} · desde tus documentos
+          </p>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2">
+          {filtered.map((course) => (
+            <SelectableCourseAccordion
+              key={course.courseCode}
+              course={course}
+              selectedSectionsMap={selectedSectionsMap}
+              selectedSectionsList={selectedSectionsList}
+              onSelectSection={onSelectSection}
+              onDeselectSection={onDeselectSection}
+              allCourses={allCourses}
+              expanded={expandedCourseCode === course.courseCode}
+              onToggle={() =>
+                onToggleCourse(
+                  expandedCourseCode === course.courseCode
+                    ? null
+                    : course.courseCode
+                )
+              }
+              enrolledNrcSet={enrolledNrcSet}
+            />
+          ))}
+        </div>
+      </aside>
+    );
+  }
 
   // Clasificar y filtrar cursos del PDF según la integración
   const recommended = (integration.primarySemesterCourses || [])
@@ -187,6 +232,7 @@ export default function CurricularScheduleSelector({
                 allCourses={allCourses}
                 expanded={expandedCourseCode === course.courseCode || (filters.query?.trim() ? true : false)}
                 onToggle={() => onToggleCourse(expandedCourseCode === course.courseCode ? null : course.courseCode)}
+                enrolledNrcSet={enrolledNrcSet}
               />
             ))}
           </GroupSection>
@@ -211,6 +257,7 @@ export default function CurricularScheduleSelector({
                 allCourses={allCourses}
                 expanded={expandedCourseCode === course.courseCode || (filters.query?.trim() ? true : false)}
                 onToggle={() => onToggleCourse(expandedCourseCode === course.courseCode ? null : course.courseCode)}
+                enrolledNrcSet={enrolledNrcSet}
               />
             ))}
           </GroupSection>
@@ -257,6 +304,7 @@ function SelectableCourseAccordion({
   allCourses,
   expanded,
   onToggle,
+  enrolledNrcSet = new Set(),
 }) {
   const courseCode = course.courseCode;
   const courseTitle = course.courseTitle;
@@ -379,6 +427,10 @@ function SelectableCourseAccordion({
                       conflicts={conflicts}
                       resolvedLinked={resolvedLinked}
                       unresolvedNrcs={unresolvedNrcs}
+                      enrolled={
+                        Boolean(section.enrolled) ||
+                        enrolledNrcSet.has(String(section.nrc || "").replace(/\D/g, ""))
+                      }
                       onSelect={() => {
                         if (isThisSelected) {
                           onDeselectSection(section);
@@ -405,6 +457,7 @@ function SelectableSectionCard({
   conflicts,
   resolvedLinked,
   unresolvedNrcs,
+  enrolled = false,
   onSelect,
 }) {
   const [showDetails, setShowDetails] = useState(false);
@@ -420,8 +473,8 @@ function SelectableSectionCard({
       }`}
       onClick={onSelect}
     >
-      <div className="flex items-center justify-between w-full">
-        <span className="text-xs font-extrabold text-textPrimary flex items-center gap-1.5">
+      <div className="flex items-center justify-between w-full gap-2">
+        <span className="text-xs font-extrabold text-textPrimary flex items-center gap-1.5 min-w-0">
           <span
             className={`h-3 w-3 rounded-full border flex items-center justify-center shrink-0 ${
               isSelected ? "border-primary bg-primary" : "border-textSecondary"
@@ -429,12 +482,29 @@ function SelectableSectionCard({
           >
             {isSelected && <span className="h-1 w-1 bg-white rounded-full" />}
           </span>
-          Sección {section.sectionNumber}
+          <span className="truncate">
+            {section.sectionNumber
+              ? `Sección ${section.sectionNumber}`
+              : `NRC ${section.nrc}`}
+          </span>
+          {enrolled && (
+            <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
+              <CheckCircle className="h-2.5 w-2.5" strokeWidth={2.5} />
+              Inscrito
+            </span>
+          )}
         </span>
-        <span className="text-[10px] font-semibold text-textSecondary uppercase tracking-wide bg-bgSecondary px-1.5 py-0.5 rounded border border-borderColor">
+        <span className="text-[10px] font-semibold text-textSecondary uppercase tracking-wide bg-bgSecondary px-1.5 py-0.5 rounded border border-borderColor shrink-0">
           {MODALITY_LABELS[section.modality] || section.modality}
         </span>
       </div>
+
+      {section.sources?.horarioAlumno &&
+        section.sources?.programacionAcademica === false && (
+          <p className="pl-4.5 text-[10px] text-textSecondary italic">
+            Importado desde tu horario
+          </p>
+        )}
 
       <div className="space-y-1 text-xs text-textPrimary pl-4.5 font-semibold">
         {(section.meetings || []).length === 0 ? (
@@ -444,7 +514,11 @@ function SelectableSectionCard({
         ) : (
           (section.meetings || []).map((m, idx) => (
             <p key={idx}>
-              {m.dayCode} {m.startTime}–{m.endTime} · <span className="text-textSecondary font-normal">{m.location || "no informada"}</span>
+              {m.dayCode} {m.startTime}–{m.endTime} ·{" "}
+              <span className="text-textSecondary font-normal">
+                {m.location ||
+                  (m.isOnline ? "Virtual" : "no informada")}
+              </span>
             </p>
           ))
         )}

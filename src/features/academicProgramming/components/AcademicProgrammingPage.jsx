@@ -2,14 +2,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
-import ProgrammingPdfDropzone from "./ProgrammingPdfDropzone";
+import DocumentSourcesPanel from "./DocumentSourcesPanel";
 import ParsingProgress from "./ParsingProgress";
 import ScheduleBuilder from "./ScheduleBuilder";
 import TomaDeRamosStepper from "./TomaDeRamosStepper";
 import MallaProgressHint from "./MallaProgressHint";
 import ErrorBoundary from "../../../components/ErrorBoundary";
 
-import { parseAcademicProgrammingFile } from "../parsers";
+import {
+  parseAcademicProgrammingFile,
+  parseStudentScheduleFile,
+} from "../parsers";
+import {
+  mergeProgrammingWithStudentSchedule,
+  mergeSelectedMaps,
+} from "../services/mergeProgrammingWithStudentSchedule";
 import {
   DEFAULT_FILTERS,
   collectFilterOptions,
@@ -41,11 +48,29 @@ const FLOW_PROGRESS_LABELS = {
   processing: "Reconociendo secciones…",
 };
 
+function buildMergeSummary(summary) {
+  if (!summary || !summary.enrolledCount) return null;
+  const parts = [`${summary.enrolledCount} ramo${summary.enrolledCount === 1 ? "" : "s"} inscrito${summary.enrolledCount === 1 ? "" : "s"}`];
+  if (summary.matchedInProgramming > 0) {
+    parts.push(
+      `${summary.matchedInProgramming} encontrado${summary.matchedInProgramming === 1 ? "" : "s"} en la programación`
+    );
+  }
+  if (summary.studentOnly > 0) {
+    parts.push(
+      `${summary.studentOnly} importado${summary.studentOnly === 1 ? "" : "s"} solo desde tu horario`
+    );
+  }
+  return parts.join(" · ");
+}
+
 export default function AcademicProgrammingPage({ isEmbedded = false }) {
   /** @type {[FlowStatus, Function]} */
   const [status, setStatus] = useState("idle");
   const [programming, setProgramming] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [programmingError, setProgrammingError] = useState(null);
+  const [studentScheduleError, setStudentScheduleError] = useState(null);
   const [infoMessage, setInfoMessage] = useState(null);
   const [progress, setProgress] = useState({
     page: 0,
@@ -56,6 +81,14 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
   const [warningsOpen, setWarningsOpen] = useState(false);
   const [fileMetadata, setFileMetadata] = useState(null);
+  const [studentScheduleMeta, setStudentScheduleMeta] = useState(null);
+  const [enrolledNrcs, setEnrolledNrcs] = useState([]);
+  const [mergeSummary, setMergeSummary] = useState(null);
+  const [hasProgrammingSource, setHasProgrammingSource] = useState(false);
+  const [hasStudentScheduleSource, setHasStudentScheduleSource] = useState(false);
+  const [studentScheduleRamos, setStudentScheduleRamos] = useState([]);
+  const [restoredSelectedMap, setRestoredSelectedMap] = useState(null);
+  const [selectionEpoch, setSelectionEpoch] = useState(0);
 
   const [mallaSeleccionada, setMallaSeleccionada] = useState(() =>
     safeStorage.get(LEGACY_KEYS.seleccionada, null)
@@ -68,7 +101,9 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
 
   const abortRef = useRef(null);
   const parseIdRef = useRef(0);
-  const lastValidProgrammingRef = useRef(null);
+  const programmingRawRef = useRef(null);
+  const studentScheduleRawRef = useRef(null);
+  const selectedMapRef = useRef({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -100,24 +135,95 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
     };
   }, []);
 
-  const [restoredSelectedMap, setRestoredSelectedMap] = useState(null);
-
-  // Restaurar planificación guardada
   useEffect(() => {
     if (!mallaSeleccionada) return;
     const saved = loadCourseRegistration(mallaSeleccionada);
     if (!saved) return;
 
     if (saved.programming) {
-      lastValidProgrammingRef.current = saved.programming;
+      const ramos = Array.isArray(saved.studentScheduleRamos)
+        ? saved.studentScheduleRamos
+        : [];
+      if (ramos.length) {
+        studentScheduleRawRef.current = { ramos, warnings: [] };
+        setStudentScheduleRamos(ramos);
+        setHasStudentScheduleSource(true);
+      }
+
+      // Separar base de programación (sin secciones solo-horario) para re-merge
+      const baseCourses = (saved.programming.courses || [])
+        .map((course) => ({
+          ...course,
+          sections: (course.sections || [])
+            .filter(
+              (s) =>
+                !s.sources ||
+                s.sources.programacionAcademica === true
+            )
+            .map((s) => ({
+              ...s,
+              enrolled: false,
+              sources: {
+                programacionAcademica: true,
+                horarioAlumno: false,
+              },
+            })),
+        }))
+        .filter((c) => c.sections.length);
+
+      if (baseCourses.length) {
+        programmingRawRef.current = {
+          ...saved.programming,
+          courses: baseCourses,
+          source: {
+            ...saved.programming.source,
+            parser: "UNAB_ACADEMIC_PROGRAMMING",
+            sources: {
+              programacionAcademica: true,
+              horarioAlumno: false,
+            },
+          },
+        };
+        setHasProgrammingSource(true);
+      } else {
+        programmingRawRef.current = null;
+        setHasProgrammingSource(false);
+      }
+
       setProgramming(saved.programming);
+      setEnrolledNrcs(Array.isArray(saved.enrolledNrcs) ? saved.enrolledNrcs : []);
+      setStudentScheduleMeta(saved.studentScheduleMeta || null);
       setFilters(
         saved.activeFilters && Object.keys(saved.activeFilters).length
           ? { ...DEFAULT_FILTERS, ...saved.activeFilters }
           : { ...DEFAULT_FILTERS }
       );
-      setFileMetadata(saved.fileMetadata || null);
+      setFileMetadata(
+        baseCourses.length ? saved.fileMetadata || null : null
+      );
       setRestoredSelectedMap(saved.selectedSectionsMap || {});
+      selectedMapRef.current = saved.selectedSectionsMap || {};
+      if (ramos.length) {
+        setMergeSummary(
+          buildMergeSummary({
+            enrolledCount: saved.enrolledNrcs?.length || ramos.length,
+            matchedInProgramming: (saved.enrolledNrcs || []).filter((nrc) =>
+              baseCourses.some((c) =>
+                c.sections.some((s) => String(s.nrc) === String(nrc))
+              )
+            ).length,
+            studentOnly: Math.max(
+              0,
+              (saved.enrolledNrcs?.length || ramos.length) -
+                (saved.enrolledNrcs || []).filter((nrc) =>
+                  baseCourses.some((c) =>
+                    c.sections.some((s) => String(s.nrc) === String(nrc))
+                  )
+                ).length
+            ),
+          })
+        );
+      }
       setStatus(
         Array.isArray(saved.warnings) && saved.warnings.length > 0
           ? "partial-success"
@@ -130,6 +236,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
 
     if (saved.selectedSectionsMap) {
       setRestoredSelectedMap(saved.selectedSectionsMap);
+      selectedMapRef.current = saved.selectedSectionsMap;
     }
   }, [mallaSeleccionada]);
 
@@ -147,7 +254,6 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
     };
   }, []);
 
-  // Cancelar parse al desmontar
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
@@ -189,36 +295,117 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
     parseIdRef.current += 1;
   }, []);
 
-  const reset = useCallback(() => {
-    abortCurrentParse();
-    setStatus("idle");
-    setErrorMessage(null);
-    setInfoMessage(null);
-    setProgress({ page: 0, totalPages: 0, percent: 0, sectionsDetected: 0 });
-    setFilters({ ...DEFAULT_FILTERS });
-    setWarningsOpen(false);
-    // Conservar último resultado válido en memoria hasta nuevo éxito
-    if (lastValidProgrammingRef.current) {
-      setProgramming(lastValidProgrammingRef.current);
-    } else {
-      setProgramming(null);
-    }
-  }, [abortCurrentParse]);
+  const persistMerged = useCallback(
+    (mergedProgramming, selectedMap, enrolled, progMeta, schedMeta, ramos) => {
+      const draft = buildRegistrationState({
+        malla: mallaSeleccionada,
+        programming: mergedProgramming,
+        selectedSectionsMap: selectedMap,
+        activeFilters: { ...DEFAULT_FILTERS },
+        fileMetadata: progMeta,
+        enrolledNrcs: enrolled,
+        studentScheduleMeta: schedMeta,
+        studentScheduleRamos: ramos || [],
+      });
+      if (!draft) return;
+      const saveResult = saveCourseRegistration(
+        mallaSeleccionada,
+        getPeriodId(mergedProgramming),
+        draft
+      );
+      if (!saveResult.ok) {
+        setInfoMessage(saveResult.userMessage);
+      }
+    },
+    [mallaSeleccionada]
+  );
+
+  const applyMerge = useCallback(
+    ({ progMeta, schedMeta, keepSelection = true }) => {
+      const merged = mergeProgrammingWithStudentSchedule(
+        programmingRawRef.current,
+        studentScheduleRawRef.current
+      );
+
+      if (!merged.programming) {
+        setProgramming(null);
+        setEnrolledNrcs([]);
+        setMergeSummary(null);
+        setStatus("idle");
+        return null;
+      }
+
+      const nextSelected = mergeSelectedMaps(
+        keepSelection ? selectedMapRef.current : {},
+        merged.selectedSectionsMapFromEnrolled
+      );
+      selectedMapRef.current = nextSelected;
+      setRestoredSelectedMap({ ...nextSelected });
+      setSelectionEpoch((n) => n + 1);
+      setProgramming(merged.programming);
+      setEnrolledNrcs(merged.enrolledNrcs);
+      setMergeSummary(buildMergeSummary(merged.summary));
+
+      const hasWarnings =
+        Array.isArray(merged.programming.warnings) &&
+        merged.programming.warnings.length > 0;
+      setStatus(hasWarnings ? "partial-success" : "success");
+
+      persistMerged(
+        merged.programming,
+        nextSelected,
+        merged.enrolledNrcs,
+        progMeta ?? fileMetadata,
+        schedMeta ?? studentScheduleMeta,
+        studentScheduleRawRef.current?.ramos || []
+      );
+
+      return merged;
+    },
+    [fileMetadata, persistMerged, studentScheduleMeta]
+  );
 
   const clearPlanningOnly = useCallback(() => {
     const periodId = programming ? getPeriodId(programming) : "unknown";
     clearCourseRegistration(mallaSeleccionada, periodId);
-    lastValidProgrammingRef.current = null;
+    if (periodId !== "student-schedule") {
+      clearCourseRegistration(mallaSeleccionada, "student-schedule");
+    }
+    programmingRawRef.current = null;
+    studentScheduleRawRef.current = null;
+    selectedMapRef.current = {};
     setProgramming(null);
     setFileMetadata(null);
+    setStudentScheduleMeta(null);
+    setHasProgrammingSource(false);
+    setHasStudentScheduleSource(false);
+    setStudentScheduleRamos([]);
+    setEnrolledNrcs([]);
+    setMergeSummary(null);
     setRestoredSelectedMap(null);
     setFilters({ ...DEFAULT_FILTERS });
     setStatus("idle");
     setErrorMessage(null);
+    setProgrammingError(null);
+    setStudentScheduleError(null);
     setInfoMessage(null);
   }, [mallaSeleccionada, programming]);
 
-  const handleFileSelected = useCallback(
+  const reset = useCallback(() => {
+    abortCurrentParse();
+    setStatus(
+      programmingRawRef.current || studentScheduleRawRef.current
+        ? "success"
+        : "idle"
+    );
+    setErrorMessage(null);
+    setProgrammingError(null);
+    setStudentScheduleError(null);
+    setInfoMessage(null);
+    setProgress({ page: 0, totalPages: 0, percent: 0, sectionsDetected: 0 });
+  }, [abortCurrentParse]);
+
+  const handleProgrammingFile = useCallback(
     async (file) => {
       abortCurrentParse();
       const controller = new AbortController();
@@ -226,20 +413,12 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
       const parseId = ++parseIdRef.current;
 
       setStatus("validating");
+      setProgrammingError(null);
       setErrorMessage(null);
       setInfoMessage(null);
-      // No borrar programming válido hasta éxito
       setProgress({ page: 0, totalPages: 0, percent: 0, sectionsDetected: 0 });
-      setFilters({ ...DEFAULT_FILTERS });
 
       try {
-        if (!file) {
-          throw Object.assign(new Error("No file"), { code: "INVALID_FILE" });
-        }
-        if (file.size === 0) {
-          throw Object.assign(new Error("Empty"), { code: "FILE_EMPTY" });
-        }
-
         setStatus("reading");
         const fingerprint = await buildFileFingerprint(file);
         if (parseId !== parseIdRef.current) return;
@@ -250,7 +429,6 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
           lastModified: file.lastModified || 0,
           fingerprint,
         };
-        setFileMetadata(meta);
 
         setStatus("processing");
         const result = await parseAcademicProgrammingFile(file, {
@@ -260,74 +438,41 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
             setProgress(p);
           },
         });
-
         if (parseId !== parseIdRef.current) return;
 
-        const hasWarnings = Array.isArray(result.warnings) && result.warnings.length > 0;
-        lastValidProgrammingRef.current = result;
-        setProgramming(result);
-        setStatus(hasWarnings ? "partial-success" : "success");
+        programmingRawRef.current = result;
+        setFileMetadata(meta);
+        setHasProgrammingSource(true);
+        setFilters({ ...DEFAULT_FILTERS });
 
-        const draft = buildRegistrationState({
-          malla: mallaSeleccionada,
-          programming: result,
-          selectedSectionsMap: {},
-          activeFilters: { ...DEFAULT_FILTERS },
-          fileMetadata: meta,
-        });
-        if (draft) {
-          const saveResult = saveCourseRegistration(
-            mallaSeleccionada,
-            getPeriodId(result),
-            draft
-          );
-          if (!saveResult.ok) {
-            setInfoMessage(saveResult.userMessage);
-          }
-        }
-
-        if (hasWarnings) {
+        const merged = applyMerge({ progMeta: meta, keepSelection: true });
+        if (merged?.programming?.warnings?.length) {
           setInfoMessage(
-            "Procesamos el archivo, pero algunas secciones no pudieron reconocerse. Revisa la información antes de crear tu horario."
+            "Procesamos la programación, pero algunas secciones no pudieron reconocerse por completo."
           );
         }
       } catch (err) {
         if (parseId !== parseIdRef.current) return;
         if (err?.code === "CANCELLED" || controller.signal.aborted) {
-          setStatus(
-            lastValidProgrammingRef.current
-              ? lastValidProgrammingRef.current.warnings?.length
-                ? "partial-success"
-                : "success"
-              : "idle"
-          );
-          if (lastValidProgrammingRef.current) {
-            setProgramming(lastValidProgrammingRef.current);
-          }
+          setStatus(programming ? "success" : "idle");
           return;
         }
-
         const normalized = normalizeAppError(err, {
-          context: "AcademicProgrammingPage.parse",
+          context: "AcademicProgrammingPage.parseProgramming",
           fallbackCode: "UNEXPECTED",
         });
+        setProgrammingError(normalized.userMessage);
         setErrorMessage(normalized.userMessage);
-        setStatus(
-          lastValidProgrammingRef.current ? "recoverable-error" : "fatal-error"
-        );
-        if (lastValidProgrammingRef.current) {
-          setProgramming(lastValidProgrammingRef.current);
-        }
+        setStatus(programming ? "recoverable-error" : "fatal-error");
       } finally {
         if (parseId === parseIdRef.current) {
-          // Evitar quedar en validating/reading/processing
           setStatus((current) => {
             if (
               current === "validating" ||
               current === "reading" ||
               current === "processing"
             ) {
-              return lastValidProgrammingRef.current
+              return programming || programmingRawRef.current
                 ? "recoverable-error"
                 : "fatal-error";
             }
@@ -336,15 +481,114 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
         }
       }
     },
-    [abortCurrentParse, mallaSeleccionada]
+    [abortCurrentParse, applyMerge, programming]
+  );
+
+  const handleStudentScheduleFile = useCallback(
+    async (file) => {
+      abortCurrentParse();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      const parseId = ++parseIdRef.current;
+
+      setStatus("validating");
+      setStudentScheduleError(null);
+      setErrorMessage(null);
+      setInfoMessage(null);
+      setProgress({ page: 0, totalPages: 0, percent: 0, sectionsDetected: 0 });
+
+      try {
+        setStatus("reading");
+        const fingerprint = await buildFileFingerprint(file);
+        if (parseId !== parseIdRef.current) return;
+
+        const meta = {
+          name: file.name,
+          size: file.size,
+          lastModified: file.lastModified || 0,
+          fingerprint,
+          enrolledCount: 0,
+        };
+
+        setStatus("processing");
+        const result = await parseStudentScheduleFile(file, {
+          signal: controller.signal,
+          onProgress: (p) => {
+            if (parseId !== parseIdRef.current) return;
+            setProgress({
+              ...p,
+              sectionsDetected: p.sectionsDetected || 0,
+            });
+          },
+        });
+        if (parseId !== parseIdRef.current) return;
+
+        studentScheduleRawRef.current = {
+          ramos: result.ramos,
+          warnings: result.warnings || [],
+        };
+        setStudentScheduleRamos(result.ramos);
+        meta.enrolledCount = result.ramos.length;
+        setStudentScheduleMeta(meta);
+        setHasStudentScheduleSource(true);
+
+        // Si no hay programación previa, usar el programming mínimo del horario como base
+        if (!programmingRawRef.current) {
+          programmingRawRef.current = null;
+        }
+
+        const merged = applyMerge({ schedMeta: meta, keepSelection: true });
+        if (!merged) return;
+
+        setInfoMessage(
+          `Detectamos ${result.ramos.length} ramo${result.ramos.length === 1 ? "" : "s"} inscrito${result.ramos.length === 1 ? "" : "s"} en tu horario.`
+        );
+        setTimeout(() => setInfoMessage(null), 5000);
+      } catch (err) {
+        if (parseId !== parseIdRef.current) return;
+        if (err?.code === "CANCELLED" || controller.signal.aborted) {
+          setStatus(programming ? "success" : "idle");
+          return;
+        }
+        const userMessage =
+          err?.userMessage ||
+          normalizeAppError(err, {
+            context: "AcademicProgrammingPage.parseStudentSchedule",
+            fallbackCode: "UNEXPECTED",
+          }).userMessage;
+        setStudentScheduleError(userMessage);
+        setErrorMessage(userMessage);
+        setStatus(programming ? "recoverable-error" : "fatal-error");
+      } finally {
+        if (parseId === parseIdRef.current) {
+          setStatus((current) => {
+            if (
+              current === "validating" ||
+              current === "reading" ||
+              current === "processing"
+            ) {
+              return programming || studentScheduleRawRef.current
+                ? "recoverable-error"
+                : "fatal-error";
+            }
+            return current;
+          });
+        }
+      }
+    },
+    [abortCurrentParse, applyMerge, programming]
   );
 
   const isBusy =
     status === "validating" || status === "reading" || status === "processing";
-  const showDropzone =
+  const hasAnySource = Boolean(
+    programming || programmingRawRef.current || studentScheduleRawRef.current
+  );
+  const showUpload =
     status === "idle" ||
     status === "fatal-error" ||
-    status === "recoverable-error";
+    status === "recoverable-error" ||
+    (!programming && !isBusy);
   const showBuilder =
     (status === "success" ||
       status === "partial-success" ||
@@ -352,6 +596,8 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
     programming;
 
   const progressLabel = FLOW_PROGRESS_LABELS[status] || "Procesando…";
+  const programmingLoaded = hasProgrammingSource;
+  const studentScheduleLoaded = hasStudentScheduleSource;
 
   return (
     <ErrorBoundary
@@ -392,83 +638,74 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
             </div>
           )}
 
-          {showDropzone && (
-            <div className="flex flex-col items-center justify-center min-h-[70vh] max-w-2xl mx-auto text-center space-y-6 fade-in">
-              <div className="space-y-2 max-w-lg">
+          {showUpload && !isBusy && (
+            <div className="flex flex-col items-center justify-center min-h-[70vh] max-w-3xl mx-auto space-y-6 fade-in">
+              <div className="space-y-2 max-w-lg text-center">
                 <h1 className="text-[1.75rem] sm:text-[2rem] font-black tracking-tight text-textPrimary">
                   Toma de Ramos
                 </h1>
                 <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
-                  Para comenzar, debes ir a la página de{" "}
-                  <a
-                    href="https://tomaderamos.unab.cl/inicio"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline font-bold"
-                  >
-                    tomaderamos.unab.cl/inicio
-                  </a>
-                  , entrar al botón{" "}
-                  <span className="font-extrabold text-textPrimary">
-                    &quot;Ver programación académica&quot;
-                  </span>{" "}
-                  y descargar el archivo como PDF. Luego, cárgalo aquí:
+                  Sube la Programación Académica y/o tu horario inscrito desde UNAB.
+                  Con ambos, Malla Pro marca automáticamente lo que ya tienes y te
+                  ayuda a armar el resto.
                 </p>
               </div>
-              <div className="w-full text-left">
-                <ProgrammingPdfDropzone
-                  onFileSelected={handleFileSelected}
+
+              <div className="w-full">
+                <DocumentSourcesPanel
+                  programmingLoaded={programmingLoaded}
+                  programmingDetail={
+                    programmingLoaded
+                      ? `${totalSectionCount || "—"} secciones encontradas`
+                      : null
+                  }
+                  studentScheduleLoaded={studentScheduleLoaded}
+                  studentScheduleDetail={
+                    studentScheduleLoaded
+                      ? `${enrolledNrcs.length || studentScheduleMeta?.enrolledCount || 0} ramos inscritos detectados`
+                      : null
+                  }
+                  mergeSummary={mergeSummary}
+                  onProgrammingFile={handleProgrammingFile}
+                  onStudentScheduleFile={handleStudentScheduleFile}
                   disabled={isBusy}
-                  error={
+                  programmingError={
                     status === "fatal-error" || status === "recoverable-error"
-                      ? errorMessage
+                      ? programmingError
+                      : null
+                  }
+                  studentScheduleError={
+                    status === "fatal-error" || status === "recoverable-error"
+                      ? studentScheduleError
                       : null
                   }
                 />
               </div>
-              {(status === "fatal-error" || status === "recoverable-error") && (
-                <div
-                  role="alert"
-                  className="w-full rounded-xl border border-red-500/30 bg-red-500/5 px-4 py-3 text-sm text-red-600 dark:text-red-400 text-center"
-                >
-                  {errorMessage}{" "}
-                  <button
-                    type="button"
-                    onClick={reset}
-                    className="underline font-medium hover:text-red-800 transition-colors"
+
+              {(status === "fatal-error" || status === "recoverable-error") &&
+                errorMessage &&
+                !programmingError &&
+                !studentScheduleError && (
+                  <div
+                    role="alert"
+                    className="w-full rounded-xl border border-red-500/30 bg-red-500/5 px-4 py-3 text-sm text-red-600 dark:text-red-400 text-center"
                   >
-                    Reintentar
-                  </button>
-                  {status === "recoverable-error" && programming && (
-                    <>
-                      {" · "}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setStatus(
-                            programming.warnings?.length
-                              ? "partial-success"
-                              : "success"
-                          )
-                        }
-                        className="underline font-medium"
-                      >
-                        Seguir con la planificación anterior
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-              {lastValidProgrammingRef.current && status === "idle" && (
+                    {errorMessage}{" "}
+                    <button
+                      type="button"
+                      onClick={reset}
+                      className="underline font-medium"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+
+              {hasAnySource && status === "idle" && (
                 <button
                   type="button"
                   onClick={() => {
-                    setProgramming(lastValidProgrammingRef.current);
-                    setStatus(
-                      lastValidProgrammingRef.current.warnings?.length
-                        ? "partial-success"
-                        : "success"
-                    );
+                    applyMerge({ keepSelection: true });
                   }}
                   className="text-sm text-primary font-semibold underline"
                 >
@@ -491,19 +728,8 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                 type="button"
                 onClick={() => {
                   abortCurrentParse();
-                  setStatus(
-                    lastValidProgrammingRef.current ? "recoverable-error" : "idle"
-                  );
+                  setStatus(programming ? "success" : "idle");
                   setErrorMessage(null);
-                  if (lastValidProgrammingRef.current) {
-                    setProgramming(lastValidProgrammingRef.current);
-                    setErrorMessage(null);
-                    setStatus(
-                      lastValidProgrammingRef.current.warnings?.length
-                        ? "partial-success"
-                        : "success"
-                    );
-                  }
                 }}
                 className="mt-4 text-sm text-textSecondary underline hover:text-textPrimary"
               >
@@ -513,8 +739,29 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
           )}
 
           {showBuilder && programming && (
-            <div className="fade-in">
+            <div className="fade-in space-y-4">
+              <DocumentSourcesPanel
+                compact
+                programmingLoaded={programmingLoaded}
+                programmingDetail={
+                  programmingLoaded
+                    ? `${totalSectionCount} secciones`
+                    : "Opcional · completa oferta y profesores"
+                }
+                studentScheduleLoaded={studentScheduleLoaded}
+                studentScheduleDetail={
+                  studentScheduleLoaded
+                    ? `${enrolledNrcs.length} inscritos`
+                    : "Opcional · marca lo que ya tienes"
+                }
+                mergeSummary={mergeSummary}
+                onProgrammingFile={handleProgrammingFile}
+                onStudentScheduleFile={handleStudentScheduleFile}
+                disabled={isBusy}
+              />
+
               <ScheduleBuilder
+                key={`builder-${selectionEpoch}`}
                 integration={integration}
                 programming={programming}
                 allCourses={allCourses}
@@ -525,12 +772,16 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                   abortCurrentParse();
                   setStatus("idle");
                   setErrorMessage(null);
-                  // Conservar programming en ref; no lo borramos hasta nuevo parse
+                  setProgrammingError(null);
+                  setStudentScheduleError(null);
                 }}
                 onClearSavedPlanning={clearPlanningOnly}
                 mallaName={mallaData?.nombre}
                 mallaSeleccionada={mallaSeleccionada}
                 fileMetadata={fileMetadata}
+                studentScheduleMeta={studentScheduleMeta}
+                enrolledNrcs={enrolledNrcs}
+                studentScheduleRamos={studentScheduleRamos}
                 careerId={getCareerId(mallaSeleccionada)}
                 warningsOpen={warningsOpen}
                 setWarningsOpen={setWarningsOpen}
@@ -539,6 +790,9 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                 modalityCount={modalityCount}
                 warningCount={warningCount}
                 initialSelectedMap={restoredSelectedMap}
+                onSelectedMapChange={(map) => {
+                  selectedMapRef.current = map;
+                }}
               />
             </div>
           )}

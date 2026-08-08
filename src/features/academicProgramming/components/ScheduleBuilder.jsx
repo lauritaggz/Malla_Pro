@@ -31,6 +31,9 @@ export default function ScheduleBuilder({
   mallaName,
   mallaSeleccionada,
   fileMetadata,
+  studentScheduleMeta = null,
+  enrolledNrcs = [],
+  studentScheduleRamos = [],
   careerId,
   warningsOpen,
   setWarningsOpen,
@@ -39,11 +42,16 @@ export default function ScheduleBuilder({
   modalityCount,
   warningCount,
   initialSelectedMap,
+  onSelectedMapChange,
 }) {
   const [selectedSectionsMap, setSelectedSectionsMap] = useState(() =>
     initialSelectedMap && typeof initialSelectedMap === "object"
       ? { ...initialSelectedMap }
       : {}
+  );
+  const enrolledNrcSet = useMemo(
+    () => new Set((enrolledNrcs || []).map((n) => String(n).replace(/\D/g, ""))),
+    [enrolledNrcs]
   );
   const showFullDay = false;
   const [activeMobileTab, setActiveMobileTab] = useState("SECTIONS");
@@ -112,6 +120,11 @@ export default function ScheduleBuilder({
     }
   }, [initialSelectedMap, allCourses]);
 
+  // Notificar cambios de selección al contenedor (para re-merge)
+  useEffect(() => {
+    onSelectedMapChange?.(selectedSectionsMap);
+  }, [selectedSectionsMap, onSelectedMapChange]);
+
   // Autoguardado con debounce
   useEffect(() => {
     if (!programming || !mallaSeleccionada) return;
@@ -124,6 +137,11 @@ export default function ScheduleBuilder({
         selectedSectionsMap,
         activeFilters: filters,
         fileMetadata,
+        enrolledNrcs,
+        studentScheduleMeta,
+        studentScheduleRamos: Array.isArray(studentScheduleRamos)
+          ? studentScheduleRamos
+          : [],
       });
       if (!draft) return;
       const result = saveCourseRegistration(
@@ -142,7 +160,16 @@ export default function ScheduleBuilder({
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [programming, mallaSeleccionada, selectedSectionsMap, filters, fileMetadata]);
+  }, [
+    programming,
+    mallaSeleccionada,
+    selectedSectionsMap,
+    filters,
+    fileMetadata,
+    enrolledNrcs,
+    studentScheduleMeta,
+    studentScheduleRamos,
+  ]);
 
   // Lista de objetos de sección seleccionados
   const selectedSectionsList = useMemo(() => {
@@ -518,6 +545,7 @@ export default function ScheduleBuilder({
             filterOptions={filterOptions}
             expandedCourseCode={expandedCourseCode}
             onToggleCourse={setExpandedCourseCode}
+            enrolledNrcs={enrolledNrcs}
           />
         </div>
 
