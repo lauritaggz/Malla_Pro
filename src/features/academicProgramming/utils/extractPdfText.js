@@ -1,10 +1,10 @@
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import { configurePdfJsWorker } from "./pdfjsWorker";
 import { textItemsToLinedText } from "./pdfTextLayout";
 
 export { textItemsToLinedText } from "./pdfTextLayout";
 
-GlobalWorkerOptions.workerSrc = pdfWorker;
+configurePdfJsWorker(GlobalWorkerOptions);
 
 const MAX_BYTES = 10 * 1024 * 1024;
 

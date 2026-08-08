@@ -1,5 +1,5 @@
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import { configurePdfJsWorker } from "../utils/pdfjsWorker";
 
 import {
   mapPdfTextItems,
@@ -21,7 +21,7 @@ import { groupSectionsByCourse } from "../services/groupSectionsByCourse";
 import { sortAcademicProgramming } from "../utils/sortAcademicProgramming";
 import { normalizeCellText } from "../utils/normalizeCellText";
 
-GlobalWorkerOptions.workerSrc = pdfWorker;
+configurePdfJsWorker(GlobalWorkerOptions);
 
 const PARSER_ID = "UNAB_ACADEMIC_PROGRAMMING";
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
