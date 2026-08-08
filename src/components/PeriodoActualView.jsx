@@ -3,6 +3,7 @@ import { BookOpen, ClipboardCheck, Clock, User, Copy, HelpCircle, CheckCircle2, 
 import CourseDrawer from "./CourseDrawer";
 import { safeStorage } from "../utils/safeStorage";
 import { LEGACY_KEYS } from "../utils/storageKeys";
+import { MODALITY_LABELS } from "../features/academicProgramming/services/filterCourses";
 
 const NOTES_KEY = LEGACY_KEYS.notas;
 const PROPOSAL_KEY = LEGACY_KEYS.propuesta;
@@ -384,7 +385,11 @@ export default function PeriodoActualView({
                                 <Clock className="w-3.5 h-3.5 text-textSecondary/70 shrink-0" aria-hidden="true" />
                                 <span className="truncate">
                                   {scheduleLabel || "Horario no definido"}
-                                  {section.modality ? ` · ${section.modality}` : ""}
+                                  {section.modality &&
+                                  section.modality !== "UNKNOWN" &&
+                                  MODALITY_LABELS[section.modality]
+                                    ? ` · ${MODALITY_LABELS[section.modality]}`
+                                    : ""}
                                 </span>
                               </div>
                             </>

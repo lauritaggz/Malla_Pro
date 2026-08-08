@@ -104,6 +104,13 @@ function sanitizeSection(section) {
       ? section.warnings.map(String).slice(0, 20)
       : [],
     incomplete: Boolean(section.incomplete) || meetings.length === 0,
+    enrolled: Boolean(section.enrolled),
+    sources: {
+      programacionAcademica: section.sources
+        ? Boolean(section.sources.programacionAcademica)
+        : true,
+      horarioAlumno: Boolean(section.sources?.horarioAlumno),
+    },
   };
 }
 
@@ -220,6 +227,26 @@ export function validateRegistrationState(state) {
 
   const uniqueNrcs = [...new Set(selectedNrcs)];
 
+  const enrolledNrcs = Array.isArray(state.enrolledNrcs)
+    ? [...new Set(state.enrolledNrcs.map((n) => String(n).replace(/\D/g, "")).filter(Boolean))]
+    : [];
+
+  // Rehidratar enrolled en secciones si hay lista persistida
+  if (enrolledNrcs.length) {
+    const enrolledSet = new Set(enrolledNrcs);
+    for (const course of programming.courses) {
+      for (const section of course.sections) {
+        if (enrolledSet.has(String(section.nrc).replace(/\D/g, ""))) {
+          section.enrolled = true;
+          section.sources = {
+            programacionAcademica: Boolean(section.sources?.programacionAcademica ?? true),
+            horarioAlumno: true,
+          };
+        }
+      }
+    }
+  }
+
   return {
     ok: true,
     reason: null,
@@ -235,9 +262,23 @@ export function validateRegistrationState(state) {
         lastModified: Number(state.fileMetadata?.lastModified) || 0,
         fingerprint: String(state.fileMetadata?.fingerprint || ""),
       },
+      studentScheduleMeta:
+        state.studentScheduleMeta && typeof state.studentScheduleMeta === "object"
+          ? {
+              name: String(state.studentScheduleMeta.name || ""),
+              size: Number(state.studentScheduleMeta.size) || 0,
+              lastModified: Number(state.studentScheduleMeta.lastModified) || 0,
+              fingerprint: String(state.studentScheduleMeta.fingerprint || ""),
+              enrolledCount: Number(state.studentScheduleMeta.enrolledCount) || enrolledNrcs.length,
+            }
+          : null,
       programming,
       selectedSectionsMap,
       selectedNrcs: uniqueNrcs,
+      enrolledNrcs,
+      studentScheduleRamos: Array.isArray(state.studentScheduleRamos)
+        ? state.studentScheduleRamos
+        : [],
       activeFilters:
         state.activeFilters && typeof state.activeFilters === "object"
           ? state.activeFilters
@@ -260,6 +301,9 @@ export function buildRegistrationState({
   selectedSectionsMap = {},
   activeFilters = {},
   fileMetadata = null,
+  enrolledNrcs = [],
+  studentScheduleMeta = null,
+  studentScheduleRamos = [],
 }) {
   const sanitized = sanitizeProgrammingForStorage(programming);
   if (!sanitized) return null;
@@ -279,9 +323,14 @@ export function buildRegistrationState({
       lastModified: 0,
       fingerprint: "",
     },
+    studentScheduleMeta: studentScheduleMeta || null,
+    studentScheduleRamos: Array.isArray(studentScheduleRamos)
+      ? studentScheduleRamos
+      : [],
     programming: sanitized,
     selectedSectionsMap: { ...selectedSectionsMap },
     selectedNrcs: [],
+    enrolledNrcs: Array.isArray(enrolledNrcs) ? [...enrolledNrcs] : [],
     activeFilters: { ...activeFilters },
     warnings: sanitized.warnings,
     lastValidStateAt: new Date().toISOString(),

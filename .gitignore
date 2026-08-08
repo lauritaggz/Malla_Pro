@@ -49,3 +49,9 @@ yarn-error.log*
 # ──────────────────────────────
 .DS_Store
 Thumbs.db
+
+# ──────────────────────────────
+# 📄 PDFs de referencia locales (pueden contener PII)
+# ──────────────────────────────
+public/Horario Alumno*.pdf
+public/_horario_*.txt
