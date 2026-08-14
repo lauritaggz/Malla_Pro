@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, animate, useInView, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   BookMarked,
@@ -8,7 +8,6 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  FileText,
   Filter,
   GraduationCap,
   LayoutGrid,
@@ -20,6 +19,8 @@ import {
   AlertTriangle,
   Download,
   Clock,
+  Lock,
+  Circle,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -31,9 +32,9 @@ const NAV_LINKS = [
 ];
 
 const HERO_TABS = [
+  { id: "notas", label: "Notas" },
   { id: "toma", label: "Toma de ramos" },
   { id: "malla", label: "Mi malla" },
-  { id: "notas", label: "Notas" },
 ];
 
 const FAQ_ITEMS = [
@@ -42,32 +43,24 @@ const FAQ_ITEMS = [
     a: "No. Malla Pro es una herramienta independiente creada para ayudar a estudiantes a organizar su semestre.",
   },
   {
-    q: "¿Malla Pro sirve para cualquier modalidad?",
-    a: "Por ahora, Malla Pro está enfocado exclusivamente en mallas de Pregrado Diurno de las carreras disponibles. Los planes vespertinos, online, Advance, continuidad de estudios, postgrado u otras modalidades pueden tener estructuras diferentes y no están cubiertos salvo que se indiquen expresamente.",
+    q: "¿Sirve para cualquier modalidad?",
+    a: "Por ahora, Malla Pro está enfocado exclusivamente en mallas de Pregrado Diurno. Vespertino, online, Advance, postgrado u otras modalidades no están cubiertas salvo que se indique.",
   },
   {
     q: "¿Qué pasa con el PDF que cargo?",
-    a: "La programación se procesa directamente en tu dispositivo y el archivo no se envía a un servidor.",
+    a: "Se procesa directamente en tu dispositivo. El archivo no se envía a un servidor.",
   },
   {
     q: "¿Los cupos están actualizados en tiempo real?",
-    a: "No. Se muestran los cupos informados en la programación académica que cargaste. Estos pueden cambiar durante la toma de ramos.",
+    a: "No. Se muestran los cupos informados en la programación que cargaste. Pueden cambiar durante la toma de ramos.",
   },
   {
     q: "¿Malla Pro inscribe mis ramos?",
-    a: "No. Malla Pro te ayuda a preparar tu propuesta. La inscripción se realiza en las plataformas oficiales de la universidad.",
-  },
-  {
-    q: "¿Puedo cambiar una sección?",
-    a: "Sí. Puedes probar distintas secciones y ver cómo cambia tu horario.",
-  },
-  {
-    q: "¿Qué pasa si tengo un tope?",
-    a: "Malla Pro marca el conflicto para que puedas cambiar una de las secciones.",
+    a: "No. Te ayuda a preparar tu propuesta. La inscripción se hace en las plataformas oficiales de la universidad.",
   },
   {
     q: "¿Puedo usar Malla Pro desde el teléfono?",
-    a: "Sí. La malla, las notas y la toma de ramos están adaptadas a pantallas pequeñas, con navegación pensada para móvil.",
+    a: "Sí. La malla, las notas y la toma de ramos están adaptadas a pantallas pequeñas.",
   },
 ];
 
@@ -85,6 +78,38 @@ function hasSelectedMalla() {
 function scrollToId(id) {
   const el = document.getElementById(id.replace(/^#/, ""));
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function CountUpStat({ to = 100 }) {
+  const reduceMotion = useReducedMotion();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.6 });
+  const [value, setValue] = useState(reduceMotion ? to : 0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    if (reduceMotion) {
+      setValue(to);
+      return undefined;
+    }
+    const controls = animate(0, to, {
+      duration: 1.35,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (latest) => setValue(Math.round(latest)),
+    });
+    return () => controls.stop();
+  }, [isInView, to, reduceMotion]);
+
+  return (
+    <motion.span
+      ref={ref}
+      className="inline-block tabular-nums"
+      animate={isInView && !reduceMotion ? { scale: [1, 1.12, 1] } : undefined}
+      transition={{ duration: 1.35, times: [0, 0.55, 1], ease: "easeOut" }}
+    >
+      {value}
+    </motion.span>
+  );
 }
 
 /* ── Product mockups (UI estática fiel al producto) ───────────── */
@@ -122,7 +147,7 @@ function MockBrowser({ activeTab, onTabChange, children }) {
   );
 }
 
-function MockTomaDeRamos() {
+function MockTomaDeRamos({ fit = false }) {
   const courses = [
     { name: "Práctica II", sec: 300, sel: true },
     { name: "Proyecto de Título", sec: 301, sel: false },
@@ -137,9 +162,16 @@ function MockTomaDeRamos() {
   ];
 
   return (
-    <div className="absolute inset-0 flex flex-col sm:flex-row select-none min-h-0">
-      {/* Lista de ramos: chips en móvil, panel en desktop */}
-      <div className="sm:w-[40%] border-b sm:border-b-0 sm:border-r border-[var(--borderColor)] p-2.5 sm:p-4 flex flex-col gap-2 bg-[var(--bgSecondary)] min-w-0 shrink-0 sm:shrink sm:min-h-0 sm:h-full">
+    <div
+      className={`${
+        fit ? "relative w-fit max-w-full" : "absolute inset-0"
+      } flex flex-col sm:flex-row select-none min-h-0`}
+    >
+      <div
+        className={`${
+          fit ? "sm:w-[11.5rem]" : "sm:w-[40%] sm:h-full sm:flex-1"
+        } border-b sm:border-b-0 sm:border-r border-[var(--borderColor)] p-2.5 sm:p-4 flex flex-col gap-2 bg-[var(--bgSecondary)] min-w-0 shrink-0`}
+      >
         <div className="flex items-center justify-between gap-2 shrink-0">
           <span className="font-bold text-[var(--textPrimary)] uppercase tracking-wide text-[10px] sm:text-xs">
             Tus asignaturas
@@ -148,11 +180,11 @@ function MockTomaDeRamos() {
             4 de 4
           </span>
         </div>
-        <div className="flex sm:flex-col gap-1.5 sm:gap-2 overflow-x-auto sm:overflow-hidden sm:flex-1 sm:min-h-0 pb-0.5 sm:pb-0">
+        <div className="flex sm:flex-col gap-1.5 sm:gap-2 overflow-x-auto sm:overflow-hidden pb-0.5 sm:pb-0">
           {courses.map((c) => (
             <div
               key={c.name}
-              className={`rounded-lg border px-2.5 py-1.5 sm:px-3 sm:py-2.5 min-w-[9.5rem] sm:min-w-0 shrink-0 sm:shrink ${
+              className={`rounded-lg border px-2.5 py-1.5 sm:px-3 sm:py-2 min-w-[9.5rem] sm:min-w-0 shrink-0 ${
                 c.sel
                   ? "border-[var(--primary)] bg-[var(--primaryMuted)]"
                   : "border-[var(--borderColor)] bg-[var(--bgPrimary)]"
@@ -170,7 +202,11 @@ function MockTomaDeRamos() {
         </div>
       </div>
 
-      <div className="flex-1 p-2.5 sm:p-4 flex flex-col gap-2 sm:gap-2.5 min-w-0 min-h-0">
+      <div
+        className={`${
+          fit ? "w-full sm:w-[22rem]" : "flex-1 min-h-0"
+        } p-2.5 sm:p-4 flex flex-col gap-2 sm:gap-2.5 min-w-0`}
+      >
         <div className="flex items-start justify-between gap-2 shrink-0">
           <div className="min-w-0">
             <p className="font-black text-[var(--textPrimary)] uppercase tracking-wider text-[10px] sm:text-xs">
@@ -187,7 +223,7 @@ function MockTomaDeRamos() {
           </span>
         </div>
 
-        <div className="flex-1 min-h-0 grid grid-cols-4 gap-1 sm:gap-2">
+        <div className={`${fit ? "h-[9.5rem] sm:h-[11rem]" : "flex-1 min-h-0"} grid grid-cols-4 gap-1 sm:gap-2`}>
           {days.map((day) => (
             <div
               key={day.d}
@@ -225,120 +261,405 @@ function MockTomaDeRamos() {
   );
 }
 
-function MockMalla() {
-  const cls = {
-    ok: "border-emerald-500/45 bg-emerald-500/10",
-    sel: "border-sky-400/80 bg-sky-400/10 ring-1 ring-sky-400/40",
-    pre: "border-amber-500/55 bg-amber-500/10",
-    un: "border-emerald-500/40 bg-emerald-500/5",
+function MockHorario() {
+  const days = [
+    { d: "LU", n: 1 },
+    { d: "MA", n: 1 },
+    { d: "MI", n: 2 },
+    { d: "JU", n: 1 },
+    { d: "VI", n: 1 },
+    { d: "SA", n: 0 },
+  ];
+  const slots = ["8:30", "10:00", "11:30", "14:40"];
+  const blocks = [
+    { day: "LU", title: "Cálculo II", meta: "Sec. 300", slot: 0, tone: "blue" },
+    { day: "MA", title: "Prog. Avanz.", meta: "Sec. 201", slot: 1, tone: "green" },
+    { day: "MI", title: "Cálculo II", meta: "Sec. 300", slot: 0, tone: "tope", col: 0 },
+    { day: "MI", title: "Física I", meta: "Sec. 110", slot: 0, tone: "tope", col: 1 },
+    { day: "JU", title: "Prog. Avanz.", meta: "Sec. 201", slot: 1, tone: "green" },
+    { day: "VI", title: "Ciberseg.", meta: "Sec. 302", slot: 3, tone: "violet" },
+  ];
+  const toneCls = {
+    blue: "bg-[var(--primaryMuted)] border-[var(--primary)]/45 text-[var(--primary)]",
+    green: "bg-emerald-500/12 border-emerald-500/40 text-emerald-400",
+    violet: "bg-violet-500/12 border-violet-500/40 text-violet-300",
+    tope: "border-red-500/70 text-red-300 bg-red-500/15",
   };
-  const labelCls = {
-    ok: "text-emerald-400",
-    sel: "text-sky-300",
-    pre: "text-amber-400",
-    un: "text-emerald-400/90",
-  };
-  const label = { ok: "Aprobada", sel: "Seleccionada", pre: "Prerrequisito", un: "Desbloquea" };
-
-  const Card = ({ name, st }) => (
-    <div className={`relative h-full rounded-xl border px-2 py-2 sm:px-3 sm:py-3 min-w-0 ${cls[st]}`}>
-      <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded-md border border-white/10 bg-black/30 text-white/60 inline-flex items-center gap-0.5">
-        <Network className="w-2.5 h-2.5 hidden sm:block" />
-        PR
-      </span>
-      <p className="text-[11px] sm:text-[13px] font-bold text-white pr-7 sm:pr-10 leading-snug break-words">
-        {name}
-      </p>
-      <p className={`text-[10px] sm:text-[11px] mt-1 sm:mt-1.5 font-semibold ${labelCls[st]}`}>
-        {label[st]}
-      </p>
-    </div>
-  );
-
-  const Conn = ({ from }) => (
-    <div className="hidden sm:flex items-center self-center w-5 sm:w-7 shrink-0" aria-hidden>
-      <div
-        className={`h-[2px] flex-1 rounded-full ${
-          from === "sel"
-            ? "bg-gradient-to-r from-sky-400 to-emerald-400"
-            : "bg-gradient-to-r from-amber-400 to-emerald-400"
-        }`}
-      />
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 -ml-0.5 shadow-[0_0_6px_rgba(52,211,153,0.7)]" />
-    </div>
-  );
 
   return (
-    <div className="absolute inset-0 p-2.5 sm:p-5 select-none overflow-hidden">
-      <div className="grid grid-cols-3 sm:grid-cols-[1fr_1fr_auto_1fr] gap-x-1.5 sm:gap-x-2 gap-y-2 h-full content-start">
-        <p className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Sem. 1</p>
-        <p className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Sem. 2</p>
-        <span className="hidden sm:block" aria-hidden />
-        <p className="text-[10px] sm:text-xs font-bold text-white/50 uppercase tracking-wider">Sem. 3</p>
+    <div className="select-none min-w-0">
+      <div className="flex items-center justify-between gap-2 px-3 sm:px-4 pt-3 pb-2.5">
+        <div className="min-w-0">
+          <p className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-[var(--textPrimary)]">
+            Tu horario
+          </p>
+          <p className="text-[10px] text-[var(--textSecondary)] mt-0.5">4 ramos · 16 créditos</p>
+        </div>
+        <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-red-400 shrink-0">
+          <AlertTriangle className="w-3.5 h-3.5" />
+          1 tope en MI
+        </span>
+      </div>
 
-        <Card name="Cálculo I" st="ok" />
-        <Card name="Intro Prog." st="sel" />
-        <Conn from="sel" />
-        <Card name="Estructura" st="un" />
+      <div className="border-t border-[var(--borderColor)] overflow-hidden">
+        <div className="grid grid-cols-[2.15rem_repeat(6,minmax(0,1fr))] text-center text-[9px] sm:text-[10px] font-extrabold text-[var(--textSecondary)] border-b border-[var(--borderColor)] bg-[var(--bgSecondary)]">
+          <div className="border-r border-[var(--borderColor)]" />
+          {days.map((day) => (
+            <div
+              key={day.d}
+              className={`py-1.5 border-r border-[var(--borderColor)] last:border-r-0 ${
+                day.d === "MI" ? "bg-red-500/10 text-red-300" : "text-[var(--textPrimary)]"
+              }`}
+            >
+              <span>{day.d}</span>
+              {day.n > 0 && (
+                <span className="block text-[8px] sm:text-[9px] font-semibold text-[var(--textSecondary)] mt-0.5">
+                  {day.n} clase{day.n === 1 ? "" : "s"}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
 
-        <Card name="Álgebra" st="ok" />
-        <Card name="Física" st="pre" />
-        <Conn from="pre" />
-        <Card name="Base Datos" st="un" />
+        <div className="relative h-[11.5rem] sm:h-[13.5rem]">
+          <div className="absolute inset-y-0 left-0 w-[2.15rem] border-r border-[var(--borderColor)] bg-[var(--bgSecondary)]">
+            {slots.map((t, i) => (
+              <span
+                key={t}
+                className="absolute right-1.5 -translate-y-1/2 font-mono text-[8px] sm:text-[9px] font-bold text-[var(--textSecondary)]"
+                style={{ top: `${(i + 0.12) * 25}%` }}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+
+          <div className="absolute inset-y-0 left-[2.15rem] right-0 grid grid-cols-6">
+            {days.map((day) => (
+              <div key={day.d} className="relative border-r border-[var(--borderColor)] last:border-r-0">
+                {slots.map((t, i) => (
+                  <div
+                    key={t}
+                    className="absolute left-0 right-0 border-t border-[var(--borderColor)]/25"
+                    style={{ top: `${i * 25}%` }}
+                  />
+                ))}
+                {blocks
+                  .filter((b) => b.day === day.d)
+                  .map((b) => {
+                    const split = b.tone === "tope";
+                    return (
+                      <div
+                        key={`${b.day}-${b.title}`}
+                        className={`absolute rounded-md border px-0.5 sm:px-1 py-0.5 overflow-hidden ${toneCls[b.tone]}`}
+                        style={{
+                          top: `calc(${b.slot * 25}% + 4px)`,
+                          height: "calc(25% - 8px)",
+                          left: split ? (b.col === 0 ? "3%" : "51%") : "6%",
+                          width: split ? "46%" : "88%",
+                          backgroundImage: split
+                            ? "repeating-linear-gradient(45deg, rgba(239,68,68,0.06), rgba(239,68,68,0.06) 6px, rgba(239,68,68,0.14) 6px, rgba(239,68,68,0.14) 12px)"
+                            : undefined,
+                        }}
+                      >
+                        <p className="font-bold text-[8px] sm:text-[10px] leading-tight truncate">{b.title}</p>
+                        <p className="text-[7px] sm:text-[9px] text-[var(--textSecondary)] truncate mt-0.5 hidden sm:block">
+                          {b.meta}
+                        </p>
+                      </div>
+                    );
+                  })}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-4 py-2.5 border-t border-[var(--borderColor)] text-[10px] sm:text-[11px] font-semibold text-[var(--textSecondary)]">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock className="w-3 h-3" />
+          Módulos UNAB
+        </span>
+        <span className="inline-flex items-center gap-1 text-[var(--textPrimary)]">
+          <Download className="w-3.5 h-3.5" /> Exportar PDF
+        </span>
       </div>
     </div>
   );
 }
 
-function MockNotas() {
+function MockMalla() {
+  const uid = useId().replace(/:/g, "");
+  const Card = ({ code, name, sct, st, grade }) => {
+    const map = {
+      ok: {
+        card: "border-emerald-500/35 bg-emerald-500/[0.09] border-l-[3px] border-l-emerald-400",
+        badge: "text-emerald-400",
+        label: "Aprobada",
+        Icon: CheckCircle2,
+      },
+      cur: {
+        card: "border-sky-400/40 bg-sky-400/[0.08] border-l-[3px] border-l-sky-400",
+        badge: "text-sky-300",
+        label: "Cursando",
+        Icon: Circle,
+      },
+      sel: {
+        card: "border-sky-400/80 bg-sky-400/12 border-l-[3px] border-l-sky-400 ring-2 ring-sky-400/70 shadow-[0_0_22px_rgba(56,189,248,0.22)] z-10",
+        badge: "text-sky-300",
+        label: "Seleccionada",
+        Icon: Circle,
+      },
+      pre: {
+        card: "border-amber-400/55 bg-amber-500/10 border-l-[3px] border-l-amber-400 ring-1 ring-amber-400/45 shadow-[0_0_16px_rgba(251,191,36,0.12)] z-10",
+        badge: "text-amber-400",
+        label: "Prerrequisito",
+        Icon: Network,
+      },
+      open: {
+        card: "border-emerald-400/35 bg-emerald-500/[0.07] border-dashed",
+        badge: "text-emerald-400",
+        label: "Desbloquea",
+        Icon: CheckCircle2,
+      },
+      lock: {
+        card: "border-[var(--borderColor)] bg-[var(--bgPrimary)]/35 opacity-50",
+        badge: "text-[var(--textSecondary)]",
+        label: "Bloqueada",
+        Icon: Lock,
+      },
+    };
+    const t = map[st];
+    return (
+      <div className={`relative rounded-xl border px-2 py-2 sm:px-2.5 sm:py-2.5 min-h-[4.25rem] sm:min-h-[4.75rem] flex flex-col justify-between ${t.card}`}>
+        <span
+          className={`absolute top-1.5 right-1.5 text-[8px] sm:text-[9px] font-bold px-1 sm:px-1.5 py-0.5 rounded-md border inline-flex items-center gap-0.5 ${
+            st === "sel"
+              ? "border-sky-400/50 bg-sky-400/15 text-sky-300"
+              : "border-white/10 bg-black/25 text-white/55"
+          }`}
+        >
+          <Network className="w-2.5 h-2.5" />
+          PR
+        </span>
+        {grade && (
+          <span className="absolute top-1.5 right-[2.35rem] sm:right-[2.6rem] text-[8px] sm:text-[9px] font-bold px-1 py-0.5 rounded-md border border-white/10 bg-black/25 text-white/70 tabular-nums">
+            {grade}
+          </span>
+        )}
+        <p className="text-[11px] sm:text-[12px] font-bold text-white pr-10 leading-snug line-clamp-2">
+          {name}
+        </p>
+        <div className="flex items-center justify-between gap-1 mt-1.5">
+          <span className="text-[8px] sm:text-[9px] font-medium text-white/45 truncate">
+            {code} · {sct} SCT
+          </span>
+          <span className={`inline-flex items-center gap-0.5 text-[8px] sm:text-[9px] font-bold shrink-0 ${t.badge}`}>
+            <t.Icon className={`w-2.5 h-2.5 ${st === "cur" || st === "sel" ? "fill-sky-400/30" : ""}`} />
+            {t.label}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const semesters = [
+    {
+      label: "Sem. 1",
+      hint: "Completo",
+      courses: [
+        { code: "MAT110", name: "Cálculo I", sct: 6, st: "ok", grade: "5.8" },
+        { code: "MAT120", name: "Álgebra", sct: 6, st: "ok", grade: "6.1" },
+      ],
+    },
+    {
+      label: "Sem. 2",
+      hint: "En curso",
+      courses: [
+        { code: "INF210", name: "Intro Prog.", sct: 6, st: "pre" },
+        { code: "FIS110", name: "Física", sct: 6, st: "lock" },
+      ],
+    },
+    {
+      label: "Sem. 3",
+      hint: "Siguiente",
+      courses: [
+        { code: "INF310", name: "Estructura", sct: 6, st: "sel" },
+        { code: "INF320", name: "Base Datos", sct: 6, st: "open" },
+      ],
+    },
+  ];
+
   return (
-    <div className="absolute inset-0 p-2.5 sm:p-5 flex items-center justify-center select-none overflow-hidden">
-      <div className="w-full max-w-md h-full max-h-full rounded-xl border border-[var(--borderColor)] bg-[var(--bgSecondary)] p-2.5 sm:p-5 flex flex-col min-h-0 gap-1.5 sm:gap-3">
-        <div className="shrink-0">
-          <p className="text-[13px] sm:text-sm font-black text-[var(--textPrimary)] leading-tight">
-            Cálculo II
+    <div className="absolute inset-0 p-2.5 sm:p-4 flex flex-col min-h-0 select-none overflow-hidden">
+      <div className="flex items-center justify-between gap-3 shrink-0 mb-2.5 sm:mb-3">
+        <div className="min-w-0">
+          <p className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-white/80">
+            Tu malla
           </p>
-          <p className="text-[10px] sm:text-xs text-[var(--textSecondary)] mt-0.5">
-            MAT210 · Evaluaciones
-          </p>
+          <p className="text-[10px] text-white/40 mt-0.5">Ing. Informática · 4 de 12</p>
+        </div>
+        <div className="w-[7.5rem] sm:w-40 shrink-0">
+          <div className="flex justify-between text-[9px] font-bold text-white/45 mb-1">
+            <span>Avance</span>
+            <span className="text-sky-300">33%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-sky-400 to-emerald-400 shadow-[0_0_10px_rgba(56,189,248,0.55)]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="relative flex-1 min-h-0 grid grid-cols-3 gap-1.5 sm:gap-2.5">
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none z-[1] hidden sm:block"
+          viewBox="0 0 300 200"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <defs>
+            <linearGradient id={`${uid}-prereq`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#fbbf24" />
+              <stop offset="100%" stopColor="#38bdf8" />
+            </linearGradient>
+            <linearGradient id={`${uid}-unlock`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#38bdf8" />
+              <stop offset="100%" stopColor="#34d399" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M 168 64 C 198 64, 218 64, 232 64"
+            fill="none"
+            stroke={`url(#${uid}-prereq)`}
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            opacity="0.9"
+          />
+          <circle cx="168" cy="64" r="2.4" fill="#fbbf24" />
+          <circle cx="232" cy="64" r="2.6" fill="#38bdf8" />
+          <path
+            d="M 250 82 C 250 112, 250 128, 250 148"
+            fill="none"
+            stroke={`url(#${uid}-unlock)`}
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            opacity="0.85"
+          />
+          <circle cx="250" cy="148" r="2.4" fill="#34d399" />
+        </svg>
+
+        {semesters.map((sem) => (
+          <div key={sem.label} className="relative z-[2] flex flex-col min-w-0 gap-1.5 sm:gap-2">
+            <div className="flex items-baseline justify-between gap-1 px-0.5">
+              <p className="text-[9px] sm:text-[11px] font-extrabold text-white/50 uppercase tracking-wider">
+                {sem.label}
+              </p>
+              <p className="text-[8px] sm:text-[10px] font-semibold text-white/30 truncate">{sem.hint}</p>
+            </div>
+            {sem.courses.map((c) => (
+              <Card key={c.code} {...c} />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MockNotas({ fit = false }) {
+  const evals = [
+    { n: "Solemne 1", p: "30%", v: "5.4" },
+    { n: "Solemne 2", p: "30%", v: "", next: true },
+    { n: "Controles", p: "20%", v: "5.8" },
+    { n: "Examen", p: "20%", v: "" },
+  ];
+
+  return (
+    <div
+      className={
+        fit
+          ? "select-none min-w-0"
+          : "absolute inset-0 p-2.5 sm:p-5 flex items-center justify-center select-none overflow-hidden"
+      }
+    >
+      <div
+        className={`${
+          fit ? "w-full" : "w-full max-w-md h-full max-h-full rounded-xl border border-[var(--borderColor)]"
+        } bg-[var(--bgSecondary)] p-2.5 sm:p-4 flex flex-col min-h-0 gap-2 sm:gap-2.5`}
+      >
+        <div className="flex items-start justify-between gap-2 shrink-0">
+          <div className="min-w-0">
+            <p className="text-[13px] sm:text-sm font-black text-[var(--textPrimary)] leading-tight">
+              Cálculo II
+            </p>
+            <p className="text-[10px] sm:text-xs text-[var(--textSecondary)] mt-0.5">
+              MAT210 · 50% evaluado
+            </p>
+          </div>
+          <span className="text-[9px] sm:text-[10px] font-bold px-2 py-1 rounded-md border border-[var(--borderColor)] text-[var(--textSecondary)] shrink-0">
+            Eximición 5.0
+          </span>
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col justify-evenly gap-0.5">
+        <div className="grid grid-cols-4 gap-1 sm:gap-1.5 shrink-0">
           {[
-            ["Solemne 1", "30%", "5.4"],
-            ["Solemne 2", "30%", "—"],
-            ["Controles", "20%", "5.8"],
-            ["Examen", "20%", "—"],
-          ].map(([n, p, v]) => (
+            ["Estado", "Cerca", "text-[var(--primary)]"],
+            ["% Eval.", "50%", "text-[var(--textPrimary)]"],
+            ["Present.", "5.56", "text-[var(--textPrimary)]"],
+            ["Final", "—", "text-[var(--textSecondary)]"],
+          ].map(([l, v, c]) => (
             <div
-              key={n}
-              className="flex items-center justify-between gap-2 text-[11px] sm:text-[13px] border-b border-[var(--borderColor)] py-1 sm:py-1.5 last:border-0"
+              key={l}
+              className="rounded-lg border border-[var(--borderColor)] bg-[var(--bgPrimary)]/50 px-1 py-1.5 sm:px-2 sm:py-2 text-center min-w-0"
             >
-              <span className="text-[var(--textPrimary)] font-semibold truncate min-w-0">{n}</span>
-              <span className="text-[var(--textSecondary)] shrink-0">{p}</span>
-              <span className="font-bold text-[var(--textPrimary)] w-7 sm:w-8 text-right shrink-0">
+              <p className="text-[8px] sm:text-[9px] uppercase tracking-wider text-[var(--textSecondary)] font-semibold leading-tight">
+                {l}
+              </p>
+              <p className={`mt-0.5 text-[11px] sm:text-sm font-black tabular-nums leading-none ${c}`}>
                 {v}
-              </span>
+              </p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-1 sm:gap-2 shrink-0">
-          {[
-            ["Promedio", "5.6"],
-            ["Próxima nota", "4.8"],
-            ["Eximición", "Cerca"],
-          ].map(([l, v]) => (
+        <div className="rounded-lg border border-[var(--primary)]/25 bg-[var(--primaryMuted)] px-2.5 py-2 shrink-0">
+          <p className="text-[10px] sm:text-[11px] text-[var(--textSecondary)] leading-snug m-0">
+            Para eximirte (5.0), necesitas{" "}
+            <strong className="text-[var(--primary)] font-bold tabular-nums">4.80</strong> en el 50%
+            restante.
+          </p>
+        </div>
+
+        <div className="min-h-0 flex-1 flex flex-col overflow-hidden rounded-lg border border-[var(--borderColor)]">
+          <div className="grid grid-cols-[1fr_2.4rem_3.2rem] sm:grid-cols-[1fr_2.75rem_3.75rem] gap-1 px-2.5 py-1.5 bg-[var(--bgPrimary)]/50 border-b border-[var(--borderColor)] text-[9px] sm:text-[10px] font-semibold text-[var(--textSecondary)]">
+            <span>Concepto</span>
+            <span className="text-center">%</span>
+            <span className="text-center">Nota</span>
+          </div>
+          {evals.map((e) => (
             <div
-              key={l}
-              className="rounded-lg bg-[var(--bgPrimary)] border border-[var(--borderColor)] px-1.5 py-1.5 sm:p-2.5 text-center min-w-0"
+              key={e.n}
+              className={`grid grid-cols-[1fr_2.4rem_3.2rem] sm:grid-cols-[1fr_2.75rem_3.75rem] gap-1 items-center px-2.5 py-1.5 sm:py-2 border-b border-[var(--borderColor)]/60 last:border-0 ${
+                e.next ? "bg-[var(--primaryMuted)]/40" : ""
+              }`}
             >
-              <p className="text-[8px] sm:text-[11px] text-[var(--textSecondary)] font-semibold leading-tight">
-                {l}
-              </p>
-              <p className="mt-0.5 sm:mt-1 text-[13px] sm:text-lg font-black text-[var(--primary)] leading-none">
-                {v}
-              </p>
+              <span className="text-[11px] sm:text-[12px] font-semibold text-[var(--textPrimary)] truncate">
+                {e.n}
+              </span>
+              <span className="text-[10px] sm:text-[11px] text-[var(--textSecondary)] text-center tabular-nums">
+                {e.p}
+              </span>
+              <span
+                className={`mx-auto w-8 sm:w-10 rounded-md border text-center text-[11px] sm:text-[12px] font-bold tabular-nums leading-6 sm:leading-7 ${
+                  e.next
+                    ? "border-[var(--primary)]/50 bg-[var(--bgPrimary)] text-[var(--textSecondary)]"
+                    : e.v
+                      ? "border-[var(--borderColor)] bg-[var(--bgPrimary)] text-[var(--textPrimary)]"
+                      : "border-[var(--borderColor)] bg-[var(--bgPrimary)] text-[var(--textSecondary)]"
+                }`}
+              >
+                {e.v || "—"}
+              </span>
             </div>
           ))}
         </div>
@@ -404,7 +725,7 @@ export default function LandingPage() {
   const canvasRef = useRef(null);
   const [hasMalla, setHasMalla] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [heroTab, setHeroTab] = useState("toma");
+  const [heroTab, setHeroTab] = useState("notas");
   const [heroPaused, setHeroPaused] = useState(false);
   const [faqOpen, setFaqOpen] = useState(0);
   const menuBtnRef = useRef(null);
@@ -565,7 +886,7 @@ export default function LandingPage() {
     navigate("/app");
   }, [navigate]);
 
-  const primaryLabel = hasMalla ? "Continuar en mi malla" : "Abrir Malla Pro";
+  const primaryLabel = hasMalla ? "Continuar en mi malla" : "Organizar mi semestre";
 
   const onHeroTabChange = (id) => {
     setHeroPaused(true);
@@ -700,16 +1021,13 @@ export default function LandingPage() {
                 <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
                 Hecho para estudiantes UNAB
               </p>
-              <h1 className="text-[1.65rem] sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight leading-[1.15] text-white">
-                <span className="block">Malla Pro</span>
-                <span className="block mt-2 font-semibold text-white/95 text-[1.15rem] sm:text-[inherit] leading-snug">
-                  Tu malla, tus notas y tu toma de ramos.{" "}
-                  <span className="text-sky-400">Todo en un solo lugar.</span>
-                </span>
+              <h1 className="text-[1.65rem] sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight leading-[1.12] text-white">
+                Organiza tu semestre
+                <br />
+                en minutos, <span className="text-sky-400">no en pestañas.</span>
               </h1>
               <p className="mt-5 text-[15px] sm:text-base text-indigo-100/75 leading-relaxed max-w-md">
-                Revisa tu avance, entiende tus prerrequisitos, carga la programación académica y arma
-                tu horario sin tener que buscar ramo por ramo en el PDF.
+                Revisa tu avance, calcula tus notas y arma tu horario sin perderte entre PDFs y planillas sueltas.
               </p>
               <div className="mt-7 flex flex-col sm:flex-row gap-3">
                 <button
@@ -728,23 +1046,20 @@ export default function LandingPage() {
                   Ver cómo funciona
                 </a>
               </div>
-              <p className="mt-4 text-xs font-medium text-white/50">
-                De estudiantes para estudiantes.
+              <div className="mt-5 flex flex-wrap gap-2">
+                {["Gratis", "Sin registro", "Tus datos se quedan en tu dispositivo"].map((chip) => (
+                  <span
+                    key={chip}
+                    className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-white/85 px-3 py-1.5 rounded-full lp-glass-chip"
+                  >
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-4 text-xs text-white/45">
+                Actualmente disponible para Pregrado Diurno.
               </p>
-              <ul className="mt-6 flex flex-col gap-2 text-[13px] text-white/65">
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  Actualmente disponible para Pregrado Diurno.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  Tu avance queda guardado localmente.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  La programación se procesa en tu dispositivo.
-                </li>
-              </ul>
             </div>
 
             <div
@@ -776,7 +1091,11 @@ export default function LandingPage() {
         <section className="lp-container py-2 sm:py-3">
           <div className="lp-glass rounded-2xl px-4 py-6 sm:px-8 sm:py-7">
             <p className="text-center text-sm sm:text-[15px] font-medium text-white/90 max-w-2xl mx-auto leading-snug">
-              Menos tiempo buscando entre PDFs y más claridad para organizar tu semestre.
+              Ya lo usan{" "}
+              <span className="text-sky-400 font-extrabold">
+                +<CountUpStat to={100} /> estudiantes
+              </span>{" "}
+              este mes — de Santiago a Viña del Mar.
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[12px] font-semibold text-white/60">
               {[
@@ -795,81 +1114,107 @@ export default function LandingPage() {
         </section>
 
         {/* 4. Demo principal */}
-        <section id="funciones" className="lp-container py-16 sm:py-20">
-          <div className="max-w-2xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Tu avance y tu horario, conectados
-            </h2>
-            <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
-              Malla Pro revisa lo que tienes registrado en tu malla, ordena primero los ramos que te
-              corresponden y te deja comparar sus secciones antes de armar tu horario.
-            </p>
-          </div>
-          <div className="mt-8 relative rounded-2xl lp-glass-strong overflow-hidden">
-            <div className="aspect-[5/4] sm:aspect-[16/9] relative max-h-[480px] mx-auto">
-              <MockTomaDeRamos />
+        <section id="funciones" className="lp-container py-14 sm:py-16">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)] mb-2">
+                Cómo se conecta
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Tu avance y tu horario, conectados
+              </h2>
+              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
+                Malla Pro revisa lo que tienes registrado en tu malla, ordena primero los ramos que te
+                corresponden y te deja comparar sus secciones antes de armar tu horario.
+              </p>
+              <ol className="mt-6 space-y-2.5 text-sm font-semibold text-[var(--textSecondary)]">
+                {[
+                  "Avance registrado",
+                  "Programación cargada",
+                  "Ramos recomendados",
+                  "Secciones disponibles",
+                  "Horario construido",
+                ].map((s, i) => (
+                  <li key={s} className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[var(--primaryMuted)] text-[var(--primary)] flex items-center justify-center text-[10px] font-black shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="leading-snug text-[var(--textPrimary)]">{s}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <div className="flex flex-wrap gap-2 p-3 sm:p-4 border-t border-[var(--borderColor)] bg-[var(--bgPrimary)]/50">
-              {["Tus ramos", "Secciones", "Horario", "Topes", "Exportación"].map((c) => (
-                <span
-                  key={c}
-                  className="text-[11px] font-bold px-2.5 py-1 rounded-full border border-[var(--borderColor)] text-[var(--textSecondary)]"
-                >
-                  {c}
-                </span>
-              ))}
+            <div className="w-full min-w-0 flex justify-center lg:justify-end">
+              <div className="w-fit max-w-full rounded-2xl lp-glass-strong overflow-hidden">
+                <MockTomaDeRamos fit />
+                <div className="flex flex-wrap justify-center gap-2 p-3 border-t border-[var(--borderColor)] bg-[var(--bgPrimary)]/50">
+                  {["Tus ramos", "Secciones", "Horario", "Topes", "Exportación"].map((c) => (
+                    <span
+                      key={c}
+                      className="text-[11px] font-bold px-2.5 py-1 rounded-full border border-[var(--borderColor)] text-[var(--textSecondary)]"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-          <ol className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-[12px] sm:text-[11px] font-semibold text-[var(--textSecondary)]">
-            {[
-              "Avance registrado",
-              "Programación cargada",
-              "Ramos recomendados",
-              "Secciones disponibles",
-              "Horario construido",
-            ].map((s, i) => (
-              <li key={s} className="flex items-center gap-2 min-w-0">
-                <span className="w-5 h-5 rounded-full bg-[var(--primaryMuted)] text-[var(--primary)] flex items-center justify-center text-[10px] font-black shrink-0">
-                  {i + 1}
-                </span>
-                <span className="leading-snug">{s}</span>
-              </li>
-            ))}
-          </ol>
         </section>
 
         {/* 5. Malla */}
         <section id="malla" className="lp-container py-14 sm:py-16 border-t border-[var(--borderColor)]">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)] mb-2">
+                Tu malla
+              </p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Entiende tu malla sin enredarte
+                Entiende tu avance de un vistazo
               </h2>
               <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
-                Marca los ramos que aprobaste o estás cursando y revisa cómo va tu avance por semestre.
-              </p>
-              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
-                Selecciona un ramo para ver qué prerrequisitos necesita y cuáles desbloquea.
-              </p>
-              <p className="mt-3 text-sm text-[var(--textSecondary)] leading-relaxed rounded-xl border border-[var(--borderColor)] bg-[var(--bgPrimary)]/40 px-3.5 py-2.5">
-                <span className="font-semibold text-[var(--textPrimary)]">Mallas de Pregrado Diurno.</span>{" "}
-                Actualmente Malla Pro está enfocado en planes de estudio de pregrado diurno de las
-                carreras disponibles.
+                Marca tus ramos como pendientes, cursando o aprobados, y revisa qué prerrequisitos necesitas y qué desbloqueas al aprobar cada uno.
               </p>
               <ul className="mt-6 space-y-2.5">
                 <FeaturePoint>Pendiente, cursando y aprobado</FeaturePoint>
                 <FeaturePoint>Progreso por semestre</FeaturePoint>
-                <FeaturePoint>Inspector PR con conexiones</FeaturePoint>
+                <FeaturePoint>Inspector de prerrequisitos con conexiones</FeaturePoint>
                 <FeaturePoint>Modo excepcional y ocultar completados</FeaturePoint>
               </ul>
             </div>
-            <div className="rounded-2xl lp-glass-strong overflow-hidden aspect-[5/4] sm:aspect-[5/4] relative max-h-[380px]">
+            <div className="rounded-2xl lp-glass-strong overflow-hidden aspect-[5/4] relative max-h-[420px]">
               <MockMalla />
             </div>
           </div>
         </section>
 
-        {/* 6. Toma de ramos */}
+        {/* 6. Horario */}
+        <section id="horario" className="lp-container py-14 sm:py-16 border-t border-[var(--borderColor)]">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)] mb-2">
+                Horario
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Arma tu horario antes de la toma
+              </h2>
+              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
+                Elige una sección por ramo y mira al instante cómo queda tu semana. Si dos clases se cruzan, Malla Pro te marca el tope.
+              </p>
+              <ul className="mt-6 space-y-2.5">
+                <FeaturePoint>Módulos UNAB y clases de varios bloques</FeaturePoint>
+                <FeaturePoint>Detección de topes</FeaturePoint>
+                <FeaturePoint>Guardar propuesta y exportar PDF</FeaturePoint>
+                <FeaturePoint>Resumen de NRC y créditos</FeaturePoint>
+              </ul>
+            </div>
+            <div className="rounded-2xl lp-glass-strong overflow-hidden min-w-0">
+              <MockHorario />
+            </div>
+          </div>
+        </section>
+
+        {/* 7. Toma de ramos */}
         <section
           id="toma-de-ramos"
           className="lp-container py-14 sm:py-16 border-t border-[var(--borderColor)]"
@@ -911,11 +1256,7 @@ export default function LandingPage() {
                 Encuentra las secciones que realmente te sirven
               </h2>
               <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
-                Carga la programación académica y Malla Pro te muestra primero los ramos que
-                corresponden a tu avance, junto con tus pendientes de semestres anteriores.
-              </p>
-              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
-                Revisa horarios, profesor, modalidad, NRC y cupos informados sin recorrer todo el PDF.
+                Carga la programación académica y Malla Pro te muestra primero los ramos que corresponden a tu avance, junto con tus pendientes de semestres anteriores.
               </p>
               <ul className="mt-6 space-y-2.5">
                 <FeaturePoint>Carga de PDF y procesamiento local</FeaturePoint>
@@ -927,91 +1268,26 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 7. Horario */}
-        <section id="horario" className="lp-container py-14 sm:py-16 border-t border-[var(--borderColor)]">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Arma tu horario antes de la toma
-              </h2>
-              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
-                Elige una sección por ramo y mira al instante cómo queda tu semana de lunes a sábado.
-              </p>
-              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
-                Si dos clases se cruzan, Malla Pro te marca el tope para que puedas probar otra sección.
-              </p>
-              <ul className="mt-6 space-y-2.5">
-                <FeaturePoint>Módulos UNAB y clases de varios bloques</FeaturePoint>
-                <FeaturePoint>Detección de topes</FeaturePoint>
-                <FeaturePoint>Guardar propuesta y exportar PDF</FeaturePoint>
-                <FeaturePoint>Resumen de NRC y créditos</FeaturePoint>
-              </ul>
-            </div>
-            <div className="rounded-2xl lp-glass-strong p-3 sm:p-4 select-none min-w-0">
-              <div className="flex items-center justify-between mb-3 gap-2">
-                <span className="text-xs font-black uppercase tracking-wider">Semana</span>
-                <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1 shrink-0">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Sin topes
-                </span>
-              </div>
-              <div className="overflow-x-auto -mx-0.5 px-0.5">
-                <div className="grid grid-cols-6 gap-1.5 text-[11px] min-w-[22rem] sm:min-w-0">
-                  {[
-                    { d: "LU", block: { t: "Ramo 1", h: "8:30", c: "blue" } },
-                    { d: "MA", block: { t: "Ramo 2", h: "10:00", c: "green" } },
-                    { d: "MI", block: { t: "Tope", h: "8:30", c: "amber" } },
-                    { d: "JU", block: { t: "Ramo 3", h: "10:00", c: "blue" } },
-                    { d: "VI", block: null },
-                    { d: "SA", block: null },
-                  ].map(({ d, block }) => (
-                    <div
-                      key={d}
-                      className="rounded-lg border border-[var(--borderColor)] bg-[var(--bgPrimary)] min-h-[100px] p-1.5 flex flex-col min-w-0"
-                    >
-                      <p className="text-center font-extrabold text-[var(--textSecondary)] text-[10px] mb-1.5">
-                        {d}
-                      </p>
-                      {block && (
-                        <div
-                          className={`rounded-md p-1.5 mt-1 overflow-hidden ${
-                            block.c === "amber"
-                              ? "bg-amber-500/15 border border-amber-500/40"
-                              : block.c === "green"
-                                ? "bg-emerald-500/10 border border-emerald-500/35"
-                                : "bg-[var(--primaryMuted)] border border-[var(--primary)]/35"
-                          }`}
-                        >
-                          <p className="font-bold text-[var(--textPrimary)] text-[10px] leading-tight truncate">
-                            {block.t}
-                          </p>
-                          <p className="text-[var(--textSecondary)] text-[10px] mt-0.5">{block.h}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[var(--textSecondary)] font-semibold">
-                <span>4 ramos · 16 créditos</span>
-                <span className="inline-flex items-center gap-1 text-[var(--textPrimary)]">
-                  <Download className="w-3.5 h-3.5" /> Exportar PDF
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* 8. Notas */}
         <section id="notas" className="lp-container py-14 sm:py-16 border-t border-[var(--borderColor)]">
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)] mb-2">
+                Notas
+              </p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 Calcula la nota que necesitas
               </h2>
-              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed max-w-lg">
+              <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
                 Agrega tus evaluaciones, revisa tu promedio y prueba distintos resultados antes de la
                 próxima prueba.
               </p>
+              <ul className="mt-6 space-y-2.5">
+                <FeaturePoint>Evaluaciones con ponderación y nota</FeaturePoint>
+                <FeaturePoint>Nota necesaria para eximirte</FeaturePoint>
+                <FeaturePoint>Modo examen si no alcanzas</FeaturePoint>
+                <FeaturePoint>Sub-notas y compartir configuración</FeaturePoint>
+              </ul>
               <button
                 type="button"
                 onClick={openApp}
@@ -1021,22 +1297,8 @@ export default function LandingPage() {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-              {[
-                ["Promedio actual", "5.6"],
-                ["Próxima nota necesaria", "4.8"],
-                ["Eximición", "Cerca"],
-              ].map(([l, v]) => (
-                <div
-                  key={l}
-                  className="rounded-xl lp-glass p-3 sm:p-4 text-center"
-                >
-                  <p className="text-[11px] sm:text-xs font-semibold text-[var(--textSecondary)] leading-snug">
-                    {l}
-                  </p>
-                  <p className="mt-1.5 text-xl sm:text-2xl font-black text-[var(--primary)]">{v}</p>
-                </div>
-              ))}
+            <div className="rounded-2xl lp-glass-strong overflow-hidden min-w-0">
+              <MockNotas fit />
             </div>
           </div>
         </section>
@@ -1085,73 +1347,103 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 10. Mosaico */}
+        {/* 10. Resumen por herramienta */}
         <section className="lp-container py-14 sm:py-16 border-t border-[var(--borderColor)]">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight max-w-xl">
-            Todo lo que necesitas para organizar el semestre
-          </h2>
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 auto-rows-fr">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Todo lo que necesitas para organizar el semestre
+            </h2>
+            <p className="mt-3 text-[var(--textSecondary)] leading-relaxed">
+              Las mismas herramientas de la app, agrupadas como las usas: malla, toma y notas.
+            </p>
+          </div>
+          <div className="mt-10 grid md:grid-cols-3 gap-3 sm:gap-4">
             {[
               {
-                icon: Network,
-                t: "Inspector de relaciones",
-                d: "Selecciona un ramo y revisa sus prerrequisitos y lo que desbloquea.",
-                span: "lg:col-span-2 lg:row-span-2",
+                kicker: "Tu malla",
+                items: [
+                  {
+                    icon: Network,
+                    t: "Inspector de relaciones",
+                    d: "Qué prerrequisitos necesita un ramo y qué desbloquea al aprobarlo.",
+                  },
+                  {
+                    icon: BookMarked,
+                    t: "Estados académicos",
+                    d: "Pendiente, cursando o aprobado, con tu avance siempre a la vista.",
+                  },
+                  {
+                    icon: AlertTriangle,
+                    t: "Pendientes anteriores",
+                    d: "Los arrastres quedan separados del semestre actual.",
+                  },
+                ],
               },
               {
-                icon: BookMarked,
-                t: "Estados académicos",
-                d: "Marca tus ramos como pendientes, cursando o aprobados.",
-                span: "",
+                kicker: "Toma de ramos",
+                items: [
+                  {
+                    icon: LayoutGrid,
+                    t: "Ramos recomendados",
+                    d: "La programación se ordena según el avance que ya registraste.",
+                  },
+                  {
+                    icon: Filter,
+                    t: "Comparación de secciones",
+                    d: "Horario, profesor, modalidad, NRC y cupos en la misma vista.",
+                  },
+                  {
+                    icon: Clock,
+                    t: "Detección de topes",
+                    d: "Los cruces aparecen al instante, antes de guardar tu propuesta.",
+                  },
+                ],
               },
               {
-                icon: LayoutGrid,
-                t: "Ramos recomendados",
-                d: "La programación se ordena según el avance que tienes registrado.",
-                span: "",
+                kicker: "Notas",
+                items: [
+                  {
+                    icon: NotebookPen,
+                    t: "Calculadora de notas",
+                    d: "Promedio, ponderaciones y la nota que te falta en la próxima prueba.",
+                  },
+                  {
+                    icon: GraduationCap,
+                    t: "Eximición y examen",
+                    d: "Mira si te eximes o qué necesitas en el examen para aprobar.",
+                  },
+                  {
+                    icon: Shield,
+                    t: "Configuración local",
+                    d: "Tus evaluaciones quedan en el dispositivo; también puedes compartirlas.",
+                  },
+                ],
               },
-              {
-                icon: AlertTriangle,
-                t: "Pendientes anteriores",
-                d: "Tus arrastres quedan separados para que no los pierdas de vista.",
-                span: "",
-              },
-              {
-                icon: Filter,
-                t: "Comparación de secciones",
-                d: "Revisa horarios, profesor, modalidad, NRC y cupos informados.",
-                span: "lg:col-span-2",
-              },
-              {
-                icon: Clock,
-                t: "Detección de topes",
-                d: "Encuentra cruces antes de guardar tu propuesta.",
-                span: "",
-              },
-              {
-                icon: FileText,
-                t: "Exportación PDF",
-                d: "Lleva tu horario junto con los NRC y créditos que necesitas.",
-                span: "",
-              },
-              {
-                icon: NotebookPen,
-                t: "Calculadora de notas",
-                d: "Revisa tu promedio y calcula la nota que te falta.",
-                span: "sm:col-span-2 lg:col-span-2",
-              },
-            ].map((card) => (
+            ].map((group) => (
               <article
-                key={card.t}
-                className={`rounded-2xl lp-glass p-4 sm:p-5 ${card.span}`}
+                key={group.kicker}
+                className="rounded-2xl lp-glass p-5 sm:p-6 flex flex-col min-h-0"
               >
-                <card.icon className="w-5 h-5 text-[var(--primary)] mb-3" />
-                <h3 className="font-bold text-[var(--textPrimary)] text-[15px] leading-snug">
-                  {card.t}
-                </h3>
-                <p className="mt-1.5 text-sm text-[var(--textSecondary)] leading-snug line-clamp-3">
-                  {card.d}
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
+                  {group.kicker}
                 </p>
+                <ul className="mt-5 space-y-5">
+                  {group.items.map((item) => (
+                    <li key={item.t} className="flex items-start gap-3">
+                      <span className="mt-0.5 w-8 h-8 rounded-lg border border-[var(--borderColor)] bg-[var(--bgPrimary)]/40 flex items-center justify-center shrink-0">
+                        <item.icon className="w-4 h-4 text-[var(--primary)]" />
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-[var(--textPrimary)] text-[15px] leading-snug">
+                          {item.t}
+                        </h3>
+                        <p className="mt-1 text-sm text-[var(--textSecondary)] leading-snug">
+                          {item.d}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </article>
             ))}
           </div>
@@ -1164,12 +1456,10 @@ export default function LandingPage() {
               <Shield className="w-6 h-6 text-[var(--primary)] shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <h2 className="text-2xl font-bold tracking-tight">
-                  Tus datos académicos principales se quedan contigo
+                  Tus datos académicos se quedan contigo
                 </h2>
                 <p className="mt-2 text-[var(--textSecondary)] leading-relaxed max-w-2xl">
-                  Tus notas, progreso, horarios y los PDF que importas se procesan y almacenan
-                  localmente en tu dispositivo. Malla Pro utiliza analítica de uso para entender de
-                  forma general cómo se utiliza la plataforma y seguir mejorándola.
+                  Tus notas, tu progreso, tus horarios y el PDF que importas se procesan y almacenan localmente en tu dispositivo. Usamos analítica de uso general para entender cómo se usa la plataforma y seguir mejorándola.
                 </p>
               </div>
             </div>
@@ -1195,9 +1485,12 @@ export default function LandingPage() {
             <ul className="mt-6 grid sm:grid-cols-2 gap-2 text-sm text-[var(--textSecondary)]">
               <FeaturePoint>La programación no se envía a un servidor</FeaturePoint>
               <FeaturePoint>Tu avance queda en tu navegador</FeaturePoint>
-              <FeaturePoint>Analítica de uso general para mejorar la plataforma</FeaturePoint>
-              <FeaturePoint>Puedes borrar tus datos locales desde el navegador</FeaturePoint>
+              <FeaturePoint>Puedes borrar tus datos locales cuando quieras</FeaturePoint>
+              <FeaturePoint>Gratis y sin registro, hoy</FeaturePoint>
             </ul>
+            <p className="mt-6 pt-4 border-t border-[var(--borderColor)] text-xs text-white/45 leading-relaxed">
+              Malla Pro es una herramienta independiente y no oficial, sin relación con la Universidad Andrés Bello. Actualmente cubre solo mallas de Pregrado Diurno; los cupos mostrados corresponden a la programación que cargaste y pueden cambiar durante la toma real.
+            </p>
           </div>
         </section>
 
@@ -1220,10 +1513,10 @@ export default function LandingPage() {
         <section className="lp-container py-16 sm:py-24 border-t border-[var(--borderColor)]">
           <div className="rounded-3xl lp-glass-strong lp-glass-glow px-6 py-12 sm:px-12 sm:py-16 text-center relative overflow-hidden">
             <h2 className="text-2xl sm:text-4xl font-bold tracking-tight max-w-xl mx-auto leading-tight">
-              Organiza tu próximo semestre con menos vueltas.
+              Arranca tu semestre organizado.
             </h2>
             <p className="mt-3 text-[var(--textSecondary)] max-w-md mx-auto">
-              Revisa tus ramos, compara secciones y arma tu horario desde un solo lugar.
+              Revisa tus ramos, calcula tus notas y arma tu horario desde un solo lugar.
             </p>
             <button
               type="button"
@@ -1234,7 +1527,7 @@ export default function LandingPage() {
               <ArrowRight className="w-4 h-4" />
             </button>
             <p className="mt-4 text-xs font-medium text-[var(--textSecondary)]">
-              De estudiantes para estudiantes.
+              Gratis. Sin registro. De estudiantes para estudiantes.
             </p>
           </div>
         </section>

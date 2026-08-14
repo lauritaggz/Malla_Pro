@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Lock, CheckCircle2, Circle, Network } from "lucide-react";
+import { Lock, CheckCircle2, Circle, Network, Sparkles } from "lucide-react";
 import { safeStorage } from "../utils/safeStorage";
 import { LEGACY_KEYS } from "../utils/storageKeys";
 
@@ -15,6 +15,10 @@ const Curso = ({
   onLongPress,
   onContextMenu,
   highlightStatus = "normal",
+  interactionMode = "normal",
+  exceptionSelected = false,
+  exceptionSelectable = true,
+  onExceptionToggle,
 }) => {
   const [promedio, setPromedio] = useState(null);
   const timerRef = useRef(null);
@@ -56,23 +60,27 @@ const Curso = ({
     return () => window.removeEventListener("notasModificadas", actualizarPromedio);
   }, [curso.id]);
 
+  const isExceptionMode = interactionMode === "exception";
+
   let cardStatusClass = "curso-card-disponible";
   let statusBadge = null;
 
-  if (aprobado) {
+  if (excepcional || (isExceptionMode && exceptionSelected)) {
+    cardStatusClass = exceptionSelected
+      ? "curso-card-exception-selected"
+      : "curso-card-excepcional";
+    statusBadge = (
+      <div className="flex items-center gap-0.5 text-[9px] font-bold text-violet-600 dark:text-violet-300">
+        <Sparkles className="w-3 h-3 flex-shrink-0" />
+        <span>Excepcional</span>
+      </div>
+    );
+  } else if (aprobado) {
     cardStatusClass = "curso-card-aprobado";
     statusBadge = (
       <div className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
         <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
-        <span>Aprobada</span>
-      </div>
-    );
-  } else if (excepcional) {
-    cardStatusClass = "curso-card-excepcional";
-    statusBadge = (
-      <div className="flex items-center gap-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-500">
-        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
-        <span>Forzada</span>
+        <span>{isExceptionMode ? "Ya aprobado" : "Aprobada"}</span>
       </div>
     );
   } else if (enCurso) {
@@ -123,10 +131,28 @@ const Curso = ({
     }
   };
 
+  const handleNormalInteraction = () => {
+    onLeftClick?.(curso);
+  };
+
+  const handleExceptionSelection = () => {
+    if (!exceptionSelectable) return;
+    onExceptionToggle?.(curso);
+  };
+
+  const activateCard = () => {
+    if (isExceptionMode) {
+      handleExceptionSelection();
+      return;
+    }
+    handleNormalInteraction();
+  };
+
   const startPress = () => {
     longPressTriggeredRef.current = false;
     touchMovedRef.current = false;
     clearPressTimer();
+    if (isExceptionMode) return;
 
     timerRef.current = setTimeout(() => {
       longPressTriggeredRef.current = true;
@@ -190,7 +216,7 @@ const Curso = ({
           touchMovedRef.current = false;
           return;
         }
-        onLeftClick?.(curso);
+        activateCard();
       }}
       onMouseLeave={cancelPress}
       onTouchStart={(e) => {
@@ -213,7 +239,7 @@ const Curso = ({
           suppressMouseRef.current = false;
         }, 500);
         if (handled || moved) return;
-        onLeftClick?.(curso);
+        activateCard();
       }}
       onTouchCancel={() => {
         cancelPress();
@@ -223,14 +249,26 @@ const Curso = ({
       }}
       onContextMenu={(e) => {
         e.preventDefault();
+        if (isExceptionMode) return;
         // El hold del cuerpo del ramo marca "cursando"; no abrir el panel de opciones.
         if (shouldIgnoreContextMenu()) return;
         // Solo clic derecho real (desktop). El long-press táctil no debe abrir menú aquí.
         if (e.pointerType === "touch" || e.pointerType === "pen") return;
         onContextMenu?.(e, curso);
       }}
-      className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-primary/45 group select-none touch-manipulation
-        ${cardStatusClass} ${highlightStyles} ${shake ? "curso-card-shake" : ""}
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        activateCard();
+      }}
+      aria-pressed={isExceptionMode ? exceptionSelected : undefined}
+      aria-disabled={isExceptionMode && !exceptionSelectable ? true : undefined}
+      className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-violet-500/40 group select-none touch-manipulation
+        ${cardStatusClass}
+        ${isExceptionMode && exceptionSelectable ? "curso-card-exception-selectable" : ""}
+        ${isExceptionMode && !exceptionSelectable ? "curso-card-exception-locked-normal" : ""}
+        ${!isExceptionMode ? highlightStyles : ""}
+        ${shake ? "curso-card-shake" : ""}
       `}
       style={{
         backfaceVisibility: "hidden",
@@ -241,6 +279,19 @@ const Curso = ({
         touchAction: "manipulation",
       }}
     >
+      {isExceptionMode && exceptionSelectable && (
+        <span
+          className={`absolute top-1.5 right-1.5 z-20 h-4 w-4 rounded-full border flex items-center justify-center text-[9px] font-black transition-all duration-200 ${
+            exceptionSelected
+              ? "border-violet-500 bg-violet-600 text-white"
+              : "border-violet-400/50 bg-bgSecondary/80 text-transparent"
+          }`}
+          aria-hidden
+        >
+          ✓
+        </span>
+      )}
+
       {promedio !== null && (
         <div className="absolute top-1.5 right-[52px] px-1 py-0.5 text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[24px] bg-white/10 dark:bg-white/5 border-borderColor/40 text-textPrimary shadow-sm">
           {promedio.toFixed(1)}
@@ -316,7 +367,7 @@ const Curso = ({
             suppressMouseRef.current = false;
           }, 500);
         }}
-        className={`absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer touch-manipulation
+        className={`${isExceptionMode ? "hidden" : ""} absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer touch-manipulation
           ${
             highlightStatus === "selected"
               ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
@@ -351,6 +402,9 @@ export default React.memo(Curso, (prevProps, nextProps) => {
     prevProps.disponible === nextProps.disponible &&
     prevProps.enCurso === nextProps.enCurso &&
     prevProps.shake === nextProps.shake &&
-    prevProps.highlightStatus === nextProps.highlightStatus
+    prevProps.highlightStatus === nextProps.highlightStatus &&
+    prevProps.interactionMode === nextProps.interactionMode &&
+    prevProps.exceptionSelected === nextProps.exceptionSelected &&
+    prevProps.exceptionSelectable === nextProps.exceptionSelectable
   );
 });

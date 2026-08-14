@@ -46,13 +46,13 @@ export default function Navbar({
   mallaSeleccionada,
   cantidadSemestres,
   onShowTour,
-  onShowHorario,
   onShowContacto,
   mostrarResumen,
   onVerProgreso,
   onChangeMalla,
   vistaPrincipal = "malla",
   setVistaPrincipal,
+  onGuardLeave,
 }) {
   const navRef = useRef(null);
   const settingsRef = useRef(null);
@@ -88,16 +88,18 @@ export default function Navbar({
       icon: <CalendarDays className="w-3.5 h-3.5" />,
       onClick: (e) => {
         e.preventDefault();
+        if (onGuardLeave && !onGuardLeave()) return;
         setVistaPrincipal("periodo-actual");
         navigate("/app");
       }
     },
     {
-      label: "Toma de Ramos",
+      label: "Horario",
       href: "/programacion-academica",
       icon: <CalendarRange className="w-3.5 h-3.5" />,
       onClick: (e) => {
         e.preventDefault();
+        if (onGuardLeave && !onGuardLeave()) return;
         setVistaPrincipal("toma-de-ramos");
         navigate("/programacion-academica");
       }
@@ -108,6 +110,7 @@ export default function Navbar({
       icon: <MessageCircle className="w-3.5 h-3.5" />,
       onClick: (e) => {
         e.preventDefault();
+        if (onGuardLeave && !onGuardLeave()) return;
         setVistaPrincipal("tutorias");
         navigate("/app");
       }
@@ -158,6 +161,7 @@ export default function Navbar({
         ref={navRef}
         id="app-navbar"
         className={`
+          navbar-shell
           fixed top-0 left-0 right-0 z-[80]
           pt-[env(safe-area-inset-top,0px)]
           bg-bgSecondary/90 backdrop-blur-xl
@@ -175,6 +179,9 @@ export default function Navbar({
               to="/"
               aria-label="Volver al inicio"
               title="Volver al inicio"
+              onClick={(e) => {
+                if (onGuardLeave && !onGuardLeave()) e.preventDefault();
+              }}
               className="w-9 h-9 sm:w-8 sm:h-8 flex-shrink-0 rounded-lg flex items-center justify-center text-textSecondary hover:text-textPrimary hover:bg-borderColor/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               <ArrowLeft className="w-4 h-4" aria-hidden />
@@ -214,13 +221,28 @@ export default function Navbar({
           {/* ── Right: User Controls & Menu ── */}
           <div className="flex items-center gap-2 flex-shrink-0">
             
-            {/* Excepcional indicator */}
-            {modoExcepcional && excepcionesActivas > 0 && (
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold tracking-wide select-none">
-                <FileText className="w-3 h-3" />
-                <span>{excepcionesActivas} Excep.</span>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                setSettingsOpen(false);
+                setVistaPrincipal("malla");
+                navigate("/app");
+                if (!modoExcepcional) setModoExcepcional(true);
+              }}
+              className={`relative w-8.5 h-8.5 rounded-full border flex items-center justify-center transition-all duration-200
+                ${modoExcepcional
+                  ? "bg-violet-500/15 border-violet-500/45 text-violet-500"
+                  : "border-borderColor text-textSecondary hover:text-violet-500 hover:border-violet-500/40 hover:bg-violet-500/10"}`}
+              aria-label="Modo excepcional: aprobar ramos sin cumplir prerrequisitos"
+              title="Modo excepcional"
+            >
+              <GraduationCap className="w-4 h-4" />
+              {excepcionesActivas > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-3.5 h-3.5 px-0.5 rounded-full bg-violet-600 text-white text-[8px] font-black leading-3.5 flex items-center justify-center">
+                  {excepcionesActivas}
+                </span>
+              )}
+            </button>
 
             {/* Configuration Dropdown */}
             <div ref={settingsRef} className="relative">
@@ -256,22 +278,16 @@ export default function Navbar({
                       {/* Main Actions */}
                       <div className="flex flex-col gap-1">
                         <button
-                          onClick={() => { onVerProgreso?.(); setSettingsOpen(false); }}
+                          onClick={() => {
+                            if (onGuardLeave && !onGuardLeave()) return;
+                            onVerProgreso?.();
+                            setSettingsOpen(false);
+                          }}
                           className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2"
                         >
                           <FileText className="w-3.5 h-3.5 text-textSecondary" />
                           <span>Resumen de progreso</span>
                         </button>
-
-                        {mallaSeleccionada && (
-                          <button
-                            onClick={() => { onShowHorario?.(); setSettingsOpen(false); }}
-                            className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2"
-                          >
-                            <CalendarDays className="w-3.5 h-3.5 text-textSecondary" />
-                            <span>Ver mi horario</span>
-                          </button>
-                        )}
                       </div>
 
                       {/* Appearance settings */}
@@ -310,20 +326,6 @@ export default function Navbar({
                       {/* Configurations */}
                       <div className="pt-2.5 border-t border-borderColor/60 flex flex-col gap-1">
                         <p className="text-[9.5px] font-bold text-textSecondary/90 uppercase tracking-widest px-2 mb-2 select-none">Configuración</p>
-
-                        {/* Exceptional switch */}
-                        <button
-                          onClick={() => setModoExcepcional(!modoExcepcional)}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center justify-between"
-                        >
-                          <span className="flex items-center gap-2">
-                            <GraduationCap className="w-3.5 h-3.5 text-textSecondary" />
-                            <span>Modo excepcional</span>
-                          </span>
-                          <div className={`w-7.5 h-4 rounded-full p-0.5 transition-colors duration-200 flex items-center ${modoExcepcional ? "bg-amber-500" : "bg-borderColor"}`}>
-                            <div className={`w-3 h-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${modoExcepcional ? "translate-x-3.5" : "translate-x-0"}`} />
-                          </div>
-                        </button>
 
                         <button
                           onClick={() => { onShowTour?.(); setSettingsOpen(false); }}

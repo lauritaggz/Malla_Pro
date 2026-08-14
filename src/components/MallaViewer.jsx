@@ -8,6 +8,15 @@ import {
 } from "lucide-react";
 import Curso from "./Curso";
 import CourseDrawer from "./CourseDrawer";
+import ExceptionModeBar from "./ExceptionModeBar";
+import {
+  applyExceptionSelection,
+  appliedExceptionsToast,
+  canSelectInExceptionMode,
+  normalizeIdList,
+  sameIdSet,
+  toggleIdInSelection,
+} from "../utils/exceptionSelection";
 import {
   trackFullscreenMalla,
   trackToggleCursoEstado,
@@ -24,6 +33,8 @@ import { fetchMallaJson, mapMallaData } from "../utils/mallasLoader";
 const MallaViewer = ({
   mallaSeleccionada,
   modoExcepcional,
+  setModoExcepcional,
+  onExceptionDirtyChange,
   setExcepcionesActivas,
   onTotalCursosChange,
   onSemestresLoaded,
@@ -85,6 +96,9 @@ const MallaViewer = ({
   const [isMobileView, setIsMobileView] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
   );
+  const [exceptionSelection, setExceptionSelection] = useState([]);
+  const [exceptionToast, setExceptionToast] = useState(null);
+  const excepcionesRef = useRef([]);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
@@ -415,9 +429,86 @@ const MallaViewer = ({
   }, []);
 
   const canMarkProgress = useCallback(
-    (curso) => Boolean(modoExcepcional || cumplePrereqs(curso)),
-    [modoExcepcional, cumplePrereqs]
+    (curso) => Boolean(cumplePrereqs(curso)),
+    [cumplePrereqs]
   );
+
+  excepcionesRef.current = excepciones;
+  const exceptionHasChanges = modoExcepcional
+    ? !sameIdSet(exceptionSelection, excepciones)
+    : false;
+
+  useEffect(() => {
+    if (!modoExcepcional) {
+      setExceptionSelection([]);
+      return;
+    }
+    setExceptionSelection(normalizeIdList(excepcionesRef.current));
+    setCourseDrawerOpen(false);
+    setContextMenu(null);
+    setSelectedCurso(null);
+  }, [modoExcepcional]);
+
+  useEffect(() => {
+    onExceptionDirtyChange?.(Boolean(modoExcepcional && exceptionHasChanges));
+  }, [modoExcepcional, exceptionHasChanges, onExceptionDirtyChange]);
+
+  const cancelExceptionMode = useCallback(() => {
+    setModoExcepcional?.(false);
+  }, [setModoExcepcional]);
+
+  const applyExceptionMode = useCallback(() => {
+    if (!exceptionHasChanges) {
+      setModoExcepcional?.(false);
+      return;
+    }
+    const next = applyExceptionSelection(
+      { aprobados, excepciones, cursando },
+      exceptionSelection
+    );
+    setExcepciones(next.excepciones);
+    setAprobados(next.aprobados);
+    setCursando(next.cursando);
+    setExceptionToast(appliedExceptionsToast(next.excepciones.length));
+    window.setTimeout(() => setExceptionToast(null), 3500);
+    setModoExcepcional?.(false);
+  }, [
+    exceptionHasChanges,
+    aprobados,
+    excepciones,
+    cursando,
+    exceptionSelection,
+    setModoExcepcional,
+  ]);
+
+  const toggleExceptionCourse = useCallback(
+    (curso) => {
+      if (!modoExcepcional || !curso) return;
+      if (
+        !canSelectInExceptionMode(curso.id, { aprobados, excepciones })
+      ) {
+        return;
+      }
+      setExceptionSelection((prev) => toggleIdInSelection(prev, curso.id));
+    },
+    [modoExcepcional, aprobados, excepciones]
+  );
+
+  useEffect(() => {
+    if (!modoExcepcional) return undefined;
+    const onKey = (event) => {
+      if (event.key !== "Escape") return;
+      if (exceptionHasChanges) {
+        const leave = window.confirm(
+          "Tienes cambios sin aplicar en Modo Excepcional.\n\nPulsa Aceptar para salir sin guardar."
+        );
+        if (!leave) return;
+      }
+      cancelExceptionMode();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modoExcepcional, exceptionHasChanges, cancelExceptionMode]);
 
   // Aprobar o desmarcar ramo
   const aprobar = useCallback((id) => {
@@ -1040,7 +1131,11 @@ const MallaViewer = ({
               key={c.id}
               curso={c}
               aprobado={aprobados.includes(c.id)}
-              excepcional={excepciones.includes(c.id)}
+              excepcional={
+                modoExcepcional
+                  ? exceptionSelection.some((id) => Number(id) === Number(c.id))
+                  : excepciones.includes(c.id)
+              }
               disponible={cumplePrereqs(c)}
               enCurso={cursando.includes(c.id)}
               shake={shakeCursoId === c.id}
@@ -1049,6 +1144,15 @@ const MallaViewer = ({
               onLongPress={handleCursoLongPress}
               onContextMenu={handleCursoContextMenu}
               highlightStatus={getHighlightStatus(c.id)}
+              interactionMode={modoExcepcional ? "exception" : "normal"}
+              exceptionSelected={exceptionSelection.some(
+                (id) => Number(id) === Number(c.id)
+              )}
+              exceptionSelectable={canSelectInExceptionMode(c.id, {
+                aprobados,
+                excepciones,
+              })}
+              onExceptionToggle={toggleExceptionCourse}
             />
           ))}
         </div>
@@ -1107,7 +1211,9 @@ const MallaViewer = ({
       className={
         fullscreenMalla
           ? "malla-fullscreen-shell fixed inset-0 z-[9999] flex flex-col bg-bgPrimary text-textPrimary h-[100dvh] w-full"
-          : "mobile-malla-shell relative px-0 sm:px-4 md:px-8 pb-0 sm:pb-8 flex flex-col flex-1 min-h-0"
+          : `mobile-malla-shell malla-exception-focus relative px-0 sm:px-4 md:px-8 pb-0 sm:pb-8 flex flex-col flex-1 min-h-0 ${
+              modoExcepcional && isMobileView ? "pb-[8.5rem]" : ""
+            }`
       }
     >
       {fullscreenMalla ? (
@@ -1267,6 +1373,27 @@ const MallaViewer = ({
             </div>
           </div>
         </div>
+      )}
+
+      {modoExcepcional && (
+        <>
+          <div className="hidden sm:flex justify-center exception-mode-bar-desktop px-2 pb-3">
+            <ExceptionModeBar
+              selectedCount={exceptionSelection.length}
+              hasChanges={exceptionHasChanges}
+              onCancel={cancelExceptionMode}
+              onApply={applyExceptionMode}
+            />
+          </div>
+          <div className="sm:hidden exception-mode-bar-mobile">
+            <ExceptionModeBar
+              selectedCount={exceptionSelection.length}
+              hasChanges={exceptionHasChanges}
+              onCancel={cancelExceptionMode}
+              onApply={applyExceptionMode}
+            />
+          </div>
+        </>
       )}
 
       {/* Specialty and display filters bar (only if menciones exist) */}
@@ -1569,23 +1696,6 @@ const MallaViewer = ({
             <span>Pendiente</span>
           </button>
 
-          {/* Exceptional status */}
-          {modoExcepcional && (
-            <button
-              onClick={() => {
-                marcarExcepcional(contextMenu.curso.id);
-                setContextMenu(null);
-              }}
-              className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
-                ${excepciones.includes(contextMenu.curso.id)
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                  : "text-textPrimary hover:bg-bgPrimary"}`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>{excepciones.includes(contextMenu.curso.id) ? "Desmarcar Excepcional" : "Forzar Excepcional"}</span>
-            </button>
-          )}
-
           {/* Grade management */}
           {(cursando.includes(contextMenu.curso.id) || aprobados.includes(contextMenu.curso.id) || excepciones.includes(contextMenu.curso.id)) && (
             <>
@@ -1616,7 +1726,7 @@ const MallaViewer = ({
         aprobado={selectedCurso ? aprobados.includes(selectedCurso.id) : false}
         excepcional={selectedCurso ? excepciones.includes(selectedCurso.id) : false}
         disponible={selectedCurso ? cumplePrereqs(selectedCurso) : true}
-        modoExcepcional={modoExcepcional}
+        modoExcepcional={false}
         enCurso={selectedCurso ? cursando.includes(selectedCurso.id) : false}
         aprobar={() => selectedCurso && aprobar(selectedCurso.id)}
         marcarExcepcional={() => selectedCurso && marcarExcepcional(selectedCurso.id)}
@@ -1634,6 +1744,18 @@ const MallaViewer = ({
         excepciones={excepciones}
         allCursos={getAllCursos()}
       />
+
+      {exceptionToast &&
+        createPortal(
+          <div
+            role="status"
+            className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[80] max-w-[min(92vw,24rem)] rounded-xl border border-violet-500/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
+          >
+            <span className="text-violet-500 mr-1.5">✓</span>
+            {exceptionToast}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

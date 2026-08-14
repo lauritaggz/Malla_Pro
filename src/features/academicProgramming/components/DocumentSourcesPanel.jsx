@@ -169,7 +169,7 @@ export default function DocumentSourcesPanel({
         <SourceCard
           title="Programación Académica"
           description="Oferta de ramos, NRC, profesores y cupos."
-          loadedLabel={programmingLoaded ? "Programación cargada" : null}
+          loadedLabel={programmingLoaded ? "Cargada" : null}
           detail={programmingDetail}
           onFileSelected={onProgrammingFile}
           disabled={disabled}
@@ -178,7 +178,7 @@ export default function DocumentSourcesPanel({
         <SourceCard
           title="Mi horario"
           description="Detecta automáticamente los ramos que ya tienes inscritos."
-          loadedLabel={studentScheduleLoaded ? "Horario cargado" : null}
+          loadedLabel={studentScheduleLoaded ? "Cargado" : null}
           detail={studentScheduleDetail}
           onFileSelected={onStudentScheduleFile}
           disabled={disabled}

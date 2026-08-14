@@ -1,13 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Check, Trash2, Save, Sparkles, ChevronDown, RefreshCw, Eye, Download, AlertTriangle } from "lucide-react";
+import { Check, Trash2, Save, ChevronDown, MoreHorizontal, Eye, Download, AlertTriangle } from "lucide-react";
 import CurricularScheduleSelector from "./CurricularScheduleSelector";
 import WeeklyScheduleGrid from "./WeeklyScheduleGrid";
 import LoadedProgrammingBlock from "./LoadedProgrammingBlock";
 import CurricularProgressSummary from "./CurricularProgressSummary";
 import ParserWarningsPanel from "./ParserWarningsPanel";
 import CourseAccordionList from "./CourseAccordionList";
-import TomaDeRamosStepper from "./TomaDeRamosStepper";
-import MallaProgressHint from "./MallaProgressHint";
 import { getSelectionConflicts } from "../services/scheduleService";
 import { toDisplayCourse } from "../services/academicProgressIntegration";
 import { generateSchedulePdf } from "../utils/generateSchedulePdf";
@@ -26,7 +24,7 @@ export default function ScheduleBuilder({
   filters,
   setFilters,
   filterOptions,
-  onChangePdf,
+  onOpenSources,
   onClearSavedPlanning,
   mallaName,
   mallaSeleccionada,
@@ -34,7 +32,7 @@ export default function ScheduleBuilder({
   studentScheduleMeta = null,
   enrolledNrcs = [],
   studentScheduleRamos = [],
-  careerId,
+  hasProgrammingSource = false,
   warningsOpen,
   setWarningsOpen,
   totalCourseCount,
@@ -42,6 +40,7 @@ export default function ScheduleBuilder({
   modalityCount,
   warningCount,
   initialSelectedMap,
+  suppressRestoreToast = false,
   onSelectedMapChange,
 }) {
   const [selectedSectionsMap, setSelectedSectionsMap] = useState(() =>
@@ -49,12 +48,13 @@ export default function ScheduleBuilder({
       ? { ...initialSelectedMap }
       : {}
   );
-  const enrolledNrcSet = useMemo(
-    () => new Set((enrolledNrcs || []).map((n) => String(n).replace(/\D/g, ""))),
-    [enrolledNrcs]
-  );
   const showFullDay = false;
-  const [activeMobileTab, setActiveMobileTab] = useState("SECTIONS");
+  const [activeMobileTab, setActiveMobileTab] = useState(() =>
+    enrolledNrcs?.length ||
+    (initialSelectedMap && Object.keys(initialSelectedMap).length > 0)
+      ? "SCHEDULE"
+      : "SECTIONS"
+  );
   const [selectedMobileDay, setSelectedMobileDay] = useState("LU");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [proposalSaved, setProposalSaved] = useState(false);
@@ -78,6 +78,7 @@ export default function ScheduleBuilder({
   });
 
   const [expandedSecondaryCodes, setExpandedSecondaryCodes] = useState(new Set());
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const toggleSecondaryCourse = (code) => {
     setExpandedSecondaryCodes((prev) => {
@@ -109,16 +110,16 @@ export default function ScheduleBuilder({
     }
     setSelectedSectionsMap(restored);
     restoredOnceRef.current = true;
-    if (Object.keys(restored).length > 0) {
+    if (Object.keys(restored).length > 0 && !suppressRestoreToast) {
       setFeedbackMessage(
         missing > 0
           ? `Recuperamos tu planificación guardada. ${missing} sección(es) ya no están disponibles.`
-          : "Recuperamos tu planificación guardada en este navegador."
+          : "Recuperamos tu planificación anterior."
       );
       const t = setTimeout(() => setFeedbackMessage(""), 5000);
       return () => clearTimeout(t);
     }
-  }, [initialSelectedMap, allCourses]);
+  }, [initialSelectedMap, allCourses, suppressRestoreToast]);
 
   // Notificar cambios de selección al contenedor (para re-merge)
   useEffect(() => {
@@ -423,62 +424,10 @@ export default function ScheduleBuilder({
       .map((m) => m.dayCode)
   );
 
-  const step = proposalSaved ? 4 : selectedSectionsList.length > 0 ? 3 : 2;
   return (
-    <div className="space-y-3 md:space-y-6">
-      <TomaDeRamosStepper currentStep={step} />
-      <MallaProgressHint />
-
-      {/* 1. Encabezado Compacto */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between sm:gap-3 pb-2.5 md:pb-3 border-b border-borderColor select-none">
-        <div className="space-y-0.5 min-w-0">
-          <h1 className="text-lg sm:text-2xl font-black text-textPrimary tracking-tight">
-            Arma tu horario
-          </h1>
-          <p className="text-[11px] sm:text-sm text-textSecondary leading-snug">
-            Selecciona una sección para cada asignatura.
-            {integration && (
-              <span className="text-textSecondary/80">
-                {" "}
-                · {integration.primarySemester}.º semestre ·{" "}
-                {integration.primarySemesterCourses?.length || 0} recomendados
-                {integration.previousPendingCourses?.length > 0
-                  ? ` · ${integration.previousPendingCourses.length} arrastre`
-                  : ""}
-              </span>
-            )}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-semibold text-textSecondary">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-textSecondary/80 mr-0.5">
-            {periodLabel}
-          </span>
-          <button
-            type="button"
-            onClick={onChangePdf}
-            className="inline-flex items-center gap-1 px-2 py-1.5 sm:px-2.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[11px] font-bold text-textSecondary transition-colors hover:text-textPrimary bg-bgSecondary btn-interactive"
-          >
-            <RefreshCw className="h-3 w-3 shrink-0" />
-            <span className="sm:hidden">Cambiar PDF</span>
-            <span className="hidden sm:inline">Cambiar programación</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleClearSavedPlanning}
-            className="inline-flex items-center gap-1 px-2 py-1.5 sm:px-2.5 rounded-lg border border-red-500/25 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors bg-bgSecondary"
-            title="Eliminar planificación guardada"
-          >
-            <Trash2 className="h-3 w-3 shrink-0" />
-            <span className="sm:hidden">Eliminar</span>
-            <span className="hidden sm:inline">Eliminar planificación guardada</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Alerta de Feedback */}
+    <div className="space-y-3">
       {feedbackMessage && (
-        <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-semibold animate-fade-in relative flex items-start sm:items-center justify-between gap-2">
+        <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-2 rounded-xl text-[11px] sm:text-xs font-semibold flex items-start sm:items-center justify-between gap-2">
           <span className="min-w-0 leading-snug">{feedbackMessage}</span>
           <button
             type="button"
@@ -490,7 +439,6 @@ export default function ScheduleBuilder({
         </div>
       )}
 
-      {/* Tabs Móviles */}
       <div className="md:hidden flex border border-borderColor bg-bgSecondary rounded-xl select-none overflow-hidden">
         <button
           type="button"
@@ -501,7 +449,7 @@ export default function ScheduleBuilder({
               : "border-transparent text-textSecondary hover:text-textPrimary"
           }`}
         >
-          Tus asignaturas
+          Ramos
         </button>
         <button
           type="button"
@@ -512,7 +460,7 @@ export default function ScheduleBuilder({
               : "border-transparent text-textSecondary hover:text-textPrimary"
           }`}
         >
-          Mi horario
+          Horario
           {selectedSectionsList.length > 0 && (
             <span className="ml-1.5 inline-flex items-center justify-center bg-primary text-white text-[10px] font-extrabold h-4 min-w-4 px-1 rounded-full">
               {selectedSectionsList.length}
@@ -521,11 +469,10 @@ export default function ScheduleBuilder({
         </button>
       </div>
 
-      {/* 2. Área Principal de Trabajo */}
       <div
-        className="border border-borderColor bg-bgSecondary rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[minmax(320px,410px)_minmax(0,1fr)] divide-y md:divide-y-0 md:divide-x divide-borderColor
-          max-md:h-[min(62dvh,520px)] max-md:min-h-[280px]
-          md:h-[72vh] md:min-h-[560px] md:max-h-[850px]"
+        className="border border-borderColor bg-bgSecondary rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[minmax(280px,330px)_minmax(0,1fr)] divide-y md:divide-y-0 md:divide-x divide-borderColor
+          max-md:h-[min(68dvh,560px)] max-md:min-h-[280px]
+          md:h-[min(72vh,820px)] md:min-h-[520px]"
       >
         {/* Columna Izquierda: Tus Asignaturas */}
         <div
@@ -546,6 +493,8 @@ export default function ScheduleBuilder({
             expandedCourseCode={expandedCourseCode}
             onToggleCourse={setExpandedCourseCode}
             enrolledNrcs={enrolledNrcs}
+            hasProgrammingSource={hasProgrammingSource}
+            onOpenSources={onOpenSources}
           />
         </div>
 
@@ -556,7 +505,7 @@ export default function ScheduleBuilder({
           }`}
         >
           {/* Header del horario sticky unificado */}
-          <div className="bg-bgSecondary border-b border-borderColor px-3 py-2.5 sm:px-4 sm:py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3 z-10 shrink-0 select-none">
+          <div className="relative z-30 bg-bgSecondary border-b border-borderColor px-3 py-2.5 sm:px-4 sm:py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3 shrink-0 select-none">
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-sm font-black text-textPrimary uppercase tracking-wider">
@@ -582,9 +531,7 @@ export default function ScheduleBuilder({
               </p>
             </div>
 
-            <div className="flex items-center justify-between md:justify-end gap-3 flex-wrap">
-
-              {/* Botones de acción */}
+            <div className="flex items-center justify-between md:justify-end gap-2 flex-wrap">
               <div className="flex items-center gap-1.5">
                 {selectedSectionsList.length > 0 && (
                   <button
@@ -592,7 +539,7 @@ export default function ScheduleBuilder({
                     onClick={handleClearSchedule}
                     className="px-2.5 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[10px] font-bold text-textSecondary hover:text-textPrimary bg-bgSecondary btn-interactive"
                   >
-                    Limpiar
+                    Limpiar prueba
                   </button>
                 )}
                 <button
@@ -604,24 +551,56 @@ export default function ScheduleBuilder({
                   <Download className="h-3.5 w-3.5" />
                   {isExportingPdf ? "Exportando..." : "Exportar PDF"}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleSaveProposal}
-                  disabled={selectedSectionsList.length === 0}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold text-white transition-colors disabled:opacity-50 disabled:pointer-events-none btn-interactive ${
-                    proposalSaved
-                      ? "bg-emerald-600 hover:bg-emerald-700"
-                      : "bg-primary hover:brightness-110"
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-bold ${
+                    proposalSaved ? "text-emerald-600 dark:text-emerald-400" : "text-textSecondary"
                   }`}
                 >
-                  {proposalSaved ? <Check className="h-3.5 w-3.5 inline mr-0.5" /> : <Save className="h-3.5 w-3.5 inline mr-0.5" />}
-                  {proposalSaved ? "Guardado" : "Guardar"}
-                </button>
+                  {proposalSaved ? <Check className="h-3 w-3" /> : <Save className="h-3 w-3 opacity-50" />}
+                  {proposalSaved ? "Guardado" : "Autoguardado"}
+                </span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setMoreOpen((v) => !v)}
+                    className="p-1.5 rounded-lg border border-borderColor text-textSecondary hover:text-textPrimary bg-bgSecondary btn-interactive"
+                    aria-label="Más opciones"
+                    aria-expanded={moreOpen}
+                  >
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </button>
+                  {moreOpen && (
+                    <div className="absolute right-0 top-full mt-1 z-40 min-w-[220px] rounded-xl border border-borderColor bg-bgSecondary shadow-lg py-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMoreOpen(false);
+                          handleSaveProposal();
+                        }}
+                        className="w-full text-left px-3 py-2 text-[11px] font-bold text-textPrimary hover:bg-bgPrimary flex items-center gap-2"
+                      >
+                        <Save className="h-3.5 w-3.5" />
+                        Guardar ahora
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMoreOpen(false);
+                          handleClearSavedPlanning();
+                        }}
+                        className="w-full text-left px-3 py-2 text-[11px] font-bold text-red-500 hover:bg-red-500/10 flex items-center gap-2"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Eliminar planificación guardada
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-hidden">
             <WeeklyScheduleGrid
               selectedSectionsList={selectedSectionsList}
               onDeselectSection={handleDeselectSection}
@@ -635,16 +614,15 @@ export default function ScheduleBuilder({
         </div>
       </div>
 
-      {/* 3. Información Secundaria Colapsada */}
-      <div className="pt-4 md:pt-8 border-t border-borderColor mt-4 md:mt-8 space-y-3 md:space-y-4">
-        <h2 className="text-xs font-bold text-textSecondary uppercase tracking-widest flex items-center gap-1.5">
-          <Eye className="h-4 w-4" /> Más información y otras asignaturas
+      <div className="pt-3 md:pt-5 border-t border-borderColor space-y-2">
+        <h2 className="text-[10px] font-bold text-textSecondary uppercase tracking-widest flex items-center gap-1.5">
+          <Eye className="h-3.5 w-3.5" /> Más información
         </h2>
 
         <div className="grid grid-cols-1 gap-3">
           {/* A1: Detalles de tu avance curricular */}
           <SecondaryAccordion
-            title="Detalles de tu avance curricular"
+            title="Avance curricular"
             isOpen={openSecInfo.progress}
             onToggle={() => toggleSecInfo("progress")}
           >
@@ -696,7 +674,7 @@ export default function ScheduleBuilder({
           {/* A4: Ramos ya aprobados y cursando */}
           {completedAndInProgress.length > 0 && (
             <SecondaryAccordion
-              title={`Ramos ya aprobados o en curso (${completedAndInProgress.length})`}
+              title={`Aprobados / en curso (${completedAndInProgress.length})`}
               isOpen={openSecInfo.approved}
               onToggle={() => toggleSecInfo("approved")}
             >
@@ -728,7 +706,7 @@ export default function ScheduleBuilder({
 
           {/* A6: Información de la programación cargada */}
           <SecondaryAccordion
-            title="Información del documento importado"
+            title="Información importada"
             isOpen={openSecInfo.pdfInfo}
             onToggle={() => toggleSecInfo("pdfInfo")}
           >

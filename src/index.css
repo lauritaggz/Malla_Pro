@@ -895,10 +895,43 @@ body {
 }
 
 .curso-card-excepcional {
-  background: rgba(245, 158, 11, 0.08) !important;
-  border-color: rgba(245, 158, 11, 0.35) !important;
-  color: #d97706 !important;
-  border-left: 4px solid #d97706 !important;
+  background: rgba(124, 58, 237, 0.10) !important;
+  border-color: rgba(124, 58, 237, 0.38) !important;
+  border-left: 4px solid #7c3aed !important;
+}
+
+.curso-card-exception-selectable:hover {
+  border-color: rgba(124, 58, 237, 0.5) !important;
+}
+
+.curso-card-exception-selected {
+  background: rgba(124, 58, 237, 0.14) !important;
+  border-color: rgba(124, 58, 237, 0.65) !important;
+  border-left: 4px solid #7c3aed !important;
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.25);
+}
+
+.curso-card-exception-locked-normal {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+html.exception-mode-active .navbar-shell {
+  opacity: 0.72;
+}
+
+.exception-mode-bar-desktop {
+  position: sticky;
+  top: 0;
+  z-index: 35;
+}
+
+.exception-mode-bar-mobile {
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: calc(var(--mobile-bottom-nav-h, 4rem) + env(safe-area-inset-bottom, 0px) + 0.5rem);
+  z-index: 85;
 }
 
 /* SVG Prerequisites Line Flow Animation */

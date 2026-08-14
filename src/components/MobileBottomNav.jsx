@@ -5,6 +5,7 @@ import { BookMarked, CalendarDays, CalendarRange, MessageCircle } from "lucide-r
 export default function MobileBottomNav({
   vistaPrincipal = "malla",
   setVistaPrincipal,
+  onGuardLeave,
 }) {
   const navigate = useNavigate();
 
@@ -23,15 +24,17 @@ export default function MobileBottomNav({
       value: "periodo-actual",
       icon: <CalendarDays className="w-5.5 h-5.5" />,
       onClick: () => {
+        if (onGuardLeave && !onGuardLeave()) return;
         setVistaPrincipal("periodo-actual");
         navigate("/app");
       }
     },
     {
-      label: "Toma de Ramos",
+      label: "Horario",
       value: "toma-de-ramos",
       icon: <CalendarRange className="w-5.5 h-5.5" />,
       onClick: () => {
+        if (onGuardLeave && !onGuardLeave()) return;
         setVistaPrincipal("toma-de-ramos");
         navigate("/programacion-academica");
       }
@@ -41,6 +44,7 @@ export default function MobileBottomNav({
       value: "tutorias",
       icon: <MessageCircle className="w-5.5 h-5.5" />,
       onClick: () => {
+        if (onGuardLeave && !onGuardLeave()) return;
         setVistaPrincipal("tutorias");
         navigate("/app");
       }

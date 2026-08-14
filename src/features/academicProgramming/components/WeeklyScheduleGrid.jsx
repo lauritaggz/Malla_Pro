@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { AlertTriangle, Clock, MapPin, User, Calendar, Trash2, List, Info } from "lucide-react";
 import {
   unabTimeSlots,
@@ -14,6 +14,61 @@ import { assignOverlapColumns } from "../services/scheduleLayoutService";
 import { MODALITY_LABELS } from "../services/filterCourses";
 
 const PIXELS_PER_MINUTE = 1.15; // Altura en píxeles por minuto
+
+function findEarliestMeeting(meetings) {
+  let earliest = null;
+  for (const m of meetings) {
+    const start = timeToMinutes(m.startTime);
+    if (!earliest) {
+      earliest = m;
+      continue;
+    }
+    const earliestStart = timeToMinutes(earliest.startTime);
+    if (start < earliestStart) {
+      earliest = m;
+      continue;
+    }
+    if (start === earliestStart) {
+      const dayIndex = scheduleDays.find((d) => d.code === m.dayCode)?.index ?? 99;
+      const earliestDay = scheduleDays.find((d) => d.code === earliest.dayCode)?.index ?? 99;
+      if (dayIndex < earliestDay) earliest = m;
+    }
+  }
+  return earliest;
+}
+
+function meetingKey(m) {
+  return `${m.courseCode}-${m.dayCode}-${m.startTime}`;
+}
+
+function scrollElementIntoNearestScroller(el) {
+  if (!el) return false;
+  const reduceMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const behavior = reduceMotion ? "auto" : "smooth";
+
+  let node = el.parentElement;
+  let scrolled = false;
+  while (node && node !== document.body) {
+    const overflowY = window.getComputedStyle(node).overflowY;
+    const canScroll =
+      (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") &&
+      node.scrollHeight > node.clientHeight + 2;
+    if (canScroll) {
+      const nodeRect = node.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      node.scrollTo({
+        top: Math.max(0, node.scrollTop + (elRect.top - nodeRect.top) - 8),
+        behavior,
+      });
+      scrolled = true;
+      break;
+    }
+    node = node.parentElement;
+  }
+  return scrolled;
+}
 
 function useIsDarkMode() {
   const [isDark, setIsDark] = useState(() =>
@@ -151,6 +206,11 @@ export default function WeeklyScheduleGrid({
 
 
 
+  const scrollerRef = useRef(null);
+  const didScrollToFirstRef = useRef(false);
+  const earliestMeeting = useMemo(() => findEarliestMeeting(gridMeetings), [gridMeetings]);
+  const earliestKey = earliestMeeting ? meetingKey(earliestMeeting) : null;
+
   const positionedMeetingsByDay = useMemo(() => {
     const byDay = { LU: [], MA: [], MI: [], JU: [], VI: [], SA: [] };
 
@@ -177,6 +237,45 @@ export default function WeeklyScheduleGrid({
 
     return byDay;
   }, [gridMeetings, scheduleStartMinutes]);
+
+  useLayoutEffect(() => {
+    if (!earliestMeeting) {
+      didScrollToFirstRef.current = false;
+      return undefined;
+    }
+    if (didScrollToFirstRef.current) return undefined;
+
+    if (earliestMeeting.dayCode && earliestMeeting.dayCode !== selectedMobileDay) {
+      setSelectedMobileDay(earliestMeeting.dayCode);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const tryScroll = () => {
+      if (cancelled || didScrollToFirstRef.current) return;
+      const root = scrollerRef.current;
+      const el = root?.querySelector("[data-earliest-meeting='true']");
+      if (!el) return false;
+      const ok = scrollElementIntoNearestScroller(el);
+      if (ok) didScrollToFirstRef.current = true;
+      return ok;
+    };
+
+    const timers = [];
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (tryScroll()) return;
+        timers.push(setTimeout(tryScroll, 80));
+        timers.push(setTimeout(tryScroll, 250));
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+      timers.forEach(clearTimeout);
+    };
+  }, [earliestMeeting, selectedMobileDay, setSelectedMobileDay, gridHeight]);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-bgSecondary overflow-hidden select-none">
@@ -231,8 +330,11 @@ export default function WeeklyScheduleGrid({
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto relative flex flex-col min-h-0 bg-bgPrimary/10">
-          <div className="min-w-0 md:min-w-[650px] flex flex-col flex-1 relative">
+        <div
+          ref={scrollerRef}
+          className="flex-1 overflow-auto relative flex flex-col min-h-0 bg-bgPrimary/10"
+        >
+          <div className="min-w-0 md:min-w-[650px] flex flex-col relative">
             {/* Cabecera de días (Fijo arriba) */}
             <div className="grid grid-cols-[56px_repeat(6,minmax(0,1fr))] md:grid-cols-[64px_repeat(6,1fr)] border-b border-borderColor bg-bgSecondary sticky top-0 z-20 text-center select-none text-[10px] font-extrabold text-textSecondary">
               <div className="border-r border-borderColor" />
@@ -347,6 +449,7 @@ export default function WeeklyScheduleGrid({
                       return (
                         <div
                           key={popKey}
+                          data-earliest-meeting={earliestKey === popKey ? "true" : undefined}
                           ref={(el) => {
                             if (el) popoverRefs.current.set(popKey, el);
                             else popoverRefs.current.delete(popKey);

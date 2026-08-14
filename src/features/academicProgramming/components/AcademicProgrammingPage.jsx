@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
-import DocumentSourcesPanel from "./DocumentSourcesPanel";
 import ParsingProgress from "./ParsingProgress";
 import ScheduleBuilder from "./ScheduleBuilder";
-import TomaDeRamosStepper from "./TomaDeRamosStepper";
 import MallaProgressHint from "./MallaProgressHint";
+import SourcesBar from "./SourcesBar";
+import SourcesManager from "./SourcesManager";
 import ErrorBoundary from "../../../components/ErrorBoundary";
 
 import {
@@ -35,9 +35,10 @@ import {
   readActiveMentionCode,
   readProgressStateFromStorage,
 } from "../../../utils/curriculumProgress";
+import { syncStudentScheduleToMallaProgress } from "../services/syncStudentScheduleToMallaProgress";
 import { fetchMallaJson, mapMallaData } from "../../../utils/mallasLoader";
 import { safeStorage } from "../../../utils/safeStorage";
-import { LEGACY_KEYS, getCareerId, getPeriodId } from "../../../utils/storageKeys";
+import { LEGACY_KEYS, getPeriodId } from "../../../utils/storageKeys";
 import { normalizeAppError } from "../../../utils/appErrors";
 
 /** @typedef {"idle"|"validating"|"reading"|"processing"|"success"|"partial-success"|"recoverable-error"|"fatal-error"} FlowStatus */
@@ -89,6 +90,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const [studentScheduleRamos, setStudentScheduleRamos] = useState([]);
   const [restoredSelectedMap, setRestoredSelectedMap] = useState(null);
   const [selectionEpoch, setSelectionEpoch] = useState(0);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
 
   const [mallaSeleccionada, setMallaSeleccionada] = useState(() =>
     safeStorage.get(LEGACY_KEYS.seleccionada, null)
@@ -104,6 +106,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const programmingRawRef = useRef(null);
   const studentScheduleRawRef = useRef(null);
   const selectedMapRef = useRef({});
+  const pendingCursandoSyncRef = useRef(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -229,7 +232,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
           ? "partial-success"
           : "success"
       );
-      setInfoMessage("Recuperamos tu planificación guardada en este navegador.");
+      setInfoMessage("Recuperamos tu planificación anterior");
       const t = setTimeout(() => setInfoMessage(null), 5000);
       return () => clearTimeout(t);
     }
@@ -319,6 +322,41 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
     },
     [mallaSeleccionada]
   );
+
+  const syncEnrolledToMalla = useCallback(
+    (ramos) => {
+      if (!mallaSeleccionada || !mallaData || !ramos?.length) return 0;
+      const result = syncStudentScheduleToMallaProgress(
+        mallaSeleccionada,
+        mallaData,
+        ramos,
+        {
+          mentionCode,
+          courseCodeAliases: mallaData.courseCodeAliases || {},
+        }
+      );
+      if (result.ok && result.progress) {
+        setProgressState(result.progress);
+      }
+      return result.added || 0;
+    },
+    [mallaSeleccionada, mallaData, mentionCode]
+  );
+
+  useEffect(() => {
+    if (!pendingCursandoSyncRef.current || !mallaData) return;
+    const ramos = studentScheduleRawRef.current?.ramos || studentScheduleRamos;
+    if (!ramos?.length) return;
+    pendingCursandoSyncRef.current = false;
+    const added = syncEnrolledToMalla(ramos);
+    if (added > 0) {
+      setInfoMessage(
+        `Marcamos ${added} ramo${added === 1 ? "" : "s"} como cursando en Mi malla.`
+      );
+      const t = setTimeout(() => setInfoMessage(null), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [mallaData, studentScheduleRamos, syncEnrolledToMalla]);
 
   const applyMerge = useCallback(
     ({ progMeta, schedMeta, keepSelection = true }) => {
@@ -540,8 +578,17 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
         const merged = applyMerge({ schedMeta: meta, keepSelection: true });
         if (!merged) return;
 
+        pendingCursandoSyncRef.current = true;
+        const addedToMalla = syncEnrolledToMalla(result.ramos);
+        if (addedToMalla > 0 || mallaData) {
+          pendingCursandoSyncRef.current = false;
+        }
+
+        const detected = `Detectamos ${result.ramos.length} ramo${result.ramos.length === 1 ? "" : "s"} inscrito${result.ramos.length === 1 ? "" : "s"} en tu horario.`;
         setInfoMessage(
-          `Detectamos ${result.ramos.length} ramo${result.ramos.length === 1 ? "" : "s"} inscrito${result.ramos.length === 1 ? "" : "s"} en tu horario.`
+          addedToMalla > 0
+            ? `${detected} Marcamos ${addedToMalla} como cursando en Mi malla.`
+            : detected
         );
         setTimeout(() => setInfoMessage(null), 5000);
       } catch (err) {
@@ -576,7 +623,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
         }
       }
     },
-    [abortCurrentParse, applyMerge, programming]
+    [abortCurrentParse, applyMerge, programming, syncEnrolledToMalla, mallaData]
   );
 
   const isBusy =
@@ -584,11 +631,6 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const hasAnySource = Boolean(
     programming || programmingRawRef.current || studentScheduleRawRef.current
   );
-  const showUpload =
-    status === "idle" ||
-    status === "fatal-error" ||
-    status === "recoverable-error" ||
-    (!programming && !isBusy);
   const showBuilder =
     (status === "success" ||
       status === "partial-success" ||
@@ -599,6 +641,19 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const programmingLoaded = hasProgrammingSource;
   const studentScheduleLoaded = hasStudentScheduleSource;
 
+  const programmingDetail = programmingLoaded
+    ? `${totalSectionCount || 0} secciones`
+    : null;
+  const studentScheduleDetail = studentScheduleLoaded
+    ? `${enrolledNrcs.length || studentScheduleMeta?.enrolledCount || 0} ramos`
+    : null;
+  const sourceErrors = status === "fatal-error" || status === "recoverable-error";
+  const hasMallaProgress =
+    (progressState?.aprobados?.length || 0) +
+      (progressState?.excepciones?.length || 0) +
+      (progressState?.cursando?.length || 0) >
+    0;
+
   return (
     <ErrorBoundary
       context="toma-de-ramos"
@@ -606,7 +661,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
       onClearModule={clearPlanningOnly}
     >
       <div className="min-h-screen bg-bgPrimary text-textPrimary">
-        {!isEmbedded && !showBuilder && (
+        {!isEmbedded && (
           <div className="sticky top-0 z-40 border-b border-borderColor bg-bgSecondary/90 backdrop-blur-xl">
             <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center gap-3">
               <Link
@@ -621,102 +676,26 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
           </div>
         )}
 
-        <main className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-[calc(var(--mobile-bottom-nav-h,4rem)+1rem)] sm:pb-20">
-          {!showBuilder && (
-            <>
-              <TomaDeRamosStepper currentStep={1} />
-              <MallaProgressHint />
-            </>
-          )}
-
+        <main className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-[calc(var(--mobile-bottom-nav-h,4rem)+1rem)] sm:pb-16 overflow-x-hidden">
           {infoMessage && (
             <div
               role="status"
-              className="mb-4 rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-textPrimary"
+              className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[70] max-w-[min(92vw,28rem)] rounded-xl border border-emerald-500/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
             >
+              <span className="text-emerald-500 mr-1.5">✓</span>
               {infoMessage}
+              <button
+                type="button"
+                className="ml-3 text-[11px] text-textSecondary underline"
+                onClick={() => setInfoMessage(null)}
+              >
+                Cerrar
+              </button>
             </div>
           )}
 
-          {showUpload && !isBusy && (
-            <div className="flex flex-col items-center justify-center min-h-[70vh] max-w-3xl mx-auto space-y-6 fade-in">
-              <div className="space-y-2 max-w-lg text-center">
-                <h1 className="text-[1.75rem] sm:text-[2rem] font-black tracking-tight text-textPrimary">
-                  Toma de Ramos
-                </h1>
-                <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
-                  Sube la Programación Académica y/o tu horario inscrito desde UNAB.
-                  Con ambos, Malla Pro marca automáticamente lo que ya tienes y te
-                  ayuda a armar el resto.
-                </p>
-              </div>
-
-              <div className="w-full">
-                <DocumentSourcesPanel
-                  programmingLoaded={programmingLoaded}
-                  programmingDetail={
-                    programmingLoaded
-                      ? `${totalSectionCount || "—"} secciones encontradas`
-                      : null
-                  }
-                  studentScheduleLoaded={studentScheduleLoaded}
-                  studentScheduleDetail={
-                    studentScheduleLoaded
-                      ? `${enrolledNrcs.length || studentScheduleMeta?.enrolledCount || 0} ramos inscritos detectados`
-                      : null
-                  }
-                  mergeSummary={mergeSummary}
-                  onProgrammingFile={handleProgrammingFile}
-                  onStudentScheduleFile={handleStudentScheduleFile}
-                  disabled={isBusy}
-                  programmingError={
-                    status === "fatal-error" || status === "recoverable-error"
-                      ? programmingError
-                      : null
-                  }
-                  studentScheduleError={
-                    status === "fatal-error" || status === "recoverable-error"
-                      ? studentScheduleError
-                      : null
-                  }
-                />
-              </div>
-
-              {(status === "fatal-error" || status === "recoverable-error") &&
-                errorMessage &&
-                !programmingError &&
-                !studentScheduleError && (
-                  <div
-                    role="alert"
-                    className="w-full rounded-xl border border-red-500/30 bg-red-500/5 px-4 py-3 text-sm text-red-600 dark:text-red-400 text-center"
-                  >
-                    {errorMessage}{" "}
-                    <button
-                      type="button"
-                      onClick={reset}
-                      className="underline font-medium"
-                    >
-                      Reintentar
-                    </button>
-                  </div>
-                )}
-
-              {hasAnySource && status === "idle" && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    applyMerge({ keepSelection: true });
-                  }}
-                  className="text-sm text-primary font-semibold underline"
-                >
-                  Continuar con la planificación guardada
-                </button>
-              )}
-            </div>
-          )}
-
-          {isBusy && (
-            <div className="flex flex-col items-center justify-center min-h-[70vh] fade-in gap-3">
+          {isBusy ? (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] fade-in gap-3">
               <p className="text-sm text-textSecondary font-medium">{progressLabel}</p>
               <ParsingProgress
                 page={progress.page}
@@ -736,67 +715,120 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                 Cancelar
               </button>
             </div>
-          )}
+          ) : (
+            <div className="fade-in space-y-3 sm:space-y-3.5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0 space-y-0.5">
+                  <h1 className="text-xl sm:text-2xl font-black text-textPrimary tracking-tight">
+                    Arma tu horario
+                  </h1>
+                  <p className="text-[11px] sm:text-sm text-textSecondary leading-snug max-w-xl">
+                    Parte desde tu horario actual y prueba cambios sin perder lo que ya tienes inscrito.
+                  </p>
+                </div>
+              </div>
 
-          {showBuilder && programming && (
-            <div className="fade-in space-y-4">
-              <DocumentSourcesPanel
-                compact
+              <SourcesBar
                 programmingLoaded={programmingLoaded}
-                programmingDetail={
-                  programmingLoaded
-                    ? `${totalSectionCount} secciones`
-                    : "Opcional · completa oferta y profesores"
-                }
+                programmingDetail={programmingDetail}
+                programmingError={sourceErrors ? programmingError : null}
                 studentScheduleLoaded={studentScheduleLoaded}
-                studentScheduleDetail={
-                  studentScheduleLoaded
-                    ? `${enrolledNrcs.length} inscritos`
-                    : "Opcional · marca lo que ya tienes"
-                }
-                mergeSummary={mergeSummary}
-                onProgrammingFile={handleProgrammingFile}
-                onStudentScheduleFile={handleStudentScheduleFile}
-                disabled={isBusy}
+                studentScheduleDetail={studentScheduleDetail}
+                studentScheduleError={sourceErrors ? studentScheduleError : null}
+                onManage={() => setSourcesOpen(true)}
               />
 
-              <ScheduleBuilder
-                key={`builder-${selectionEpoch}`}
-                integration={integration}
-                programming={programming}
-                allCourses={allCourses}
-                filters={filters}
-                setFilters={setFilters}
-                filterOptions={filterOptions}
-                onChangePdf={() => {
-                  abortCurrentParse();
-                  setStatus("idle");
-                  setErrorMessage(null);
-                  setProgrammingError(null);
-                  setStudentScheduleError(null);
-                }}
-                onClearSavedPlanning={clearPlanningOnly}
-                mallaName={mallaData?.nombre}
-                mallaSeleccionada={mallaSeleccionada}
-                fileMetadata={fileMetadata}
-                studentScheduleMeta={studentScheduleMeta}
-                enrolledNrcs={enrolledNrcs}
-                studentScheduleRamos={studentScheduleRamos}
-                careerId={getCareerId(mallaSeleccionada)}
-                warningsOpen={warningsOpen}
-                setWarningsOpen={setWarningsOpen}
-                totalCourseCount={totalCourseCount}
-                totalSectionCount={totalSectionCount}
-                modalityCount={modalityCount}
-                warningCount={warningCount}
-                initialSelectedMap={restoredSelectedMap}
-                onSelectedMapChange={(map) => {
-                  selectedMapRef.current = map;
-                }}
-              />
+              {!hasMallaProgress && <MallaProgressHint />}
+
+              {sourceErrors &&
+                errorMessage &&
+                !programmingError &&
+                !studentScheduleError && (
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-600 dark:text-red-400"
+                  >
+                    {errorMessage}{" "}
+                    <button type="button" onClick={reset} className="underline font-medium">
+                      Reintentar
+                    </button>
+                  </div>
+                )}
+
+              {showBuilder && programming ? (
+                <ScheduleBuilder
+                  key={`builder-${selectionEpoch}`}
+                  integration={integration}
+                  programming={programming}
+                  allCourses={allCourses}
+                  filters={filters}
+                  setFilters={setFilters}
+                  filterOptions={filterOptions}
+                  onOpenSources={() => setSourcesOpen(true)}
+                  onClearSavedPlanning={clearPlanningOnly}
+                  mallaName={mallaData?.nombre}
+                  mallaSeleccionada={mallaSeleccionada}
+                  fileMetadata={fileMetadata}
+                  studentScheduleMeta={studentScheduleMeta}
+                  enrolledNrcs={enrolledNrcs}
+                  studentScheduleRamos={studentScheduleRamos}
+                  hasProgrammingSource={programmingLoaded}
+                  warningsOpen={warningsOpen}
+                  setWarningsOpen={setWarningsOpen}
+                  totalCourseCount={totalCourseCount}
+                  totalSectionCount={totalSectionCount}
+                  modalityCount={modalityCount}
+                  warningCount={warningCount}
+                  initialSelectedMap={restoredSelectedMap}
+                  suppressRestoreToast
+                  onSelectedMapChange={(map) => {
+                    selectedMapRef.current = map;
+                  }}
+                />
+              ) : (
+                <div className="rounded-2xl border border-borderColor bg-bgSecondary px-4 py-8 sm:py-12 text-center space-y-3">
+                  <p className="text-sm font-bold text-textPrimary">
+                    Empieza cargando tu horario o la Programación Académica.
+                  </p>
+                  <p className="text-xs text-textSecondary max-w-md mx-auto">
+                    Puedes usar cualquiera de los dos. Con tu horario vemos lo inscrito; con la programación puedes probar otras secciones.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSourcesOpen(true)}
+                    className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:brightness-110 btn-interactive"
+                  >
+                    Cargar archivos
+                  </button>
+                  {hasAnySource && status === "idle" && (
+                    <button
+                      type="button"
+                      onClick={() => applyMerge({ keepSelection: true })}
+                      className="block mx-auto text-xs text-primary font-semibold underline"
+                    >
+                      Continuar con la planificación guardada
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </main>
+
+        <SourcesManager
+          open={sourcesOpen}
+          onClose={() => setSourcesOpen(false)}
+          programmingLoaded={programmingLoaded}
+          programmingDetail={programmingDetail}
+          studentScheduleLoaded={studentScheduleLoaded}
+          studentScheduleDetail={studentScheduleDetail}
+          mergeSummary={mergeSummary}
+          onProgrammingFile={handleProgrammingFile}
+          onStudentScheduleFile={handleStudentScheduleFile}
+          disabled={isBusy}
+          programmingError={sourceErrors ? programmingError : null}
+          studentScheduleError={sourceErrors ? studentScheduleError : null}
+        />
       </div>
     </ErrorBoundary>
   );

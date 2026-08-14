@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Navbar from "./components/Navbar";
 import { listarMallas } from "./utils/mallasLoader";
 import MallaViewer from "./components/MallaViewer";
@@ -12,7 +12,8 @@ import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
 import LoginSuggestion, { getStoredUser } from "./components/LoginSuggestion";
 import { trackOpenNotas, trackSelectMalla, inferUniversidadFromUrl } from "./utils/analytics";
-import { clearAcademicProgress } from "./utils/academicProgressStorage";
+import { clearAcademicProgress, readAcademicProgress } from "./utils/academicProgressStorage";
+import { MALLA_PROGRESS_EVENT } from "./utils/curriculumProgress";
 import { safeStorage } from "./utils/safeStorage";
 import { LEGACY_KEYS } from "./utils/storageKeys";
 import { AnimatePresence } from "framer-motion";
@@ -55,6 +56,7 @@ export default function App() {
   const [progreso, setProgreso] = useState({ total: 0, aprobados: 0 });
   const [cursosCursando, setCursosCursando] = useState(0);
   const [modoExcepcional, setModoExcepcional] = useState(false);
+  const exceptionDirtyRef = useRef(false);
   const [mallasDisponibles, setMallasDisponibles] = useState([]);
   const [mallaSeleccionada, setMallaSeleccionada] = useState(
     readMallaSeleccionadaFromStorage
@@ -210,6 +212,47 @@ export default function App() {
   const handleSetMallaData = useCallback((val) => setMallaData(val), []);
   const handleSetAprobados = useCallback((val) => setAprobados(val), []);
   const handleSetExcepciones = useCallback((val) => setExcepciones(val), []);
+  const handleExceptionDirtyChange = useCallback((dirty) => {
+    exceptionDirtyRef.current = Boolean(dirty);
+  }, []);
+
+  const confirmLeaveExceptionMode = useCallback(() => {
+    if (!modoExcepcional) return true;
+    if (exceptionDirtyRef.current) {
+      const leave = window.confirm(
+        "Tienes cambios sin aplicar en Modo Excepcional.\n\nAceptar: salir sin guardar\nCancelar: seguir editando"
+      );
+      if (!leave) return false;
+    }
+    setModoExcepcional(false);
+    exceptionDirtyRef.current = false;
+    return true;
+  }, [modoExcepcional]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle(
+      "exception-mode-active",
+      modoExcepcional
+    );
+    return () => {
+      document.documentElement.classList.remove("exception-mode-active");
+    };
+  }, [modoExcepcional]);
+
+  useEffect(() => {
+    const syncFromStorage = () => {
+      if (!mallaSeleccionada) return;
+      const progress = readAcademicProgress(mallaSeleccionada);
+      setAprobados(progress.aprobados);
+      setExcepciones(progress.excepciones);
+      setCursando(progress.cursando);
+      setCursosCursando(progress.cursando.length);
+    };
+    window.addEventListener(MALLA_PROGRESS_EVENT, syncFromStorage);
+    return () => {
+      window.removeEventListener(MALLA_PROGRESS_EVENT, syncFromStorage);
+    };
+  }, [mallaSeleccionada]);
 
   return (
     <div className={`bg-bgPrimary text-textPrimary overflow-x-hidden relative ${mallaSeleccionada ? "mobile-app-shell min-h-[100dvh] sm:min-h-screen" : "min-h-screen"}`}>
@@ -229,10 +272,14 @@ export default function App() {
           onShowTour={() => setMostrarTour(true)}
           onShowHorario={() => setMostrarHorario(true)}
           onShowContacto={() => setMostrarContacto(true)}
-          onChangeMalla={handleCambiarMalla}
+          onChangeMalla={() => {
+            if (!confirmLeaveExceptionMode()) return;
+            handleCambiarMalla();
+          }}
           mostrarResumen={mostrarResumen}
           vistaPrincipal={vistaPrincipal}
           setVistaPrincipal={setVistaPrincipal}
+          onGuardLeave={confirmLeaveExceptionMode}
         />
       )}
 
@@ -240,6 +287,7 @@ export default function App() {
         <MobileBottomNav
           vistaPrincipal={vistaPrincipal}
           setVistaPrincipal={setVistaPrincipal}
+          onGuardLeave={confirmLeaveExceptionMode}
         />
       )}
 
@@ -355,6 +403,8 @@ export default function App() {
             <MallaViewer
               mallaSeleccionada={mallaSeleccionada}
               modoExcepcional={modoExcepcional}
+              setModoExcepcional={setModoExcepcional}
+              onExceptionDirtyChange={handleExceptionDirtyChange}
               setExcepcionesActivas={setExcepcionesActivas}
               onTotalCursosChange={handleSetProgreso}
               onSemestresLoaded={handleSemestresLoaded}

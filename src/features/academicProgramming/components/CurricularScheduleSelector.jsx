@@ -19,91 +19,95 @@ export default function CurricularScheduleSelector({
   expandedCourseCode,
   onToggleCourse,
   enrolledNrcs = [],
+  hasProgrammingSource = false,
+  onOpenSources,
 }) {
   const [openGroups, setOpenGroups] = useState({
     recommended: true,
     previous: true,
   });
-
+  const [sidebarTab, setSidebarTab] = useState(() =>
+    enrolledNrcs?.length ? "horario" : hasProgrammingSource ? "disponibles" : "horario"
+  );
   const [showFilters, setShowFilters] = useState(false);
   const enrolledNrcSet = new Set(
     (enrolledNrcs || []).map((n) => String(n).replace(/\D/g, ""))
   );
 
-  // Sin malla: mostrar todos los cursos del PDF / horario
-  if (!integration) {
-    const fallbackCourses = (allCourses || []).map((c) => ({
-      ...c,
-      displayCategory: "Importados",
-    }));
-    const filtered = filterAndSortCourses(fallbackCourses, filters);
-    return (
-      <aside className="w-full flex flex-col h-full min-h-0 bg-bgSecondary overflow-hidden select-none">
-        <div className="p-3 sm:p-4 border-b border-borderColor shrink-0">
-          <h2 className="text-sm font-black text-textPrimary uppercase tracking-wider">
-            Tus asignaturas
-          </h2>
-          <p className="text-[11px] text-textSecondary mt-1">
-            {filtered.length} ramo{filtered.length === 1 ? "" : "s"} · desde tus documentos
-          </p>
-        </div>
-        <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2">
-          {filtered.map((course) => (
-            <SelectableCourseAccordion
-              key={course.courseCode}
-              course={course}
-              selectedSectionsMap={selectedSectionsMap}
-              selectedSectionsList={selectedSectionsList}
-              onSelectSection={onSelectSection}
-              onDeselectSection={onDeselectSection}
-              allCourses={allCourses}
-              expanded={expandedCourseCode === course.courseCode}
-              onToggle={() =>
-                onToggleCourse(
-                  expandedCourseCode === course.courseCode
-                    ? null
-                    : course.courseCode
-                )
-              }
-              enrolledNrcSet={enrolledNrcSet}
-            />
-          ))}
-        </div>
-      </aside>
+  const isCourseEnrolled = (course) =>
+    (course.sections || []).some(
+      (s) =>
+        Boolean(s.enrolled) ||
+        enrolledNrcSet.has(String(s.nrc || "").replace(/\D/g, ""))
     );
-  }
 
-  // Clasificar y filtrar cursos del PDF según la integración
-  const recommended = (integration.primarySemesterCourses || [])
-    .map((c) => toDisplayCourse(c, "Semestre recomendado"));
+  const horarioCourses = (allCourses || []).filter((c) => {
+    const code = c.courseCode;
+    return Boolean(selectedSectionsMap[code]) || isCourseEnrolled(c);
+  });
+  const filteredHorario = filterAndSortCourses(horarioCourses, filters);
+  const enrolledCount = (allCourses || []).filter(isCourseEnrolled).length;
+
+  const recommended = integration
+    ? (integration.primarySemesterCourses || []).map((c) =>
+        toDisplayCourse(c, "Semestre recomendado")
+      )
+    : [];
   const filteredRecommended = filterAndSortCourses(recommended, filters);
 
-  const previous = (integration.previousPendingCourses || [])
-    .map((c) => toDisplayCourse(c, "Pendiente"));
+  const previous = integration
+    ? (integration.previousPendingCourses || []).map((c) =>
+        toDisplayCourse(c, "Pendiente")
+      )
+    : [];
   const filteredPrevious = filterAndSortCourses(previous, filters);
 
-  // Total de asignaturas prioritarias
-  const totalRamosRelevantes = recommended.length + previous.length;
-  const totalRamosSeleccionados = Object.keys(selectedSectionsMap).filter(code =>
-    recommended.some(r => r.courseCode === code) || previous.some(p => p.courseCode === code)
-  ).length;
+  const availableFallback =
+    hasProgrammingSource &&
+    (!integration || (recommended.length === 0 && previous.length === 0))
+      ? filterAndSortCourses(allCourses || [], filters)
+      : [];
 
   return (
     <aside className="w-full flex flex-col h-full min-h-0 bg-bgSecondary overflow-hidden select-none">
-      {/* Cabecera Fija */}
-      <div className="p-3 sm:p-4 border-b border-borderColor space-y-2.5 sm:space-y-3 shrink-0 bg-bgSecondary relative z-20">
+      <div className="p-3 sm:p-3.5 border-b border-borderColor space-y-2.5 shrink-0 bg-bgSecondary relative z-20">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="text-sm font-black text-textPrimary uppercase tracking-wider">
-              Tus asignaturas
+            <h2 className="text-sm font-black text-textPrimary tracking-tight">
+              Tus ramos
             </h2>
             <p className="text-[11px] text-textSecondary font-medium leading-snug mt-0.5">
-              Selecciona una sección por ramo.
+              Inscritos y secciones que quieras probar.
             </p>
           </div>
-          <div className="px-2 py-1 rounded bg-bgPrimary border border-borderColor text-xs font-extrabold text-primary shrink-0 select-none">
-            {totalRamosSeleccionados} de {totalRamosRelevantes}
+          <div className="px-2 py-1 rounded bg-bgPrimary border border-borderColor text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 shrink-0">
+            {enrolledCount} inscrito{enrolledCount === 1 ? "" : "s"}
           </div>
+        </div>
+
+        <div className="flex rounded-lg border border-borderColor overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setSidebarTab("horario")}
+            className={`flex-1 py-1.5 text-[10px] font-extrabold uppercase tracking-wide ${
+              sidebarTab === "horario"
+                ? "bg-primary text-white"
+                : "bg-bgPrimary text-textSecondary hover:text-textPrimary"
+            }`}
+          >
+            Tu horario
+          </button>
+          <button
+            type="button"
+            onClick={() => setSidebarTab("disponibles")}
+            className={`flex-1 py-1.5 text-[10px] font-extrabold uppercase tracking-wide border-l border-borderColor ${
+              sidebarTab === "disponibles"
+                ? "bg-primary text-white"
+                : "bg-bgPrimary text-textSecondary hover:text-textPrimary"
+            }`}
+          >
+            Disponibles
+          </button>
         </div>
 
         {/* Buscador y Botón de Filtros */}
@@ -113,7 +117,7 @@ export default function CurricularScheduleSelector({
               type="text"
               value={filters.query}
               onChange={(e) => setFilters(prev => ({ ...prev, query: e.target.value }))}
-              placeholder="Buscar asignatura..."
+              placeholder="Buscar ramo, código o NRC..."
               className="w-full min-w-0 pl-3 pr-3 py-1.5 rounded-lg border border-borderColor bg-bgPrimary text-xs focus:ring-1 focus:ring-primary focus:border-primary text-textPrimary font-semibold"
             />
           </div>
@@ -210,57 +214,190 @@ export default function CurricularScheduleSelector({
         </div>
       </div>
 
-      {/* Listas con Scroll Independiente */}
-      <div className="flex-1 min-h-0 divide-y divide-borderColor overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-3 sm:space-y-4">
-        {/* 1. Ramos Recomendados */}
-        {filteredRecommended.length > 0 && (
-          <GroupSection
-            title={`${integration.primarySemester}.º SEMESTRE · ${recommended.length} RAMOS`}
-            isOpen={openGroups.recommended}
-            onToggle={() =>
-              setOpenGroups((g) => ({ ...g, recommended: !g.recommended }))
-            }
-          >
-            {filteredRecommended.map((course) => (
-              <SelectableCourseAccordion
-                key={course.courseCode}
-                course={course}
-                selectedSectionsMap={selectedSectionsMap}
-                selectedSectionsList={selectedSectionsList}
-                onSelectSection={onSelectSection}
-                onDeselectSection={onDeselectSection}
-                allCourses={allCourses}
-                expanded={expandedCourseCode === course.courseCode || (filters.query?.trim() ? true : false)}
-                onToggle={() => onToggleCourse(expandedCourseCode === course.courseCode ? null : course.courseCode)}
-                enrolledNrcSet={enrolledNrcSet}
-              />
-            ))}
-          </GroupSection>
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-3.5 space-y-3">
+        {sidebarTab === "horario" && (
+          <>
+            {filteredHorario.length === 0 ? (
+              <div className="py-5 px-2 text-center space-y-2">
+                {hasProgrammingSource ? (
+                  <>
+                    <p className="text-xs font-bold text-textPrimary">
+                      Selecciona las secciones que quieras probar.
+                    </p>
+                    <p className="text-[11px] text-textSecondary leading-relaxed">
+                      También puedes subir tu horario para detectar automáticamente lo que ya tienes inscrito.
+                    </p>
+                    {onOpenSources && (
+                      <button
+                        type="button"
+                        onClick={onOpenSources}
+                        className="mt-1 inline-flex items-center rounded-lg border border-borderColor bg-bgPrimary px-3 py-1.5 text-[11px] font-bold text-textPrimary hover:border-primary/40 hover:text-primary btn-interactive"
+                      >
+                        Cargar mi horario
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-textSecondary leading-relaxed">
+                    Aún no hay ramos en tu horario. Carga tu horario o elige secciones en Disponibles.
+                  </p>
+                )}
+              </div>
+            ) : (
+              filteredHorario.map((course) => (
+                <SelectableCourseAccordion
+                  key={course.courseCode}
+                  course={course}
+                  selectedSectionsMap={selectedSectionsMap}
+                  selectedSectionsList={selectedSectionsList}
+                  onSelectSection={onSelectSection}
+                  onDeselectSection={onDeselectSection}
+                  allCourses={allCourses}
+                  expanded={
+                    expandedCourseCode === course.courseCode ||
+                    Boolean(filters.query?.trim())
+                  }
+                  onToggle={() =>
+                    onToggleCourse(
+                      expandedCourseCode === course.courseCode
+                        ? null
+                        : course.courseCode
+                    )
+                  }
+                  enrolledNrcSet={enrolledNrcSet}
+                />
+              ))
+            )}
+          </>
         )}
 
-        {/* 2. Pendientes Anteriores */}
-        {filteredPrevious.length > 0 && (
-          <GroupSection
-            title={`PENDIENTES ANTERIORES · ${previous.length} RAMOS`}
-            description="Ramos de semestres anteriores que aún puedes cursar."
-            isOpen={openGroups.previous}
-            onToggle={() => setOpenGroups((g) => ({ ...g, previous: !g.previous }))}
-          >
-            {filteredPrevious.map((course) => (
-              <SelectableCourseAccordion
-                key={course.courseCode}
-                course={course}
-                selectedSectionsMap={selectedSectionsMap}
-                selectedSectionsList={selectedSectionsList}
-                onSelectSection={onSelectSection}
-                onDeselectSection={onDeselectSection}
-                allCourses={allCourses}
-                expanded={expandedCourseCode === course.courseCode || (filters.query?.trim() ? true : false)}
-                onToggle={() => onToggleCourse(expandedCourseCode === course.courseCode ? null : course.courseCode)}
-                enrolledNrcSet={enrolledNrcSet}
-              />
-            ))}
-          </GroupSection>
+        {sidebarTab === "disponibles" && !hasProgrammingSource && (
+          <div className="py-5 px-2 text-center space-y-2">
+            <p className="text-xs font-bold text-textPrimary">
+              Carga la Programación Académica para explorar otras secciones.
+            </p>
+            <p className="text-[11px] text-textSecondary">
+              Así puedes probar NRC distintos sin perder lo que ya tienes inscrito.
+            </p>
+            {onOpenSources && (
+              <button
+                type="button"
+                onClick={onOpenSources}
+                className="mt-1 inline-flex items-center rounded-lg bg-primary px-3 py-1.5 text-[11px] font-bold text-white hover:brightness-110 btn-interactive"
+              >
+                Cargar programación
+              </button>
+            )}
+          </div>
+        )}
+
+        {sidebarTab === "disponibles" && hasProgrammingSource && (
+          <>
+            {filteredRecommended.length > 0 && (
+              <GroupSection
+                title={`${integration.primarySemester}.º SEMESTRE · ${recommended.length} RAMOS`}
+                isOpen={openGroups.recommended}
+                onToggle={() =>
+                  setOpenGroups((g) => ({ ...g, recommended: !g.recommended }))
+                }
+              >
+                {filteredRecommended.map((course) => (
+                  <SelectableCourseAccordion
+                    key={course.courseCode}
+                    course={course}
+                    selectedSectionsMap={selectedSectionsMap}
+                    selectedSectionsList={selectedSectionsList}
+                    onSelectSection={onSelectSection}
+                    onDeselectSection={onDeselectSection}
+                    allCourses={allCourses}
+                    expanded={
+                      expandedCourseCode === course.courseCode ||
+                      Boolean(filters.query?.trim())
+                    }
+                    onToggle={() =>
+                      onToggleCourse(
+                        expandedCourseCode === course.courseCode
+                          ? null
+                          : course.courseCode
+                      )
+                    }
+                    enrolledNrcSet={enrolledNrcSet}
+                  />
+                ))}
+              </GroupSection>
+            )}
+
+            {filteredPrevious.length > 0 && (
+              <GroupSection
+                title={`PENDIENTES ANTERIORES · ${previous.length} RAMOS`}
+                description="Ramos de semestres anteriores que aún puedes cursar."
+                isOpen={openGroups.previous}
+                onToggle={() =>
+                  setOpenGroups((g) => ({ ...g, previous: !g.previous }))
+                }
+              >
+                {filteredPrevious.map((course) => (
+                  <SelectableCourseAccordion
+                    key={course.courseCode}
+                    course={course}
+                    selectedSectionsMap={selectedSectionsMap}
+                    selectedSectionsList={selectedSectionsList}
+                    onSelectSection={onSelectSection}
+                    onDeselectSection={onDeselectSection}
+                    allCourses={allCourses}
+                    expanded={
+                      expandedCourseCode === course.courseCode ||
+                      Boolean(filters.query?.trim())
+                    }
+                    onToggle={() =>
+                      onToggleCourse(
+                        expandedCourseCode === course.courseCode
+                          ? null
+                          : course.courseCode
+                      )
+                    }
+                    enrolledNrcSet={enrolledNrcSet}
+                  />
+                ))}
+              </GroupSection>
+            )}
+
+            {availableFallback.length > 0 && (
+              <div className="space-y-2">
+                {availableFallback.map((course) => (
+                  <SelectableCourseAccordion
+                    key={course.courseCode}
+                    course={course}
+                    selectedSectionsMap={selectedSectionsMap}
+                    selectedSectionsList={selectedSectionsList}
+                    onSelectSection={onSelectSection}
+                    onDeselectSection={onDeselectSection}
+                    allCourses={allCourses}
+                    expanded={
+                      expandedCourseCode === course.courseCode ||
+                      Boolean(filters.query?.trim())
+                    }
+                    onToggle={() =>
+                      onToggleCourse(
+                        expandedCourseCode === course.courseCode
+                          ? null
+                          : course.courseCode
+                      )
+                    }
+                    enrolledNrcSet={enrolledNrcSet}
+                  />
+                ))}
+              </div>
+            )}
+
+            {filteredRecommended.length === 0 &&
+              filteredPrevious.length === 0 &&
+              availableFallback.length === 0 && (
+                <p className="text-xs text-textSecondary text-center py-4">
+                  No hay ramos disponibles con los filtros actuales.
+                </p>
+              )}
+          </>
         )}
       </div>
     </aside>
@@ -371,6 +508,16 @@ function SelectableCourseAccordion({
               <span className="text-[10px] font-bold text-textSecondary uppercase tracking-wider shrink-0">
                 {courseCode}
               </span>
+              {sections.some(
+                (s) =>
+                  Boolean(s.enrolled) ||
+                  enrolledNrcSet.has(String(s.nrc || "").replace(/\D/g, ""))
+              ) && (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
+                  <CheckCircle className="h-2.5 w-2.5" strokeWidth={2.5} />
+                  Inscrito
+                </span>
+              )}
               <span className="text-textSecondary/40 text-[9px]">•</span>
               <span
                 className={`text-[10px] font-bold inline-flex items-center gap-1 min-w-0 ${
@@ -494,9 +641,13 @@ function SelectableSectionCard({
             </span>
           )}
         </span>
-        <span className="text-[10px] font-semibold text-textSecondary uppercase tracking-wide bg-bgSecondary px-1.5 py-0.5 rounded border border-borderColor shrink-0">
-          {MODALITY_LABELS[section.modality] || section.modality}
-        </span>
+        {section.modality &&
+          section.modality !== "UNKNOWN" &&
+          MODALITY_LABELS[section.modality] && (
+          <span className="text-[10px] font-semibold text-textSecondary uppercase tracking-wide bg-bgSecondary px-1.5 py-0.5 rounded border border-borderColor shrink-0">
+            {MODALITY_LABELS[section.modality]}
+          </span>
+        )}
       </div>
 
       {section.sources?.horarioAlumno &&
