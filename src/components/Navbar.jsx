@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   GraduationCap, Moon, Sun, FileText, HelpCircle,
   CalendarDays, ChevronDown, BookMarked, Heart, MessageCircle, CalendarRange,
-  ChevronUp, Settings, ArrowLeft, Shield, Scale, Mail
+  ChevronUp, Settings, ArrowLeft, Shield, Scale, Instagram
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import GooeyNav from "./GooeyNav";
@@ -376,12 +376,14 @@ export default function Navbar({
                           <span>Términos de uso</span>
                         </Link>
                         <a
-                          href="mailto:contacto@mallapro.cl"
+                          href="https://www.instagram.com/mallapro.cl_/"
+                          target="_blank"
+                          rel="noopener noreferrer"
                           onClick={() => setSettingsOpen(false)}
                           className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                         >
-                          <Mail className="w-3.5 h-3.5 opacity-70" aria-hidden />
-                          <span>Contacto</span>
+                          <Instagram className="w-3.5 h-3.5 opacity-70" aria-hidden />
+                          <span>@mallapro.cl_</span>
                         </a>
                       </div>
                     </div>

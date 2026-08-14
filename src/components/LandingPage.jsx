@@ -1584,10 +1584,12 @@ export default function LandingPage() {
                   </li>
                   <li>
                     <a
-                      href="mailto:contacto@mallapro.cl"
+                      href="https://www.instagram.com/mallapro.cl_/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-[var(--textPrimary)] hover:text-[var(--primary)]"
                     >
-                      Contacto
+                      Instagram
                     </a>
                   </li>
                   <li>
@@ -1604,7 +1606,14 @@ export default function LandingPage() {
                 <span className="mx-1.5 opacity-50">·</span>
                 <Link to="/terminos" className="hover:text-[var(--primary)]">Términos de uso</Link>
                 <span className="mx-1.5 opacity-50">·</span>
-                <a href="mailto:contacto@mallapro.cl" className="hover:text-[var(--primary)]">Contacto</a>
+                <a
+                  href="https://www.instagram.com/mallapro.cl_/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[var(--primary)]"
+                >
+                  Instagram
+                </a>
               </p>
               <p className="text-[12px] text-[var(--textSecondary)] leading-relaxed max-w-2xl">
                 Malla Pro es una herramienta independiente y no oficial. No corresponde a una
