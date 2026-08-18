@@ -27,7 +27,7 @@ Malla Pro tiene operación en Chile.
 
 Para consultas puedes escribir a:
 
-**contacto@mallapro.cl**
+**mallaprocl@gmail.com**
 
 ---
 
@@ -467,7 +467,7 @@ Si detectas:
 
 puedes comunicarlo a:
 
-**contacto@mallapro.cl**
+**mallaprocl@gmail.com**
 
 Los reportes de estudiantes son una fuente importante para detectar problemas y mejorar Malla Pro.
 
@@ -513,7 +513,7 @@ Para dudas, reportes o consultas relacionadas con estos Términos:
 
 **Malla Pro**  
 Chile  
-**contacto@mallapro.cl**
+**mallaprocl@gmail.com**
 
 ---
 

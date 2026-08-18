@@ -13,7 +13,7 @@ Malla Pro ha sido diseñado bajo un enfoque principalmente **local-first**: gran
 
 Para consultas relacionadas con esta Política de Privacidad puedes escribir a:
 
-**contacto@mallapro.cl**
+**mallaprocl@gmail.com**
 
 ---
 
@@ -21,7 +21,7 @@ Para consultas relacionadas con esta Política de Privacidad puedes escribir a:
 
 El servicio es operado bajo la marca **Malla Pro**, proyecto independiente con operación en Chile.
 
-**Contacto:** contacto@mallapro.cl
+**Contacto:** mallaprocl@gmail.com
 
 Malla Pro no pertenece, representa ni mantiene una afiliación oficial con la Universidad Andrés Bello, la Universidad de Chile ni con otras instituciones educacionales que puedan aparecer en la plataforma.
 
@@ -235,7 +235,7 @@ Al solicitar dichos recursos, el navegador puede establecer comunicación con se
 
 # 13. Contacto por correo electrónico
 
-Si te comunicas voluntariamente con Malla Pro mediante **contacto@mallapro.cl**, podremos recibir la información incluida en tu mensaje.
+Si te comunicas voluntariamente con Malla Pro mediante **mallaprocl@gmail.com**, podremos recibir la información incluida en tu mensaje.
 
 Esto puede incluir:
 
@@ -308,7 +308,7 @@ Utilizado para obtener estadísticas y métricas de utilización.
 Utilizado para cargar recursos tipográficos.
 
 **Proveedor de correo electrónico**  
-Interviene cuando un usuario se comunica con contacto@mallapro.cl.
+Interviene cuando un usuario se comunica con mallaprocl@gmail.com.
 
 **WhatsApp/Meta**  
 Solo interviene cuando el usuario decide abrir voluntariamente un enlace hacia WhatsApp disponible en alguna funcionalidad.
@@ -392,7 +392,7 @@ Dependiendo de la normativa vigente y de las circunstancias correspondientes, es
 
 Para realizar una solicitud puedes escribir a:
 
-**contacto@mallapro.cl**
+**mallaprocl@gmail.com**
 
 Incluye suficiente información para identificar la solicitud y los datos o tratamiento respecto de los cuales deseas ejercer tus derechos.
 
@@ -453,7 +453,7 @@ Para consultas, solicitudes relacionadas con privacidad, ejercicio de derechos o
 
 **Malla Pro**  
 Chile  
-**contacto@mallapro.cl**
+**mallaprocl@gmail.com**
 
 ---
 

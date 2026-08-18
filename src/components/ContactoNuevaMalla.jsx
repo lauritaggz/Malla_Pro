@@ -5,7 +5,7 @@ import {
   LogIn, FileDown, MousePointerClick, Paperclip, PartyPopper,
 } from "lucide-react";
 
-const MAIL = "contacto@mallapro.cl";
+const MAIL = "mallaprocl@gmail.com";
 
 const STEPS = [
   {
@@ -30,7 +30,7 @@ const STEPS = [
     num: 4,
     icon: <Paperclip className="w-5 h-5" />,
     title: "Envíanos el PDF",
-    desc: "Manda ese archivo al correo contacto@mallapro.cl. El botón de abajo te abre el correo con el asunto prellenado, solo adjunta el PDF y envía.",
+    desc: "Manda ese archivo al correo mallaprocl@gmail.com. El botón de abajo te abre el correo con el asunto prellenado, solo adjunta el PDF y envía.",
   },
   {
     num: 5,
