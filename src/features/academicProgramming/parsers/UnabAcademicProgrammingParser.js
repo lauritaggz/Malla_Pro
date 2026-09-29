@@ -1,5 +1,5 @@
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
-import { configurePdfJsWorker } from "../utils/pdfjsWorker";
+import { configurePdfJsWorker, PDFJS_DOCUMENT_OPTIONS } from "../utils/pdfjsWorker";
 
 import {
   mapPdfTextItems,
@@ -140,7 +140,7 @@ export class UnabAcademicProgrammingParser {
 
     let pdf;
     try {
-      pdf = await getDocument({ data, useSystemFonts: true, password: "" }).promise;
+      pdf = await getDocument({ data, ...PDFJS_DOCUMENT_OPTIONS }).promise;
     } catch (err) {
       const msg = String(err?.message || err?.name || "").toLowerCase();
       if (msg.includes("password") || msg.includes("encrypted")) {

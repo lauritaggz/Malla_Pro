@@ -9,6 +9,7 @@ import {
 import Curso from "./Curso";
 import CourseDrawer from "./CourseDrawer";
 import ExceptionModeBar from "./ExceptionModeBar";
+import MallaProgressStats from "./MallaProgressStats";
 import {
   applyExceptionSelection,
   appliedExceptionsToast,
@@ -1242,26 +1243,12 @@ const MallaViewer = ({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 text-xs text-textSecondary font-semibold sm:justify-end sm:flex-nowrap min-w-0">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
-              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                {stats.aprobados} aprobados
-              </span>
-              <span className="opacity-45">•</span>
-              <span className="flex items-center gap-1 text-primary whitespace-nowrap">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                {stats.cursando} cursando
-              </span>
-              <span className="opacity-45">•</span>
-              <span className="flex items-center gap-1 whitespace-nowrap">
-                <span className="w-1.5 h-1.5 rounded-full bg-borderColor" />
-                {stats.pendientes} pendientes
-              </span>
-              <span className="opacity-45">•</span>
-              <span className="text-textPrimary font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md whitespace-nowrap">
-                {stats.pct}% de avance
-              </span>
-            </div>
+            <MallaProgressStats
+              aprobados={stats.aprobados}
+              cursando={stats.cursando}
+              pendientes={stats.pendientes}
+              pct={stats.pct}
+            />
 
             {/* Actions: Marcar Hasta, Ocultar Completados, Pantalla Completa */}
             <div className="flex items-center gap-1.5 sm:ml-1 sm:pl-2.5 sm:border-l border-borderColor/60 shrink-0">

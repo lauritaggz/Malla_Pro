@@ -1,5 +1,5 @@
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
-import { configurePdfJsWorker } from "./pdfjsWorker";
+import { configurePdfJsWorker, PDFJS_DOCUMENT_OPTIONS } from "./pdfjsWorker";
 import { textItemsToLinedText } from "./pdfTextLayout";
 
 export { textItemsToLinedText } from "./pdfTextLayout";
@@ -53,11 +53,21 @@ export async function extractPdfText(input, options = {}) {
     throw Object.assign(new Error("Cancelled"), { code: "CANCELLED" });
   }
 
-  const pdf = await getDocument({
-    data,
-    useSystemFonts: true,
-    password: "",
-  }).promise;
+  let pdf;
+  try {
+    pdf = await getDocument({
+      data,
+      ...PDFJS_DOCUMENT_OPTIONS,
+    }).promise;
+  } catch (err) {
+    const msg = String(err?.message || err?.name || "").toLowerCase();
+    if (msg.includes("password") || msg.includes("encrypted")) {
+      throw Object.assign(new Error("PDF password protected"), { code: "PDF_PROTECTED" });
+    }
+    throw Object.assign(new Error("El archivo seleccionado no es un PDF válido."), {
+      code: "INVALID_FILE",
+    });
+  }
 
   const totalPages = pdf.numPages || 0;
   const pageTexts = [];

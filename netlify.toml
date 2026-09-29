@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
 
 # Preview social apuntando al dominio de Netlify
@@ -29,5 +29,50 @@
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
+
+# Iframes: Netlify combina los valores de reglas que coinciden, así que la
+# protección anti-iframe no puede ir en "/*" (anularía la excepción del preview).
+# Se declara por ruta de la SPA.
+[[headers]]
+  for = "/"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+
+[[headers]]
+  for = "/app"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+
+[[headers]]
+  for = "/programacion-academica"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+
+[[headers]]
+  for = "/privacidad"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+
+[[headers]]
+  for = "/terminos"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Content-Security-Policy = "frame-ancestors 'none'"
+
+# DOMINIO DEL PORTAFOLIO: reemplaza https://TU-PORTFOLIO.example por el origen
+# exacto (sin ruta). Mantener sincronizado con public/.htaccess.
+[[headers]]
+  for = "/portfolio-preview"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' lauragonzalezv.netlify.app"

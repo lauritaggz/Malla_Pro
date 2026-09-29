@@ -31,7 +31,11 @@ const PDF_PATH = "public/Horario Alumno-1.pdf";
 describe.skipIf(!existsSync(PDF_PATH))("PDF referencia Horario Alumno", () => {
   it("detecta los 4 ramos del PDF real (incl. corte entre páginas)", async () => {
     const data = new Uint8Array(readFileSync(PDF_PATH));
-    const pdf = await getDocument({ data, useSystemFonts: true }).promise;
+    const pdf = await getDocument({
+      data,
+      useSystemFonts: true,
+      enableScripting: false,
+    }).promise;
     const pages = [];
     for (let p = 1; p <= pdf.numPages; p++) {
       const page = await pdf.getPage(p);

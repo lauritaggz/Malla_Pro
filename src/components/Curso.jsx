@@ -19,6 +19,7 @@ const Curso = ({
   exceptionSelected = false,
   exceptionSelectable = true,
   onExceptionToggle,
+  readOnly = false,
 }) => {
   const [promedio, setPromedio] = useState(null);
   const timerRef = useRef(null);
@@ -38,6 +39,8 @@ const Curso = ({
   };
 
   useEffect(() => {
+    // readOnly: tarjeta de demo, nunca debe leer las notas guardadas del usuario.
+    if (readOnly) return undefined;
     const actualizarPromedio = () => {
       try {
         const notasGuardadas = safeStorage.get(LEGACY_KEYS.notas, {});
@@ -58,7 +61,7 @@ const Curso = ({
     actualizarPromedio();
     window.addEventListener("notasModificadas", actualizarPromedio);
     return () => window.removeEventListener("notasModificadas", actualizarPromedio);
-  }, [curso.id]);
+  }, [curso.id, readOnly]);
 
   const isExceptionMode = interactionMode === "exception";
 
@@ -189,6 +192,69 @@ const Curso = ({
     }
     return false;
   };
+
+  const cardBody = (
+    <>
+      <div className="font-semibold text-textPrimary text-xs sm:text-[12px] leading-tight line-clamp-2 pr-[80px] mb-1">
+        {curso.nombre}
+      </div>
+
+      <div className="flex items-center justify-between gap-1.5 mt-auto w-full select-none">
+        <div className="text-[9px] font-medium text-textSecondary leading-none">
+          {curso.codigo} · {curso.sct || 0} SCT
+        </div>
+        {statusBadge}
+      </div>
+    </>
+  );
+
+  // Solo visualización: sin marcar estados, sin menú contextual ni notas.
+  // Con onSelect es un botón que resalta relaciones; sin él, no es focusable.
+  if (readOnly) {
+    const selectable = typeof onSelect === "function";
+    const Tag = selectable ? "button" : "div";
+    const selectableProps = selectable
+      ? {
+          type: "button",
+          onClick: (e) => {
+            e.stopPropagation();
+            onSelect(curso);
+          },
+          "aria-pressed": highlightStatus === "selected",
+          title: "Ver prerrequisitos y ramos que desbloquea",
+        }
+      : {};
+
+    return (
+      <Tag
+        {...selectableProps}
+        id={`curso-card-${curso.id}`}
+        className={`curso-card-base w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 select-none
+          ${cardStatusClass}
+          ${highlightStyles}
+          ${selectable ? "cursor-pointer" : "cursor-default"}
+        `}
+        style={{ backfaceVisibility: "hidden", transform: "translateZ(0)" }}
+      >
+        {selectable && (
+          <span
+            aria-hidden
+            className={`absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 transition-all duration-200
+              ${
+                highlightStatus === "selected"
+                  ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
+                  : "bg-bgSecondary/90 border-borderColor/40 text-textSecondary shadow-[0_1px_3px_rgba(0,0,0,0.05)]"
+              }
+            `}
+          >
+            <Network className="w-3 h-3" />
+            <span className="text-[9px] tracking-tight font-sans font-bold">PR</span>
+          </span>
+        )}
+        {cardBody}
+      </Tag>
+    );
+  }
 
   return (
     <button
@@ -380,16 +446,7 @@ const Curso = ({
         <span className="text-[9px] tracking-tight font-sans font-bold">PR</span>
       </div>
 
-      <div className="font-semibold text-textPrimary text-xs sm:text-[12px] leading-tight line-clamp-2 pr-[80px] mb-1">
-        {curso.nombre}
-      </div>
-
-      <div className="flex items-center justify-between gap-1.5 mt-auto w-full select-none">
-        <div className="text-[9px] font-medium text-textSecondary leading-none">
-          {curso.codigo} · {curso.sct || 0} SCT
-        </div>
-        {statusBadge}
-      </div>
+      {cardBody}
     </button>
   );
 };
@@ -405,6 +462,8 @@ export default React.memo(Curso, (prevProps, nextProps) => {
     prevProps.highlightStatus === nextProps.highlightStatus &&
     prevProps.interactionMode === nextProps.interactionMode &&
     prevProps.exceptionSelected === nextProps.exceptionSelected &&
-    prevProps.exceptionSelectable === nextProps.exceptionSelectable
+    prevProps.exceptionSelectable === nextProps.exceptionSelectable &&
+    prevProps.readOnly === nextProps.readOnly &&
+    Boolean(prevProps.onSelect) === Boolean(nextProps.onSelect)
   );
 });

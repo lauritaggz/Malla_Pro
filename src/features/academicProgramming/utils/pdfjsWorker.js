@@ -1,22 +1,20 @@
 /**
  * Configuración compartida de pdf.js.
- * El worker NO se empaqueta en dist/ (evita falso positivo ClamAV
- * Html.Phishing.SVGDecryption en cPanel al subir el zip).
- *
- * Mantener la versión alineada con package.json → pdfjs-dist.
+ * El worker se empaqueta con Vite y se sirve desde el mismo origen.
  */
-export const PDFJS_VERSION = "6.1.200";
+import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
-const DEFAULT_WORKER_CDN = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.mjs`;
+/** Opciones de apertura: PDFs de usuario, sin ejecutar JavaScript embebido. */
+export const PDFJS_DOCUMENT_OPTIONS = Object.freeze({
+  useSystemFonts: true,
+  password: "",
+  enableScripting: false,
+});
 
 /**
  * @param {{ workerSrc?: string }} GlobalWorkerOptions
  */
 export function configurePdfJsWorker(GlobalWorkerOptions) {
   if (!GlobalWorkerOptions) return;
-  const fromEnv =
-    typeof import.meta !== "undefined" && import.meta.env?.VITE_PDFJS_WORKER_URL
-      ? String(import.meta.env.VITE_PDFJS_WORKER_URL).trim()
-      : "";
-  GlobalWorkerOptions.workerSrc = fromEnv || DEFAULT_WORKER_CDN;
+  GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 }
