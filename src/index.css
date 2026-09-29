@@ -866,6 +866,22 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
+/* /portfolio-preview?embed=1: tarjetas más legibles en iframes pequeños */
+.portfolio-embed .curso-card-base {
+  height: 100%;
+  min-height: 0;
+  padding: 6px 11px;
+}
+.portfolio-embed .curso-card-name {
+  font-size: 13px;
+  line-height: 1.2;
+  padding-right: 52px;
+  margin-bottom: 2px;
+}
+.portfolio-embed .curso-card-footer > * {
+  font-size: 10.5px;
+}
+
 /* Statuses */
 .curso-card-aprobado {
   background: var(--status-approved-bg) !important;

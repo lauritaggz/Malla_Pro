@@ -195,11 +195,11 @@ const Curso = ({
 
   const cardBody = (
     <>
-      <div className="font-semibold text-textPrimary text-xs sm:text-[12px] leading-tight line-clamp-2 pr-[80px] mb-1">
+      <div className="curso-card-name font-semibold text-textPrimary text-xs sm:text-[12px] leading-tight line-clamp-2 pr-[80px] mb-1">
         {curso.nombre}
       </div>
 
-      <div className="flex items-center justify-between gap-1.5 mt-auto w-full select-none">
+      <div className="curso-card-footer flex items-center justify-between gap-1.5 mt-auto w-full select-none">
         <div className="text-[9px] font-medium text-textSecondary leading-none">
           {curso.codigo} · {curso.sct || 0} SCT
         </div>
