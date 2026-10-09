@@ -30,7 +30,7 @@ export async function listarMallas() {
         },
         {
           nombre: "Medicina",
-          url: "/mallas/med.json",
+          url: "/mallas/Med.json",
         },
         {
           nombre: "Tecnología Médica",
