@@ -25,7 +25,7 @@ import {
   Lock,
   Circle,
 } from "lucide-react";
-import { SimMalla, SimNotas, SimToma, SimHorario } from "./FeatureSims";
+import { SimMalla, SimNotas, SimPlan } from "./FeatureSims";
 
 const NAV_LINKS = [
   { href: "#funciones", label: "Funciones" },
@@ -144,16 +144,14 @@ const FEATURES = [
   {
     id: "toma-de-ramos",
     band: "lp-band-amber",
-    title: "Encuentra las secciones que te sirven",
-    desc: "Carga la programación y verás primero los ramos que te corresponden, junto con tus pendientes anteriores.",
-    points: ["PDF procesado en tu dispositivo", "Secciones con NRC y modalidad", "Búsqueda y filtros"],
-  },
-  {
-    id: "horario",
-    band: "lp-band-blue",
-    title: "Arma tu horario antes de la toma",
-    desc: "Elige una sección por ramo y mira cómo queda tu semana. Si dos clases se cruzan, Malla Pro marca el tope.",
-    points: ["Detección de topes", "Guardar propuesta y exportar PDF", "Resumen de NRC y créditos"],
+    title: "Encuentra tus secciones y arma tu horario",
+    desc: "Carga la programación y compara las secciones de cada ramo. Elige una por ramo y mira cómo queda tu semana: si dos clases se cruzan, Malla Pro marca el tope.",
+    points: [
+      "PDF procesado en tu dispositivo",
+      "Secciones con NRC y modalidad",
+      "Detección de topes en vivo",
+      "Guardar propuesta y exportar PDF",
+    ],
   },
 ];
 
@@ -163,13 +161,15 @@ const STEPS = [
   { n: "3", band: "lp-band-blue", t: "Arma tu horario", d: "Compara alternativas, revisa topes y guarda tu propuesta." },
 ];
 
-function FeatureTile({ f, span = "", children }) {
+function FeatureTile({ f, span = "", split = false, children }) {
   return (
     <article
       id={f.id}
-      className={`lp-tint ${f.band} ${span} scroll-mt-24 rounded-3xl p-6 sm:p-8 flex flex-col gap-7 min-w-0`}
+      className={`lp-tint ${f.band} ${span} scroll-mt-24 rounded-3xl p-6 sm:p-8 flex flex-col gap-7 min-w-0 ${
+        split ? "lg:flex-row lg:items-center lg:gap-10" : ""
+      }`}
     >
-      <div>
+      <div className={split ? "lg:w-[34%] lg:shrink-0" : ""}>
         <h3 className="text-2xl sm:text-[1.75rem] font-semibold leading-tight">{f.title}</h3>
         <p className="mt-3 text-[var(--textSecondary)] leading-relaxed max-w-[46ch]">{f.desc}</p>
         <ul className="mt-5 space-y-2.5">
@@ -178,7 +178,7 @@ function FeatureTile({ f, span = "", children }) {
           ))}
         </ul>
       </div>
-      <div className="min-w-0 mt-auto">{children}</div>
+      <div className={`min-w-0 ${split ? "lg:flex-1" : "mt-auto"}`}>{children}</div>
     </article>
   );
 }
@@ -910,11 +910,8 @@ export default function LandingPage() {
             <FeatureTile f={FEATURES[1]} span="lg:col-span-5">
               <SimNotas />
             </FeatureTile>
-            <FeatureTile f={FEATURES[2]} span="lg:col-span-6">
-              <SimToma />
-            </FeatureTile>
-            <FeatureTile f={FEATURES[3]} span="lg:col-span-6">
-              <SimHorario />
+            <FeatureTile f={FEATURES[2]} span="md:col-span-2 lg:col-span-12" split>
+              <SimPlan />
             </FeatureTile>
           </div>
         </section>
@@ -1032,7 +1029,6 @@ export default function LandingPage() {
               <a href="#malla" onClick={(e) => onNavClick(e, "#malla")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Malla</a>
               <a href="#notas" onClick={(e) => onNavClick(e, "#notas")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Notas</a>
               <a href="#toma-de-ramos" onClick={(e) => onNavClick(e, "#toma-de-ramos")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Toma de ramos</a>
-              <a href="#horario" onClick={(e) => onNavClick(e, "#horario")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Horario</a>
               <Link to="/privacidad" className="text-[var(--textPrimary)] hover:underline underline-offset-4">Privacidad</Link>
               <Link to="/terminos" className="text-[var(--textPrimary)] hover:underline underline-offset-4">Términos de uso</Link>
               <a href="https://www.instagram.com/mallapro.cl_/" target="_blank" rel="noopener noreferrer" className="text-[var(--textPrimary)] hover:underline underline-offset-4">Instagram</a>

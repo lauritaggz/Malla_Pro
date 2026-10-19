@@ -367,42 +367,45 @@ export function SimNotas() {
   );
 }
 
-/* --------------------------- Toma de ramos --------------------------- */
-const TOMA = [
+/* --------------------- Secciones y horario (unificado) --------------------- */
+const DAYS = ["LU", "MA", "MI", "JU", "VI"];
+const SLOTS = ["8:30", "10:00", "11:30", "14:40"];
+const PLAN = [
+  { id: "calc", name: "Cálculo II", secs: [{ n: "300", day: 2, slot: 0, prof: "Prof. Rivas" }] },
   {
-    id: "pr",
-    name: "Práctica II",
+    id: "fis",
+    name: "Física I",
     secs: [
-      { n: "300", h: "LU 8:30 · VI 10:00", p: "Prof. Rivas · Presencial" },
-      { n: "301", h: "MA 14:00 · JU 14:00", p: "Prof. Soto · Online" },
-      { n: "302", h: "MI 8:30 · VI 8:30", p: "Prof. Núñez · Presencial" },
+      { n: "110", day: 2, slot: 0, prof: "Prof. Soto" },
+      { n: "111", day: 3, slot: 2, prof: "Prof. Núñez" },
+      { n: "112", day: 4, slot: 1, prof: "Prof. Araya" },
     ],
   },
   {
-    id: "pt",
-    name: "Proyecto de Título",
+    id: "prog",
+    name: "Prog. Avanzada",
     secs: [
-      { n: "310", h: "MA 10:00 · JU 10:00", p: "Prof. Araya · Presencial" },
-      { n: "311", h: "LU 14:40 · MI 14:40", p: "Prof. Vidal · Presencial" },
-      { n: "312", h: "VI 8:30 · VI 10:00", p: "Prof. Campos · Online" },
+      { n: "201", day: 1, slot: 1, prof: "Prof. Vidal" },
+      { n: "202", day: 0, slot: 3, prof: "Prof. Campos" },
+      { n: "203", day: 3, slot: 0, prof: "Prof. Lagos" },
     ],
   },
   {
-    id: "ci",
-    name: "Ciberseguridad",
+    id: "cib",
+    name: "Base de Datos",
     secs: [
-      { n: "320", h: "LU 11:30 · MI 11:30", p: "Prof. Lagos · Presencial" },
-      { n: "321", h: "MA 8:30 · JU 8:30", p: "Prof. Mena · Presencial" },
-      { n: "322", h: "JU 14:40 · VI 14:40", p: "Prof. Ortiz · Online" },
+      { n: "301", day: 4, slot: 3, prof: "Prof. Mena" },
+      { n: "302", day: 0, slot: 2, prof: "Prof. Ortiz" },
+      { n: "303", day: 1, slot: 3, prof: "Prof. Peña" },
     ],
   },
-  { id: "sl", name: "Sem. Licenciatura", secs: [{ n: "330", h: "MI 10:00 · VI 11:30", p: "Prof. Peña · Presencial" }] },
 ];
+const PLAN_START = { calc: "300" };
 
-export function SimToma() {
-  const { rootRef, active, pointAt, down, hide, cursorNode } = useSim();
+export function SimPlan() {
+  const { reduce, rootRef, active, pointAt, down, hide, cursorNode } = useSim();
   const [current, setCurrent] = useState(null);
-  const [chosen, setChosen] = useState({});
+  const [chosen, setChosen] = useState(PLAN_START);
   const [pressed, setPressed] = useState(null);
   const courseRefs = useRef({});
   const secRefs = useRef({});
@@ -419,29 +422,41 @@ export function SimToma() {
       setPressed(null);
       down(false);
     };
-    await sleep(900);
-    const plan = [
-      ["pr", 2],
-      ["pt", 0],
-      ["ci", 1],
-    ];
-    for (const [cid, idx] of plan) {
+    const pick = async (cid, idx) => {
       await tap(courseRefs.current[cid], `c-${cid}`, () => setCurrent(cid));
       await sleep(1000);
       if (stop()) return;
-      const sec = TOMA.find((c) => c.id === cid).secs[idx];
+      const sec = PLAN.find((c) => c.id === cid).secs[idx];
       await tap(secRefs.current[`${cid}-${idx}`], `s-${cid}-${idx}`, () => setChosen((m) => ({ ...m, [cid]: sec.n })));
-      await sleep(1100);
-    }
+    };
     await sleep(900);
+    await pick("fis", 0); // cae el mismo bloque que Cálculo II: tope
+    await sleep(2300);
+    if (stop()) return;
+    await pick("fis", 1); // se resuelve
+    await sleep(1100);
+    await pick("prog", 0);
+    await sleep(1100);
+    await pick("cib", 1);
+    await sleep(2200);
     hide();
-    await sleep(700);
-    setChosen({});
+    await sleep(800);
+    setChosen(PLAN_START);
     setCurrent(null);
   });
 
-  const cur = TOMA.find((c) => c.id === current);
-  const count = Object.keys(chosen).length;
+  const cur = PLAN.find((c) => c.id === current);
+  const placed = PLAN.flatMap((c) => {
+    const sec = c.secs.find((s) => s.n === chosen[c.id]);
+    return sec ? [{ cid: c.id, name: c.name, ...sec }] : [];
+  });
+  const key = (b) => `${b.day}-${b.slot}`;
+  const counts = placed.reduce((m, b) => ({ ...m, [key(b)]: (m[key(b)] || 0) + 1 }), {});
+  const clashKeys = Object.keys(counts).filter((k) => counts[k] > 1);
+  const clash = clashKeys.length > 0;
+  const clashDay = clash ? DAYS[Number(clashKeys[0].split("-")[0])] : "";
+  const clashSlot = clash ? SLOTS[Number(clashKeys[0].split("-")[1])] : "";
+  const done = Object.keys(chosen).length;
 
   return (
     <div
@@ -449,41 +464,41 @@ export function SimToma() {
       aria-hidden="true"
       className="relative rounded-2xl lp-glass-strong p-4 sm:p-5 pointer-events-none select-none overflow-hidden"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-        <div className="sm:col-span-2 min-w-0">
+      <div className="grid gap-4 lg:grid-cols-12">
+        <div className="lg:col-span-5 min-w-0">
           <p className="text-[12px] font-semibold text-[var(--textSecondary)]">Tus asignaturas</p>
-          <div className="mt-2 grid grid-cols-2 sm:grid-cols-1 gap-2">
-          {TOMA.map((c) => (
-            <motion.div
-              key={c.id}
-              ref={(el) => {
-                courseRefs.current[c.id] = el;
-              }}
-              animate={{ scale: pressed === `c-${c.id}` ? 0.94 : 1 }}
-              transition={{ type: "spring", stiffness: 520, damping: 26 }}
-              className={`rounded-xl border px-2.5 py-2 min-w-0 transition-colors duration-200 ${
-                current === c.id ? "border-ink bg-[var(--bgSecondary)]" : "border-ink/15 bg-transparent"
-              }`}
-            >
-              <p className="text-[13px] font-semibold leading-tight text-ink">{c.name}</p>
-              <p className="mt-1 flex items-center gap-1 text-[12px] text-[var(--textSecondary)]">
-                {chosen[c.id] ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-approved" strokeWidth={2.5} aria-hidden />
-                    <span className="font-mono">Sec. {chosen[c.id]}</span>
-                  </>
-                ) : (
-                  "Sin sección"
-                )}
-              </p>
-            </motion.div>
-          ))}
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {PLAN.map((c) => (
+              <motion.div
+                key={c.id}
+                ref={(el) => {
+                  courseRefs.current[c.id] = el;
+                }}
+                animate={{ scale: pressed === `c-${c.id}` ? 0.94 : 1 }}
+                transition={{ type: "spring", stiffness: 520, damping: 26 }}
+                className={`rounded-xl border px-2.5 py-2 min-w-0 transition-colors duration-200 ${
+                  current === c.id ? "border-ink bg-[var(--bgSecondary)]" : "border-ink/15 bg-transparent"
+                }`}
+              >
+                <p className="text-[13px] font-semibold leading-tight text-ink">{c.name}</p>
+                <p className="mt-1 flex items-center gap-1 text-[12px] text-[var(--textSecondary)]">
+                  {chosen[c.id] ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-approved shrink-0" strokeWidth={2.5} aria-hidden />
+                      <span className="font-mono">Sec. {chosen[c.id]}</span>
+                    </>
+                  ) : (
+                    "Sin sección"
+                  )}
+                </p>
+              </motion.div>
+            ))}
           </div>
-        </div>
 
-        <div className="sm:col-span-3 min-w-0">
-          <p className="text-[12px] font-semibold text-[var(--textSecondary)]">{cur ? `Secciones de ${cur.name}` : "Secciones"}</p>
-          <div className="mt-2 sm:min-h-[210px]">
+          <p className="mt-4 text-[12px] font-semibold text-[var(--textSecondary)]">
+            {cur ? `Secciones de ${cur.name}` : "Secciones"}
+          </p>
+          <div className="mt-2 sm:min-h-[196px]">
             <AnimatePresence mode="wait" initial={false}>
               {cur ? (
                 <motion.div
@@ -505,15 +520,17 @@ export function SimToma() {
                         animate={{ scale: pressed === `s-${cur.id}-${i}` ? 0.95 : 1 }}
                         transition={{ type: "spring", stiffness: 520, damping: 26 }}
                         className={`rounded-xl border px-3 py-2 transition-colors duration-200 ${
-                          picked ? "border-transparent bg-approved text-paper" : "border-ink/15 bg-[var(--bgSecondary)] text-ink"
+                          picked ? "border-transparent bg-ink text-paper" : "border-ink/15 bg-[var(--bgSecondary)] text-ink"
                         }`}
                       >
                         <p className="flex flex-wrap justify-between gap-x-2 text-[13px] font-semibold">
                           <span>Sección {s.n}</span>
-                          <span className="font-mono text-[12px] font-medium">NRC 12{s.n}</span>
+                          <span className="font-mono text-[12px] font-medium">
+                            {DAYS[s.day]} {SLOTS[s.slot]}
+                          </span>
                         </p>
-                        <p className={`mt-0.5 text-[12px] ${picked ? "text-paper/85" : "text-[var(--textSecondary)]"}`}>
-                          {s.h} · {s.p}
+                        <p className={`mt-0.5 text-[12px] ${picked ? "text-paper/80" : "text-[var(--textSecondary)]"}`}>
+                          NRC 12{s.n} · {s.prof}
                         </p>
                       </motion.div>
                     );
@@ -525,7 +542,7 @@ export function SimToma() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="rounded-xl border border-dashed border-ink/25 px-3 py-6 text-center text-[13px] text-[var(--textSecondary)]"
+                  className="rounded-xl border border-dashed border-ink/25 px-3 py-8 text-center text-[13px] text-[var(--textSecondary)]"
                 >
                   Elige un ramo para ver sus secciones
                 </motion.p>
@@ -533,173 +550,93 @@ export function SimToma() {
             </AnimatePresence>
           </div>
         </div>
-      </div>
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-ink/10 pt-3 text-[12px] text-[var(--textSecondary)]">
-        <span>
-          <span className="font-mono font-medium text-ink tabular-nums">{count}</span> de {TOMA.length} ramos con sección
-        </span>
-        <span className="inline-flex gap-1">
-          {TOMA.map((c) => (
-            <span key={c.id} className={`h-1.5 w-6 rounded-full transition-colors duration-300 ${chosen[c.id] ? "bg-approved" : "bg-ink/15"}`} />
-          ))}
-        </span>
-      </div>
-      {cursorNode}
-    </div>
-  );
-}
 
-/* ------------------------------ Horario ------------------------------ */
-const DAYS = ["LU", "MA", "MI", "JU", "VI"];
-const SLOTS = ["8:30", "10:00", "11:30", "14:40"];
-const CLASES = [
-  { id: "calc", short: "Cálculo II", sec: "Sec. 300", day: 2, slot: 0 },
-  { id: "fis", short: "Física I", sec: "Sec. 110", day: 2, slot: 0 },
-  { id: "prog", short: "Prog. Avanz.", sec: "Sec. 201", day: 1, slot: 1 },
-  { id: "cib", short: "Ciberseg.", sec: "Sec. 302", day: 4, slot: 3 },
-  { id: "fis2", short: "Física I", sec: "Sec. 111", day: 3, slot: 2 },
-];
-const HORARIO_START = ["prog", "cib"];
-
-export function SimHorario() {
-  const { reduce, rootRef, active, pointAt, down, hide, cursorNode } = useSim();
-  const [on, setOn] = useState(HORARIO_START);
-  const [pressed, setPressed] = useState(null);
-  const chipRefs = useRef({});
-
-  useSimLoop(active, async ({ sleep, stop }) => {
-    const toggle = async (id) => {
-      pointAt(chipRefs.current[id], 0.5, 0.55);
-      await sleep(700);
-      if (stop()) return;
-      down(true);
-      setPressed(id);
-      await sleep(180);
-      setOn((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
-      setPressed(null);
-      down(false);
-    };
-    await sleep(900);
-    await toggle("calc");
-    await sleep(1100);
-    await toggle("fis");
-    await sleep(2400);
-    await toggle("fis");
-    await sleep(1000);
-    await toggle("fis2");
-    await sleep(1600);
-    hide();
-    await sleep(800);
-    setOn(HORARIO_START);
-  });
-
-  const placed = CLASES.filter((c) => on.includes(c.id));
-  const cellKey = (c) => `${c.day}-${c.slot}`;
-  const counts = placed.reduce((m, c) => ({ ...m, [cellKey(c)]: (m[cellKey(c)] || 0) + 1 }), {});
-  const clashes = Object.entries(counts).filter(([, n]) => n > 1);
-  const clash = clashes.length > 0;
-
-  return (
-    <div
-      ref={rootRef}
-      aria-hidden="true"
-      className="relative rounded-2xl lp-glass-strong p-4 sm:p-5 pointer-events-none select-none overflow-hidden"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-display text-lg font-semibold leading-none text-ink">Tu horario</p>
-          <p className="mt-1 text-[12px] text-[var(--textSecondary)]">{placed.length} ramos</p>
-        </div>
-        <div className="min-h-[30px]">
-          <AnimatePresence mode="wait" initial={false}>
-            {clash ? (
-              <motion.span
-                key="tope"
-                initial={{ opacity: 0, y: 6 }}
-                animate={reduce ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, x: [0, -6, 6, -4, 4, 0] }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-danger/15 px-2.5 py-1 text-[13px] font-semibold text-danger"
-              >
-                <AlertTriangle className="w-3.5 h-3.5" aria-hidden />1 tope en MI
-              </motion.span>
-            ) : (
-              <motion.span
-                key="libre"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-semibold text-approved"
-              >
-                <Check className="w-3.5 h-3.5" strokeWidth={2.5} aria-hidden />
-                Sin topes
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
-      <div className="mt-3 grid grid-cols-[2.4rem_repeat(5,minmax(0,1fr))] gap-px rounded-xl bg-ink/10 overflow-hidden border border-ink/10">
-        <div className="bg-[var(--bgSecondary)]" />
-        {DAYS.map((d) => (
-          <div key={d} className="bg-[var(--bgSecondary)] py-1.5 text-center text-[12px] font-semibold text-ink">
-            {d}
-          </div>
-        ))}
-        {SLOTS.map((slot, s) => (
-          <div key={slot} className="contents">
-            <div className="bg-[var(--bgSecondary)] px-1 py-2 text-right font-mono text-[11px] leading-none text-[var(--textSecondary)]">
-              {slot}
+        <div className="lg:col-span-7 min-w-0">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-display text-lg font-semibold leading-none text-ink">Tu horario</p>
+              <p className="mt-1 text-[12px] text-[var(--textSecondary)]">
+                <span className="font-mono tabular-nums text-ink">{done}</span> de {PLAN.length} ramos con sección
+              </p>
             </div>
-            {DAYS.map((d, di) => {
-              const here = placed.filter((c) => c.day === di && c.slot === s);
-              const bad = here.length > 1;
-              return (
-                <div key={d + slot} className="relative bg-[var(--bgSecondary)] min-h-[46px] p-0.5 flex gap-0.5">
-                  <AnimatePresence initial={false}>
-                    {here.map((c) => (
-                      <motion.div
-                        key={c.id}
-                        initial={reduce ? false : { opacity: 0, scale: 0.7 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.7 }}
-                        transition={{ type: "spring", stiffness: 420, damping: 24 }}
-                        className={`flex-1 min-w-0 rounded-md px-1 py-1 transition-colors duration-200 ${
-                          bad ? "bg-danger text-paper" : "bg-cursando text-paper"
-                        }`}
-                      >
-                        <p className="truncate text-[11px] font-semibold leading-tight">{c.short}</p>
-                        <p className="truncate font-mono text-[10px] leading-tight opacity-85">{c.sec}</p>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+            <div className="min-h-[30px]">
+              <AnimatePresence mode="wait" initial={false}>
+                {clash ? (
+                  <motion.span
+                    key="tope"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="inline-flex"
+                  >
+                    <motion.span
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-danger/15 px-2.5 py-1 text-[13px] font-semibold text-danger"
+                      animate={reduce ? undefined : { x: [0, -7, 7, -5, 5, -3, 3, 0] }}
+                      transition={{ duration: 0.55, repeat: Infinity, repeatDelay: 1.6 }}
+                    >
+                      <AlertTriangle className="w-3.5 h-3.5" aria-hidden />
+                      Tope el {clashDay} {clashSlot}
+                    </motion.span>
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="libre"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-semibold text-approved"
+                  >
+                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} aria-hidden />
+                    Sin topes
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-        ))}
-      </div>
 
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {CLASES.map((c) => {
-          const isOn = on.includes(c.id);
-          return (
-            <motion.span
-              key={c.id}
-              ref={(el) => {
-                chipRefs.current[c.id] = el;
-              }}
-              animate={{ scale: pressed === c.id ? 0.92 : 1 }}
-              transition={{ type: "spring", stiffness: 520, damping: 26 }}
-              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[12px] font-semibold transition-colors duration-200 ${
-                isOn ? "border-transparent bg-ink text-paper" : "border-ink/25 text-[var(--textSecondary)]"
-              }`}
-            >
-              {c.short} · {c.sec.replace("Sec. ", "")}
-            </motion.span>
-          );
-        })}
+          <div className="mt-3 grid grid-cols-[2.6rem_repeat(5,minmax(0,1fr))] gap-px rounded-xl bg-ink/10 overflow-hidden border border-ink/10">
+            <div className="bg-[var(--bgSecondary)]" />
+            {DAYS.map((d) => (
+              <div key={d} className="bg-[var(--bgSecondary)] py-1.5 text-center text-[12px] font-semibold text-ink">
+                {d}
+              </div>
+            ))}
+            {SLOTS.map((slot, s) => (
+              <div key={slot} className="contents">
+                <div className="bg-[var(--bgSecondary)] px-1 py-2 text-right font-mono text-[12px] leading-none text-[var(--textSecondary)]">
+                  {slot}
+                </div>
+                {DAYS.map((d, di) => {
+                  const here = placed.filter((b) => b.day === di && b.slot === s);
+                  const bad = here.length > 1;
+                  return (
+                    <div key={d + slot} className="relative bg-[var(--bgSecondary)] min-h-[54px] p-0.5 flex flex-col gap-0.5">
+                      <AnimatePresence initial={false}>
+                        {here.map((b) => (
+                          <motion.div
+                            key={b.cid}
+                            initial={reduce ? false : { opacity: 0, scale: 0.7 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.7 }}
+                            transition={{ type: "spring", stiffness: 420, damping: 24 }}
+                            className={`flex-1 min-w-0 rounded-md px-1 py-0.5 transition-colors duration-200 ${
+                              bad ? "bg-danger text-paper" : "bg-cursando text-paper"
+                            }`}
+                          >
+                            <p className="truncate text-[12px] font-semibold leading-tight">{b.name}</p>
+                            {!bad && <p className="truncate font-mono text-[12px] leading-tight opacity-85">{b.n}</p>}
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
       {cursorNode}
     </div>
