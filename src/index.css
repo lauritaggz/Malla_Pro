@@ -47,6 +47,9 @@
   --cursando-rgb:  42 95 191;
   --exception-rgb: 154 91 11;
   --danger-rgb:    179 54 47;
+
+  --ink-rgb:       20 22 27;
+  --paper-rgb:     245 244 240;
 }
 
 /* Modo oscuro (grafito) */
@@ -61,6 +64,7 @@
   --textSecondary:  #9A9DA5;
   --borderColor:    #2A2C31;
 
+  --primary:        var(--ink);
   --primaryMuted:   rgba(236, 235, 232, 0.08);
   --shadowPrimary:  rgba(0, 0, 0, 0.5);
 
@@ -77,6 +81,9 @@
   --cursando-rgb:  108 155 240;
   --exception-rgb: 224 162 60;
   --danger-rgb:    240 113 120;
+
+  --ink-rgb:       236 235 232;
+  --paper-rgb:     18 19 22;
 }
 
 /* ── Tipografía: Bricolage Grotesque (títulos), Instrument Sans (interfaz),
@@ -92,8 +99,13 @@
   --text-section: 20px;
   --text-page:    28px;
   --text-figure:  40px;
+}
 
-  /* Aliases de los nombres de diseño anteriores */
+/* Aliases de los nombres de diseño anteriores. Se declaran en cada ámbito
+   (html o un contenedor .dark como la landing) para resolverse con sus valores. */
+:root,
+.light,
+.dark {
   --brand-primary: var(--primary);
   --brand-soft: var(--primaryMuted);
   --brand-contrast: var(--on-ink);

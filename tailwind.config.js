@@ -8,6 +8,8 @@ export default {
         cursando: 'rgb(var(--cursando-rgb) / <alpha-value>)',
         exception: 'rgb(var(--exception-rgb) / <alpha-value>)',
         danger: 'rgb(var(--danger-rgb) / <alpha-value>)',
+        ink: 'rgb(var(--ink-rgb) / <alpha-value>)',
+        paper: 'rgb(var(--paper-rgb) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
