@@ -25,7 +25,6 @@ import {
   Lock,
   Circle,
 } from "lucide-react";
-import Logo from "./Logo";
 import { SimMalla, SimNotas, SimToma, SimHorario } from "./FeatureSims";
 
 const NAV_LINKS = [
@@ -715,7 +714,7 @@ export default function LandingPage() {
         <header className="sticky top-0 z-50 lp-glass-nav">
           <div className="lp-container h-16 sm:h-[68px] flex items-center justify-between gap-3">
             <a href="#inicio" className="flex items-center gap-2.5 min-w-0 shrink-0" onClick={(e) => onNavClick(e, "#inicio")}>
-              <Logo className="w-8 h-8" />
+              <img src="/favicon.png" alt="" width={32} height={32} className="w-8 h-8 rounded-lg" />
               <span className="font-bold text-[15px] tracking-tight text-ink">Malla Pro</span>
             </a>
 
@@ -1018,94 +1017,34 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 14. Footer */}
-        <footer className="border-t border-ink/10 lp-glass-nav mt-4">
-          <div className="lp-container py-10 sm:py-12">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="sm:col-span-2 lg:col-span-1">
-                <div className="flex items-center gap-2">
-                  <Logo className="w-7 h-7" />
-                  <span className="font-bold">Malla Pro</span>
-                </div>
-                <p className="mt-3 text-sm text-[var(--textSecondary)] leading-relaxed max-w-xs">
-                  Malla Pro te ayuda a organizar tu avance, tus notas y tu toma de ramos.
-                </p>
-              </div>
-              <div>
-                <p className="text-[12px] font-bold text-[var(--textSecondary)] mb-3">
-                  Producto
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li>
-                    <a href="#malla" onClick={(e) => onNavClick(e, "#malla")} className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
-                      Malla
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#notas" onClick={(e) => onNavClick(e, "#notas")} className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
-                      Notas
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#toma-de-ramos" onClick={(e) => onNavClick(e, "#toma-de-ramos")} className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
-                      Toma de ramos
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="text-[12px] font-bold text-[var(--textSecondary)] mb-3">
-                  Info
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li>
-                    <Link to="/privacidad" className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
-                      Privacidad
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/terminos" className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
-                      Términos de uso
-                    </Link>
-                  </li>
-                  <li>
-                    <a
-                      href="https://www.instagram.com/mallapro.cl_/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--textPrimary)] hover:text-[var(--primary)]"
-                    >
-                      Instagram
-                    </a>
-                  </li>
-                  <li>
-                    <Link to="/app" className="text-[var(--textPrimary)] hover:text-[var(--primary)]">
-                      Abrir app
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+        {/* 14. Footer centrado */}
+        <footer className="border-t border-ink/10 lp-glass-nav">
+          <div className="lp-container py-12 sm:py-14 flex flex-col items-center text-center">
+            <div className="flex items-center gap-2.5">
+              <img src="/favicon.png" alt="" width={32} height={32} className="w-8 h-8 rounded-lg" />
+              <span className="font-bold text-[17px] tracking-tight">Malla Pro</span>
             </div>
-            <div className="mt-10 pt-6 border-t border-[var(--borderColor)] space-y-3">
-              <p className="text-[12px] text-[var(--textSecondary)] leading-relaxed">
-                <Link to="/privacidad" className="hover:text-[var(--primary)]">Privacidad</Link>
-                <span className="mx-1.5 opacity-50">·</span>
-                <Link to="/terminos" className="hover:text-[var(--primary)]">Términos de uso</Link>
-                <span className="mx-1.5 opacity-50">·</span>
-                <a
-                  href="https://www.instagram.com/mallapro.cl_/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-[var(--primary)]"
-                >
-                  Instagram
-                </a>
-              </p>
-              <p className="text-[12px] text-[var(--textSecondary)] leading-relaxed max-w-2xl">
+            <p className="mt-3 text-[15px] text-[var(--textSecondary)] leading-relaxed max-w-sm">
+              Malla Pro te ayuda a organizar tu avance, tus notas y tu toma de ramos.
+            </p>
+
+            <nav aria-label="Pie de página" className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-[15px] font-medium">
+              <a href="#malla" onClick={(e) => onNavClick(e, "#malla")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Malla</a>
+              <a href="#notas" onClick={(e) => onNavClick(e, "#notas")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Notas</a>
+              <a href="#toma-de-ramos" onClick={(e) => onNavClick(e, "#toma-de-ramos")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Toma de ramos</a>
+              <a href="#horario" onClick={(e) => onNavClick(e, "#horario")} className="text-[var(--textPrimary)] hover:underline underline-offset-4">Horario</a>
+              <Link to="/privacidad" className="text-[var(--textPrimary)] hover:underline underline-offset-4">Privacidad</Link>
+              <Link to="/terminos" className="text-[var(--textPrimary)] hover:underline underline-offset-4">Términos de uso</Link>
+              <a href="https://www.instagram.com/mallapro.cl_/" target="_blank" rel="noopener noreferrer" className="text-[var(--textPrimary)] hover:underline underline-offset-4">Instagram</a>
+              <Link to="/app" className="text-[var(--textPrimary)] hover:underline underline-offset-4">Abrir app</Link>
+            </nav>
+
+            <div className="mt-10 pt-6 w-full max-w-3xl border-t border-[var(--borderColor)] flex flex-col items-center gap-2">
+              <p className="text-[13px] text-[var(--textSecondary)] leading-relaxed max-w-2xl">
                 Malla Pro es una herramienta independiente y no oficial. No corresponde a una
                 plataforma oficial de la Universidad Andrés Bello ni de otras instituciones.
               </p>
-              <p className="text-[12px] text-[var(--textSecondary)]">
+              <p className="text-[13px] text-[var(--textSecondary)]">
                 © {year} Malla Pro · De estudiantes para estudiantes.
               </p>
             </div>

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Logo from "../Logo";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import LegalDocument from "./LegalDocument";
@@ -86,7 +85,7 @@ export default function LegalLayout({
             to="/"
             className="flex items-center gap-2 min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-            <Logo className="w-7 h-7 shrink-0" />
+            <img src="/favicon.png" alt="" width={28} height={28} className="w-7 h-7 rounded-md shrink-0" />
             <span className="font-bold text-sm sm:text-base truncate">Malla Pro</span>
           </Link>
           <Link
