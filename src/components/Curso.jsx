@@ -195,7 +195,7 @@ const Curso = ({
 
   const cardBody = (
     <>
-      <div className={`curso-card-name font-semibold text-[14px] leading-[1.25] line-clamp-2 mb-1.5 ${promedio !== null ? "pr-[92px]" : "pr-[56px]"}`}>
+      <div className={`curso-card-name font-semibold text-[14px] leading-[1.25] line-clamp-2 mb-1.5 pr-[52px]`}>
         {curso.nombre}
       </div>
 
@@ -239,7 +239,8 @@ const Curso = ({
         {selectable && (
           <span
             aria-hidden
-            className={`absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-md border flex items-center gap-1 transition-colors duration-150
+            data-active={highlightStatus === "selected" ? "true" : undefined}
+            className={`absolute top-1 right-1 z-20 pr-chip px-1.5 py-0.5 rounded-md border flex items-center gap-1 transition-colors duration-150
               ${
                 highlightStatus === "selected"
                   ? "bg-primaryMuted border-primary text-primary shadow-sm"
@@ -359,7 +360,7 @@ const Curso = ({
       )}
 
       {promedio !== null && (
-        <div className="absolute top-1 right-[58px] px-1.5 py-0.5 text-[12px] num rounded-md border flex items-center justify-center bg-bgSecondary border-borderColor text-textPrimary">
+        <div className="grade-pill absolute top-1 right-1 px-1.5 py-0.5 text-[12px] num rounded-md border flex items-center justify-center bg-bgSecondary border-borderColor text-textPrimary">
           {promedio.toFixed(1)}
         </div>
       )}
@@ -433,13 +434,14 @@ const Curso = ({
             suppressMouseRef.current = false;
           }, 500);
         }}
-        className={`${isExceptionMode ? "hidden" : ""} absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-md border flex items-center gap-1 select-none transition-colors duration-150 cursor-pointer touch-manipulation
+        className={`${isExceptionMode ? "hidden" : ""} absolute top-1 right-1 z-20 pr-chip px-1.5 py-0.5 rounded-md border flex items-center gap-1 select-none transition-colors duration-150 cursor-pointer touch-manipulation
           ${
             highlightStatus === "selected"
               ? "bg-primaryMuted border-primary text-primary shadow-sm"
               : "bg-bgSecondary border-borderColor text-textSecondary hover:text-textPrimary"
           }
         `}
+        data-active={highlightStatus === "selected" ? "true" : undefined}
         title="Ver prerrequisitos / Opciones"
       >
         <Network className="w-3 h-3" />

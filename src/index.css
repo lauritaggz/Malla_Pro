@@ -833,15 +833,27 @@ html.exception-mode-active .navbar-shell {
   z-index: 85;
 }
 
-/* SVG Prerequisites Line Flow Animation */
-@keyframes neonFlow {
-  to {
-    stroke-dashoffset: -20;
+/* Tarjetas de ramo más silenciosas en escritorio: el chip PR aparece al pasar el cursor
+   (o con foco / ramo seleccionado) y toma el lugar de la nota. */
+@media (hover: hover) and (pointer: fine) {
+  .curso-card-base .pr-chip {
+    opacity: 0;
+    transition: opacity 150ms ease-out, background-color 150ms, border-color 150ms;
   }
-}
-
-.neon-flow-path {
-  animation: neonFlow 0.8s linear infinite;
+  .curso-card-base:hover .pr-chip,
+  .curso-card-base:focus-visible .pr-chip,
+  .curso-card-base .pr-chip:focus-visible,
+  .curso-card-base .pr-chip[data-active="true"] {
+    opacity: 1;
+  }
+  .curso-card-base:hover .grade-pill,
+  .curso-card-base:focus-visible .grade-pill,
+  .curso-card-base:has(.pr-chip[data-active="true"]) .grade-pill {
+    opacity: 0;
+  }
+  .curso-card-base .grade-pill {
+    transition: opacity 150ms ease-out;
+  }
 }
 
 /* ── Legal pages ──────────────────────────────────────────────── */

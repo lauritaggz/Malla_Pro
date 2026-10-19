@@ -79,6 +79,8 @@ const MallaViewer = ({
   const [courseDrawerOpen, setCourseDrawerOpen] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [paths, setPaths] = useState([]);
+  const [allPaths, setAllPaths] = useState([]);
+  const [hoverId, setHoverId] = useState(null);
   const [shakeCursoId, setShakeCursoId] = useState(null);
   const shakeTimerRef = useRef(null);
 
@@ -602,6 +604,12 @@ const MallaViewer = ({
     triggerBlockedShake,
   ]);
 
+  // Curva Bezier entre dos tarjetas; en columnas adyacentes baja por el canal vacío
+  const connectorPath = ({ x1, y1, x2, y2 }) => {
+    const dx = Math.abs(x2 - x1) < 100 ? (x2 - x1) / 2 : Math.max(Math.abs(x2 - x1) * 0.4, 30);
+    return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+  };
+
   // Helper para obtener las coordenadas relativas de una tarjeta (soporta zoom del contenedor)
   const getCardCoordinates = (cardEl, containerEl) => {
     if (!cardEl || !containerEl) return null;
@@ -688,17 +696,61 @@ const MallaViewer = ({
     setPaths(newPaths);
   }, [selectedCurso, isMobileView, getAllCursos, getCursoById]);
 
+  // Mapa base: todas las dependencias prerrequisito -> asignatura (solo escritorio)
+  const recalculateAllPaths = useCallback(() => {
+    if (isMobileView) {
+      setAllPaths([]);
+      return;
+    }
+    const containerEl = document.getElementById("malla-grid-container");
+    if (!containerEl) return;
+    const approved = new Set(aprobados.map(Number));
+    const edges = [];
+    getAllCursos().forEach((c) => {
+      const toEl = document.getElementById(`curso-card-${c.id}`);
+      if (!toEl) return;
+      const coordsT = getCardCoordinates(toEl, containerEl);
+      if (!coordsT) return;
+      (c.prerrequisitos || []).forEach((preId) => {
+        const fromEl = document.getElementById(`curso-card-${Number(preId)}`);
+        if (!fromEl) return;
+        const coordsF = getCardCoordinates(fromEl, containerEl);
+        if (!coordsF) return;
+        edges.push({
+          id: `all-${preId}-${c.id}`,
+          from: Number(preId),
+          to: Number(c.id),
+          done: approved.has(Number(preId)),
+          x1: coordsF.right + 2,
+          y1: coordsF.centerY,
+          x2: coordsT.left - 6,
+          y2: coordsT.centerY,
+        });
+      });
+    });
+    setAllPaths(edges);
+  }, [isMobileView, aprobados, getAllCursos]);
+
   useEffect(() => {
     recalculatePaths();
+    recalculateAllPaths();
 
-    const timer = setTimeout(recalculatePaths, 150);
-
-    window.addEventListener("resize", recalculatePaths);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("resize", recalculatePaths);
+    const recalc = () => {
+      recalculatePaths();
+      recalculateAllPaths();
     };
-  }, [selectedCurso, malla, recalculatePaths]);
+    const timers = [setTimeout(recalc, 150), setTimeout(recalc, 700)];
+
+    window.addEventListener("resize", recalc);
+    const containerEl = document.getElementById("malla-grid-container");
+    const ro = containerEl && typeof ResizeObserver !== "undefined" ? new ResizeObserver(recalc) : null;
+    if (ro) ro.observe(containerEl);
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener("resize", recalc);
+      if (ro) ro.disconnect();
+    };
+  }, [selectedCurso, malla, recalculatePaths, recalculateAllPaths]);
 
   // Cerrar el menú contextual al hacer clic en cualquier parte
   useEffect(() => {
@@ -1482,6 +1534,12 @@ const MallaViewer = ({
                   setSelectedCurso(null);
                 }
               }}
+              onMouseOver={(e) => {
+                const card = e.target.closest?.(".curso-card-base");
+                const id = card ? Number(card.id.replace("curso-card-", "")) : null;
+                setHoverId((prev) => (prev === id ? prev : id));
+              }}
+              onMouseLeave={() => setHoverId(null)}
               className="flex gap-4 sm:gap-5 md:gap-6 min-w-max py-2 relative"
               style={{ 
                  backfaceVisibility: "hidden",
@@ -1489,72 +1547,61 @@ const MallaViewer = ({
                  position: "relative"
               }}
             >
-              {/* Connection lines SVG overlay */}
+              {/* Mapa base: todas las dependencias, debajo de las tarjetas */}
+              {allPaths.length > 0 && (
+                <svg
+                  aria-hidden
+                  className="absolute inset-0 pointer-events-none w-full h-full overflow-visible transition-opacity duration-300"
+                  style={{ zIndex: -1, opacity: selectedCurso ? 0.25 : 1 }}
+                >
+                  <defs>
+                    <marker id="arrow-base" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="rgb(var(--ink-rgb))" />
+                    </marker>
+                  </defs>
+                  {allPaths.map((p) => {
+                    const hot = hoverId !== null && (p.from === hoverId || p.to === hoverId);
+                    return (
+                      <path
+                        key={p.id}
+                        d={connectorPath(p)}
+                        fill="none"
+                        stroke={p.done ? "rgb(var(--approved-rgb))" : "rgb(var(--ink-rgb))"}
+                        strokeWidth={hot ? 2 : 1.25}
+                        strokeDasharray={p.done ? undefined : "3 4"}
+                        markerEnd="url(#arrow-base)"
+                        style={{
+                          opacity: hot ? 0.85 : hoverId !== null ? 0.08 : p.done ? 0.4 : 0.22,
+                          transition: "opacity 160ms ease-out, stroke-width 160ms ease-out",
+                        }}
+                      />
+                    );
+                  })}
+                </svg>
+              )}
+
+              {/* Conexiones del ramo seleccionado */}
               {paths.length > 0 && (
                 <svg className="absolute inset-0 pointer-events-none w-full h-full z-10 overflow-visible">
                   <defs>
-                    <marker
-                      id="arrow-prereq"
-                      viewBox="0 0 10 10"
-                      refX="6"
-                      refY="5"
-                      markerWidth="6"
-                      markerHeight="6"
-                      orient="auto-start-reverse"
-                    >
-                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f59e0b" className="opacity-80" />
+                    <marker id="arrow-prereq" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="rgb(var(--exception-rgb))" />
                     </marker>
-                    <marker
-                      id="arrow-unlock"
-                      viewBox="0 0 10 10"
-                      refX="6"
-                      refY="5"
-                      markerWidth="6"
-                      markerHeight="6"
-                      orient="auto-start-reverse"
-                    >
-                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#10b981" className="opacity-80" />
+                    <marker id="arrow-unlock" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="rgb(var(--approved-rgb))" />
                     </marker>
                   </defs>
-
-                  {paths.map((p) => {
-                    const { x1, y1, x2, y2 } = p;
-                    
-                    // Camino más corto (curva Bezier directa)
-                    // Para columnas adyacentes, controlamos la curvatura a la mitad de la separación para que baje por el canal vacío.
-                    // Para columnas no adyacentes, trazamos un camino directo suave.
-                    const dx = Math.abs(x2 - x1) < 100 
-                      ? (x2 - x1) / 2 
-                      : Math.max(Math.abs(x2 - x1) * 0.4, 30);
-                      
-                    const pathD = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-                    
-                    const strokeColor = p.type === "prereq" ? "#f59e0b" : "#10b981";
-                    const markerId = p.type === "prereq" ? "url(#arrow-prereq)" : "url(#arrow-unlock)";
-
-                    return (
-                      <g key={p.id}>
-                        {/* Glowing backdrop path */}
-                        <path
-                          d={pathD}
-                          fill="none"
-                          stroke={strokeColor}
-                          strokeWidth="3.5"
-                          className="opacity-25 blur-[1.5px]"
-                        />
-                        {/* Main path */}
-                        <path
-                          d={pathD}
-                          fill="none"
-                          stroke={strokeColor}
-                          strokeWidth="2"
-                          strokeDasharray="4 4"
-                          markerEnd={markerId}
-                          className="opacity-80 transition-all duration-300 neon-flow-path"
-                        />
-                      </g>
-                    );
-                  })}
+                  {paths.map((p) => (
+                    <path
+                      key={p.id}
+                      d={connectorPath(p)}
+                      fill="none"
+                      stroke={p.type === "prereq" ? "rgb(var(--exception-rgb))" : "rgb(var(--approved-rgb))"}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      markerEnd={p.type === "prereq" ? "url(#arrow-prereq)" : "url(#arrow-unlock)"}
+                    />
+                  ))}
                 </svg>
               )}
               <AnimatePresence mode="popLayout">
