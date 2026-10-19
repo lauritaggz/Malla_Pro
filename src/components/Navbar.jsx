@@ -8,14 +8,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import GooeyNav from "./GooeyNav";
 
-const THEMES = [
-  { id: "aurora",   name: "Aurora",   color: "#2563EB" },
-  { id: "sunset",   name: "Sunset",   color: "#DB2777" },
-  { id: "emerald",  name: "Emerald",  color: "#059669" },
-  { id: "midnight", name: "Midnight", color: "#7C3AED" },
-  { id: "golden",   name: "Golden",   color: "#D97706" },
-];
-
 function NavBtn({ onClick, label, active, children, amber }) {
   return (
     <button
@@ -36,8 +28,6 @@ function NavBtn({ onClick, label, active, children, amber }) {
 }
 
 export default function Navbar({
-  theme,
-  setTheme,
   darkMode,
   setDarkMode,
   modoExcepcional,
@@ -152,7 +142,6 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const currentTheme = THEMES.find((t) => t.id === theme) || THEMES[0];
   const uni = mallaSeleccionada?.url?.includes("uch") ? "U. de Chile" : "UNAB";
 
   return (
@@ -294,20 +283,6 @@ export default function Navbar({
                       <div className="pt-2.5 border-t border-borderColor/60">
                         <p className="text-[9.5px] font-bold text-textSecondary/90 uppercase tracking-widest px-2 mb-2 select-none">Apariencia</p>
                         
-                        {/* Swatches list */}
-                        <div className="flex gap-2 justify-between px-2 mb-3">
-                          {THEMES.map((t) => (
-                            <button
-                              key={t.id}
-                              onClick={() => setTheme(t.id)}
-                              aria-label={`Tema ${t.name}`}
-                              className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center flex-shrink-0
-                                ${theme === t.id ? "border-primary scale-110 shadow-sm" : "border-transparent hover:scale-105"}`}
-                              style={{ background: t.color }}
-                            />
-                          ))}
-                        </div>
-
                         {/* DarkMode Toggle Switch */}
                         <button
                           onClick={() => setDarkMode(!darkMode)}
@@ -318,7 +293,7 @@ export default function Navbar({
                             <span>Modo oscuro</span>
                           </span>
                           <div className={`w-7.5 h-4 rounded-full p-0.5 transition-colors duration-200 flex items-center ${darkMode ? "bg-primary" : "bg-borderColor"}`}>
-                            <div className={`w-3 h-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${darkMode ? "translate-x-3.5" : "translate-x-0"}`} />
+                            <div className={`w-3 h-3 rounded-full bg-bgPrimary shadow-sm transition-transform duration-200 ${darkMode ? "translate-x-3.5" : "translate-x-0"}`} />
                           </div>
                         </button>
                       </div>

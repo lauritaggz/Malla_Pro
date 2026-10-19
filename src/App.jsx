@@ -45,9 +45,6 @@ export default function App() {
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
   );
 
-  const [theme, setTheme] = useState(
-    localStorage.getItem("malla-theme") || "aurora"
-  );
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("malla-darkmode");
     return saved ? saved === "true" : true;
@@ -169,12 +166,9 @@ export default function App() {
 
   // ---------------- THEME & DARKMODE ----------------
   useEffect(() => {
-    document.documentElement.className = `${theme} ${
-      darkMode ? "dark" : "light"
-    }`;
-    localStorage.setItem("malla-theme", theme);
+    document.documentElement.className = darkMode ? "dark" : "light";
     localStorage.setItem("malla-darkmode", darkMode);
-  }, [theme, darkMode]);
+  }, [darkMode]);
 
   useEffect(() => {
     listarMallas().then(setMallasDisponibles);
@@ -259,8 +253,6 @@ export default function App() {
       {/* NAVBAR */}
       {mallaSeleccionada && (
         <Navbar
-          theme={theme}
-          setTheme={setTheme}
           darkMode={darkMode}
           setDarkMode={setDarkMode}
           modoExcepcional={modoExcepcional}

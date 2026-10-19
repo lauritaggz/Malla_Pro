@@ -1111,7 +1111,7 @@ const MallaViewer = ({
     return (
       <motion.div
         key={`sem-${semNumero}`}
-        className="flex flex-col gap-2.5 w-[80vw] sm:w-[210px] md:w-[220px] shrink-0 snap-center sm:snap-align-none py-1 px-0.5"
+        className="flex flex-col gap-2.5 w-[80vw] sm:w-[228px] md:w-[236px] shrink-0 snap-center sm:snap-align-none py-1 px-0.5"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
@@ -1578,7 +1578,7 @@ const MallaViewer = ({
                         className={`w-max sm:w-auto flex-shrink-0 transition-all duration-300 ${
                           showA && showB 
                             ? "sm:min-w-[440px] md:min-w-[464px]" 
-                            : "sm:min-w-[210px] md:min-w-[220px]"
+                            : "sm:min-w-[228px] md:min-w-[236px]"
                         }`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}

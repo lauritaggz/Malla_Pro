@@ -1629,7 +1629,7 @@ export default function LandingPage() {
 
       <style>{`
         .lp-root {
-          font-family: Inter, system-ui, sans-serif;
+          font-family: var(--font-ui);
           color: #E8EEF7;
           --textPrimary: #F1F5F9;
           --textSecondary: rgba(226, 232, 240, 0.7);

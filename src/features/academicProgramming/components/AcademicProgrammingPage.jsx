@@ -110,10 +110,9 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const theme = safeStorage.getRaw(LEGACY_KEYS.theme) || "aurora";
     const savedDark = safeStorage.getRaw(LEGACY_KEYS.darkmode);
     const darkMode = savedDark ? savedDark === "true" : true;
-    document.documentElement.className = `${theme} ${darkMode ? "dark" : "light"}`;
+    document.documentElement.className = darkMode ? "dark" : "light";
   }, []);
 
   useEffect(() => {

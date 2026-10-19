@@ -11,134 +11,82 @@
    · Tipografía con contraste real
    ================================================================ */
 
-/* ── Light themes ─────────────────────────────────────────────── */
-.aurora.light {
-  --primary:        #2563EB;
-  --bgPrimary:      #F8FAFC;
+/* ── Tokens — dirección Tinta (papel y grafito) ───────────────────
+   Una sola identidad: la marca es tinta; el color solo marca estados.
+   Los nombres antiguos (--primary, --bgPrimary…) se mantienen como alias
+   para no romper los estilos que aún los usan. */
+
+/* Modo claro (papel) */
+:root,
+.light {
+  --ink:            #14161B;
+  --on-ink:         #F5F4F0;
+
+  --bgPrimary:      #F5F4F0;
   --bgSecondary:    #FFFFFF;
   --bgSurface:      #FFFFFF;
-  --textPrimary:    #0F172A;
-  --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.13);
-  --shadowPrimary:  rgba(37,99,235,0.14);
-  --primaryMuted:   rgba(37,99,235,0.07);
+  --textPrimary:    #14161B;
+  --textSecondary:  #5E6470;
+  --borderColor:    #DAD9D5;
+
+  --primary:        var(--ink);
+  --primaryMuted:   rgba(20, 22, 27, 0.06);
+  --shadowPrimary:  rgba(20, 22, 27, 0.16);
+
+  --status-approved-text:  #1F7A53;
+  --status-approved-bg:    #E3F1E9;
+  --status-current-text:   #2A5FBF;
+  --status-current-bg:     #E4ECF9;
+  --status-exception-text: #9A5B0B;
+  --status-exception-bg:   #F8ECD6;
+  --status-blocked-text:   #868B95;
+  --danger:                #B3362F;
 }
 
-.sunset.light {
-  --primary:        #DB2777;
-  --bgPrimary:      #FDF8F8;
-  --bgSecondary:    #FFFFFF;
-  --bgSurface:      #FFFFFF;
-  --textPrimary:    #0F172A;
-  --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.13);
-  --shadowPrimary:  rgba(219,39,119,0.14);
-  --primaryMuted:   rgba(219,39,119,0.07);
+/* Modo oscuro (grafito) */
+.dark {
+  --ink:            #ECEBE8;
+  --on-ink:         #121316;
+
+  --bgPrimary:      #121316;
+  --bgSecondary:    #1A1C20;
+  --bgSurface:      #202328;
+  --textPrimary:    #ECEBE8;
+  --textSecondary:  #9A9DA5;
+  --borderColor:    #2A2C31;
+
+  --primaryMuted:   rgba(236, 235, 232, 0.08);
+  --shadowPrimary:  rgba(0, 0, 0, 0.5);
+
+  --status-approved-text:  #4CC08A;
+  --status-approved-bg:    #20302D;
+  --status-current-text:   #6C9BF0;
+  --status-current-bg:     #242B39;
+  --status-exception-text: #E0A23C;
+  --status-exception-bg:   #322C23;
+  --status-blocked-text:   #6B6F78;
+  --danger:                #F07178;
 }
 
-.emerald.light {
-  --primary:        #059669;
-  --bgPrimary:      #F7FBF9;
-  --bgSecondary:    #FFFFFF;
-  --bgSurface:      #FFFFFF;
-  --textPrimary:    #0F172A;
-  --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.13);
-  --shadowPrimary:  rgba(5,150,105,0.14);
-  --primaryMuted:   rgba(5,150,105,0.07);
-}
-
-.midnight.light {
-  --primary:        #7C3AED;
-  --bgPrimary:      #F9F8FE;
-  --bgSecondary:    #FFFFFF;
-  --bgSurface:      #FFFFFF;
-  --textPrimary:    #0F172A;
-  --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.13);
-  --shadowPrimary:  rgba(124,58,237,0.14);
-  --primaryMuted:   rgba(124,58,237,0.07);
-}
-
-.golden.light {
-  --primary:        #D97706;
-  --bgPrimary:      #FDFAF5;
-  --bgSecondary:    #FFFFFF;
-  --bgSurface:      #FFFFFF;
-  --textPrimary:    #0F172A;
-  --textSecondary:  #64748B;
-  --borderColor:    rgba(15,23,42,0.13);
-  --shadowPrimary:  rgba(217,119,6,0.14);
-  --primaryMuted:   rgba(217,119,6,0.07);
-}
-
-/* ── Dark themes ──────────────────────────────────────────────── */
-.aurora.dark {
-  --primary:        #60A5FA;
-  --bgPrimary:      #0D1117;
-  --bgSecondary:    #161B22;
-  --bgSurface:      #1C2128;
-  --textPrimary:    #E6EDF3;
-  --textSecondary:  #7D8590;
-  --borderColor:    rgba(255,255,255,0.08);
-  --shadowPrimary:  rgba(96,165,250,0.18);
-  --primaryMuted:   rgba(96,165,250,0.10);
-}
-
-.sunset.dark {
-  --primary:        #F472B6;
-  --bgPrimary:      #0D1117;
-  --bgSecondary:    #161B22;
-  --bgSurface:      #1C2128;
-  --textPrimary:    #E6EDF3;
-  --textSecondary:  #7D8590;
-  --borderColor:    rgba(255,255,255,0.08);
-  --shadowPrimary:  rgba(244,114,182,0.18);
-  --primaryMuted:   rgba(244,114,182,0.10);
-}
-
-.emerald.dark {
-  --primary:        #34D399;
-  --bgPrimary:      #0D1117;
-  --bgSecondary:    #161B22;
-  --bgSurface:      #1C2128;
-  --textPrimary:    #E6EDF3;
-  --textSecondary:  #7D8590;
-  --borderColor:    rgba(255,255,255,0.08);
-  --shadowPrimary:  rgba(52,211,153,0.18);
-  --primaryMuted:   rgba(52,211,153,0.10);
-}
-
-.midnight.dark {
-  --primary:        #A78BFA;
-  --bgPrimary:      #0D1117;
-  --bgSecondary:    #161B22;
-  --bgSurface:      #1C2128;
-  --textPrimary:    #E6EDF3;
-  --textSecondary:  #7D8590;
-  --borderColor:    rgba(255,255,255,0.08);
-  --shadowPrimary:  rgba(167,139,250,0.18);
-  --primaryMuted:   rgba(167,139,250,0.10);
-}
-
-.golden.dark {
-  --primary:        #FCD34D;
-  --bgPrimary:      #0D1117;
-  --bgSecondary:    #161B22;
-  --bgSurface:      #1C2128;
-  --textPrimary:    #E6EDF3;
-  --textSecondary:  #7D8590;
-  --borderColor:    rgba(255,255,255,0.08);
-  --shadowPrimary:  rgba(252,211,77,0.18);
-  --primaryMuted:   rgba(252,211,77,0.10);
-}
-
-/* ── Design tokens system mappings ────────────────────────────── */
+/* ── Tipografía: Bricolage Grotesque (títulos), Instrument Sans (interfaz),
+   IBM Plex Mono (códigos y notas). Piso de 12px. ─────────────────── */
 :root {
+  --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+  --font-ui:      'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-meta:    12px;
+  --text-ui:      14px;
+  --text-body:    16px;
+  --text-section: 20px;
+  --text-page:    28px;
+  --text-figure:  40px;
+
+  /* Aliases de los nombres de diseño anteriores */
   --brand-primary: var(--primary);
   --brand-soft: var(--primaryMuted);
-  --brand-contrast: #ffffff;
-  --focus-ring: var(--primary);
+  --brand-contrast: var(--on-ink);
+  --focus-ring: var(--ink);
 
   --background: var(--bgPrimary);
   --surface: var(--bgSecondary);
@@ -150,42 +98,19 @@
   --text-secondary: var(--textSecondary);
   --text-muted: var(--textSecondary);
 
-  /* Semantic status colors (fixed color meanings!) */
-  --status-approved-bg: rgba(16, 185, 129, 0.08);
-  --status-approved-border: rgba(16, 185, 129, 0.35);
-  --status-approved-text: #059669;
-
-  --status-current-bg: rgba(37, 99, 235, 0.08);
-  --status-current-border: rgba(37, 99, 235, 0.4);
-  --status-current-text: #2563eb;
-
   --status-available-bg: transparent;
   --status-available-border: var(--borderColor);
   --status-available-text: var(--textPrimary);
-
-  --status-blocked-bg: rgba(148, 163, 184, 0.06);
+  --status-blocked-bg: transparent;
   --status-blocked-border: var(--borderColor);
-  --status-blocked-text: var(--textSecondary);
-}
-
-.dark {
-  --status-approved-text: #34d399;
-  --status-current-text: #60a5fa;
-  --status-approved-bg: rgba(52, 211, 153, 0.1);
-  --status-current-bg: rgba(96, 165, 250, 0.1);
-}
-
-.light {
-  --status-approved-text: #059669;
-  --status-current-text: #2563eb;
-  --status-approved-bg: rgba(16, 185, 129, 0.08);
-  --status-current-bg: rgba(37, 99, 235, 0.08);
 }
 
 /* ── Utility classes ──────────────────────────────────────────── */
-.bg-primary         { background-color: var(--primary); }
+.bg-primary         { background-color: var(--primary); color: var(--on-ink); }
 .text-primary       { color: var(--primary); }
 .border-primary     { border-color: var(--primary); }
+.ring-primary       { --tw-ring-color: var(--primary); }
+.ring-offset-bgPrimary { --tw-ring-offset-color: var(--bgPrimary); }
 .bg-bgPrimary       { background-color: var(--bgPrimary); }
 .bg-bgSecondary     { background-color: var(--bgSecondary); }
 .text-textPrimary   { color: var(--textPrimary); }
@@ -196,8 +121,8 @@
 body {
   background-color: var(--bgPrimary);
   color: var(--textPrimary);
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "kern" 1;
+  font-family: var(--font-ui);
+  font-feature-settings: "kern" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
@@ -275,10 +200,6 @@ body {
   color: var(--primary);
 }
 
-/* ── Borde izquierdo destacado para "en curso" ─────────────────── */
-.encurso-glow {
-  border-left-width: 4px !important;
-}
 
 /* ── Animations ───────────────────────────────────────────────── */
 @keyframes fadeIn {
@@ -354,124 +275,6 @@ body {
   .min-w-\[210px\]         { min-width: 150px !important; }
 }
 
-/* ── Estados de tarjetas de curso ────────────────────────────── */
-
-/* Tarjeta disponible — blanco con borde izquierdo de acento */
-.curso-disponible {
-  background-color: var(--bgSecondary);
-  border-left: 3px solid var(--primary) !important;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
-}
-.curso-disponible:hover {
-  box-shadow: 0 2px 8px var(--shadowPrimary);
-}
-.dark .curso-disponible {
-  background-color: var(--bgSurface);
-}
-
-/* Base (dark mode fallback) */
-.curso-aprobado   { background-color: rgb(16 185 129 / 0.88); }
-.curso-excepcional { background-color: rgb(245 158 11 / 0.88); }
-.curso-encurso    { background-color: var(--primary); }
-
-/* Light mode — pastels sofisticados */
-.light .curso-aprobado {
-  background-color: #ECFDF5;
-  color: #065F46 !important;
-  border-color: #6EE7B7 !important;
-}
-.light .curso-excepcional {
-  background-color: #FFFBEB;
-  color: #78350F !important;
-  border-color: #FCD34D !important;
-}
-/* En curso light mode — pastel del color primario (fondo claro + texto oscuro) */
-.aurora.light  .curso-encurso { background-color: #EFF6FF; color: #1E3A8A !important; border-color: #BFDBFE !important; }
-.sunset.light  .curso-encurso { background-color: #FDF2F8; color: #831843 !important; border-color: #FBCFE8 !important; }
-/* Emerald: cursando usa familia TEAL para diferenciarse del aprobado (verde esmeralda) */
-.emerald.light .curso-encurso { background-color: #CCFBF1; color: #0F766E !important; border-color: #5EEAD4 !important; }
-.midnight.light .curso-encurso { background-color: #F5F3FF; color: #4C1D95 !important; border-color: #DDD6FE !important; }
-.golden.light  .curso-encurso { background-color: #FFFBEB; color: #78350F !important; border-color: #FDE68A !important; }
-.light .curso-encurso {
-  filter: none;
-  box-shadow: none;
-}
-/* Botón "Notas" en cursando light mode */
-.aurora.light  .curso-encurso button { background-color: rgba(30,58,138,0.10) !important; border-color: rgba(30,58,138,0.20) !important; color: #1E3A8A !important; }
-.sunset.light  .curso-encurso button { background-color: rgba(131,24,67,0.10) !important; border-color: rgba(131,24,67,0.20) !important; color: #831843 !important; }
-/* Emerald: botón en teal */
-.emerald.light .curso-encurso button { background-color: rgba(15,118,110,0.12) !important; border-color: rgba(15,118,110,0.25) !important; color: #0F766E !important; }
-.midnight.light .curso-encurso button { background-color: rgba(76,29,149,0.10) !important; border-color: rgba(76,29,149,0.20) !important; color: #4C1D95 !important; }
-.golden.light  .curso-encurso button { background-color: rgba(120,53,15,0.10) !important; border-color: rgba(120,53,15,0.20) !important; color: #78350F !important; }
-
-/* Botón "Notas" adaptado al fondo pastel en light mode */
-.light .curso-aprobado button {
-  background-color: rgba(6,95,70,0.10) !important;
-  border-color: rgba(6,95,70,0.20) !important;
-  color: #065F46 !important;
-}
-.light .curso-aprobado button:hover {
-  background-color: rgba(6,95,70,0.18) !important;
-}
-.light .curso-excepcional button {
-  background-color: rgba(120,53,15,0.10) !important;
-  border-color: rgba(120,53,15,0.20) !important;
-  color: #78350F !important;
-}
-.light .curso-excepcional button:hover {
-  background-color: rgba(120,53,15,0.18) !important;
-}
-
-/* Dark mode — fondos muy apagados, texto en tono del color */
-.dark .curso-aprobado {
-  background-color: rgb(2 44 34 / 0.85);
-  color: #6ee7b7 !important;
-  border-color: rgb(6 95 70 / 0.5) !important;
-  box-shadow: none;
-}
-.dark .curso-excepcional {
-  background-color: rgb(69 26 3 / 0.85);
-  color: #fcd34d !important;
-  border-color: rgb(120 53 15 / 0.5) !important;
-  box-shadow: none;
-}
-.dark .curso-encurso {
-  background-color: var(--primaryMuted);
-  color: var(--primary) !important;
-  border-color: var(--shadowPrimary) !important;
-  box-shadow: none;
-}
-/* Emerald dark: cursando → teal oscuro para diferenciarse del aprobado verde */
-.emerald.dark .curso-encurso {
-  background-color: rgb(4 47 46 / 0.85) !important;
-  color: #5eead4 !important;
-  border-color: rgb(15 118 110 / 0.5) !important;
-  box-shadow: none;
-}
-
-/* ── Stat cards — diferenciación en tema emerald ─────────────── */
-/*
-  Por defecto:
-    aprobados → bg-emerald-500 (hardcoded en JSX)
-    encurso   → bg-primary (= emerald en tema verde → idénticos)
-  Solución: en tema emerald, encurso pasa a teal-600
-*/
-.emerald .stat-card-encurso {
-  background-color: #0d9488 !important; /* teal-600 */
-  border-color: rgba(20, 184, 166, 0.25) !important;
-  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.28) !important;
-}
-/* Emerald dark: aprobados en verde bosque, encurso en teal vibrante */
-.emerald.dark .stat-card-aprobados {
-  background-color: #166534 !important; /* green-800 */
-  border-color: rgba(22, 163, 74, 0.3) !important;
-  box-shadow: 0 8px 20px rgba(22, 101, 52, 0.35) !important;
-}
-.emerald.dark .stat-card-encurso {
-  background-color: #0f766e !important; /* teal-700 */
-  border-color: rgba(20, 184, 166, 0.25) !important;
-  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35) !important;
-}
 
 /* ── Selector de mención (native select) ─────────────────────── */
 .mencion-select option {
@@ -846,24 +649,45 @@ body {
   }
 }
 
-/* ── Redesigned Course Cards ─────────────────────────────────── */
+/* ── Tarjetas de ramo — el estado se codifica con relleno y etiqueta ──
+   Sin barras laterales ni !important: la base va primero y cada estado
+   la sobrescribe con la misma especificidad. */
 .curso-card-base {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 10px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 8px;
+  padding: 10px 11px;
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 72px;
+  min-height: 80px;
   position: relative;
 }
 
-.curso-card-base:hover {
-  transform: translateY(-1px);
-  border-color: var(--brand-primary);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+@media (hover: hover) and (pointer: fine) {
+  .curso-card-disponible:hover,
+  .curso-card-bloqueado:hover {
+    border-color: var(--border-strong);
+  }
+  .curso-card-aprobado:hover,
+  .curso-card-encurso:hover,
+  .curso-card-excepcional:hover {
+    border-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+}
+
+.curso-card-base:active {
+  transform: scale(0.985);
+}
+
+.curso-card-base:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 
 /* /portfolio-preview?embed=1: tarjetas más legibles en iframes pequeños */
@@ -879,52 +703,52 @@ body {
   margin-bottom: 2px;
 }
 .portfolio-embed .curso-card-footer > * {
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
-/* Statuses */
+/* Estados */
 .curso-card-aprobado {
-  background: var(--status-approved-bg) !important;
-  border-color: var(--status-approved-border) !important;
-  color: var(--status-approved-text) !important;
-  border-left: 4px solid var(--status-approved-text) !important;
+  background: var(--status-approved-bg);
+  border-color: transparent;
+  color: var(--status-approved-text);
 }
 
 .curso-card-encurso {
-  background: var(--status-current-bg) !important;
-  border-color: var(--status-current-border) !important;
-  color: var(--status-current-text) !important;
-  border-left: 4px solid var(--status-current-text) !important;
+  background: var(--status-current-bg);
+  border-color: transparent;
+  color: var(--status-current-text);
 }
 
 .curso-card-disponible {
-  background: var(--surface) !important;
-  border-color: var(--border) !important;
-  color: var(--text-primary) !important;
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
 }
 
 .curso-card-bloqueado {
-  background: var(--surface-subtle) !important;
-  border-color: var(--border) !important;
-  color: var(--text-secondary) !important;
-  opacity: 0.65;
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border);
+  color: var(--status-blocked-text);
 }
 
 .curso-card-excepcional {
-  background: rgba(124, 58, 237, 0.10) !important;
-  border-color: rgba(124, 58, 237, 0.38) !important;
-  border-left: 4px solid #7c3aed !important;
-}
-
-.curso-card-exception-selectable:hover {
-  border-color: rgba(124, 58, 237, 0.5) !important;
+  background: var(--status-exception-bg);
+  border-color: transparent;
+  color: var(--status-exception-text);
 }
 
 .curso-card-exception-selected {
-  background: rgba(124, 58, 237, 0.14) !important;
-  border-color: rgba(124, 58, 237, 0.65) !important;
-  border-left: 4px solid #7c3aed !important;
-  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.25);
+  background: var(--status-exception-bg);
+  border-color: transparent;
+  color: var(--status-exception-text);
+  box-shadow: 0 0 0 2px var(--status-exception-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .curso-card-exception-selectable:hover {
+    border-color: var(--status-exception-text);
+  }
 }
 
 .curso-card-exception-locked-normal {

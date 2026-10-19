@@ -73,39 +73,39 @@ const Curso = ({
       ? "curso-card-exception-selected"
       : "curso-card-excepcional";
     statusBadge = (
-      <div className="flex items-center gap-0.5 text-[9px] font-bold text-violet-600 dark:text-violet-300">
-        <Sparkles className="w-3 h-3 flex-shrink-0" />
+      <div className="flex items-center gap-1 text-[12px] font-semibold">
+        <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
         <span>Excepcional</span>
       </div>
     );
   } else if (aprobado) {
     cardStatusClass = "curso-card-aprobado";
     statusBadge = (
-      <div className="flex items-center gap-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-        <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+      <div className="flex items-center gap-1 text-[12px] font-semibold">
+        <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
         <span>{isExceptionMode ? "Ya aprobado" : "Aprobada"}</span>
       </div>
     );
   } else if (enCurso) {
     cardStatusClass = "curso-card-encurso";
     statusBadge = (
-      <div className="flex items-center gap-0.5 text-[9px] font-bold text-primary">
-        <Circle className="w-2 h-2 fill-primary/30 flex-shrink-0" />
+      <div className="flex items-center gap-1 text-[12px] font-semibold">
+        <Circle className="w-2.5 h-2.5 fill-current flex-shrink-0" />
         <span>Cursando</span>
       </div>
     );
   } else if (!disponible) {
     cardStatusClass = "curso-card-bloqueado";
     statusBadge = (
-      <div className="flex items-center gap-0.5 text-[9px] font-semibold text-textSecondary/70">
-        <Lock className="w-2.5 h-2.5 flex-shrink-0" />
+      <div className="flex items-center gap-1 text-[12px] font-semibold">
+        <Lock className="w-3 h-3 flex-shrink-0" />
         <span>Bloqueada</span>
       </div>
     );
   } else {
-    cardStatusClass = "curso-card-disponible border-dashed border-borderColor/80";
+    cardStatusClass = "curso-card-disponible";
     statusBadge = (
-      <div className="text-[9px] font-semibold text-textSecondary">
+      <div className="text-[12px] font-semibold text-textSecondary">
         <span>Disponible</span>
       </div>
     );
@@ -195,12 +195,12 @@ const Curso = ({
 
   const cardBody = (
     <>
-      <div className="curso-card-name font-semibold text-textPrimary text-xs sm:text-[12px] leading-tight line-clamp-2 pr-[80px] mb-1">
+      <div className={`curso-card-name font-semibold text-[14px] leading-[1.25] line-clamp-2 mb-1.5 ${promedio !== null ? "pr-[92px]" : "pr-[56px]"}`}>
         {curso.nombre}
       </div>
 
-      <div className="curso-card-footer flex items-center justify-between gap-1.5 mt-auto w-full select-none">
-        <div className="text-[9px] font-medium text-textSecondary leading-none">
+      <div className="curso-card-footer flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 mt-auto w-full select-none">
+        <div className="font-mono text-[12px] tracking-[-0.01em] text-textSecondary leading-none whitespace-nowrap">
           {curso.codigo} · {curso.sct || 0} SCT
         </div>
         {statusBadge}
@@ -229,7 +229,7 @@ const Curso = ({
       <Tag
         {...selectableProps}
         id={`curso-card-${curso.id}`}
-        className={`curso-card-base w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 select-none
+        className={`curso-card-base w-full text-left select-none
           ${cardStatusClass}
           ${highlightStyles}
           ${selectable ? "cursor-pointer" : "cursor-default"}
@@ -239,16 +239,16 @@ const Curso = ({
         {selectable && (
           <span
             aria-hidden
-            className={`absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 transition-all duration-200
+            className={`absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-md border flex items-center gap-1 transition-colors duration-150
               ${
                 highlightStatus === "selected"
-                  ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
-                  : "bg-bgSecondary/90 border-borderColor/40 text-textSecondary shadow-[0_1px_3px_rgba(0,0,0,0.05)]"
+                  ? "bg-primaryMuted border-primary text-primary shadow-sm"
+                  : "bg-bgSecondary border-borderColor text-textSecondary"
               }
             `}
           >
             <Network className="w-3 h-3" />
-            <span className="text-[9px] tracking-tight font-sans font-bold">PR</span>
+            <span className="text-[12px] font-semibold">PR</span>
           </span>
         )}
         {cardBody}
@@ -329,7 +329,7 @@ const Curso = ({
       }}
       aria-pressed={isExceptionMode ? exceptionSelected : undefined}
       aria-disabled={isExceptionMode && !exceptionSelectable ? true : undefined}
-      className={`curso-card-base w-full text-left focus:outline-none focus:ring-2 focus:ring-violet-500/40 group select-none touch-manipulation
+      className={`curso-card-base w-full text-left group select-none touch-manipulation
         ${cardStatusClass}
         ${isExceptionMode && exceptionSelectable ? "curso-card-exception-selectable" : ""}
         ${isExceptionMode && !exceptionSelectable ? "curso-card-exception-locked-normal" : ""}
@@ -347,10 +347,10 @@ const Curso = ({
     >
       {isExceptionMode && exceptionSelectable && (
         <span
-          className={`absolute top-1.5 right-1.5 z-20 h-4 w-4 rounded-full border flex items-center justify-center text-[9px] font-black transition-all duration-200 ${
+          className={`absolute top-1.5 right-1.5 z-20 h-5 w-5 rounded-full border flex items-center justify-center text-[12px] font-semibold transition-colors duration-150 ${
             exceptionSelected
-              ? "border-violet-500 bg-violet-600 text-white"
-              : "border-violet-400/50 bg-bgSecondary/80 text-transparent"
+              ? "border-[color:var(--status-exception-text)] bg-[color:var(--status-exception-text)] text-[color:var(--bgPrimary)]"
+              : "border-borderColor bg-bgSecondary text-transparent"
           }`}
           aria-hidden
         >
@@ -359,7 +359,7 @@ const Curso = ({
       )}
 
       {promedio !== null && (
-        <div className="absolute top-1.5 right-[52px] px-1 py-0.5 text-[9px] font-bold rounded-md border flex items-center justify-center min-w-[24px] bg-white/10 dark:bg-white/5 border-borderColor/40 text-textPrimary shadow-sm">
+        <div className="absolute top-1 right-[58px] px-1.5 py-0.5 text-[12px] font-mono font-medium tabular-nums rounded-md border flex items-center justify-center bg-bgSecondary border-borderColor text-textPrimary">
           {promedio.toFixed(1)}
         </div>
       )}
@@ -433,17 +433,17 @@ const Curso = ({
             suppressMouseRef.current = false;
           }, 500);
         }}
-        className={`${isExceptionMode ? "hidden" : ""} absolute top-1 right-1 z-20 px-2 py-1 rounded-md border flex items-center gap-1 select-none transition-all duration-200 cursor-pointer touch-manipulation
+        className={`${isExceptionMode ? "hidden" : ""} absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-md border flex items-center gap-1 select-none transition-colors duration-150 cursor-pointer touch-manipulation
           ${
             highlightStatus === "selected"
-              ? "bg-primary/20 border-primary text-primary font-extrabold shadow-sm"
-              : "bg-bgSecondary/90 border-borderColor/40 text-textSecondary hover:text-textPrimary hover:bg-borderColor/30 shadow-[0_1px_3px_rgba(0,0,0,0.05)]"
+              ? "bg-primaryMuted border-primary text-primary shadow-sm"
+              : "bg-bgSecondary border-borderColor text-textSecondary hover:text-textPrimary"
           }
         `}
         title="Ver prerrequisitos / Opciones"
       >
         <Network className="w-3 h-3" />
-        <span className="text-[9px] tracking-tight font-sans font-bold">PR</span>
+        <span className="text-[12px] font-semibold">PR</span>
       </div>
 
       {cardBody}
