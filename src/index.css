@@ -953,9 +953,9 @@ html.exception-mode-active .navbar-shell {
 .legal-content .legal-quote {
   margin: 0 0 1rem;
   padding: 0.75rem 1rem;
-  border-left: 3px solid var(--primary);
+  border: 1px solid var(--borderColor);
   background: var(--primaryMuted);
-  border-radius: 0 0.75rem 0.75rem 0;
+  border-radius: 0.75rem;
 }
 
 .legal-content .legal-quote p {

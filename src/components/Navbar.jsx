@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import GooeyNav from "./GooeyNav";
+import Logo from "./Logo";
 
 function NavBtn({ onClick, label, active, children, amber }) {
   return (
@@ -176,12 +177,7 @@ export default function Navbar({
               <ArrowLeft className="w-4 h-4" aria-hidden />
             </Link>
 
-            <div
-              className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-white"
-              style={{ background: "var(--primary)" }}
-            >
-              <BookMarked className="w-3.5 h-3.5" />
-            </div>
+            <Logo className="w-7 h-7 flex-shrink-0" />
 
             <div className="flex flex-col min-w-0 leading-tight">
               <div className="flex items-baseline gap-1.5 min-w-0">
@@ -384,8 +380,7 @@ export default function Navbar({
         <button
           type="button"
           onClick={handleToggleMinimize}
-          className="fixed top-2.5 left-1/2 -translate-x-1/2 z-[85] bg-primary text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-[0_4px_16px_rgba(0,0,0,0.18)] flex items-center gap-1.5 hover:brightness-110 active:scale-95 transition-all animate-bounce"
-          style={{ animationDuration: '2.5s' }}
+          className="fixed top-2.5 left-1/2 -translate-x-1/2 z-[85] bg-primary text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-[0_4px_16px_rgba(0,0,0,0.18)] flex items-center gap-1.5 hover:brightness-110 active:scale-95 transition-[transform,filter]"
         >
           <ChevronDown className="w-3.5 h-3.5" />
           <span>Expandir Menú</span>

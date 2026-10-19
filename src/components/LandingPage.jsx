@@ -25,6 +25,7 @@ import {
   Lock,
   Circle,
 } from "lucide-react";
+import Logo from "./Logo";
 import { SimMalla, SimNotas, SimToma, SimHorario } from "./FeatureSims";
 
 const NAV_LINKS = [
@@ -714,7 +715,7 @@ export default function LandingPage() {
         <header className="sticky top-0 z-50 lp-glass-nav">
           <div className="lp-container h-16 sm:h-[68px] flex items-center justify-between gap-3">
             <a href="#inicio" className="flex items-center gap-2.5 min-w-0 shrink-0" onClick={(e) => onNavClick(e, "#inicio")}>
-              <img src="/favicon.png" alt="" width={32} height={32} className="w-8 h-8 rounded-lg" />
+              <Logo className="w-8 h-8" />
               <span className="font-bold text-[15px] tracking-tight text-ink">Malla Pro</span>
             </a>
 
@@ -1023,7 +1024,7 @@ export default function LandingPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="sm:col-span-2 lg:col-span-1">
                 <div className="flex items-center gap-2">
-                  <img src="/favicon.png" alt="" width={28} height={28} className="w-7 h-7 rounded-md" />
+                  <Logo className="w-7 h-7" />
                   <span className="font-bold">Malla Pro</span>
                 </div>
                 <p className="mt-3 text-sm text-[var(--textSecondary)] leading-relaxed max-w-xs">
