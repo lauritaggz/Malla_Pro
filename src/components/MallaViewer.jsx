@@ -721,6 +721,7 @@ const MallaViewer = ({
           from: Number(preId),
           to: Number(c.id),
           done: approved.has(Number(preId)),
+          dense: (c.prerrequisitos || []).length > 2,
           x1: coordsF.right + 2,
           y1: coordsF.centerY,
           x2: coordsT.left - 6,
@@ -1561,6 +1562,8 @@ const MallaViewer = ({
                   </defs>
                   {allPaths.map((p) => {
                     const hot = hoverId !== null && (p.from === hoverId || p.to === hoverId);
+                    // Ramos con muchos prerrequisitos: solo se dibujan al apuntarlos, para no hacer un enredo
+                    if (p.dense && !hot) return null;
                     return (
                       <path
                         key={p.id}

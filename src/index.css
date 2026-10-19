@@ -785,7 +785,7 @@ body {
 }
 
 .curso-card-bloqueado {
-  background: transparent;
+  background: var(--bgPrimary);
   border-style: dashed;
   border-color: var(--border);
   color: var(--status-blocked-text);
