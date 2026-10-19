@@ -718,7 +718,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
             <div className="fade-in space-y-3 sm:space-y-3.5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div className="min-w-0 space-y-0.5">
-                  <h1 className="text-xl sm:text-2xl font-black text-textPrimary tracking-tight">
+                  <h1 className="t-page text-textPrimary">
                     Arma tu horario
                   </h1>
                   <p className="text-[11px] sm:text-sm text-textSecondary leading-snug max-w-xl">

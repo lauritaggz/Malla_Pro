@@ -24,7 +24,7 @@ export default function ProgrammingHeader({ onChangePdf }) {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-1">
-          <h1 className="text-[1.75rem] sm:text-[2rem] font-bold tracking-tight text-textPrimary leading-tight">
+          <h1 className="t-page text-textPrimary">
             Programación académica
           </h1>
           <p className="text-sm text-textSecondary leading-relaxed max-w-xl">

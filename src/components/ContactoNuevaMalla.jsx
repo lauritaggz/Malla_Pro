@@ -125,7 +125,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
                     <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center">
                       <Heart className="w-4.5 h-4.5 text-primary" style={{ width: 18, height: 18 }} />
                     </div>
-                    <h2 className="text-lg font-bold text-textPrimary">Envía tu malla</h2>
+                    <h2 className="t-section text-textPrimary">Envía tu malla</h2>
                   </div>
                   <p className="text-sm text-textSecondary leading-snug max-w-sm">
                     Ayuda a más estudiantes de tu carrera. Entre todos construimos la base de mallas.

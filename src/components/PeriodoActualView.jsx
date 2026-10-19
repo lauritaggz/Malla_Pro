@@ -237,7 +237,7 @@ export default function PeriodoActualView({
       >
         {/* Title Header */}
         <div className="flex flex-col gap-1 py-5 mb-1 select-none shrink-0">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-textPrimary leading-none m-0">
+          <h1 className="t-page text-textPrimary m-0">
             Periodo actual
           </h1>
           <p className="text-xs text-textSecondary font-medium m-0 mt-1.5">

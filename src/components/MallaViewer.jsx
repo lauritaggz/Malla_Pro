@@ -1234,15 +1234,15 @@ const MallaViewer = ({
       
       {/* ── Compact Statistics & Title Header ── */}
       {!fullscreenMalla && (
-        <div className="malla-toolbar overflow-visible flex flex-col gap-2 py-2 px-3 mb-3 border border-borderColor/60 bg-bgSecondary/30 rounded-2xl select-none shrink-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:py-2 sm:px-3.5">
-          <div className="flex flex-col min-w-0 sm:max-w-[38%] lg:max-w-[42%]">
-            <h1 className="text-sm sm:text-base font-bold text-textPrimary leading-none">Mi malla curricular</h1>
-            <p className="text-[10px] text-textSecondary/80 font-bold mt-0.5 uppercase tracking-wide truncate">
+        <div className="malla-toolbar overflow-visible flex flex-col gap-3 py-3 px-3.5 mb-3 border border-borderColor bg-bgSecondary rounded-xl select-none shrink-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4">
+          <div className="flex flex-col min-w-0 sm:shrink-0">
+            <h1 className="t-page text-textPrimary m-0">Mi malla curricular</h1>
+            <p className="text-[12px] text-textSecondary font-medium mt-1 truncate">
               {/\([A-Za-z\s.]+\)$/.test(malla.nombre) ? malla.nombre : `${malla.nombre} (${uni})`}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 text-xs text-textSecondary font-semibold sm:justify-end sm:flex-nowrap min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 text-xs text-textSecondary font-semibold sm:justify-end min-w-0">
             <MallaProgressStats
               aprobados={stats.aprobados}
               cursando={stats.cursando}

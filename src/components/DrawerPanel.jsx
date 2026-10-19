@@ -133,7 +133,7 @@ export default function DrawerPanel({
                   }}
                 >
                   <div className="min-w-0">
-                    <h2 className="text-base font-semibold text-textPrimary m-0 truncate">{title}</h2>
+                    <h2 className="t-section text-textPrimary m-0 truncate">{title}</h2>
                     {subtitle && (
                       <p className="text-xs text-textSecondary m-0 mt-0.5">{subtitle}</p>
                     )}
@@ -231,7 +231,7 @@ export default function DrawerPanel({
                 }}
               >
                 <div className="min-w-0">
-                  <h2 className="text-base font-semibold text-textPrimary m-0 truncate">{title}</h2>
+                  <h2 className="t-section text-textPrimary m-0 truncate">{title}</h2>
                   {subtitle && (
                     <p className="text-xs text-textSecondary m-0 mt-0.5">{subtitle}</p>
                   )}

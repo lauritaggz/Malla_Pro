@@ -155,7 +155,7 @@ export default function LoginSuggestion({ isOpen, onClose }) {
                 </div>
 
                 {/* Heading */}
-                <h2 className="text-lg font-bold text-textPrimary mb-1 leading-snug">
+                <h2 className="t-section text-textPrimary mb-1">
                   Sincroniza entre dispositivos
                 </h2>
                 <p className="text-sm text-textSecondary mb-5 leading-relaxed">
