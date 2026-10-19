@@ -97,7 +97,7 @@ export default function CourseDrawer({
       width="max-w-md"
     >
       <div className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-6 text-sm">
-        <p className="text-[11px] text-textSecondary leading-relaxed -mt-2 sm:hidden">
+        <p className="text-[12px] text-textSecondary leading-relaxed -mt-2 sm:hidden">
           En móvil, el botón <span className="font-bold text-textPrimary">PR</span> abre este panel
           con prerrequisitos y ramos que desbloquea. Toca la tarjeta para marcar aprobado;
           mantén pulsado para cursando.
@@ -105,7 +105,7 @@ export default function CourseDrawer({
         
         {/* State selection */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="course-status-select" className="text-[10px] font-bold text-textSecondary uppercase tracking-wider">
+          <label htmlFor="course-status-select" className="text-[12px] font-bold text-textSecondary ">
             Estado de la asignatura
           </label>
           <div className="relative">
@@ -145,7 +145,7 @@ export default function CourseDrawer({
                 {modoExcepcional && (
                   <button
                     onClick={marcarExcepcional}
-                    className={`text-[10.5px] font-bold px-2 py-1 rounded bg-amber-500 text-white hover:brightness-110 active:scale-95 transition-all self-start ${excepcional ? "bg-amber-600 shadow-sm" : ""}`}
+                    className={`text-[12px] font-bold px-2 py-1 rounded bg-amber-500 text-white hover:brightness-110 active:scale-95 transition-all self-start ${excepcional ? "bg-amber-600 shadow-sm" : ""}`}
                   >
                     {excepcional ? "Desmarcar Aprobación Excepcional" : "Forzar Aprobación Excepcional"}
                   </button>
@@ -169,10 +169,10 @@ export default function CourseDrawer({
         {/* Prerequisites Section */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] font-bold text-textSecondary uppercase tracking-wider">
+            <span className="text-[12px] font-bold text-textSecondary ">
               Prerrequisitos
             </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-600 dark:text-amber-400">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
               Requeridos
             </span>
@@ -204,10 +204,10 @@ export default function CourseDrawer({
         {/* Unlocks Section */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] font-bold text-textSecondary uppercase tracking-wider">
+            <span className="text-[12px] font-bold text-textSecondary ">
               Asignaturas que desbloquea
             </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               Desbloquea
             </span>

@@ -62,7 +62,7 @@ function EmailForm({ onSuccess, onBack }) {
       </button>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">
+          <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">
             Correo electrónico
           </label>
           <input
@@ -217,7 +217,7 @@ export default function LoginSuggestion({ isOpen, onClose }) {
                 </AnimatePresence>
 
                 {/* Legal */}
-                <p className="text-[10px] text-textSecondary/50 text-center mt-4 leading-relaxed">
+                <p className="text-[12px] text-textSecondary/50 text-center mt-4 leading-relaxed">
                   Datos almacenados localmente. Sin spam ni terceros.
                 </p>
               </div>

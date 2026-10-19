@@ -80,7 +80,7 @@ function SourceCard({
           <p className="text-xs text-textSecondary leading-relaxed">{description}</p>
         </div>
         {loaded && (
-          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-bold">
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[12px] font-bold">
             <Check className="h-3 w-3" strokeWidth={2.5} />
             Listo
           </span>
@@ -94,7 +94,7 @@ function SourceCard({
             {loadedLabel}
           </p>
           {detail && (
-            <p className="text-[11px] text-textSecondary pl-5">{detail}</p>
+            <p className="text-[12px] text-textSecondary pl-5">{detail}</p>
           )}
           <button
             type="button"
@@ -187,12 +187,12 @@ export default function DocumentSourcesPanel({
       </div>
 
       {mergeSummary && (
-        <p className="text-[11px] sm:text-xs text-textSecondary text-center leading-relaxed">
+        <p className="text-[12px] sm:text-xs text-textSecondary text-center leading-relaxed">
           {mergeSummary}
         </p>
       )}
 
-      <p className="text-[11px] text-textSecondary text-center leading-relaxed px-2">
+      <p className="text-[12px] text-textSecondary text-center leading-relaxed px-2">
         Los archivos se procesan solo en tu dispositivo. No se envían a ningún servidor.
       </p>
     </div>

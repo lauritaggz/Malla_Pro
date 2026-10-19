@@ -12,7 +12,7 @@ function StarsRow({ value, max = 5 }) {
           className={`w-3.5 h-3.5 ${i < full ? "text-amber-500 fill-amber-500" : "text-textSecondary/40"}`}
         />
       ))}
-      <span className="text-[11px] text-textSecondary ml-1.5 font-bold">
+      <span className="text-[12px] text-textSecondary ml-1.5 font-bold">
         {value > 0 ? value.toFixed(1) : "—"}
       </span>
     </div>
@@ -43,12 +43,12 @@ export default function TutorCard({ tutor, filterSubject, onSimulateComplete }) 
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col">
           <h3 className="font-bold text-textPrimary text-sm leading-snug">{tutor.nombre}</h3>
-          <span className="text-[10px] text-textSecondary mt-1 uppercase font-semibold">
+          <span className="text-[12px] text-textSecondary mt-1 font-semibold">
             {tutor.disponible ? "Disponible" : "No disponible"}
           </span>
         </div>
         {!tutor.disponible && (
-          <span className="text-[9px] uppercase tracking-wide font-extrabold px-2 py-0.5 rounded-md bg-textSecondary/15 text-textSecondary select-none">
+          <span className="text-[12px] font-extrabold px-2 py-0.5 rounded-md bg-textSecondary/15 text-textSecondary select-none">
             Pausado
           </span>
         )}
@@ -59,7 +59,7 @@ export default function TutorCard({ tutor, filterSubject, onSimulateComplete }) 
         {(tutor.asignaturas || []).map((a) => (
           <span
             key={a}
-            className="text-[9.5px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20"
+            className="text-[12px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20"
           >
             {a}
           </span>

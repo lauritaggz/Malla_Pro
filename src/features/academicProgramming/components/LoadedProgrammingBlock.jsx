@@ -93,7 +93,7 @@ function Stat({ value, label, muted = false }) {
       >
         {value}
       </p>
-      <p className="mt-1 text-[11px] sm:text-xs text-textSecondary">{label}</p>
+      <p className="mt-1 text-[12px] sm:text-xs text-textSecondary">{label}</p>
     </div>
   );
 }

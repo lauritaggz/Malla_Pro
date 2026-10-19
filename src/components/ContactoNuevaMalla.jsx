@@ -158,7 +158,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
               </div>
 
               {/* Pasos */}
-              <p className="text-[11px] font-bold text-textSecondary uppercase tracking-widest mb-3">Paso a paso</p>
+              <p className="text-[12px] font-bold text-textSecondary mb-3">Paso a paso</p>
               <div className="space-y-2.5 mb-6">
                 {STEPS.map((step) => (
                   <div
@@ -176,7 +176,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
                     {/* Texto */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[10px] font-bold text-textSecondary/45 uppercase tracking-wider">
+                        <span className="text-[12px] font-bold text-textSecondary/45 ">
                           Paso {step.num}
                         </span>
                         {step.num === 5 && (
@@ -195,7 +195,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
                 className="rounded-2xl border border-borderColor/60 bg-bgSurface/70 p-4"
                 style={{ backdropFilter: "blur(4px)" }}
               >
-                <p className="text-[11px] font-bold text-textSecondary uppercase tracking-widest mb-3">Correo de contacto</p>
+                <p className="text-[12px] font-bold text-textSecondary mb-3">Correo de contacto</p>
 
                 {/* Mail row */}
                 <div className="flex items-center gap-3 mb-4">
@@ -203,7 +203,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
                     <Mail className="w-4 h-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-textSecondary">Escríbenos a</p>
+                    <p className="text-[12px] text-textSecondary">Escríbenos a</p>
                     <p className="text-sm font-bold text-textPrimary font-mono tracking-tight">{MAIL}</p>
                   </div>
                   <button
@@ -229,7 +229,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
                   <ArrowRight className="w-4 h-4" />
                 </a>
 
-                <p className="text-[11px] text-textSecondary/55 text-center mt-2.5 leading-relaxed">
+                <p className="text-[12px] text-textSecondary/55 text-center mt-2.5 leading-relaxed">
                   Se abre tu aplicación de correo con el asunto prellenado.
                   Solo adjunta el PDF de tu malla y envía.
                 </p>

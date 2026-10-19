@@ -68,7 +68,7 @@ export default function CourseAccordion({
           {/* Identidad */}
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="inline-flex items-center rounded-md border border-borderColor bg-bgPrimary px-1.5 py-0.5 text-[11px] font-semibold text-textSecondary tracking-tight">
+              <span className="inline-flex items-center rounded-md border border-borderColor bg-bgPrimary px-1.5 py-0.5 text-[12px] font-semibold text-textSecondary tracking-tight">
                 {course.courseCode}
               </span>
               <span className="text-[15px] sm:text-base font-bold text-textPrimary leading-snug">
@@ -77,7 +77,7 @@ export default function CourseAccordion({
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-textSecondary">
               {badge && (
-                <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[12px] font-bold text-primary">
                   {badge}
                 </span>
               )}
@@ -102,7 +102,7 @@ export default function CourseAccordion({
               )}
             </div>
             {missing.length > 0 && (
-              <div className="mt-1.5 text-[11px] text-amber-700 dark:text-amber-400">
+              <div className="mt-1.5 text-[12px] text-amber-700 dark:text-amber-400">
                 <p className="font-semibold">Te falta aprobar:</p>
                 <ul className="list-disc pl-4 mt-0.5 space-y-0.5">
                   {missing.map((p) => (

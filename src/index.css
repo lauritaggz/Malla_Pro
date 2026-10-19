@@ -444,11 +444,9 @@ body {
   }
 
   .mobile-semester-card__title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--textSecondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--textPrimary);
   }
 
   .mobile-semester-card__courses {
@@ -474,7 +472,7 @@ body {
 
   .mobile-scroll-hint {
     text-align: center;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--textSecondary);
     opacity: 0.7;
     padding: 0.25rem 0.75rem 0.125rem;

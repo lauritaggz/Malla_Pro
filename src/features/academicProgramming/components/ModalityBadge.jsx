@@ -16,7 +16,7 @@ const STYLES = {
 export default function ModalityBadge({ modality, className = "" }) {
   return (
     <span
-      className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[11px] font-medium ${STYLES[modality] || STYLES.UNKNOWN} ${className}`}
+      className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[12px] font-medium ${STYLES[modality] || STYLES.UNKNOWN} ${className}`}
     >
       {MODALITY_LABELS[modality] || modality || "Desconocida"}
     </span>

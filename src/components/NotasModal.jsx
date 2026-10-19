@@ -365,7 +365,7 @@ export default function NotasModal({
       <div className="flex flex-col h-full min-h-0 overflow-y-auto p-4 sm:p-5 gap-4">
         {/* Toolbar: config discreet */}
         <div className="flex items-center justify-between gap-2 sm:gap-3 shrink-0 min-w-0">
-          <p className="text-[11px] text-textSecondary m-0 font-medium min-w-0 truncate">
+          <p className="text-[12px] text-textSecondary m-0 font-medium min-w-0 truncate">
             {evaluaciones.length} {evaluaciones.length === 1 ? "evaluación" : "evaluaciones"}
             {pesoRestante > 0
               ? ` · ${formatPeso(pesoRestante)}% libre`
@@ -441,12 +441,12 @@ export default function NotasModal({
               className="overflow-hidden shrink-0"
             >
               <div className="bg-bgPrimary/60 border border-borderColor rounded-lg p-3">
-                <p className="text-[11px] font-semibold text-textSecondary m-0 mb-2.5 uppercase tracking-wide">
+                <p className="text-[12px] font-semibold text-textSecondary m-0 mb-2.5 ">
                   Parámetros de evaluación final
                 </p>
                 <div className="grid grid-cols-3 gap-2.5">
                   <div>
-                    <label className="block text-[10px] font-bold text-textSecondary mb-1">Nota eximición</label>
+                    <label className="block text-[12px] font-bold text-textSecondary mb-1">Nota eximición</label>
                     <input
                       type="text"
                       inputMode="decimal"
@@ -457,7 +457,7 @@ export default function NotasModal({
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-textSecondary mb-1">% Presentación</label>
+                    <label className="block text-[12px] font-bold text-textSecondary mb-1">% Presentación</label>
                     <div className="relative">
                       <input
                         type="number"
@@ -473,7 +473,7 @@ export default function NotasModal({
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-textSecondary mb-1">% Examen</label>
+                    <label className="block text-[12px] font-bold text-textSecondary mb-1">% Examen</label>
                     <div className="relative">
                       <input
                         type="number"
@@ -501,15 +501,15 @@ export default function NotasModal({
           aria-label="Resumen de notas"
         >
           <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
-            <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">Estado</p>
+            <p className="text-[12px] text-textSecondary m-0 mb-0.5">Estado</p>
             <p className={`text-xs sm:text-sm font-bold leading-tight m-0 ${estadoColor}`}>{estado}</p>
           </div>
           <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
-            <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">% Evaluado</p>
+            <p className="text-[12px] text-textSecondary m-0 mb-0.5">% Evaluado</p>
             <p className="num text-sm text-textPrimary m-0">{formatPeso(pesoTotal)}%</p>
           </div>
           <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
-            <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">Presentación</p>
+            <p className="text-[12px] text-textSecondary m-0 mb-0.5">Presentación</p>
             <p className="num text-sm text-textPrimary m-0">
               {pesoConNota > 0 ? safeToFixed(promedioPresentacion, 2) : "—"}
             </p>
@@ -519,7 +519,7 @@ export default function NotasModal({
               rindeExamen ? "border-amber-500/45 bg-amber-500/5" : "border-borderColor bg-bgPrimary/40"
             }`}
           >
-            <p className={`text-[9px] uppercase tracking-wider m-0 mb-0.5 ${rindeExamen ? "text-amber-600 font-bold" : "text-textSecondary"}`}>
+            <p className={`text-[12px] m-0 mb-0.5 ${rindeExamen ? "text-amber-600 font-bold" : "text-textSecondary"}`}>
               Nota final
             </p>
             <p className={`num text-sm m-0 ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
@@ -556,7 +556,7 @@ export default function NotasModal({
             </p>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-bgPrimary/70 p-2.5 rounded-lg border border-borderColor/50">
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-textSecondary font-medium m-0 mb-0.5">
+                <p className="text-[12px] text-textSecondary font-medium m-0 mb-0.5">
                   Nota necesaria en examen para aprobar (4.0)
                 </p>
                 <p className={`num text-xl m-0 ${notaNecesariaExamen > 7.0 ? "text-red-500" : "text-amber-500"}`}>
@@ -564,7 +564,7 @@ export default function NotasModal({
                 </p>
               </div>
               <div className="shrink-0">
-                <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">Examen</label>
+                <label className="block text-[12px] font-bold text-textSecondary mb-1 ">Examen</label>
                 <input
                   type="text"
                   inputMode="decimal"
@@ -612,10 +612,10 @@ export default function NotasModal({
               <table className="w-full text-left border-collapse text-sm">
                 <thead>
                   <tr className="bg-bgPrimary/50 border-b border-borderColor">
-                    <th className="py-2 px-3 font-semibold text-textSecondary text-[11px] w-[36%]">Concepto</th>
-                    <th className="py-2 px-2 font-semibold text-textSecondary text-[11px] text-center w-[16%]">%</th>
-                    <th className="py-2 px-2 font-semibold text-textSecondary text-[11px] text-center w-[22%]">Nota</th>
-                    <th className="py-2 px-2 font-semibold text-textSecondary text-[11px] text-right w-[26%]"> </th>
+                    <th className="py-2 px-3 font-semibold text-textSecondary text-[12px] w-[36%]">Concepto</th>
+                    <th className="py-2 px-2 font-semibold text-textSecondary text-[12px] text-center w-[16%]">%</th>
+                    <th className="py-2 px-2 font-semibold text-textSecondary text-[12px] text-center w-[22%]">Nota</th>
+                    <th className="py-2 px-2 font-semibold text-textSecondary text-[12px] text-right w-[26%]"> </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-borderColor/50">
@@ -628,7 +628,7 @@ export default function NotasModal({
                           <td className="py-2.5 px-3 font-medium text-textPrimary text-xs sm:text-sm">
                             {evaluacion.nombre}
                             {tieneSubNotas && (
-                              <span className="block text-[10px] text-textSecondary mt-0.5">Con sub-notas</span>
+                              <span className="block text-[12px] text-textSecondary mt-0.5">Con sub-notas</span>
                             )}
                           </td>
                           <td className="num py-2.5 px-2 text-center text-textSecondary text-xs">
@@ -659,7 +659,7 @@ export default function NotasModal({
                                 onClick={() => toggleSubNotasPanel(evaluacion.id)}
                                 title="Agregar o gestionar sub-notas de esta evaluación"
                                 aria-label="Sub-notas de la evaluación"
-                                className={`text-[10px] px-1.5 py-1 rounded transition-colors font-medium border-0 cursor-pointer ${
+                                className={`text-[12px] px-1.5 py-1 rounded transition-colors font-medium border-0 cursor-pointer ${
                                   openSubNotas.includes(evaluacion.id)
                                     ? "bg-primary text-white"
                                     : "text-textSecondary hover:bg-bgPrimary"
@@ -773,7 +773,7 @@ export default function NotasModal({
 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-[10px] font-semibold text-textSecondary mb-1 uppercase tracking-wider">
+                    <label className="block text-[12px] font-semibold text-textSecondary mb-1 ">
                       Concepto
                     </label>
                     <input
@@ -787,7 +787,7 @@ export default function NotasModal({
 
                   <div className="flex gap-2.5">
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">
+                      <label className="block text-[12px] font-bold text-textSecondary mb-1 ">
                         Porcentaje (%)
                       </label>
                       <input
@@ -801,7 +801,7 @@ export default function NotasModal({
                       />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-[10px] font-bold text-textSecondary mb-1 uppercase">
+                      <label className="block text-[12px] font-bold text-textSecondary mb-1 ">
                         Calificación
                       </label>
                       <input
@@ -837,7 +837,7 @@ export default function NotasModal({
                   </div>
 
                   {pesoRestante > 0 && (
-                    <p className="text-[11px] text-textSecondary m-0 text-center">
+                    <p className="text-[12px] text-textSecondary m-0 text-center">
                       Queda <strong className="text-textPrimary">{formatPeso(pesoRestante)}%</strong> por distribuir.
                     </p>
                   )}

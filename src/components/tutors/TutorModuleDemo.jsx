@@ -103,7 +103,7 @@ export default function TutorModuleDemo({ onVolver, onSalirDemo }) {
         </motion.button>
       </div>
 
-      <p className="text-[11px] text-textSecondary mb-3">
+      <p className="text-[12px] text-textSecondary mb-3">
         {filtered.length === 0
           ? "No hay coincidencias con ese filtro."
           : `${filtered.length} tutor${filtered.length === 1 ? "" : "es"}`}

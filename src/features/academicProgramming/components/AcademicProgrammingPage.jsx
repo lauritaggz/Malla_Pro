@@ -685,7 +685,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
               {infoMessage}
               <button
                 type="button"
-                className="ml-3 text-[11px] text-textSecondary underline"
+                className="ml-3 text-[12px] text-textSecondary underline"
                 onClick={() => setInfoMessage(null)}
               >
                 Cerrar
@@ -721,7 +721,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                   <h1 className="t-page text-textPrimary">
                     Arma tu horario
                   </h1>
-                  <p className="text-[11px] sm:text-sm text-textSecondary leading-snug max-w-xl">
+                  <p className="text-[12px] sm:text-sm text-textSecondary leading-snug max-w-xl">
                     Parte desde tu horario actual y prueba cambios sin perder lo que ya tienes inscrito.
                   </p>
                 </div>

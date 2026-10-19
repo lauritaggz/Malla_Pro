@@ -206,7 +206,7 @@ export default function ImportCourseConfigModal({
             <div className="flex flex-col gap-2 min-w-0 w-full">
               <label
                 htmlFor={codeFieldId}
-                className="text-[10px] font-bold text-textSecondary uppercase tracking-wider"
+                className="text-[12px] font-bold text-textSecondary "
               >
                 Código
               </label>
@@ -225,7 +225,7 @@ export default function ImportCourseConfigModal({
                 placeholder="Pega aquí el código MP1C..."
                 aria-label="Código de configuración de Malla Pro"
                 aria-invalid={Boolean(pasteError)}
-                className="w-full max-w-full min-w-0 box-border rounded-xl border border-borderColor bg-bgPrimary text-textPrimary text-[11px] sm:text-xs font-mono leading-relaxed px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary/25 resize-y break-all overflow-x-hidden"
+                className="w-full max-w-full min-w-0 box-border rounded-xl border border-borderColor bg-bgPrimary text-textPrimary text-[12px] sm:text-xs font-mono leading-relaxed px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary/25 resize-y break-all overflow-x-hidden"
                 style={{ overflowWrap: "anywhere", wordBreak: "break-all" }}
               />
             </div>
@@ -328,7 +328,7 @@ export default function ImportCourseConfigModal({
               <p className="text-xs font-semibold text-textSecondary m-0 mt-1 font-mono tracking-wide">
                 {payload.courseCode}
               </p>
-              <p className="text-[11px] text-textSecondary m-0 mt-2">
+              <p className="text-[12px] text-textSecondary m-0 mt-2">
                 {importedCount}{" "}
                 {importedCount === 1 ? "evaluación" : "evaluaciones"}
               </p>

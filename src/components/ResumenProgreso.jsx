@@ -105,7 +105,7 @@ export default function ResumenProgreso({
 
         {/* ── Tarjetas de asignaturas ── */}
         <div>
-          <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">Asignaturas</p>
+          <p className="text-[12px] font-semibold text-textSecondary mb-3">Asignaturas</p>
           <div className="grid grid-cols-3 gap-3">
             <StatCard
               icon={<CheckCircle2 className="w-4 h-4" />}
@@ -159,7 +159,7 @@ export default function ResumenProgreso({
 
         {/* ── Detalle asignaturas ── */}
         <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
-          <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">
+          <p className="text-[12px] font-semibold text-textSecondary mb-3">
             <BookOpen className="w-3.5 h-3.5 inline mr-1.5 opacity-60" />
             Detalle de asignaturas
           </p>
@@ -172,7 +172,7 @@ export default function ResumenProgreso({
 
         {/* ── Créditos SCT (detalle secundario) ── */}
         <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
-          <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">
+          <p className="text-[12px] font-semibold text-textSecondary mb-3">
             <BarChart3 className="w-3.5 h-3.5 inline mr-1.5 opacity-60" />
             Créditos SCT
           </p>
@@ -193,7 +193,7 @@ export default function ResumenProgreso({
         {promedioGlobal !== null && (
           <div className="rounded-xl border border-borderColor bg-bgSurface p-5 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide">Promedio ponderado</p>
+              <p className="text-[12px] font-semibold text-textSecondary ">Promedio ponderado</p>
               <p className="text-xs text-textSecondary/60 mt-0.5">Solo cursos con notas completas (100% peso)</p>
             </div>
             <span className={`t-figure ${promedioGlobal >= 4 ? "text-emerald-500" : "text-red-500"}`}>
@@ -212,7 +212,7 @@ function StatCard({ icon, label, value, color, bg }) {
       <div className={`${color} opacity-80`}>{icon}</div>
       <div>
         <div className={`font-display text-2xl font-semibold tabular-nums ${color}`}>{value}</div>
-        <div className="text-[11px] text-textSecondary mt-0.5">{label}</div>
+        <div className="text-[12px] text-textSecondary mt-0.5">{label}</div>
       </div>
     </div>
   );

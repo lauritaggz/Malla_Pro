@@ -112,7 +112,7 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
               placeholder="Ej. Ana Pérez"
               autoComplete="name"
             />
-            {errors.nombre && <p className="text-[11px] text-red-500 mt-1">{errors.nombre}</p>}
+            {errors.nombre && <p className="text-[12px] text-red-500 mt-1">{errors.nombre}</p>}
           </div>
 
           <div>
@@ -125,7 +125,7 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
               inputMode="tel"
               autoComplete="tel"
             />
-            {errors.telefono && <p className="text-[11px] text-red-500 mt-1">{errors.telefono}</p>}
+            {errors.telefono && <p className="text-[12px] text-red-500 mt-1">{errors.telefono}</p>}
           </div>
 
           <div>
@@ -137,7 +137,7 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
               className="w-full rounded-xl border border-borderColor bg-bgPrimary px-3 py-2.5 text-sm text-textPrimary outline-none focus:ring-2 focus:ring-primary/40 resize-none"
               placeholder="Ej. Cálculo I, Física general, Programación"
             />
-            {errors.asignaturas && <p className="text-[11px] text-red-500 mt-1">{errors.asignaturas}</p>}
+            {errors.asignaturas && <p className="text-[12px] text-red-500 mt-1">{errors.asignaturas}</p>}
           </div>
 
           <div>
@@ -149,13 +149,13 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
               placeholder="Dejar vacío = a convenir"
               inputMode="decimal"
             />
-            {errors.precio && <p className="text-[11px] text-red-500 mt-1">{errors.precio}</p>}
+            {errors.precio && <p className="text-[12px] text-red-500 mt-1">{errors.precio}</p>}
           </div>
 
           <div className="flex items-center justify-between gap-3 rounded-xl border border-borderColor bg-bgPrimary px-3 py-3">
             <div>
               <p className="text-sm font-medium text-textPrimary">Disponible para tutorías</p>
-              <p className="text-[11px] text-textSecondary mt-0.5">
+              <p className="text-[12px] text-textSecondary mt-0.5">
                 Si está desactivado, no se mostrará el enlace de WhatsApp.
               </p>
             </div>

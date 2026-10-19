@@ -427,7 +427,7 @@ export default function ScheduleBuilder({
   return (
     <div className="space-y-3">
       {feedbackMessage && (
-        <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-2 rounded-xl text-[11px] sm:text-xs font-semibold flex items-start sm:items-center justify-between gap-2">
+        <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-2 rounded-xl text-[12px] sm:text-xs font-semibold flex items-start sm:items-center justify-between gap-2">
           <span className="min-w-0 leading-snug">{feedbackMessage}</span>
           <button
             type="button"
@@ -462,7 +462,7 @@ export default function ScheduleBuilder({
         >
           Horario
           {selectedSectionsList.length > 0 && (
-            <span className="ml-1.5 inline-flex items-center justify-center bg-primary text-white text-[10px] font-extrabold h-4 min-w-4 px-1 rounded-full">
+            <span className="ml-1.5 inline-flex items-center justify-center bg-primary text-white text-[12px] font-semibold h-[18px] min-w-[18px] px-1 rounded-full">
               {selectedSectionsList.length}
             </span>
           )}
@@ -512,13 +512,13 @@ export default function ScheduleBuilder({
                   Tu horario
                 </h2>
                 {conflicts.length > 0 && (
-                  <span className="inline-flex items-center gap-1 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 px-2 py-0.5 rounded text-[10px] font-extrabold animate-pulse">
+                  <span className="inline-flex items-center gap-1 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 px-2 py-0.5 rounded text-[12px] font-extrabold animate-pulse">
                     <AlertTriangle className="h-3 w-3 shrink-0" />
                     {conflicts.length} {conflicts.length === 1 ? "tope" : "topes"} por resolver
                   </span>
                 )}
               </div>
-              <p className="text-[11px] font-semibold text-textSecondary leading-snug">
+              <p className="text-[12px] font-semibold text-textSecondary leading-snug">
                 {selectedSectionsList.length} {selectedSectionsList.length === 1 ? "ramo" : "ramos"}
                 <span className="text-borderColor mx-1">·</span>
                 {totalCredits} créditos
@@ -537,7 +537,7 @@ export default function ScheduleBuilder({
                   <button
                     type="button"
                     onClick={handleClearSchedule}
-                    className="px-2.5 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[10px] font-bold text-textSecondary hover:text-textPrimary bg-bgSecondary btn-interactive"
+                    className="px-2.5 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[12px] font-bold text-textSecondary hover:text-textPrimary bg-bgSecondary btn-interactive"
                   >
                     Limpiar prueba
                   </button>
@@ -546,13 +546,13 @@ export default function ScheduleBuilder({
                   type="button"
                   disabled={selectedSectionsList.length === 0 || isExportingPdf}
                   onClick={handleExportPdf}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[10px] font-bold text-textSecondary disabled:opacity-50 disabled:pointer-events-none transition-all btn-interactive bg-bgSecondary"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[12px] font-bold text-textSecondary disabled:opacity-50 disabled:pointer-events-none transition-all btn-interactive bg-bgSecondary"
                 >
                   <Download className="h-3.5 w-3.5" />
                   {isExportingPdf ? "Exportando..." : "Exportar PDF"}
                 </button>
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-bold ${
+                  className={`inline-flex items-center gap-1 px-2 py-1.5 text-[12px] font-bold ${
                     proposalSaved ? "text-emerald-600 dark:text-emerald-400" : "text-textSecondary"
                   }`}
                 >
@@ -577,7 +577,7 @@ export default function ScheduleBuilder({
                           setMoreOpen(false);
                           handleSaveProposal();
                         }}
-                        className="w-full text-left px-3 py-2 text-[11px] font-bold text-textPrimary hover:bg-bgPrimary flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-[12px] font-bold text-textPrimary hover:bg-bgPrimary flex items-center gap-2"
                       >
                         <Save className="h-3.5 w-3.5" />
                         Guardar ahora
@@ -588,7 +588,7 @@ export default function ScheduleBuilder({
                           setMoreOpen(false);
                           handleClearSavedPlanning();
                         }}
-                        className="w-full text-left px-3 py-2 text-[11px] font-bold text-red-500 hover:bg-red-500/10 flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-[12px] font-bold text-red-500 hover:bg-red-500/10 flex items-center gap-2"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         Eliminar planificación guardada
@@ -615,7 +615,7 @@ export default function ScheduleBuilder({
       </div>
 
       <div className="pt-3 md:pt-5 border-t border-borderColor space-y-2">
-        <h2 className="text-[10px] font-bold text-textSecondary uppercase tracking-widest flex items-center gap-1.5">
+        <h2 className="text-[12px] font-bold text-textSecondary flex items-center gap-1.5">
           <Eye className="h-3.5 w-3.5" /> Más información
         </h2>
 

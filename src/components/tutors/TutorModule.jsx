@@ -36,7 +36,7 @@ export default function TutorModule({ onVolver }) {
           <MessageCircle className="h-7 w-7" strokeWidth={1.75} />
         </div>
 
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary mb-4">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[12px] font-bold text-primary mb-4">
           <Sparkles className="h-3.5 w-3.5" />
           Próximamente
         </span>

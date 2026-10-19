@@ -1121,7 +1121,7 @@ const MallaViewer = ({
           <span className="text-xs font-bold text-textPrimary leading-none">
             Semestre {semNumero}{labelExtra}
           </span>
-          <span className="text-[10px] text-textSecondary font-semibold leading-none">
+          <span className="text-[12px] text-textSecondary font-semibold leading-none">
             {cursosList.length} ramos
           </span>
         </div>
@@ -1260,7 +1260,7 @@ const MallaViewer = ({
                     aria-expanded={marcarHastaOpen}
                     aria-haspopup="listbox"
                     aria-label="Marcar aprobados hasta un semestre"
-                    className={`marcar-hasta-btn btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer
+                    className={`marcar-hasta-btn btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold border transition-all duration-200 cursor-pointer
                       ${marcarHastaOpen || marcarHastaFlash
                         ? "bg-primary text-white border-primary shadow-[0_0_0_3px_color-mix(in_srgb,var(--primary)_22%,transparent)]"
                         : "bg-bgPrimary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
@@ -1305,7 +1305,7 @@ const MallaViewer = ({
                               }}
                               className="marcar-hasta-menu fixed z-[9999] max-h-[min(60vh,320px)] overflow-y-auto rounded-xl border border-borderColor/80 bg-bgSecondary shadow-[0_12px_32px_rgba(0,0,0,0.22)] py-1.5"
                             >
-                              <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-textSecondary/70">
+                              <p className="px-3 pt-1 pb-1.5 text-[12px] font-bold text-textSecondary/70">
                                 Aprobar hasta
                               </p>
                               {Array.from({ length: malla.totalSemestres }).map((_, i) => (
@@ -1337,7 +1337,7 @@ const MallaViewer = ({
 
               <button
                 onClick={() => setOcultarCompletados(!ocultarCompletados)}
-                className={`btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer
+                className={`btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold border transition-all duration-200 cursor-pointer
                   ${ocultarCompletados
                     ? "bg-primary text-white border-primary"
                     : "bg-bgPrimary/60 text-textSecondary border-borderColor hover:text-primary hover:border-primary/40"}
@@ -1351,7 +1351,7 @@ const MallaViewer = ({
               <button
                 type="button"
                 onClick={enterFullscreenMalla}
-                className="btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-borderColor bg-bgPrimary/60 text-textSecondary hover:text-primary hover:border-primary/40 transition-all cursor-pointer"
+                className="btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold border border-borderColor bg-bgPrimary/60 text-textSecondary hover:text-primary hover:border-primary/40 transition-all cursor-pointer"
                 title="Ver malla en pantalla completa"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
@@ -1587,7 +1587,7 @@ const MallaViewer = ({
                         layout
                       >
                         <div className="text-center mb-4 select-none">
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-textSecondary/80">Año</span>
+                          <span className="text-[12px] font-bold text-textSecondary/80">Año</span>
                           <div className="text-lg sm:text-xl font-extrabold text-primary">
                             {year}
                           </div>
@@ -1623,7 +1623,7 @@ const MallaViewer = ({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="px-2.5 py-1.5 text-[10px] font-bold text-textSecondary uppercase tracking-wider select-none border-b border-borderColor/50 mb-1">
+          <div className="px-2.5 py-1.5 text-[12px] font-bold text-textSecondary select-none border-b border-borderColor/50 mb-1">
             {contextMenu.curso.nombre}
           </div>
           

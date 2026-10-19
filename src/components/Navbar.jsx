@@ -189,13 +189,13 @@ export default function Navbar({
                   Malla Pro
                 </span>
                 {mallaSeleccionada && (
-                  <span className="hidden md:inline text-[11px] sm:text-xs font-semibold text-textSecondary/80 truncate">
+                  <span className="hidden md:inline text-[12px] sm:text-xs font-semibold text-textSecondary/80 truncate">
                     / {mallaSeleccionada.nombre} ({uni})
                   </span>
                 )}
               </div>
               {mallaSeleccionada && (
-                <span className="text-[9px] font-bold text-textSecondary/80 uppercase tracking-wider md:hidden">
+                <span className="text-[12px] font-bold text-textSecondary/80 md:hidden">
                   {uni}
                 </span>
               )}
@@ -227,7 +227,7 @@ export default function Navbar({
             >
               <GraduationCap className="w-4 h-4" />
               {excepcionesActivas > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-3.5 h-3.5 px-0.5 rounded-full bg-violet-600 text-white text-[8px] font-black leading-3.5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-violet-600 text-white text-[12px] font-semibold leading-none flex items-center justify-center">
                   {excepcionesActivas}
                 </span>
               )}
@@ -259,7 +259,7 @@ export default function Navbar({
                         <p className="text-xs font-bold text-textPrimary leading-snug truncate">
                           {mallaSeleccionada?.nombre || "Malla Pro"}
                         </p>
-                        <p className="text-[9px] font-bold text-textSecondary/80 mt-0.5 uppercase tracking-wider leading-none">
+                        <p className="text-[12px] font-bold text-textSecondary/80 mt-0.5 leading-none">
                           {uni}
                         </p>
                       </div>
@@ -281,7 +281,7 @@ export default function Navbar({
 
                       {/* Appearance settings */}
                       <div className="pt-2.5 border-t border-borderColor/60">
-                        <p className="text-[9.5px] font-bold text-textSecondary/90 uppercase tracking-widest px-2 mb-2 select-none">Apariencia</p>
+                        <p className="text-[12px] font-bold text-textSecondary/90 px-2 mb-2 select-none">Apariencia</p>
                         
                         {/* DarkMode Toggle Switch */}
                         <button
@@ -293,14 +293,14 @@ export default function Navbar({
                             <span>Modo oscuro</span>
                           </span>
                           <div className={`w-7.5 h-4 rounded-full p-0.5 transition-colors duration-200 flex items-center ${darkMode ? "bg-primary" : "bg-borderColor"}`}>
-                            <div className={`w-3 h-3 rounded-full bg-bgPrimary shadow-sm transition-transform duration-200 ${darkMode ? "translate-x-3.5" : "translate-x-0"}`} />
+                            <div className={`w-3 h-3 rounded-full shadow-sm transition-transform duration-200 ${darkMode ? "bg-bgPrimary translate-x-3.5" : "bg-bgSecondary translate-x-0"}`} />
                           </div>
                         </button>
                       </div>
 
                       {/* Configurations */}
                       <div className="pt-2.5 border-t border-borderColor/60 flex flex-col gap-1">
-                        <p className="text-[9.5px] font-bold text-textSecondary/90 uppercase tracking-widest px-2 mb-2 select-none">Configuración</p>
+                        <p className="text-[12px] font-bold text-textSecondary/90 px-2 mb-2 select-none">Configuración</p>
 
                         <button
                           onClick={() => { onShowTour?.(); setSettingsOpen(false); }}
@@ -331,7 +331,7 @@ export default function Navbar({
 
                       {/* Información legal / institucional */}
                       <div className="pt-2.5 border-t border-borderColor/60 flex flex-col gap-0.5">
-                        <p className="text-[9.5px] font-bold text-textSecondary/90 uppercase tracking-widest px-2 mb-1.5 select-none">
+                        <p className="text-[12px] font-bold text-textSecondary/90 px-2 mb-1.5 select-none">
                           Información
                         </p>
                         <Link

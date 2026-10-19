@@ -282,14 +282,14 @@ export default function WeeklyScheduleGrid({
       {/* Asignaturas sin horario */}
       {unscheduledCourses.length > 0 && (
         <div className="px-4 py-2 bg-amber-500/5 border-b border-borderColor/60 space-y-1 shrink-0">
-          <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1 uppercase tracking-wider">
+          <p className="text-[12px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1 ">
             <Clock className="h-3 w-3" /> Asignaturas sin horario
           </p>
           <div className="flex flex-wrap gap-1.5">
             {unscheduledCourses.map((sec) => (
               <div
                 key={sec.id}
-                className="inline-flex items-center gap-1.5 bg-bgSecondary border border-borderColor px-2 py-0.5 rounded-md text-[10px] font-bold text-textPrimary"
+                className="inline-flex items-center gap-1.5 bg-bgSecondary border border-borderColor px-2 py-0.5 rounded-md text-[12px] font-bold text-textPrimary"
               >
                 <span>{sec.courseCode} · Sec. {sec.sectionNumber}</span>
                 <button
@@ -336,7 +336,7 @@ export default function WeeklyScheduleGrid({
         >
           <div className="min-w-0 md:min-w-[650px] flex flex-col relative">
             {/* Cabecera de días (Fijo arriba) */}
-            <div className="grid grid-cols-[56px_repeat(6,minmax(0,1fr))] md:grid-cols-[64px_repeat(6,1fr)] border-b border-borderColor bg-bgSecondary sticky top-0 z-20 text-center select-none text-[10px] font-extrabold text-textSecondary">
+            <div className="grid grid-cols-[56px_repeat(6,minmax(0,1fr))] md:grid-cols-[64px_repeat(6,1fr)] border-b border-borderColor bg-bgSecondary sticky top-0 z-20 text-center select-none text-[12px] font-extrabold text-textSecondary">
               <div className="border-r border-borderColor" />
               {scheduleDays.map((day) => {
                 const isSelected = selectedMobileDay === day.code;
@@ -352,7 +352,7 @@ export default function WeeklyScheduleGrid({
                   >
                     <span>{day.code}</span>
                     {count > 0 && (
-                      <span className="text-[9px] font-normal text-textSecondary mt-0.5">
+                      <span className="text-[12px] font-normal text-textSecondary mt-0.5">
                         {count} class{count === 1 ? "" : "es"}
                       </span>
                     )}
@@ -367,7 +367,7 @@ export default function WeeklyScheduleGrid({
               style={{ height: gridHeight }}
             >
               {/* Eje de Horas */}
-              <div className="border-r border-borderColor bg-bgSecondary text-right pr-2 text-[11px] font-bold text-textSecondary relative select-none z-10 font-mono">
+              <div className="border-r border-borderColor bg-bgSecondary text-right pr-2 text-[12px] font-bold text-textSecondary relative select-none z-10 font-mono">
                 {unabTimeSlots.map((slot) => {
                   const slotStart = timeToMinutes(slot.start);
                   if (slotStart < scheduleStartMinutes || slotStart >= scheduleEndMinutes) return null;
@@ -486,7 +486,7 @@ export default function WeeklyScheduleGrid({
                           {popoverOpen && (
                             <div className="absolute top-full left-0 right-0 md:left-1/2 md:-translate-x-1/2 mt-1.5 z-30 bg-bgSecondary border border-borderColor rounded-xl p-4 shadow-xl space-y-3 min-w-[260px] max-w-[300px] text-textPrimary font-semibold text-xs select-none popover-animate">
                               <div>
-                                <h4 className="text-[10px] font-black text-textSecondary uppercase tracking-wider">
+                                <h4 className="text-[12px] font-black text-textSecondary ">
                                   {m.courseCode} · Sec. {m.section.sectionNumber}
                                 </h4>
                                 <h3 className="text-sm font-black text-textPrimary mt-0.5 leading-snug">
@@ -494,7 +494,7 @@ export default function WeeklyScheduleGrid({
                                 </h3>
                               </div>
 
-                              <div className="space-y-1.5 text-textSecondary font-medium text-[11px]">
+                              <div className="space-y-1.5 text-textSecondary font-medium text-[12px]">
                                 <p className="flex items-center gap-1.5">
                                   <Clock className="h-3.5 w-3.5" />
                                   <span>{m.dayCode} {m.startTime}–{m.endTime} ({getOccupiedUnabSlots(m, unabTimeSlots).length} mód.)</span>
@@ -520,7 +520,7 @@ export default function WeeklyScheduleGrid({
                               </div>
 
                               {isConflicting && (
-                                <p className="text-[10px] text-red-600 dark:text-red-400 font-bold bg-red-500/5 border border-red-500/10 p-1.5 rounded flex items-center gap-1">
+                                <p className="text-[12px] text-red-600 dark:text-red-400 font-bold bg-red-500/5 border border-red-500/10 p-1.5 rounded flex items-center gap-1">
                                   <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                                   Conflicto de horario activo
                                 </p>
@@ -569,16 +569,16 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
     return (
       <div className="h-full flex flex-col justify-between overflow-hidden text-left relative z-10 pointer-events-none">
         <div className="space-y-0.5">
-          <div className="flex items-center gap-1 font-bold text-[9px] uppercase tracking-wider opacity-85">
+          <div className="flex items-center gap-1 font-bold text-[12px] opacity-85">
             {isConflicting && <AlertTriangle className="h-3 w-3 shrink-0" />}
             <span className="truncate">{isConflicting ? "Tope" : m.courseCode}</span>
           </div>
-          <p className="text-[11px] font-black leading-snug line-clamp-2">
+          <p className="text-[12px] font-black leading-snug line-clamp-2">
             {m.courseTitle}
           </p>
         </div>
 
-        <div className="space-y-0.5 text-[9px] opacity-90 font-bold">
+        <div className="space-y-0.5 text-[12px] opacity-90 font-bold">
           <p className="font-semibold opacity-85">Sec. {m.section.sectionNumber} {numSlots > 1 && `· ${numSlots} mód.`}</p>
           <p className="font-semibold opacity-85">Hora: {m.startTime}–{m.endTime}</p>
           <p className="truncate font-black opacity-90">Sala: {m.locations.join(" / ") || "no inf."}</p>
@@ -591,15 +591,15 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
     return (
       <div className="h-full flex flex-col justify-between overflow-hidden text-left relative z-10 pointer-events-none">
         <div className="space-y-0.5">
-          <div className="flex items-center gap-1 font-bold text-[8.5px] uppercase opacity-85">
+          <div className="flex items-center gap-1 font-bold text-[12px] opacity-85">
             {isConflicting && <AlertTriangle className="h-2.5 w-2.5 shrink-0" />}
             <span className="truncate">{isConflicting ? "Tope" : m.courseCode}</span>
           </div>
-          <p className="text-[10px] font-black leading-tight truncate">
+          <p className="text-[12px] font-black leading-tight truncate">
             {m.courseTitle}
           </p>
         </div>
-        <div className="text-[8.5px] opacity-95 flex items-center justify-between gap-1 flex-wrap font-bold">
+        <div className="text-[12px] opacity-95 flex items-center justify-between gap-1 flex-wrap font-bold">
           <span>{m.startTime}–{m.endTime}</span>
           <span className="truncate font-semibold opacity-85">Sec. {m.section.sectionNumber}</span>
         </div>
@@ -612,11 +612,11 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
     <div className="h-full flex items-center justify-between overflow-hidden text-left relative z-10 pointer-events-none gap-1 py-0.5 font-bold">
       <div className="flex items-center gap-1 min-w-0">
         {isConflicting && <AlertTriangle className="h-2.5 w-2.5 shrink-0" />}
-        <p className="text-[9.5px] truncate leading-none">
+        <p className="text-[12px] truncate leading-none">
           {m.courseCode} <span className="opacity-75 font-normal">({m.startTime})</span>
         </p>
       </div>
-      <p className="text-[8.5px] opacity-80 shrink-0">{m.locations[0] || "no inf."}</p>
+      <p className="text-[12px] opacity-80 shrink-0">{m.locations[0] || "no inf."}</p>
     </div>
   );
 }

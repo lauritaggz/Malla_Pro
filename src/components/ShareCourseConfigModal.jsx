@@ -181,14 +181,14 @@ export default function ShareCourseConfigModal({
           <p className="text-xs font-semibold text-textSecondary m-0 mt-1 font-mono tracking-wide">
             {curso.codigo}
           </p>
-          <p className="text-[11px] text-textSecondary m-0 mt-2">
+          <p className="text-[12px] text-textSecondary m-0 mt-2">
             {evalCount} {evalCount === 1 ? "evaluación" : "evaluaciones"}
             {" · "}
             Ponderación total: {totalLabel}%
             {isComplete ? " ✓" : ""}
           </p>
           {!isComplete && evalCount > 0 && (
-            <p className="text-[11px] text-amber-600 dark:text-amber-400 m-0 mt-1.5 leading-snug">
+            <p className="text-[12px] text-amber-600 dark:text-amber-400 m-0 mt-1.5 leading-snug">
               Los porcentajes actualmente suman {totalLabel}%. Puedes compartir igualmente.
             </p>
           )}
@@ -196,7 +196,7 @@ export default function ShareCourseConfigModal({
 
         <div className="flex items-start gap-2 rounded-xl border border-borderColor/80 bg-bgPrimary/40 px-3 py-2.5 min-w-0">
           <Lock className="w-3.5 h-3.5 text-textSecondary shrink-0 mt-0.5" aria-hidden />
-          <p className="text-[11px] text-textSecondary m-0 leading-relaxed">
+          <p className="text-[12px] text-textSecondary m-0 leading-relaxed">
             El código comparte únicamente nombres y porcentajes. Tus notas y datos personales no se
             incluyen.
           </p>
@@ -219,7 +219,7 @@ export default function ShareCourseConfigModal({
           <div className="flex flex-col gap-2.5 min-w-0 w-full">
             <label
               htmlFor={codeFieldId}
-              className="text-[10px] font-bold text-textSecondary uppercase tracking-wider"
+              className="text-[12px] font-bold text-textSecondary "
             >
               Código de configuración
             </label>
@@ -230,7 +230,7 @@ export default function ShareCourseConfigModal({
               rows={5}
               spellCheck={false}
               aria-label="Código de configuración de Malla Pro"
-              className="w-full max-w-full min-w-0 box-border rounded-xl border border-borderColor bg-bgPrimary text-textPrimary text-[11px] sm:text-xs font-mono leading-relaxed px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary/25 resize-y break-all overflow-x-hidden overflow-y-auto"
+              className="w-full max-w-full min-w-0 box-border rounded-xl border border-borderColor bg-bgPrimary text-textPrimary text-[12px] sm:text-xs font-mono leading-relaxed px-3 py-2.5 outline-none focus:ring-2 focus:ring-primary/25 resize-y break-all overflow-x-hidden overflow-y-auto"
               style={{ overflowWrap: "anywhere", wordBreak: "break-all" }}
               onFocus={(e) => e.target.select()}
             />
@@ -255,7 +255,7 @@ export default function ShareCourseConfigModal({
             </button>
 
             {copyFeedback === "failed" && (
-              <p role="alert" className="text-[11px] text-amber-600 dark:text-amber-400 m-0 leading-snug">
+              <p role="alert" className="text-[12px] text-amber-600 dark:text-amber-400 m-0 leading-snug">
                 No pudimos copiar el código automáticamente. Puedes seleccionarlo y copiarlo
                 manualmente.
               </p>

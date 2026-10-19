@@ -59,7 +59,7 @@ export default function CurricularProgressSummary({
         )}
 
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-textSecondary">
+          <p className="text-[12px] font-semibold text-textSecondary">
             Semestre principal detectado
           </p>
           <p className="text-xl sm:text-2xl font-bold text-textPrimary mt-0.5">

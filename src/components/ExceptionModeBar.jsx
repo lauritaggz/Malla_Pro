@@ -25,7 +25,7 @@ export default function ExceptionModeBar({
               <Sparkles className="h-3.5 w-3.5" />
               Modo Excepcional
             </span>
-            <span className="text-[11px] font-bold text-textSecondary">
+            <span className="text-[12px] font-bold text-textSecondary">
               {countLabel}
             </span>
             <span className="relative group/help">
@@ -39,7 +39,7 @@ export default function ExceptionModeBar({
               </button>
             </span>
           </div>
-          <p className="text-[11px] text-textSecondary mt-0.5 leading-snug">
+          <p className="text-[12px] text-textSecondary mt-0.5 leading-snug">
             Sirve para marcar ramos como aprobados aunque no cumplas los prerrequisitos,
             por ejemplo convalidaciones o casos especiales.
           </p>
@@ -49,14 +49,14 @@ export default function ExceptionModeBar({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl border border-borderColor text-[11px] sm:text-xs font-bold text-textSecondary hover:text-textPrimary hover:bg-bgPrimary btn-interactive"
+            className="flex-1 sm:flex-none px-3 py-1.5 rounded-xl border border-borderColor text-[12px] sm:text-xs font-bold text-textSecondary hover:text-textPrimary hover:bg-bgPrimary btn-interactive"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={hasChanges ? onApply : onCancel}
-            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold btn-interactive ${
+            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl text-[12px] sm:text-xs font-bold btn-interactive ${
               hasChanges
                 ? "bg-violet-600 text-white hover:brightness-110"
                 : "bg-violet-600/80 text-white hover:brightness-110"

@@ -321,7 +321,7 @@ export default function PeriodoActualView({
                             <h2 className="font-bold text-textPrimary text-sm leading-snug m-0 line-clamp-2">
                               {course.nombre}
                             </h2>
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-textSecondary font-medium">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-textSecondary font-medium">
                               <span className="uppercase tracking-wide">{course.codigo}</span>
                               {credits && (
                                 <>
@@ -333,7 +333,7 @@ export default function PeriodoActualView({
                           </div>
 
                           <div className="shrink-0 flex flex-col items-end leading-none" aria-label="Promedio">
-                            <span className="text-[9px] font-bold text-textSecondary uppercase tracking-wider">
+                            <span className="text-[12px] font-bold text-textSecondary ">
                               Promedio
                             </span>
                             <span
@@ -361,7 +361,7 @@ export default function PeriodoActualView({
                                       copyToClipboard(section.nrc, course.id);
                                     }}
                                     aria-label={`Copiar NRC ${section.nrc}`}
-                                    className={`ml-auto shrink-0 px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all flex items-center gap-1 cursor-pointer
+                                    className={`ml-auto shrink-0 px-1.5 py-0.5 rounded text-[12px] font-mono border transition-all flex items-center gap-1 cursor-pointer
                                       ${copiedNrc === course.id
                                         ? "bg-emerald-500/10 border-emerald-500/35 text-emerald-600 dark:text-emerald-400"
                                         : "bg-bgPrimary/60 border-borderColor text-textSecondary hover:text-textPrimary"}`}
@@ -394,7 +394,7 @@ export default function PeriodoActualView({
                               </div>
                             </>
                           ) : (
-                            <div className="text-[11.5px] text-textSecondary/80 py-0.5 flex items-center gap-2">
+                            <div className="text-[12px] text-textSecondary/80 py-0.5 flex items-center gap-2">
                               <HelpCircle className="w-3.5 h-3.5 text-textSecondary/50 shrink-0" aria-hidden="true" />
                               <span>Sin sección asignada. Defínela en Toma de Ramos.</span>
                             </div>
@@ -403,7 +403,7 @@ export default function PeriodoActualView({
 
                         {/* Footer */}
                         <div className="flex items-center justify-between gap-3 mt-auto">
-                          <span className="text-[10px] font-semibold text-textSecondary">
+                          <span className="text-[12px] font-semibold text-textSecondary">
                             {gradedCount > 0
                               ? `${gradedCount} de ${evalsCount} notas`
                               : evalsCount > 0
@@ -416,7 +416,7 @@ export default function PeriodoActualView({
                               e.stopPropagation();
                               onAbrirNotas?.(course);
                             }}
-                            className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[11px] font-bold transition-all flex items-center gap-1.5 shadow-sm border-0 cursor-pointer"
+                            className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-sm border-0 cursor-pointer"
                           >
                             <NotebookPen className="w-3.5 h-3.5" aria-hidden="true" />
                             <span>Notas</span>
@@ -444,7 +444,7 @@ export default function PeriodoActualView({
                             <div key={course.id} className="p-4 bg-bgSecondary border border-borderColor/60 rounded-xl flex flex-col gap-3">
                               <div className="flex flex-col leading-tight border-b border-borderColor/55 pb-2">
                                 <span className="font-bold text-xs text-textPrimary">{course.nombre}</span>
-                                <span className="text-[9px] font-bold text-textSecondary uppercase mt-1 tracking-wider">{course.codigo}</span>
+                                <span className="text-[12px] font-bold text-textSecondary mt-1 ">{course.codigo}</span>
                               </div>
                               <div className="flex flex-col gap-1.5">
                                 {evals.map((ev) => (
@@ -459,7 +459,7 @@ export default function PeriodoActualView({
                               <button
                                 type="button"
                                 onClick={() => onAbrirNotas?.(course)}
-                                className="mt-1 self-start text-[11px] font-bold text-primary hover:underline bg-transparent border-0 cursor-pointer px-0"
+                                className="mt-1 self-start text-[12px] font-bold text-primary hover:underline bg-transparent border-0 cursor-pointer px-0"
                               >
                                 Abrir notas
                               </button>

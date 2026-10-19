@@ -65,7 +65,7 @@ export default function MobileBottomNav({
             <div className={`transition-transform duration-200 ${isActive ? "scale-105 text-primary" : "text-textSecondary/80"}`}>
               {item.icon}
             </div>
-            <span className="text-[9.5px] font-semibold leading-none truncate w-full text-center">
+            <span className="text-[12px] font-semibold leading-none truncate w-full text-center">
               {item.label}
             </span>
           </button>

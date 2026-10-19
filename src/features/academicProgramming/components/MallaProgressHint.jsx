@@ -30,7 +30,7 @@ export default function MallaProgressHint({ forceShow = false }) {
   return (
     <div
       role="status"
-      className="rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2 text-[11px] sm:text-xs text-amber-900 dark:text-amber-100"
+      className="rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2 text-[12px] sm:text-xs text-amber-900 dark:text-amber-100"
     >
       <div className="flex items-start gap-2">
         <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />

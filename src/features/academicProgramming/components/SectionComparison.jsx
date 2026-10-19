@@ -92,12 +92,12 @@ export default function SectionComparison({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <label className="inline-flex items-center gap-1.5 text-[11px] text-textSecondary">
+          <label className="inline-flex items-center gap-1.5 text-[12px] text-textSecondary">
             <span className="font-medium whitespace-nowrap">Ordenar secciones</span>
             <select
               value={sectionSort}
               onChange={(e) => setSectionSort(e.target.value)}
-              className="h-8 rounded-lg border border-borderColor bg-bgPrimary px-2 text-[11px] font-medium text-textPrimary outline-none"
+              className="h-8 rounded-lg border border-borderColor bg-bgPrimary px-2 text-[12px] font-medium text-textPrimary outline-none"
             >
               {SECTION_SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -106,7 +106,7 @@ export default function SectionComparison({
               ))}
             </select>
           </label>
-          <label className="inline-flex items-center gap-1.5 text-[11px] text-textSecondary">
+          <label className="inline-flex items-center gap-1.5 text-[12px] text-textSecondary">
             <input
               type="checkbox"
               checked={groupByPeriod}
@@ -122,7 +122,7 @@ export default function SectionComparison({
       <div className="hidden lg:block overflow-hidden rounded-xl border border-borderColor">
         <table className="w-full text-left border-collapse table-fixed">
           <thead>
-            <tr className="bg-bgPrimary border-b border-borderColor text-[10px] uppercase tracking-wider text-textSecondary">
+            <tr className="bg-bgPrimary border-b border-borderColor text-[12px] text-textSecondary">
               <th className="px-3 py-2 font-semibold w-[12%]">Sección</th>
               <th className="px-3 py-2 font-semibold w-[30%]">Horario</th>
               <th className="px-3 py-2 font-semibold w-[23%]">Profesor</th>
@@ -174,7 +174,7 @@ function GroupRows({ group, highlightedDays, colSpan }) {
         <tr className="bg-bgPrimary/70">
           <td
             colSpan={colSpan}
-            className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-textSecondary"
+            className="px-3 py-1.5 text-[12px] font-bold text-textSecondary"
           >
             {group.label}
           </td>
@@ -216,13 +216,13 @@ function SectionTableRow({ section, striped, highlightedDays }) {
             )}
           </div>
           {section.activityType && (
-            <p className="text-[11px] text-textSecondary mt-0.5">{section.activityType}</p>
+            <p className="text-[12px] text-textSecondary mt-0.5">{section.activityType}</p>
           )}
           {hasLinked && (
             <button
               type="button"
               onClick={() => setLinkedOpen((v) => !v)}
-              className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary"
+              className="mt-1 inline-flex items-center gap-1 text-[12px] font-medium text-primary"
             >
               <Link2 className="h-3 w-3" aria-hidden />
               Requiere sección ligada
@@ -283,14 +283,14 @@ function SectionMobileCard({ section, highlightedDays }) {
             Sección <span className="num">{section.sectionNumber}</span>
           </h4>
           {section.activityType && (
-            <p className="text-[11px] text-textSecondary">{section.activityType}</p>
+            <p className="text-[12px] text-textSecondary">{section.activityType}</p>
           )}
         </div>
         <ModalityBadge modality={section.modality} />
       </div>
 
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-textSecondary mb-1">
+        <p className="text-[12px] font-semibold text-textSecondary mb-1">
           Horarios
         </p>
         <MeetingSchedule
@@ -300,7 +300,7 @@ function SectionMobileCard({ section, highlightedDays }) {
       </div>
 
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-textSecondary mb-0.5">
+        <p className="text-[12px] font-semibold text-textSecondary mb-0.5">
           Profesor
         </p>
         <ProfessorsCell professors={section.professors} />
