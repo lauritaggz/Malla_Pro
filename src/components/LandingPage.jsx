@@ -111,12 +111,6 @@ function CountUpStat({ to = 100 }) {
 
 /* ── Product mockups (UI estática fiel al producto) ───────────── */
 
-const KICKER_BAND = {
-  "Tu malla": "lp-band-green",
-  "Toma de ramos": "lp-band-amber",
-  Notas: "lp-band-pink",
-};
-
 function FeaturePoint({ children }) {
   return (
     <li className="flex items-start gap-2 text-sm text-[var(--textSecondary)]">
@@ -143,7 +137,7 @@ const FEATURES = [
   },
   {
     id: "toma-de-ramos",
-    band: "lp-band-amber",
+    band: "lp-band-cyan",
     title: "Encuentra tus secciones y arma tu horario",
     desc: "Carga la programación y compara las secciones de cada ramo. Elige una por ramo y mira cómo queda tu semana: si dos clases se cruzan, Malla Pro marca el tope.",
     points: [
@@ -157,7 +151,7 @@ const FEATURES = [
 
 const STEPS = [
   { n: "1", band: "lp-band-green", t: "Marca tu avance", d: "Registra los ramos que aprobaste y los que estás cursando." },
-  { n: "2", band: "lp-band-amber", t: "Carga la programación", d: "Malla Pro organiza las secciones según los ramos que te corresponden." },
+  { n: "2", band: "lp-band-cyan", t: "Carga la programación", d: "Malla Pro organiza las secciones según los ramos que te corresponden." },
   { n: "3", band: "lp-band-blue", t: "Arma tu horario", d: "Compara alternativas, revisa topes y guarda tu propuesta." },
 ];
 
@@ -1143,11 +1137,11 @@ export default function LandingPage() {
         .dark .lp-tint-yellow  { --band-bg: #3A3214; --band-ink: #F2D14B; }
         .light .lp-band-green  { --band-bg: #DCEFE3; --band-ink: #1B6E4A; }
         .light .lp-band-blue   { --band-bg: #DCE7F8; --band-ink: #2A5FBF; }
-        .light .lp-band-amber  { --band-bg: #F7E6C3; --band-ink: #8A5008; }
+        .light .lp-band-cyan   { --band-bg: #D2EBF3; --band-ink: #0B6480; }
         .light .lp-band-pink   { --band-bg: #F8DCE6; --band-ink: #B0305A; }
         .dark .lp-band-green   { --band-bg: #15241D; --band-ink: #5CCB93; }
         .dark .lp-band-blue    { --band-bg: #172033; --band-ink: #7BA6F3; }
-        .dark .lp-band-amber   { --band-bg: #2A2315; --band-ink: #E8AE45; }
+        .dark .lp-band-cyan    { --band-bg: #0E2630; --band-ink: #5DC6E3; }
         .dark .lp-band-pink    { --band-bg: #2C1A23; --band-ink: #F27AA6; }
 
         /* Banda amarilla: siempre texto oscuro sobre amarillo */
