@@ -49,9 +49,9 @@ function SourceChip({ label, loaded, detail, error, emptyLabel }) {
   const tone = error ? "error" : loaded ? "ok" : "idle";
   const dot =
     tone === "ok"
-      ? "bg-emerald-500"
+      ? "bg-approved"
       : tone === "error"
-        ? "bg-red-500"
+        ? "bg-danger"
         : "bg-textSecondary/40";
   const text =
     tone === "error"
@@ -71,9 +71,9 @@ function SourceChip({ label, loaded, detail, error, emptyLabel }) {
         <p
           className={`text-[12px] font-medium truncate ${
             tone === "error"
-              ? "text-red-500"
+              ? "text-danger"
               : loaded
-                ? "text-emerald-600 dark:text-emerald-400"
+                ? "text-approved "
                 : "text-textSecondary"
           }`}
         >

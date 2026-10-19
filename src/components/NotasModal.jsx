@@ -331,14 +331,14 @@ export default function NotasModal({
 
   const estadoColor =
     estado.includes("Aprobado") || estado.includes("Eximido")
-      ? "text-emerald-500"
+      ? "text-approved"
       : estado.includes("Reprobado")
-        ? "text-red-500"
+        ? "text-danger"
         : estado === "Rinde Examen"
-          ? "text-amber-500"
+          ? "text-exception"
           : estado === "Cursando"
             ? "text-primary"
-            : "text-amber-500";
+            : "text-exception";
 
   return (
     <>
@@ -424,7 +424,7 @@ export default function NotasModal({
         {importFeedback && (
           <div
             role="status"
-            className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs px-3.5 py-2.5 font-semibold"
+            className="rounded-xl border border-approved/25 bg-approved/10 text-approved text-xs px-3.5 py-2.5 font-semibold"
           >
             {importFeedback}
           </div>
@@ -516,13 +516,13 @@ export default function NotasModal({
           </div>
           <div
             className={`rounded-lg border px-2.5 py-2 text-center ${
-              rindeExamen ? "border-amber-500/45 bg-amber-500/5" : "border-borderColor bg-bgPrimary/40"
+              rindeExamen ? "border-exception/45 bg-exception/5" : "border-borderColor bg-bgPrimary/40"
             }`}
           >
-            <p className={`text-[12px] m-0 mb-0.5 ${rindeExamen ? "text-amber-600 font-bold" : "text-textSecondary"}`}>
+            <p className={`text-[12px] m-0 mb-0.5 ${rindeExamen ? "text-exception font-bold" : "text-textSecondary"}`}>
               Nota final
             </p>
-            <p className={`num text-sm m-0 ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
+            <p className={`num text-sm m-0 ${rindeExamen ? "text-exception" : "text-textPrimary"}`}>
               {pesoCompleto || rindeExamen ? safeToFixed(promedioFinal, 2) : "—"}
             </p>
           </div>
@@ -536,7 +536,7 @@ export default function NotasModal({
               <strong className="num text-primary">{safeToFixed(notaNecesariaPresentacion, 2)}</strong>{" "}
               en el {formatPeso(pesoRestante)}% restante.
               {notaNecesariaPresentacion > 7.0 && (
-                <span className="text-red-500 ml-1 font-medium">Matemáticamente inalcanzable; irás a examen.</span>
+                <span className="text-danger ml-1 font-medium">Matemáticamente inalcanzable; irás a examen.</span>
               )}
             </p>
           </div>
@@ -546,9 +546,9 @@ export default function NotasModal({
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex flex-col gap-2.5 shrink-0"
+            className="bg-exception/10 border border-exception/30 rounded-lg p-3 flex flex-col gap-2.5 shrink-0"
           >
-            <p className="text-xs font-bold text-amber-600 dark:text-amber-500 m-0">Modo examen</p>
+            <p className="text-xs font-bold text-exception m-0">Modo examen</p>
             <p className="text-textSecondary text-xs m-0 leading-relaxed">
               Presentación <strong className="num text-textPrimary">{safeToFixed(promedioPresentacion, 2)}</strong> bajo
               eximición ({safeToFixed(config.notaEximicion, 1)}). Ponderación: {config.ponderacionPresentacion}% /{" "}
@@ -559,7 +559,7 @@ export default function NotasModal({
                 <p className="text-[12px] text-textSecondary font-medium m-0 mb-0.5">
                   Nota necesaria en examen para aprobar (4.0)
                 </p>
-                <p className={`num text-xl m-0 ${notaNecesariaExamen > 7.0 ? "text-red-500" : "text-amber-500"}`}>
+                <p className={`num text-xl m-0 ${notaNecesariaExamen > 7.0 ? "text-danger" : "text-exception"}`}>
                   {safeToFixed(notaNecesariaExamen, 2)}
                 </p>
               </div>
@@ -571,7 +571,7 @@ export default function NotasModal({
                   placeholder="Ej: 5.5"
                   value={notaExamen}
                   onChange={handleNotaExamenChange}
-                  className="w-full sm:w-24 px-2.5 py-1.5 rounded-md border border-amber-500/40 bg-bgSecondary focus:border-amber-500 text-textPrimary font-bold text-center outline-none text-sm"
+                  className="w-full sm:w-24 px-2.5 py-1.5 rounded-md border border-exception/40 bg-bgSecondary focus:border-exception text-textPrimary font-bold text-center outline-none text-sm"
                 />
               </div>
             </div>
@@ -670,7 +670,7 @@ export default function NotasModal({
                               <button
                                 type="button"
                                 onClick={() => eliminarEvaluacion(evaluacion.id)}
-                                className="text-red-500/70 hover:text-red-500 hover:bg-red-500/10 w-7 h-7 rounded transition-colors border-0 bg-transparent cursor-pointer text-sm"
+                                className="text-danger/70 hover:text-danger hover:bg-danger/10 w-7 h-7 rounded transition-colors border-0 bg-transparent cursor-pointer text-sm"
                                 aria-label={`Eliminar ${evaluacion.nombre}`}
                               >
                                 ✕
@@ -715,7 +715,7 @@ export default function NotasModal({
                                           <button
                                             type="button"
                                             onClick={() => eliminarSubNota(evaluacion.id, sub.id)}
-                                            className="text-textSecondary hover:text-red-500 border-0 bg-transparent cursor-pointer p-0 pl-1"
+                                            className="text-textSecondary hover:text-danger border-0 bg-transparent cursor-pointer p-0 pl-1"
                                             aria-label="Eliminar sub-nota"
                                           >
                                             ✕
@@ -766,7 +766,7 @@ export default function NotasModal({
                 </button>
 
                 {error && (
-                  <div className="bg-red-500/10 border-l-2 border-red-500 p-2 mb-3 text-red-600 text-xs font-medium" role="alert">
+                  <div className="bg-danger/10 border-l-2 border-danger p-2 mb-3 text-danger text-xs font-medium" role="alert">
                     {error}
                   </div>
                 )}

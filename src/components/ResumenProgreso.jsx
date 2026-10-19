@@ -111,8 +111,8 @@ export default function ResumenProgreso({
               icon={<CheckCircle2 className="w-4 h-4" />}
               label="Aprobadas"
               value={datos.asignaturasAprobadas}
-              color="text-emerald-500"
-              bg="bg-emerald-500/8 border-emerald-500/20"
+              color="text-approved"
+              bg="bg-approved/8 border-approved/20"
             />
             <StatCard
               icon={<Hourglass className="w-4 h-4" />}
@@ -142,7 +142,7 @@ export default function ResumenProgreso({
 
           <div className="relative w-full h-3 bg-borderColor/40 rounded-full overflow-hidden">
             <div
-              className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full transition-all duration-700"
+              className="absolute inset-y-0 left-0 bg-approved rounded-full transition-all duration-700"
               style={{ width: `${pctAprobado}%` }}
             />
             <div
@@ -152,7 +152,7 @@ export default function ResumenProgreso({
           </div>
 
           <div className="flex items-center gap-4 mt-3 flex-wrap">
-            <LegendDot color="bg-emerald-500" label={`Aprobadas (${pctAprobado.toFixed(1)}%)`} />
+            <LegendDot color="bg-approved" label={`Aprobadas (${pctAprobado.toFixed(1)}%)`} />
             <LegendDot color="bg-primary" label={`En curso (${pctCursando.toFixed(1)}%)`} opacity="opacity-60" />
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function ResumenProgreso({
             Detalle de asignaturas
           </p>
           <div className="space-y-2">
-            <ProgressRow label="Aprobadas"  value={datos.asignaturasAprobadas} total={datos.asignaturasTotales} color="text-emerald-500" unit="ramos" />
+            <ProgressRow label="Aprobadas"  value={datos.asignaturasAprobadas} total={datos.asignaturasTotales} color="text-approved" unit="ramos" />
             <ProgressRow label="En curso"   value={datos.asignaturasCursando}  total={datos.asignaturasTotales} color="text-primary"     unit="ramos" />
             <ProgressRow label="Pendientes" value={asigPendientes}             total={datos.asignaturasTotales} color="text-textSecondary" unit="ramos" />
           </div>
@@ -177,7 +177,7 @@ export default function ResumenProgreso({
             Créditos SCT
           </p>
           <div className="space-y-2">
-            <ProgressRow label="Aprobados"  value={datos.creditosAprobados} total={datos.creditosTotales} color="text-emerald-500" unit="SCT" />
+            <ProgressRow label="Aprobados"  value={datos.creditosAprobados} total={datos.creditosTotales} color="text-approved" unit="SCT" />
             <ProgressRow label="En curso"   value={datos.creditosCursando}  total={datos.creditosTotales} color="text-primary"     unit="SCT" />
             <ProgressRow
               label="Pendientes"
@@ -196,7 +196,7 @@ export default function ResumenProgreso({
               <p className="text-[12px] font-semibold text-textSecondary ">Promedio ponderado</p>
               <p className="text-xs text-textSecondary/60 mt-0.5">Solo cursos con notas completas (100% peso)</p>
             </div>
-            <span className={`t-figure ${promedioGlobal >= 4 ? "text-emerald-500" : "text-red-500"}`}>
+            <span className={`t-figure ${promedioGlobal >= 4 ? "text-approved" : "text-danger"}`}>
               {promedioGlobal.toFixed(1)}
             </span>
           </div>

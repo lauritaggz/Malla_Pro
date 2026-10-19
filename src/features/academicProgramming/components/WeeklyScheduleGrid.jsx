@@ -281,8 +281,8 @@ export default function WeeklyScheduleGrid({
     <div className="flex-1 flex flex-col h-full bg-bgSecondary overflow-hidden select-none">
       {/* Asignaturas sin horario */}
       {unscheduledCourses.length > 0 && (
-        <div className="px-4 py-2 bg-amber-500/5 border-b border-borderColor/60 space-y-1 shrink-0">
-          <p className="text-[12px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1 ">
+        <div className="px-4 py-2 bg-exception/5 border-b border-borderColor/60 space-y-1 shrink-0">
+          <p className="text-[12px] font-bold text-exception flex items-center gap-1 ">
             <Clock className="h-3 w-3" /> Asignaturas sin horario
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -295,7 +295,7 @@ export default function WeeklyScheduleGrid({
                 <button
                   type="button"
                   onClick={() => onDeselectSection(sec)}
-                  className="text-textSecondary hover:text-red-600 transition-colors btn-interactive"
+                  className="text-textSecondary hover:text-danger transition-colors btn-interactive"
                   aria-label={`Quitar ${sec.courseCode}`}
                 >
                   <Trash2 className="h-3 w-3" />
@@ -456,7 +456,7 @@ export default function WeeklyScheduleGrid({
                           }}
                           className={`absolute rounded-lg border p-2 flex flex-col justify-between select-none shadow-sm transition-all focus-within:ring-1 focus-within:ring-primary/30 cursor-pointer ${
                             isConflicting
-                              ? "border-red-500 text-red-700 dark:text-red-300"
+                              ? "border-danger text-danger "
                               : ""
                           }`}
                           style={{
@@ -520,7 +520,7 @@ export default function WeeklyScheduleGrid({
                               </div>
 
                               {isConflicting && (
-                                <p className="text-[12px] text-red-600 dark:text-red-400 font-bold bg-red-500/5 border border-red-500/10 p-1.5 rounded flex items-center gap-1">
+                                <p className="text-[12px] text-danger font-bold bg-danger/5 border border-danger/10 p-1.5 rounded flex items-center gap-1">
                                   <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                                   Conflicto de horario activo
                                 </p>
@@ -533,7 +533,7 @@ export default function WeeklyScheduleGrid({
                                   onDeselectSection(m.section);
                                   setActivePopover(null);
                                 }}
-                                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 bg-red-500/5 hover:bg-red-500 hover:text-white transition-colors text-xs font-bold text-red-600 bg-bgSecondary btn-interactive"
+                                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger bg-danger/5 hover:bg-danger hover:text-bgPrimary transition-colors text-xs font-bold text-danger bg-bgSecondary btn-interactive"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                                 Quitar sección

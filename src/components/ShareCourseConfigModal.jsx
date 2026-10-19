@@ -188,7 +188,7 @@ export default function ShareCourseConfigModal({
             {isComplete ? " ✓" : ""}
           </p>
           {!isComplete && evalCount > 0 && (
-            <p className="text-[12px] text-amber-600 dark:text-amber-400 m-0 mt-1.5 leading-snug">
+            <p className="text-[12px] text-exception m-0 mt-1.5 leading-snug">
               Los porcentajes actualmente suman {totalLabel}%. Puedes compartir igualmente.
             </p>
           )}
@@ -209,7 +209,7 @@ export default function ShareCourseConfigModal({
         {status === "error" && (
           <div
             role="alert"
-            className="rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs px-3.5 py-3 leading-relaxed"
+            className="rounded-xl border border-exception/25 bg-exception/10 text-exception text-xs px-3.5 py-3 leading-relaxed"
           >
             {errorMessage}
           </div>
@@ -255,7 +255,7 @@ export default function ShareCourseConfigModal({
             </button>
 
             {copyFeedback === "failed" && (
-              <p role="alert" className="text-[12px] text-amber-600 dark:text-amber-400 m-0 leading-snug">
+              <p role="alert" className="text-[12px] text-exception m-0 leading-snug">
                 No pudimos copiar el código automáticamente. Puedes seleccionarlo y copiarlo
                 manualmente.
               </p>

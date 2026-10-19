@@ -512,7 +512,7 @@ export default function ScheduleBuilder({
                   Tu horario
                 </h2>
                 {conflicts.length > 0 && (
-                  <span className="inline-flex items-center gap-1 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 px-2 py-0.5 rounded text-[12px] font-extrabold animate-pulse">
+                  <span className="inline-flex items-center gap-1 bg-danger/10 border border-danger/20 text-danger px-2 py-0.5 rounded text-[12px] font-extrabold animate-pulse">
                     <AlertTriangle className="h-3 w-3 shrink-0" />
                     {conflicts.length} {conflicts.length === 1 ? "tope" : "topes"} por resolver
                   </span>
@@ -553,7 +553,7 @@ export default function ScheduleBuilder({
                 </button>
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-1.5 text-[12px] font-bold ${
-                    proposalSaved ? "text-emerald-600 dark:text-emerald-400" : "text-textSecondary"
+                    proposalSaved ? "text-approved " : "text-textSecondary"
                   }`}
                 >
                   {proposalSaved ? <Check className="h-3 w-3" /> : <Save className="h-3 w-3 opacity-50" />}
@@ -588,7 +588,7 @@ export default function ScheduleBuilder({
                           setMoreOpen(false);
                           handleClearSavedPlanning();
                         }}
-                        className="w-full text-left px-3 py-2 text-[12px] font-bold text-red-500 hover:bg-red-500/10 flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-[12px] font-bold text-danger hover:bg-danger/10 flex items-center gap-2"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         Eliminar planificación guardada

@@ -14,14 +14,14 @@ export default function ExceptionModeBar({
 
   return (
     <div
-      className="exception-mode-bar pointer-events-auto w-full max-w-3xl rounded-2xl border border-violet-500/35 bg-bgSecondary/95 shadow-lg backdrop-blur-md px-3.5 py-2.5 sm:px-4 sm:py-3"
+      className="exception-mode-bar pointer-events-auto w-full max-w-3xl rounded-2xl border border-exception/35 bg-bgSecondary/95 shadow-lg backdrop-blur-md px-3.5 py-2.5 sm:px-4 sm:py-3"
       role="region"
       aria-label="Modo Excepcional"
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-black text-violet-600 dark:text-violet-300">
+            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-black text-exception ">
               <Sparkles className="h-3.5 w-3.5" />
               Modo Excepcional
             </span>
@@ -31,7 +31,7 @@ export default function ExceptionModeBar({
             <span className="relative group/help">
               <button
                 type="button"
-                className="rounded-md p-0.5 text-textSecondary/70 hover:text-violet-500"
+                className="rounded-md p-0.5 text-textSecondary/70 hover:text-exception"
                 aria-label="Qué es una excepción"
                 title="Los ramos excepcionales se consideran aprobados aunque no cumplas sus prerrequisitos."
               >
@@ -58,8 +58,8 @@ export default function ExceptionModeBar({
             onClick={hasChanges ? onApply : onCancel}
             className={`flex-1 sm:flex-none px-3 py-1.5 rounded-xl text-[12px] sm:text-xs font-bold btn-interactive ${
               hasChanges
-                ? "bg-violet-600 text-white hover:brightness-110"
-                : "bg-violet-600/80 text-white hover:brightness-110"
+                ? "bg-exception text-bgPrimary hover:brightness-110"
+                : "bg-exception/80 text-white hover:brightness-110"
             }`}
           >
             {hasChanges ? "Aplicar y salir" : "Salir"}

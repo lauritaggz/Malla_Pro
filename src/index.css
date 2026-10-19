@@ -41,6 +41,12 @@
   --status-exception-bg:   #F8ECD6;
   --status-blocked-text:   #868B95;
   --danger:                #B3362F;
+
+  /* Canales RGB para que Tailwind admita opacidad: bg-approved/10 */
+  --approved-rgb:  31 122 83;
+  --cursando-rgb:  42 95 191;
+  --exception-rgb: 154 91 11;
+  --danger-rgb:    179 54 47;
 }
 
 /* Modo oscuro (grafito) */
@@ -66,6 +72,11 @@
   --status-exception-bg:   #322C23;
   --status-blocked-text:   #6B6F78;
   --danger:                #F07178;
+
+  --approved-rgb:  76 192 138;
+  --cursando-rgb:  108 155 240;
+  --exception-rgb: 224 162 60;
+  --danger-rgb:    240 113 120;
 }
 
 /* ── Tipografía: Bricolage Grotesque (títulos), Instrument Sans (interfaz),

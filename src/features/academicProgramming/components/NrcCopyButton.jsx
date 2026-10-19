@@ -44,7 +44,7 @@ export default function NrcCopyButton({ nrc, compact = false }) {
         {compact ? nrc : `NRC ${nrc}`}
       </span>
       {copied ? (
-        <Check className="h-3 w-3 text-emerald-500" aria-hidden />
+        <Check className="h-3 w-3 text-approved" aria-hidden />
       ) : (
         <Copy className="h-3 w-3 opacity-60" aria-hidden />
       )}

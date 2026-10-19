@@ -102,7 +102,7 @@ export default function CourseAccordion({
               )}
             </div>
             {missing.length > 0 && (
-              <div className="mt-1.5 text-[12px] text-amber-700 dark:text-amber-400">
+              <div className="mt-1.5 text-[12px] text-exception ">
                 <p className="font-semibold">Te falta aprobar:</p>
                 <ul className="list-disc pl-4 mt-0.5 space-y-0.5">
                   {missing.map((p) => (

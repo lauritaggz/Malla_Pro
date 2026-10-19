@@ -233,7 +233,7 @@ export default function ImportCourseConfigModal({
             {pasteError && (
               <div
                 role="alert"
-                className="rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs px-3.5 py-3 leading-relaxed"
+                className="rounded-xl border border-exception/25 bg-exception/10 text-exception text-xs px-3.5 py-3 leading-relaxed"
               >
                 {pasteError}
               </div>
@@ -263,7 +263,7 @@ export default function ImportCourseConfigModal({
           <>
             <div
               role="alert"
-              className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-3.5 py-3 text-xs leading-relaxed text-amber-800 dark:text-amber-300"
+              className="rounded-xl border border-exception/25 bg-exception/10 px-3.5 py-3 text-xs leading-relaxed text-exception "
             >
               {mismatch.reason === SHARE_ERROR_CODES.INSTITUTION_MISMATCH ? (
                 <>
@@ -355,8 +355,8 @@ export default function ImportCourseConfigModal({
             <div
               className={`rounded-xl border px-3.5 py-2.5 text-xs leading-relaxed ${
                 totalComplete
-                  ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                  : "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                  ? "border-approved/25 bg-approved/10 text-approved "
+                  : "border-exception/25 bg-exception/10 text-exception "
               }`}
             >
               <p className="m-0 font-semibold">
@@ -373,7 +373,7 @@ export default function ImportCourseConfigModal({
             {applyError && (
               <div
                 role="alert"
-                className="rounded-xl border border-red-500/25 bg-red-500/10 text-red-600 dark:text-red-400 text-xs px-3.5 py-3"
+                className="rounded-xl border border-danger/25 bg-danger/10 text-danger text-xs px-3.5 py-3"
               >
                 {applyError}
               </div>
@@ -438,13 +438,13 @@ export default function ImportCourseConfigModal({
 
         {step === "confirmDestructive" && payload && (
           <>
-            <div className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-3">
+            <div className="flex items-start gap-2.5 rounded-xl border border-danger/30 bg-danger/10 px-3.5 py-3">
               <AlertTriangle
-                className="w-4 h-4 text-red-500 shrink-0 mt-0.5"
+                className="w-4 h-4 text-danger shrink-0 mt-0.5"
                 aria-hidden
               />
-              <div className="min-w-0 text-xs leading-relaxed text-red-700 dark:text-red-300">
-                <p className="m-0 font-bold text-sm text-red-600 dark:text-red-400">
+              <div className="min-w-0 text-xs leading-relaxed text-danger ">
+                <p className="m-0 font-bold text-sm text-danger ">
                   La configuración actual tiene notas o subnotas registradas.
                 </p>
                 <p className="m-0 mt-2">
@@ -480,7 +480,7 @@ export default function ImportCourseConfigModal({
               <button
                 type="button"
                 onClick={applyImport}
-                className="min-h-[44px] px-4 py-2 rounded-xl text-sm font-bold bg-red-600 hover:bg-red-500 text-white transition cursor-pointer"
+                className="min-h-[44px] px-4 py-2 rounded-xl text-sm font-bold bg-danger hover:bg-danger text-bgPrimary transition cursor-pointer"
               >
                 Reemplazar y eliminar notas actuales
               </button>

@@ -24,17 +24,17 @@ export default function OnboardingTour({ isVisible, onClose }) {
     {
       title: "Ver Prerrequisitos y Desbloqueos",
       description: "Haz clic sobre el botón de relaciones PR (icono de conexiones) en la esquina superior derecha de cualquier asignatura. Esto la seleccionará, mostrando visualmente mediante líneas de flujo sus prerrequisitos (Amarillo) y ramos que desbloquea (Verde), sin alterar su estado.",
-      icon: <Network className="w-12 h-12 text-amber-500 mx-auto mb-4" />,
+      icon: <Network className="w-12 h-12 text-exception mx-auto mb-4" />,
     },
     {
       title: "Aprobar un Ramo",
       description: "Haz clic o toca sobre el cuerpo de cualquier ramo para marcarlo o desmarcarlo inmediatamente como Aprobado (Verde). Esto habilitará automáticamente los ramos que dependen de él.",
-      icon: <MousePointerClick className="w-12 h-12 text-emerald-500 mx-auto mb-4" />,
+      icon: <MousePointerClick className="w-12 h-12 text-approved mx-auto mb-4" />,
     },
     {
       title: "Ramos en Curso",
       description: "Mantén presionada cualquier asignatura (clic largo en PC o pulsación táctil prolongada en móvil) por medio segundo para marcarla como Cursando (Azul).",
-      icon: <BookOpen className="w-12 h-12 text-blue-500 mx-auto mb-4" />,
+      icon: <BookOpen className="w-12 h-12 text-cursando mx-auto mb-4" />,
     },
     {
       title: "Calcula tus Notas",

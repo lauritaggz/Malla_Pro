@@ -109,9 +109,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
               className="absolute inset-0 pointer-events-none"
               style={{ zIndex: 0 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-purple-500/5" />
               <div className="absolute -top-14 -right-14 w-52 h-52 bg-primary/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-14 -left-14 w-52 h-52 bg-purple-500/12 rounded-full blur-3xl" />
             </div>
 
             {/* ── Header ── */}
@@ -180,7 +178,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
                           Paso {step.num}
                         </span>
                         {step.num === 5 && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-approved" />
                         )}
                       </div>
                       <p className="text-sm font-semibold text-textPrimary leading-snug">{step.title}</p>
@@ -210,7 +208,7 @@ export default function ContactoNuevaMalla({ isOpen, onClose }) {
                     onClick={copyMail}
                     className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                       copied
-                        ? "bg-emerald-500/12 border-emerald-500/35 text-emerald-500"
+                        ? "bg-approved/12 border-approved/35 text-approved"
                         : "border-borderColor bg-bgPrimary text-textSecondary hover:border-primary/40 hover:text-primary"
                     }`}
                   >

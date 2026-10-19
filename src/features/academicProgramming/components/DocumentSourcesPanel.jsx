@@ -52,7 +52,7 @@ function SourceCard({
     <div
       className={`rounded-2xl border px-4 py-4 sm:px-5 sm:py-5 text-left transition-colors ${
         loaded
-          ? "border-emerald-500/35 bg-emerald-500/5"
+          ? "border-approved/35 bg-approved/5"
           : "border-borderColor bg-bgSecondary/60"
       } ${dragging ? "border-primary bg-primary/10" : ""}`}
       onDragEnter={(e) => {
@@ -80,7 +80,7 @@ function SourceCard({
           <p className="text-xs text-textSecondary leading-relaxed">{description}</p>
         </div>
         {loaded && (
-          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[12px] font-bold">
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-approved/15 text-approved px-2 py-0.5 text-[12px] font-bold">
             <Check className="h-3 w-3" strokeWidth={2.5} />
             Listo
           </span>
@@ -90,7 +90,7 @@ function SourceCard({
       {loaded ? (
         <div className="mt-3 space-y-2">
           <p className="text-xs font-semibold text-textPrimary flex items-center gap-1.5">
-            <Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2.5} />
+            <Check className="h-3.5 w-3.5 text-approved" strokeWidth={2.5} />
             {loadedLabel}
           </p>
           {detail && (
@@ -128,7 +128,7 @@ function SourceCard({
       />
 
       {(localError || error) && (
-        <p className="mt-3 text-xs text-red-500 font-medium" role="alert">
+        <p className="mt-3 text-xs text-danger font-medium" role="alert">
           {localError || error}
         </p>
       )}

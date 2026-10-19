@@ -121,10 +121,10 @@ const Curso = ({
       "ring-2 ring-primary ring-offset-2 ring-offset-bgPrimary scale-[1.02] shadow-md z-30";
   } else if (highlightStatus === "prereq") {
     highlightStyles =
-      "ring-2 ring-amber-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+      "ring-2 ring-exception/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
   } else if (highlightStatus === "unlock") {
     highlightStyles =
-      "ring-2 ring-emerald-500/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
+      "ring-2 ring-approved/60 ring-offset-1 ring-offset-bgPrimary scale-[1.01] z-20";
   }
 
   const clearPressTimer = () => {

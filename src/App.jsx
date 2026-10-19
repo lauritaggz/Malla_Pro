@@ -337,7 +337,6 @@ export default function App() {
               {/* Enlace de contacto Destacado */}
               <div className="mt-10 overflow-hidden relative rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-6 text-center shadow-lg transition-all duration-300 hover:shadow-primary/10 hover:-translate-y-1">
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <h3 className="font-semibold text-textPrimary text-lg mb-2 flex items-center justify-center gap-2 relative z-10">
                   <span className="text-xl">🤔</span> ¿No encuentras tu malla?

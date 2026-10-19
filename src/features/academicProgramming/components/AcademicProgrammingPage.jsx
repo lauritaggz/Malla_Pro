@@ -679,9 +679,9 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
           {infoMessage && (
             <div
               role="status"
-              className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[70] max-w-[min(92vw,28rem)] rounded-xl border border-emerald-500/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
+              className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[70] max-w-[min(92vw,28rem)] rounded-xl border border-approved/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
             >
-              <span className="text-emerald-500 mr-1.5">✓</span>
+              <span className="text-approved mr-1.5">✓</span>
               {infoMessage}
               <button
                 type="button"
@@ -745,7 +745,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                 !studentScheduleError && (
                   <div
                     role="alert"
-                    className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-600 dark:text-red-400"
+                    className="rounded-xl border border-danger/30 bg-danger/5 px-3 py-2 text-xs text-danger "
                   >
                     {errorMessage}{" "}
                     <button type="button" onClick={reset} className="underline font-medium">

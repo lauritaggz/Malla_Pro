@@ -20,7 +20,7 @@ export default function TutorModule({ onVolver }) {
       <button
         type="button"
         onClick={onVolver}
-        className="absolute top-3 right-3 sm:top-4 sm:right-6 flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/25 bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-600 shadow-sm backdrop-blur-sm transition-colors z-10"
+        className="absolute top-3 right-3 sm:top-4 sm:right-6 flex h-9 w-9 items-center justify-center rounded-xl border border-danger/25 bg-danger/10 text-danger hover:bg-danger/20 hover:border-danger/40 hover:text-danger shadow-sm backdrop-blur-sm transition-colors z-10"
         aria-label="Volver a la malla"
       >
         <X className="w-4 h-4" />

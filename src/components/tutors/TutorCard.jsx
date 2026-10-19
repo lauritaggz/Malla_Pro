@@ -9,7 +9,7 @@ function StarsRow({ value, max = 5 }) {
       {Array.from({ length: max }).map((_, i) => (
         <Star
           key={i}
-          className={`w-3.5 h-3.5 ${i < full ? "text-amber-500 fill-amber-500" : "text-textSecondary/40"}`}
+          className={`w-3.5 h-3.5 ${i < full ? "text-exception fill-exception" : "text-textSecondary/40"}`}
         />
       ))}
       <span className="text-[12px] text-textSecondary ml-1.5 font-bold">
@@ -85,7 +85,7 @@ export default function TutorCard({ tutor, filterSubject, onSimulateComplete }) 
             href={wa}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-colors"
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-approved hover:bg-approved text-bgPrimary text-xs font-semibold shadow-sm transition-colors"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             <span>Solicitar tutoría</span>

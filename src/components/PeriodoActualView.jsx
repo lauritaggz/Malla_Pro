@@ -363,7 +363,7 @@ export default function PeriodoActualView({
                                     aria-label={`Copiar NRC ${section.nrc}`}
                                     className={`ml-auto shrink-0 px-1.5 py-0.5 rounded text-[12px] font-mono border transition-all flex items-center gap-1 cursor-pointer
                                       ${copiedNrc === course.id
-                                        ? "bg-emerald-500/10 border-emerald-500/35 text-emerald-600 dark:text-emerald-400"
+                                        ? "bg-approved/10 border-approved/35 text-approved "
                                         : "bg-bgPrimary/60 border-borderColor text-textSecondary hover:text-textPrimary"}`}
                                   >
                                     <span>NRC {section.nrc}</span>

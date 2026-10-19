@@ -3,6 +3,12 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      colors: {
+        approved: 'rgb(var(--approved-rgb) / <alpha-value>)',
+        cursando: 'rgb(var(--cursando-rgb) / <alpha-value>)',
+        exception: 'rgb(var(--exception-rgb) / <alpha-value>)',
+        danger: 'rgb(var(--danger-rgb) / <alpha-value>)',
+      },
       fontFamily: {
         sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
         display: ['"Bricolage Grotesque"', '"Instrument Sans"', 'system-ui', 'sans-serif'],

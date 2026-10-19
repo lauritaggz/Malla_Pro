@@ -138,14 +138,14 @@ export default function CourseDrawer({
 
           {/* Locked Warnings & Exceptional mode option */}
           {!disponible && currentStatus === "pendiente" && (
-            <div className="mt-1.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs flex gap-2.5 items-start">
+            <div className="mt-1.5 p-3 rounded-xl bg-exception/10 border border-exception/20 text-exception text-xs flex gap-2.5 items-start">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="flex flex-col gap-1.5 leading-snug">
                 <span>Esta asignatura está bloqueada por prerrequisitos.</span>
                 {modoExcepcional && (
                   <button
                     onClick={marcarExcepcional}
-                    className={`text-[12px] font-bold px-2 py-1 rounded bg-amber-500 text-white hover:brightness-110 active:scale-95 transition-all self-start ${excepcional ? "bg-amber-600 shadow-sm" : ""}`}
+                    className={`text-[12px] font-bold px-2 py-1 rounded bg-exception text-bgPrimary hover:brightness-110 active:scale-95 transition-all self-start ${excepcional ? "bg-exception shadow-sm" : ""}`}
                   >
                     {excepcional ? "Desmarcar Aprobación Excepcional" : "Forzar Aprobación Excepcional"}
                   </button>
@@ -172,8 +172,8 @@ export default function CourseDrawer({
             <span className="text-[12px] font-bold text-textSecondary ">
               Prerrequisitos
             </span>
-            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-600 dark:text-amber-400">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-exception ">
+              <span className="w-2 h-2 rounded-full bg-exception" />
               Requeridos
             </span>
           </div>
@@ -186,14 +186,14 @@ export default function CourseDrawer({
                   key={pre.id}
                   className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors
                     ${pre.cumplido
-                      ? "bg-emerald-500/5 border-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold"
-                      : "bg-amber-500/5 border-amber-500/20 text-amber-800 dark:text-amber-200"}`}
+                      ? "bg-approved/5 border-approved/15 text-approved font-semibold"
+                      : "bg-exception/5 border-exception/20 text-exception "}`}
                 >
                   <span className="truncate pr-4">{pre.nombre} ({pre.codigo})</span>
                   {pre.cumplido ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-approved flex-shrink-0" />
                   ) : (
-                    <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                    <Lock className="w-3.5 h-3.5 text-exception flex-shrink-0" />
                   )}
                 </div>
               ))}
@@ -207,8 +207,8 @@ export default function CourseDrawer({
             <span className="text-[12px] font-bold text-textSecondary ">
               Asignaturas que desbloquea
             </span>
-            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-approved ">
+              <span className="w-2 h-2 rounded-full bg-approved" />
               Desbloquea
             </span>
           </div>
@@ -219,9 +219,9 @@ export default function CourseDrawer({
               {desbloqueaCursos.map((des) => (
                 <div
                   key={des.id}
-                  className="flex items-center gap-2.5 p-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-xs text-textPrimary"
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl border border-approved/20 bg-approved/5 text-xs text-textPrimary"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <BookOpen className="w-3.5 h-3.5 text-approved " />
                   <span className="truncate">{des.nombre} ({des.codigo})</span>
                 </div>
               ))}

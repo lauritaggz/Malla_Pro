@@ -52,17 +52,17 @@ export default function TutorModuleDemo({ onVolver, onSalirDemo }) {
         <button
           type="button"
           onClick={onVolver}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/25 bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-600 transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-danger/25 bg-danger/10 text-danger hover:bg-danger/20 hover:border-danger/40 hover:text-danger transition-colors"
           aria-label="Volver a la malla"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2.5">
-        <FlaskConical className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+      <div className="mb-4 flex items-start gap-2 rounded-xl border border-exception/30 bg-exception/10 px-3 py-2.5">
+        <FlaskConical className="w-4 h-4 text-exception shrink-0 mt-0.5" />
         <p className="text-xs text-textPrimary leading-relaxed">
-          <span className="font-semibold text-amber-700 dark:text-amber-400">Vista demo.</span>{" "}
+          <span className="font-semibold text-exception ">Vista demo.</span>{" "}
           Así se verá Tutorías Connect. Los datos son de ejemplo y la función aún no está publicada.
         </p>
       </div>
@@ -159,13 +159,13 @@ export default function TutorModuleDemo({ onVolver, onSalirDemo }) {
                 aria-label={`${n} estrellas`}
                 className={`p-2 rounded-xl border transition-colors ${
                   pickedStars >= n
-                    ? "border-amber-400 bg-amber-400/15 text-amber-500"
+                    ? "border-exception bg-exception/15 text-exception"
                     : "border-borderColor text-textSecondary hover:bg-bgPrimary"
                 }`}
               >
                 <Star
                   className={`w-7 h-7 sm:w-8 sm:h-8 ${
-                    pickedStars >= n ? "fill-amber-400 text-amber-400" : ""
+                    pickedStars >= n ? "fill-exception text-exception" : ""
                   }`}
                 />
               </motion.button>

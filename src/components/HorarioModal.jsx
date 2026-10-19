@@ -260,7 +260,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
         {/* Toast */}
         {toast && (
           <div
-            className="absolute top-2 left-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-medium shadow-lg"
+            className="absolute top-2 left-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-danger/30 bg-danger/10 text-danger text-sm font-medium shadow-lg"
           >
             <span className="flex-1">{toast}</span>
             <button onClick={() => setToast(null)}><X className="w-3.5 h-3.5" /></button>
@@ -387,8 +387,8 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               )}
 
               {!hasCursando && (
-                <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-3 flex items-start gap-2" style={{ marginTop: 14 }}>
-                  <BookOpen className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="rounded-xl border border-exception/25 bg-exception/8 p-3 flex items-start gap-2" style={{ marginTop: 14 }}>
+                  <BookOpen className="w-4 h-4 text-exception flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-textSecondary">
                     Sin ramos marcados como <strong>cursando</strong>.
                   </p>
@@ -414,7 +414,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
                     </button>
                     <button
                       onClick={() => deleteItem(editingItem.id)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-red-500/25 bg-red-500/8 text-red-500"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-danger/25 bg-danger/8 text-danger"
                     >
                       <Trash2 className="w-4 h-4" />Eliminar
                     </button>
@@ -473,7 +473,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18 }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-danger/30 bg-danger/10 text-danger text-sm font-medium"
             >
               <span className="flex-shrink-0">⚠</span>
               <span className="flex-1">{toast}</span>
@@ -569,7 +569,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
                 </button>
                 <button
                   onClick={() => deleteItem(editingItem.id)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-red-500/25 bg-red-500/8 text-red-500 hover:bg-red-500/15 transition"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-danger/25 bg-danger/8 text-danger hover:bg-danger/15 transition"
                 >
                   <Trash2 className="w-3.5 h-3.5" />Eliminar
                 </button>
@@ -580,8 +580,8 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
 
         {/* Ramos cursando */}
         {!hasCursando ? (
-          <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-4 flex items-start gap-3">
-            <BookOpen className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-exception/25 bg-exception/8 p-4 flex items-start gap-3">
+            <BookOpen className="w-4 h-4 text-exception flex-shrink-0 mt-0.5" />
             <div>
               <div className="text-sm font-semibold text-textPrimary">Sin ramos marcados como cursando</div>
               <div className="text-xs text-textSecondary mt-0.5">

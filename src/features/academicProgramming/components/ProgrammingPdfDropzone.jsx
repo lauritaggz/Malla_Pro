@@ -130,7 +130,7 @@ export default function ProgrammingPdfDropzone({ onFileSelected, disabled = fals
       </p>
 
       {(localError || error) && (
-        <p className="text-sm text-red-500 text-center font-medium px-2" role="alert">
+        <p className="text-sm text-danger text-center font-medium px-2" role="alert">
           {localError || error}
         </p>
       )}

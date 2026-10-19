@@ -210,7 +210,7 @@ function SectionTableRow({ section, striped, highlightedDays }) {
               {section.sectionNumber}
             </span>
             {hasWarnings && (
-              <span title={section.warnings.join(" · ")} className="text-amber-500">
+              <span title={section.warnings.join(" · ")} className="text-exception">
                 <AlertCircle className="h-3.5 w-3.5" aria-label="Advertencia" />
               </span>
             )}

@@ -1634,7 +1634,7 @@ const MallaViewer = ({
             }}
             className={`flex items-center gap-2.5 w-full px-2.5 py-2 text-xs font-semibold rounded-lg text-left transition-colors cursor-pointer
               ${aprobados.includes(contextMenu.curso.id)
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                ? "bg-approved/10 text-approved "
                 : !canMarkProgress(contextMenu.curso)
                 ? "text-textSecondary/70 hover:bg-bgPrimary"
                 : "text-textPrimary hover:bg-bgPrimary"}`}
@@ -1736,9 +1736,9 @@ const MallaViewer = ({
         createPortal(
           <div
             role="status"
-            className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[80] max-w-[min(92vw,24rem)] rounded-xl border border-violet-500/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
+            className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[80] max-w-[min(92vw,24rem)] rounded-xl border border-exception/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
           >
-            <span className="text-violet-500 mr-1.5">✓</span>
+            <span className="text-exception mr-1.5">✓</span>
             {exceptionToast}
           </div>,
           document.body

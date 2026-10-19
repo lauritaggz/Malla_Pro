@@ -80,7 +80,7 @@ export default function CurricularScheduleSelector({
               Inscritos y secciones que quieras probar.
             </p>
           </div>
-          <div className="px-2 py-1 rounded bg-bgPrimary border border-borderColor text-[12px] font-extrabold text-emerald-600 dark:text-emerald-400 shrink-0">
+          <div className="px-2 py-1 rounded bg-bgPrimary border border-borderColor text-[12px] font-extrabold text-approved shrink-0">
             {enrolledCount} inscrito{enrolledCount === 1 ? "" : "s"}
           </div>
         </div>
@@ -486,7 +486,7 @@ function SelectableCourseAccordion({
       className={`rounded-xl border transition-colors overflow-hidden ${
         selectedSection
           ? hasConflict
-            ? "border-red-500/30 bg-red-500/5"
+            ? "border-danger/30 bg-danger/5"
             : "border-primary bg-primary/2"
           : "border-borderColor bg-bgSecondary hover:border-borderColor/80"
       }`}
@@ -513,7 +513,7 @@ function SelectableCourseAccordion({
                   Boolean(s.enrolled) ||
                   enrolledNrcSet.has(String(s.nrc || "").replace(/\D/g, ""))
               ) && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[12px] font-bold ">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-approved/15 text-approved px-1.5 py-0.5 text-[12px] font-bold ">
                   <CheckCircle className="h-2.5 w-2.5" strokeWidth={2.5} />
                   Inscrito
                 </span>
@@ -523,7 +523,7 @@ function SelectableCourseAccordion({
                 className={`text-[12px] font-bold inline-flex items-center gap-1 min-w-0 ${
                   selectedSection
                     ? hasConflict
-                      ? "text-red-600 dark:text-red-400"
+                      ? "text-danger "
                       : "text-primary"
                     : "text-textSecondary"
                 }`}
@@ -615,7 +615,7 @@ function SelectableSectionCard({
         isSelected
           ? "border-primary bg-primary/5 ring-1 ring-primary/40"
           : hasConflict
-          ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60"
+          ? "border-exception/40 bg-exception/5 hover:border-exception/60"
           : "border-borderColor bg-bgPrimary hover:border-borderColor/80"
       }`}
       onClick={onSelect}
@@ -635,7 +635,7 @@ function SelectableSectionCard({
               : `NRC ${section.nrc}`}
           </span>
           {enrolled && (
-            <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[12px] font-bold ">
+            <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-approved/15 text-approved px-1.5 py-0.5 text-[12px] font-bold ">
               <CheckCircle className="h-2.5 w-2.5" strokeWidth={2.5} />
               Inscrito
             </span>
@@ -719,7 +719,7 @@ function SelectableSectionCard({
                   </p>
                 )}
                 {unresolvedNrcs.length > 0 && (
-                  <p className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                  <p className="text-exception font-bold flex items-center gap-1">
                     <AlertTriangle className="h-3 w-3 shrink-0" />
                     No encontramos el detalle de uno de los NRC ligados. Revisa esta sección antes de inscribirla.
                   </p>
@@ -732,8 +732,8 @@ function SelectableSectionCard({
 
       {/* Alertas de conflicto en la lista */}
       {hasConflict && !isSelected && (
-        <div className="pl-4.5 text-[12px] text-amber-700 dark:text-amber-400 font-bold space-y-0.5 mt-1 border-t border-amber-500/10 pt-1.5 w-full">
-          <p className="flex items-center gap-1 text-[12px] text-amber-600 dark:text-amber-400 font-extrabold">
+        <div className="pl-4.5 text-[12px] text-exception font-bold space-y-0.5 mt-1 border-t border-exception/10 pt-1.5 w-full">
+          <p className="flex items-center gap-1 text-[12px] text-exception font-extrabold">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
             Tope de horario con:
           </p>
@@ -746,7 +746,7 @@ function SelectableSectionCard({
       )}
 
       {isSelected && hasConflict && (
-        <p className="pl-4.5 text-[12px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1 mt-1 border-t border-red-500/10 pt-1.5">
+        <p className="pl-4.5 text-[12px] text-danger font-bold flex items-center gap-1 mt-1 border-t border-danger/10 pt-1.5">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           Esta sección genera conflictos en tu horario.
         </p>

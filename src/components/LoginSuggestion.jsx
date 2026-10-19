@@ -73,7 +73,7 @@ function EmailForm({ onSuccess, onBack }) {
             autoFocus
             className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition"
           />
-          {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+          {error && <p className="text-xs text-danger mt-1">{error}</p>}
         </div>
         <button
           type="submit"

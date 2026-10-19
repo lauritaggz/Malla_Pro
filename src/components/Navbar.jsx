@@ -17,7 +17,7 @@ function NavBtn({ onClick, label, active, children, amber }) {
         w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 border border-transparent
         ${active
           ? amber
-            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+            ? "bg-exception/10 text-exception border-exception/20"
             : "bg-primary/10 text-primary border-primary/20"
           : "text-textSecondary hover:text-textPrimary hover:bg-borderColor/40"}
       `}
@@ -220,14 +220,14 @@ export default function Navbar({
               }}
               className={`relative w-8.5 h-8.5 rounded-full border flex items-center justify-center transition-all duration-200
                 ${modoExcepcional
-                  ? "bg-violet-500/15 border-violet-500/45 text-violet-500"
-                  : "border-borderColor text-textSecondary hover:text-violet-500 hover:border-violet-500/40 hover:bg-violet-500/10"}`}
+                  ? "bg-exception/15 border-exception/45 text-exception"
+                  : "border-borderColor text-textSecondary hover:text-exception hover:border-exception/40 hover:bg-exception/10"}`}
               aria-label="Modo excepcional: aprobar ramos sin cumplir prerrequisitos"
               title="Modo excepcional"
             >
               <GraduationCap className="w-4 h-4" />
               {excepcionesActivas > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-violet-600 text-white text-[12px] font-semibold leading-none flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-exception text-bgPrimary text-[12px] font-semibold leading-none flex items-center justify-center">
                   {excepcionesActivas}
                 </span>
               )}
@@ -321,7 +321,7 @@ export default function Navbar({
                         {onChangeMalla && (
                           <button
                             onClick={() => { onChangeMalla(); setSettingsOpen(false); }}
-                            className="w-full text-left px-2.5 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-xl transition-colors flex items-center gap-2 mt-1.5 border border-red-500/10"
+                            className="w-full text-left px-2.5 py-1.5 text-xs font-bold text-danger hover:bg-danger/10 rounded-xl transition-colors flex items-center gap-2 mt-1.5 border border-danger/10"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                             <span>Cambiar de malla</span>
