@@ -181,12 +181,12 @@ function FeatureTile({ f, span = "", split = false, children }) {
 
 /* ---------- Hero interactivo: la herramienta funcionando ---------- */
 const PLAY_COURSES = [
-  { id: "prog", name: "Programación I", code: "TDFI102", pre: null },
-  { id: "bd", name: "Base de Datos", code: "TDFI103", pre: "prog" },
-  { id: "alg", name: "Algoritmos y Estructuras", code: "INF210", pre: "bd" },
-  { id: "calc1", name: "Cálculo I", code: "MAT110", pre: null },
-  { id: "calc2", name: "Cálculo II", code: "MAT210", pre: "calc1" },
-  { id: "fis", name: "Física General", code: "FIS110", pre: "calc2" },
+  { id: "prog", sem: 1, name: "Programación I", code: "TDFI102", pre: null },
+  { id: "bd", sem: 2, name: "Base de Datos", code: "TDFI103", pre: "prog" },
+  { id: "alg", sem: 3, name: "Algoritmos y Estructuras", code: "INF210", pre: "bd" },
+  { id: "calc1", sem: 1, name: "Cálculo I", code: "MAT110", pre: null },
+  { id: "calc2", sem: 2, name: "Cálculo II", code: "MAT210", pre: "calc1" },
+  { id: "fis", sem: 3, name: "Física General", code: "FIS110", pre: "calc2" },
 ];
 
 const PLAY_START = { prog: "ok", bd: "pend", alg: "pend", calc1: "cur", calc2: "pend", fis: "pend" };
@@ -464,21 +464,28 @@ function HeroPlayground() {
           <h2 className="font-display text-xl sm:text-2xl font-semibold tracking-tight">Tu malla</h2>
           <p className="text-[13px] font-medium lp-eyebrow">Toca un ramo para cambiar su estado</p>
         </div>
-        <div className="relative mt-5 flex-1 grid grid-cols-2 min-[560px]:grid-cols-3 auto-rows-fr gap-2.5 sm:gap-3">
-          {PLAY_COURSES.map((c) => (
-            <PlayCourse
-              key={c.id}
-              course={c}
-              status={status[c.id]}
-              locked={isLocked(c)}
-              shaking={shake === c.id}
-              pressed={pressed === c.id}
-              onToggle={() => toggle(c)}
-              reduceMotion={reduceMotion}
-              setRef={(el) => {
-                cardRefs.current[c.id] = el;
-              }}
-            />
+        <div className="relative mt-5 flex-1 grid gap-5 min-[560px]:grid-cols-3 min-[560px]:gap-3">
+          {[1, 2, 3].map((sem) => (
+            <div key={sem} className="flex flex-col gap-2 min-w-0">
+              <p className="text-[13px] font-semibold text-ink">Semestre {sem}</p>
+              <div className="flex-1 grid grid-cols-2 min-[560px]:grid-cols-1 auto-rows-fr gap-2.5 sm:gap-3">
+                {PLAY_COURSES.filter((c) => c.sem === sem).map((c) => (
+                  <PlayCourse
+                    key={c.id}
+                    course={c}
+                    status={status[c.id]}
+                    locked={isLocked(c)}
+                    shaking={shake === c.id}
+                    pressed={pressed === c.id}
+                    onToggle={() => toggle(c)}
+                    reduceMotion={reduceMotion}
+                    setRef={(el) => {
+                      cardRefs.current[c.id] = el;
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
         <p className="mt-4 text-[13px] text-[var(--textSecondary)] leading-snug">
