@@ -344,7 +344,7 @@ export default function ImportCourseConfigModal({
                     <span className="text-textPrimary font-medium min-w-0 break-words">
                       {ev.nombre}
                     </span>
-                    <span className="text-textSecondary font-semibold shrink-0 tabular-nums">
+                    <span className="text-textSecondary shrink-0 num">
                       {formatPeso(ev.peso)}%
                     </span>
                   </li>
@@ -410,11 +410,11 @@ export default function ImportCourseConfigModal({
             <div className="rounded-xl border border-borderColor bg-bgPrimary/40 px-3.5 py-3 text-xs space-y-1.5">
               <p className="m-0 flex justify-between gap-3">
                 <span className="text-textSecondary">Evaluaciones actuales</span>
-                <span className="font-bold text-textPrimary tabular-nums">{currentCount}</span>
+                <span className="text-textPrimary num">{currentCount}</span>
               </p>
               <p className="m-0 flex justify-between gap-3">
                 <span className="text-textSecondary">Evaluaciones nuevas</span>
-                <span className="font-bold text-textPrimary tabular-nums">{importedCount}</span>
+                <span className="text-textPrimary num">{importedCount}</span>
               </p>
             </div>
             <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-between pt-1">
@@ -461,11 +461,11 @@ export default function ImportCourseConfigModal({
             <div className="rounded-xl border border-borderColor bg-bgPrimary/40 px-3.5 py-3 text-xs space-y-1.5">
               <p className="m-0 flex justify-between gap-3">
                 <span className="text-textSecondary">Evaluaciones actuales</span>
-                <span className="font-bold text-textPrimary tabular-nums">{currentCount}</span>
+                <span className="text-textPrimary num">{currentCount}</span>
               </p>
               <p className="m-0 flex justify-between gap-3">
                 <span className="text-textSecondary">Evaluaciones nuevas</span>
-                <span className="font-bold text-textPrimary tabular-nums">{importedCount}</span>
+                <span className="text-textPrimary num">{importedCount}</span>
               </p>
             </div>
 

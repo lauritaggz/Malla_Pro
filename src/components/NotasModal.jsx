@@ -506,11 +506,11 @@ export default function NotasModal({
           </div>
           <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
             <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">% Evaluado</p>
-            <p className="text-sm font-bold text-textPrimary m-0 tabular-nums">{formatPeso(pesoTotal)}%</p>
+            <p className="num text-sm text-textPrimary m-0">{formatPeso(pesoTotal)}%</p>
           </div>
           <div className="rounded-lg border border-borderColor bg-bgPrimary/40 px-2.5 py-2 text-center">
             <p className="text-[9px] text-textSecondary uppercase tracking-wider m-0 mb-0.5">Presentación</p>
-            <p className="text-sm font-bold text-textPrimary m-0 tabular-nums">
+            <p className="num text-sm text-textPrimary m-0">
               {pesoConNota > 0 ? safeToFixed(promedioPresentacion, 2) : "—"}
             </p>
           </div>
@@ -522,7 +522,7 @@ export default function NotasModal({
             <p className={`text-[9px] uppercase tracking-wider m-0 mb-0.5 ${rindeExamen ? "text-amber-600 font-bold" : "text-textSecondary"}`}>
               Nota final
             </p>
-            <p className={`text-sm font-bold m-0 tabular-nums ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
+            <p className={`num text-sm m-0 ${rindeExamen ? "text-amber-500" : "text-textPrimary"}`}>
               {pesoCompleto || rindeExamen ? safeToFixed(promedioFinal, 2) : "—"}
             </p>
           </div>
@@ -533,7 +533,7 @@ export default function NotasModal({
           <div className="bg-primary/5 border border-primary/20 rounded-lg px-3 py-2.5 text-sm shrink-0">
             <p className="text-textSecondary text-xs m-0 leading-relaxed">
               Para eximirte ({safeToFixed(config.notaEximicion, 1)}), necesitas promedio{" "}
-              <strong className="text-primary font-bold">{safeToFixed(notaNecesariaPresentacion, 2)}</strong>{" "}
+              <strong className="num text-primary">{safeToFixed(notaNecesariaPresentacion, 2)}</strong>{" "}
               en el {formatPeso(pesoRestante)}% restante.
               {notaNecesariaPresentacion > 7.0 && (
                 <span className="text-red-500 ml-1 font-medium">Matemáticamente inalcanzable; irás a examen.</span>
@@ -550,7 +550,7 @@ export default function NotasModal({
           >
             <p className="text-xs font-bold text-amber-600 dark:text-amber-500 m-0">Modo examen</p>
             <p className="text-textSecondary text-xs m-0 leading-relaxed">
-              Presentación <strong className="text-textPrimary">{safeToFixed(promedioPresentacion, 2)}</strong> bajo
+              Presentación <strong className="num text-textPrimary">{safeToFixed(promedioPresentacion, 2)}</strong> bajo
               eximición ({safeToFixed(config.notaEximicion, 1)}). Ponderación: {config.ponderacionPresentacion}% /{" "}
               {config.ponderacionExamen}% examen.
             </p>
@@ -559,7 +559,7 @@ export default function NotasModal({
                 <p className="text-[10px] text-textSecondary font-medium m-0 mb-0.5">
                   Nota necesaria en examen para aprobar (4.0)
                 </p>
-                <p className={`text-xl font-bold m-0 tabular-nums ${notaNecesariaExamen > 7.0 ? "text-red-500" : "text-amber-500"}`}>
+                <p className={`num text-xl m-0 ${notaNecesariaExamen > 7.0 ? "text-red-500" : "text-amber-500"}`}>
                   {safeToFixed(notaNecesariaExamen, 2)}
                 </p>
               </div>
@@ -631,7 +631,7 @@ export default function NotasModal({
                               <span className="block text-[10px] text-textSecondary mt-0.5">Con sub-notas</span>
                             )}
                           </td>
-                          <td className="py-2.5 px-2 text-center text-textSecondary font-medium text-xs tabular-nums">
+                          <td className="num py-2.5 px-2 text-center text-textSecondary text-xs">
                             {formatPeso(evaluacion.peso)}%
                           </td>
                           <td className="py-2.5 px-2 text-center">
@@ -643,10 +643,10 @@ export default function NotasModal({
                                 onChange={(e) => actualizarNota(evaluacion.id, e.target.value)}
                                 placeholder="—"
                                 aria-label={`Nota de ${evaluacion.nombre}`}
-                                className="w-14 px-1 py-1 rounded border border-borderColor bg-bgPrimary focus:border-primary text-textPrimary text-center text-sm font-semibold outline-none"
+                                className="num w-14 px-1 py-1 rounded border border-borderColor bg-bgPrimary focus:border-primary text-textPrimary text-center text-sm outline-none"
                               />
                               {tieneSubNotas && (
-                                <span className="text-[10px] font-bold text-primary">
+                                <span className="num text-[12px] text-primary">
                                   Prom: {safeToFixed(evaluacion.nota, 2)}
                                 </span>
                               )}
@@ -711,7 +711,7 @@ export default function NotasModal({
                                           key={sub.id}
                                           className="flex items-center gap-1.5 bg-bgSecondary border border-borderColor/80 rounded px-2 py-1 text-xs"
                                         >
-                                          <span className="font-semibold text-textPrimary">{safeToFixed(sub.nota, 1)}</span>
+                                          <span className="num text-textPrimary">{safeToFixed(sub.nota, 1)}</span>
                                           <button
                                             type="button"
                                             onClick={() => eliminarSubNota(evaluacion.id, sub.id)}

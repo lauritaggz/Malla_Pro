@@ -40,7 +40,7 @@ export default function NrcCopyButton({ nrc, compact = false }) {
         ${compact ? "px-1 py-0.5" : "px-1.5 py-1"}
       `}
     >
-      <span className="tabular-nums font-medium">
+      <span className="num ">
         {compact ? nrc : `NRC ${nrc}`}
       </span>
       {copied ? (

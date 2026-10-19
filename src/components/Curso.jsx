@@ -359,7 +359,7 @@ const Curso = ({
       )}
 
       {promedio !== null && (
-        <div className="absolute top-1 right-[58px] px-1.5 py-0.5 text-[12px] font-mono font-medium tabular-nums rounded-md border flex items-center justify-center bg-bgSecondary border-borderColor text-textPrimary">
+        <div className="absolute top-1 right-[58px] px-1.5 py-0.5 text-[12px] num rounded-md border flex items-center justify-center bg-bgSecondary border-borderColor text-textPrimary">
           {promedio.toFixed(1)}
         </div>
       )}

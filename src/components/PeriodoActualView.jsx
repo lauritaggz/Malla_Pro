@@ -337,7 +337,7 @@ export default function PeriodoActualView({
                               Promedio
                             </span>
                             <span
-                              className={`text-lg font-extrabold mt-1 tabular-nums ${
+                              className={`num text-xl mt-1 ${
                                 average !== null ? "text-primary" : "text-textSecondary/45"
                               }`}
                             >
@@ -450,7 +450,7 @@ export default function PeriodoActualView({
                                 {evals.map((ev) => (
                                   <div key={ev.id} className="flex items-center justify-between text-xs py-1 px-1 rounded-lg hover:bg-bgPrimary/30 transition-colors">
                                     <span className="text-textPrimary font-semibold">{ev.nombre || "Evaluación"} ({ev.peso || 0}%)</span>
-                                    <div className={`font-mono font-extrabold ${ev.nota != null ? "text-primary" : "text-textSecondary/50 font-normal italic"}`}>
+                                    <div className={ev.nota != null ? "num text-primary" : "text-textSecondary/50 italic"}>
                                       {ev.nota != null ? ev.nota.toFixed(1) : "Pendiente"}
                                     </div>
                                   </div>

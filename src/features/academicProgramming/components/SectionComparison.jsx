@@ -206,7 +206,7 @@ function SectionTableRow({ section, striped, highlightedDays }) {
       >
         <td className="px-3 py-3">
           <div className="flex items-start gap-1">
-            <span className="text-sm font-bold text-textPrimary tabular-nums">
+            <span className="text-sm text-textPrimary num">
               {section.sectionNumber}
             </span>
             {hasWarnings && (
@@ -244,7 +244,7 @@ function SectionTableRow({ section, striped, highlightedDays }) {
         </td>
         <td className="px-3 py-3">
           <span
-            className="text-xs text-textSecondary tabular-nums"
+            className="text-xs text-textSecondary num"
             title="Cantidad indicada en la programación académica. Puede no estar actualizada."
           >
             {section.capacity != null ? section.capacity : "—"}
@@ -259,7 +259,7 @@ function SectionTableRow({ section, striped, highlightedDays }) {
           <td colSpan={6} className="px-3 pb-3 pt-0">
             <p className="text-xs text-textSecondary">
               NRC ligados:{" "}
-              <span className="font-semibold text-textPrimary tabular-nums">
+              <span className="text-textPrimary num">
                 {section.linkedNrcs.join(", ")}
               </span>
             </p>
@@ -279,8 +279,8 @@ function SectionMobileCard({ section, highlightedDays }) {
     <article className="rounded-xl border border-borderColor bg-bgSecondary p-3.5 space-y-2.5">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h4 className="text-sm font-bold text-textPrimary tabular-nums">
-            Sección {section.sectionNumber}
+          <h4 className="text-sm font-semibold text-textPrimary">
+            Sección <span className="num">{section.sectionNumber}</span>
           </h4>
           {section.activityType && (
             <p className="text-[11px] text-textSecondary">{section.activityType}</p>

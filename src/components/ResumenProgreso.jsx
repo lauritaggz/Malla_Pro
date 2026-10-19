@@ -135,7 +135,7 @@ export default function ResumenProgreso({
         <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Progreso general</span>
-            <span className="text-sm font-bold text-textPrimary">
+            <span className="num text-sm text-textPrimary">
               {(pctAprobado + pctCursando).toFixed(1)}%
             </span>
           </div>
@@ -196,7 +196,7 @@ export default function ResumenProgreso({
               <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide">Promedio ponderado</p>
               <p className="text-xs text-textSecondary/60 mt-0.5">Solo cursos con notas completas (100% peso)</p>
             </div>
-            <span className={`text-3xl font-bold tabular-nums ${promedioGlobal >= 4 ? "text-emerald-500" : "text-red-500"}`}>
+            <span className={`t-figure ${promedioGlobal >= 4 ? "text-emerald-500" : "text-red-500"}`}>
               {promedioGlobal.toFixed(1)}
             </span>
           </div>
@@ -211,7 +211,7 @@ function StatCard({ icon, label, value, color, bg }) {
     <div className={`rounded-xl border p-4 flex flex-col gap-2 ${bg}`}>
       <div className={`${color} opacity-80`}>{icon}</div>
       <div>
-        <div className={`text-2xl font-bold tabular-nums ${color}`}>{value}</div>
+        <div className={`font-display text-2xl font-semibold tabular-nums ${color}`}>{value}</div>
         <div className="text-[11px] text-textSecondary mt-0.5">{label}</div>
       </div>
     </div>
@@ -235,7 +235,7 @@ function ProgressRow({ label, value, total, color, unit }) {
       <div className="flex-1 h-1.5 bg-borderColor/40 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-500 ${color.replace("text-", "bg-")}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className={`text-xs font-semibold tabular-nums ${color} w-16 text-right`}>{value} {unit}</span>
+      <span className={`num text-xs ${color} w-16 text-right`}>{value} {unit}</span>
     </div>
   );
 }

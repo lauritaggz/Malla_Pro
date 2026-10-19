@@ -41,7 +41,7 @@ export default function MeetingSchedule({
               >
                 {m.dayCode}
               </span>
-              <span className="font-semibold tabular-nums text-textPrimary">
+              <span className="num text-textPrimary">
                 {m.startTime}–{m.endTime}
               </span>
               <span className="text-textSecondary"> · </span>
@@ -67,7 +67,7 @@ export default function MeetingSchedule({
               {m.dayCode}
             </span>
             <div className="min-w-0 leading-snug">
-              <p className="font-semibold tabular-nums text-textPrimary">
+              <p className="num text-textPrimary">
                 {m.startTime}–{m.endTime}
               </p>
               <p className="text-xs text-textSecondary truncate">{room}</p>

@@ -87,7 +87,7 @@ function Stat({ value, label, muted = false }) {
   return (
     <div className="px-3 sm:px-4 first:pl-0 sm:first:pl-0">
       <p
-        className={`text-xl sm:text-2xl font-bold tabular-nums leading-none ${
+        className={`text-xl sm:text-2xl num leading-none ${
           muted ? "text-textSecondary" : "text-textPrimary"
         }`}
       >
