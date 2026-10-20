@@ -7,6 +7,7 @@ import ScheduleBuilder from "./ScheduleBuilder";
 import MallaProgressHint from "./MallaProgressHint";
 import SourcesBar from "./SourcesBar";
 import SourcesManager from "./SourcesManager";
+import DocumentSourcesPanel from "./DocumentSourcesPanel";
 import ErrorBoundary from "../../../components/ErrorBoundary";
 
 import {
@@ -110,10 +111,9 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const theme = safeStorage.getRaw(LEGACY_KEYS.theme) || "aurora";
     const savedDark = safeStorage.getRaw(LEGACY_KEYS.darkmode);
     const darkMode = savedDark ? savedDark === "true" : true;
-    document.documentElement.className = `${theme} ${darkMode ? "dark" : "light"}`;
+    document.documentElement.className = darkMode ? "dark" : "light";
   }, []);
 
   useEffect(() => {
@@ -680,13 +680,13 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
           {infoMessage && (
             <div
               role="status"
-              className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[70] max-w-[min(92vw,28rem)] rounded-xl border border-emerald-500/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
+              className="fixed bottom-[calc(var(--mobile-bottom-nav-h,4rem)+0.75rem)] sm:bottom-6 left-1/2 -translate-x-1/2 z-[70] max-w-[min(92vw,28rem)] rounded-xl border border-approved/30 bg-bgSecondary px-3.5 py-2.5 text-[12px] sm:text-sm font-semibold text-textPrimary shadow-lg"
             >
-              <span className="text-emerald-500 mr-1.5">✓</span>
+              <span className="text-approved mr-1.5">✓</span>
               {infoMessage}
               <button
                 type="button"
-                className="ml-3 text-[11px] text-textSecondary underline"
+                className="ml-3 text-[12px] text-textSecondary underline"
                 onClick={() => setInfoMessage(null)}
               >
                 Cerrar
@@ -719,24 +719,27 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
             <div className="fade-in space-y-3 sm:space-y-3.5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div className="min-w-0 space-y-0.5">
-                  <h1 className="text-xl sm:text-2xl font-black text-textPrimary tracking-tight">
+                  <h1 className="t-page text-textPrimary">
                     Arma tu horario
                   </h1>
-                  <p className="text-[11px] sm:text-sm text-textSecondary leading-snug max-w-xl">
+                  <p className="text-[12px] sm:text-sm text-textSecondary leading-snug max-w-xl">
                     Parte desde tu horario actual y prueba cambios sin perder lo que ya tienes inscrito.
                   </p>
                 </div>
               </div>
 
-              <SourcesBar
-                programmingLoaded={programmingLoaded}
-                programmingDetail={programmingDetail}
-                programmingError={sourceErrors ? programmingError : null}
-                studentScheduleLoaded={studentScheduleLoaded}
-                studentScheduleDetail={studentScheduleDetail}
-                studentScheduleError={sourceErrors ? studentScheduleError : null}
-                onManage={() => setSourcesOpen(true)}
-              />
+              {(programmingLoaded || studentScheduleLoaded || sourceErrors) && (
+                <SourcesBar
+                  programmingLoaded={programmingLoaded}
+                  programmingDetail={programmingDetail}
+                  programmingError={sourceErrors ? programmingError : null}
+                  studentScheduleLoaded={studentScheduleLoaded}
+                  studentScheduleDetail={studentScheduleDetail}
+                  studentScheduleError={sourceErrors ? studentScheduleError : null}
+                  warningCount={warningCount}
+                  onManage={() => setSourcesOpen(true)}
+                />
+              )}
 
               {!hasMallaProgress && <MallaProgressHint />}
 
@@ -746,7 +749,7 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                 !studentScheduleError && (
                   <div
                     role="alert"
-                    className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-600 dark:text-red-400"
+                    className="rounded-xl border border-danger/30 bg-danger/5 px-3 py-2 text-xs text-danger "
                   >
                     {errorMessage}{" "}
                     <button type="button" onClick={reset} className="underline font-medium">
@@ -786,20 +789,20 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                   }}
                 />
               ) : (
-                <div className="rounded-2xl border border-borderColor bg-bgSecondary px-4 py-8 sm:py-12 text-center space-y-3">
-                  <p className="text-sm font-bold text-textPrimary">
-                    Empieza cargando tu horario o la Programación Académica.
-                  </p>
-                  <p className="text-xs text-textSecondary max-w-md mx-auto">
-                    Puedes usar cualquiera de los dos. Con tu horario vemos lo inscrito; con la programación puedes probar otras secciones.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setSourcesOpen(true)}
-                    className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:brightness-110 btn-interactive"
-                  >
-                    Cargar archivos
-                  </button>
+                <div className="space-y-4">
+                  <DocumentSourcesPanel
+                    firstRun
+                    programmingLoaded={programmingLoaded}
+                    programmingDetail={programmingDetail}
+                    studentScheduleLoaded={studentScheduleLoaded}
+                    studentScheduleDetail={studentScheduleDetail}
+                    mergeSummary={mergeSummary}
+                    onProgrammingFile={handleProgrammingFile}
+                    onStudentScheduleFile={handleStudentScheduleFile}
+                    disabled={isBusy}
+                    programmingError={sourceErrors ? programmingError : null}
+                    studentScheduleError={sourceErrors ? studentScheduleError : null}
+                  />
                   {hasAnySource && status === "idle" && (
                     <button
                       type="button"

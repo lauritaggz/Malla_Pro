@@ -32,7 +32,7 @@ export default function MissingFromProgrammingSection({ missing = [] }) {
 function MissingGroup({ title, items }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-textSecondary mb-1.5">
+      <p className="text-[12px] font-semibold text-textSecondary mb-1.5">
         {title}
       </p>
       <ul className="space-y-1.5">
@@ -47,7 +47,7 @@ function MissingGroup({ title, items }) {
               </span>
               {item.curriculumCourse.nombre}
             </p>
-            <p className="text-[11px] text-textSecondary mt-0.5">
+            <p className="text-[12px] text-textSecondary mt-0.5">
               {item.semester}.º semestre · No encontrada en la programación cargada.
             </p>
           </li>

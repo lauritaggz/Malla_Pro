@@ -30,19 +30,19 @@ export default function MallaProgressHint({ forceShow = false }) {
   return (
     <div
       role="status"
-      className="rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2 text-[11px] sm:text-xs text-amber-900 dark:text-amber-100"
+      className="rounded-xl border border-exception/25 bg-exception/8 px-3 py-2 text-[12px] sm:text-xs text-exception "
     >
       <div className="flex items-start gap-2">
-        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-exception mt-0.5" />
         <div className="flex-1 min-w-0 leading-snug">
-          <p className="font-bold text-amber-800 dark:text-amber-200">
+          <p className="font-bold text-exception ">
             Para recomendarte ramos, completa tu avance en Mi malla.
           </p>
-          <p className="mt-0.5 text-amber-900/80 dark:text-amber-100/75">
+          <p className="mt-0.5 text-exception/80 ">
             Tu horario actual sí se puede usar normalmente.{" "}
             <Link
               to="/app"
-              className="font-bold underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-50"
+              className="font-bold underline underline-offset-2 hover:text-exception "
             >
               Ir a Mi malla
             </Link>
@@ -51,7 +51,7 @@ export default function MallaProgressHint({ forceShow = false }) {
         <button
           type="button"
           onClick={dismiss}
-          className="shrink-0 rounded-lg p-1 text-amber-700/70 hover:text-amber-900 dark:text-amber-200/70 dark:hover:text-amber-50 hover:bg-amber-500/10 transition-colors"
+          className="shrink-0 rounded-lg p-1 text-exception/70 hover:text-exception hover:bg-exception/10 transition-colors"
           aria-label="Cerrar aviso"
         >
           <X className="h-3.5 w-3.5" />

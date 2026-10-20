@@ -62,7 +62,7 @@ function EmailForm({ onSuccess, onBack }) {
       </button>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">
+          <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">
             Correo electrónico
           </label>
           <input
@@ -73,7 +73,7 @@ function EmailForm({ onSuccess, onBack }) {
             autoFocus
             className="w-full rounded-lg px-3 py-2.5 border border-borderColor bg-bgPrimary text-textPrimary text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition"
           />
-          {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+          {error && <p className="text-xs text-danger mt-1">{error}</p>}
         </div>
         <button
           type="submit"
@@ -155,7 +155,7 @@ export default function LoginSuggestion({ isOpen, onClose }) {
                 </div>
 
                 {/* Heading */}
-                <h2 className="text-lg font-bold text-textPrimary mb-1 leading-snug">
+                <h2 className="t-section text-textPrimary mb-1">
                   Sincroniza entre dispositivos
                 </h2>
                 <p className="text-sm text-textSecondary mb-5 leading-relaxed">
@@ -217,7 +217,7 @@ export default function LoginSuggestion({ isOpen, onClose }) {
                 </AnimatePresence>
 
                 {/* Legal */}
-                <p className="text-[10px] text-textSecondary/50 text-center mt-4 leading-relaxed">
+                <p className="text-[12px] text-textSecondary/50 text-center mt-4 leading-relaxed">
                   Datos almacenados localmente. Sin spam ni terceros.
                 </p>
               </div>

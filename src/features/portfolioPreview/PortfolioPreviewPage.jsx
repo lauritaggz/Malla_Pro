@@ -258,7 +258,7 @@ export default function PortfolioPreviewPage() {
               aria-valuenow={stats.pct}
               className="mt-2 flex h-1.5 overflow-hidden rounded-full bg-borderColor/30"
             >
-              <div className="h-full bg-emerald-500" style={{ width: `${(stats.aprobados / total) * 100}%` }} />
+              <div className="h-full bg-approved" style={{ width: `${(stats.aprobados / total) * 100}%` }} />
               <div className="h-full bg-primary opacity-70" style={{ width: `${(stats.cursando / total) * 100}%` }} />
             </div>
           </section>

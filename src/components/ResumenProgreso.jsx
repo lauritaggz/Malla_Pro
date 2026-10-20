@@ -105,14 +105,14 @@ export default function ResumenProgreso({
 
         {/* ── Tarjetas de asignaturas ── */}
         <div>
-          <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">Asignaturas</p>
+          <p className="text-[12px] font-semibold text-textSecondary mb-3">Asignaturas</p>
           <div className="grid grid-cols-3 gap-3">
             <StatCard
               icon={<CheckCircle2 className="w-4 h-4" />}
               label="Aprobadas"
               value={datos.asignaturasAprobadas}
-              color="text-emerald-500"
-              bg="bg-emerald-500/8 border-emerald-500/20"
+              color="text-approved"
+              bg="bg-approved/8 border-approved/20"
             />
             <StatCard
               icon={<Hourglass className="w-4 h-4" />}
@@ -135,14 +135,14 @@ export default function ResumenProgreso({
         <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Progreso general</span>
-            <span className="text-sm font-bold text-textPrimary">
+            <span className="num text-sm text-textPrimary">
               {(pctAprobado + pctCursando).toFixed(1)}%
             </span>
           </div>
 
           <div className="relative w-full h-3 bg-borderColor/40 rounded-full overflow-hidden">
             <div
-              className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full transition-all duration-700"
+              className="absolute inset-y-0 left-0 bg-approved rounded-full transition-all duration-700"
               style={{ width: `${pctAprobado}%` }}
             />
             <div
@@ -152,19 +152,19 @@ export default function ResumenProgreso({
           </div>
 
           <div className="flex items-center gap-4 mt-3 flex-wrap">
-            <LegendDot color="bg-emerald-500" label={`Aprobadas (${pctAprobado.toFixed(1)}%)`} />
+            <LegendDot color="bg-approved" label={`Aprobadas (${pctAprobado.toFixed(1)}%)`} />
             <LegendDot color="bg-primary" label={`En curso (${pctCursando.toFixed(1)}%)`} opacity="opacity-60" />
           </div>
         </div>
 
         {/* ── Detalle asignaturas ── */}
         <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
-          <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">
+          <p className="text-[12px] font-semibold text-textSecondary mb-3">
             <BookOpen className="w-3.5 h-3.5 inline mr-1.5 opacity-60" />
             Detalle de asignaturas
           </p>
           <div className="space-y-2">
-            <ProgressRow label="Aprobadas"  value={datos.asignaturasAprobadas} total={datos.asignaturasTotales} color="text-emerald-500" unit="ramos" />
+            <ProgressRow label="Aprobadas"  value={datos.asignaturasAprobadas} total={datos.asignaturasTotales} color="text-approved" unit="ramos" />
             <ProgressRow label="En curso"   value={datos.asignaturasCursando}  total={datos.asignaturasTotales} color="text-primary"     unit="ramos" />
             <ProgressRow label="Pendientes" value={asigPendientes}             total={datos.asignaturasTotales} color="text-textSecondary" unit="ramos" />
           </div>
@@ -172,12 +172,12 @@ export default function ResumenProgreso({
 
         {/* ── Créditos SCT (detalle secundario) ── */}
         <div className="rounded-xl border border-borderColor bg-bgSurface p-5">
-          <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">
+          <p className="text-[12px] font-semibold text-textSecondary mb-3">
             <BarChart3 className="w-3.5 h-3.5 inline mr-1.5 opacity-60" />
             Créditos SCT
           </p>
           <div className="space-y-2">
-            <ProgressRow label="Aprobados"  value={datos.creditosAprobados} total={datos.creditosTotales} color="text-emerald-500" unit="SCT" />
+            <ProgressRow label="Aprobados"  value={datos.creditosAprobados} total={datos.creditosTotales} color="text-approved" unit="SCT" />
             <ProgressRow label="En curso"   value={datos.creditosCursando}  total={datos.creditosTotales} color="text-primary"     unit="SCT" />
             <ProgressRow
               label="Pendientes"
@@ -193,10 +193,10 @@ export default function ResumenProgreso({
         {promedioGlobal !== null && (
           <div className="rounded-xl border border-borderColor bg-bgSurface p-5 flex items-center justify-between">
             <div>
-              <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide">Promedio ponderado</p>
+              <p className="text-[12px] font-semibold text-textSecondary ">Promedio ponderado</p>
               <p className="text-xs text-textSecondary/60 mt-0.5">Solo cursos con notas completas (100% peso)</p>
             </div>
-            <span className={`text-3xl font-bold tabular-nums ${promedioGlobal >= 4 ? "text-emerald-500" : "text-red-500"}`}>
+            <span className={`t-figure ${promedioGlobal >= 4 ? "text-approved" : "text-danger"}`}>
               {promedioGlobal.toFixed(1)}
             </span>
           </div>
@@ -211,8 +211,8 @@ function StatCard({ icon, label, value, color, bg }) {
     <div className={`rounded-xl border p-4 flex flex-col gap-2 ${bg}`}>
       <div className={`${color} opacity-80`}>{icon}</div>
       <div>
-        <div className={`text-2xl font-bold tabular-nums ${color}`}>{value}</div>
-        <div className="text-[11px] text-textSecondary mt-0.5">{label}</div>
+        <div className={`font-display text-2xl font-semibold tabular-nums ${color}`}>{value}</div>
+        <div className="text-[12px] text-textSecondary mt-0.5">{label}</div>
       </div>
     </div>
   );
@@ -235,7 +235,7 @@ function ProgressRow({ label, value, total, color, unit }) {
       <div className="flex-1 h-1.5 bg-borderColor/40 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-500 ${color.replace("text-", "bg-")}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className={`text-xs font-semibold tabular-nums ${color} w-16 text-right`}>{value} {unit}</span>
+      <span className={`num text-xs ${color} w-16 text-right`}>{value} {unit}</span>
     </div>
   );
 }

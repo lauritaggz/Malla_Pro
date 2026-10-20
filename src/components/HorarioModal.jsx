@@ -260,7 +260,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
         {/* Toast */}
         {toast && (
           <div
-            className="absolute top-2 left-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-medium shadow-lg"
+            className="absolute top-2 left-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-xl border border-danger/30 bg-danger/10 text-danger text-sm font-medium shadow-lg"
           >
             <span className="flex-1">{toast}</span>
             <button onClick={() => setToast(null)}><X className="w-3.5 h-3.5" /></button>
@@ -343,7 +343,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
 
               {/* Selector de hora */}
               <div style={{ marginTop: 14 }}>
-                <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide" style={{ marginBottom: 8 }}>Hora de inicio</p>
+                <p className="text-[12px] font-semibold text-textSecondary " style={{ marginBottom: 8 }}>Hora de inicio</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, maxHeight: 120, overflowY: "auto" }}>
                   {slots.slice(0, 20).map((s) => (
                     <button
@@ -365,7 +365,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               {/* Chips cursando */}
               {hasCursando && (
                 <div style={{ marginTop: 14 }}>
-                  <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide" style={{ marginBottom: 8 }}>Ramos cursando</p>
+                  <p className="text-[12px] font-semibold text-textSecondary " style={{ marginBottom: 8 }}>Ramos cursando</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {cursosOptions.map((c) => {
                       const active = draft.courseId === c.id;
@@ -387,8 +387,8 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               )}
 
               {!hasCursando && (
-                <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-3 flex items-start gap-2" style={{ marginTop: 14 }}>
-                  <BookOpen className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="rounded-xl border border-exception/25 bg-exception/8 p-3 flex items-start gap-2" style={{ marginTop: 14 }}>
+                  <BookOpen className="w-4 h-4 text-exception flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-textSecondary">
                     Sin ramos marcados como <strong>cursando</strong>.
                   </p>
@@ -414,7 +414,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
                     </button>
                     <button
                       onClick={() => deleteItem(editingItem.id)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-red-500/25 bg-red-500/8 text-red-500"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border border-danger/25 bg-danger/8 text-danger"
                     >
                       <Trash2 className="w-4 h-4" />Eliminar
                     </button>
@@ -473,7 +473,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18 }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-danger/30 bg-danger/10 text-danger text-sm font-medium"
             >
               <span className="flex-shrink-0">⚠</span>
               <span className="flex-1">{toast}</span>
@@ -519,7 +519,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
 
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div>
-              <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Ramo</label>
+              <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">Ramo</label>
               <select
                 value={draft.courseId}
                 onChange={(e) => setDraft((d) => ({ ...d, courseId: e.target.value }))}
@@ -530,7 +530,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Sala</label>
+              <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">Sala</label>
               <input
                 value={draft.sala}
                 onChange={(e) => setDraft((d) => ({ ...d, sala: e.target.value }))}
@@ -539,7 +539,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Duración</label>
+              <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">Duración</label>
               <select
                 value={draft.blocks}
                 onChange={(e) => setDraft((d) => ({ ...d, blocks: Number(e.target.value) }))}
@@ -569,7 +569,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
                 </button>
                 <button
                   onClick={() => deleteItem(editingItem.id)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-red-500/25 bg-red-500/8 text-red-500 hover:bg-red-500/15 transition"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-danger/25 bg-danger/8 text-danger hover:bg-danger/15 transition"
                 >
                   <Trash2 className="w-3.5 h-3.5" />Eliminar
                 </button>
@@ -580,8 +580,8 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
 
         {/* Ramos cursando */}
         {!hasCursando ? (
-          <div className="rounded-xl border border-amber-500/25 bg-amber-500/8 p-4 flex items-start gap-3">
-            <BookOpen className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-exception/25 bg-exception/8 p-4 flex items-start gap-3">
+            <BookOpen className="w-4 h-4 text-exception flex-shrink-0 mt-0.5" />
             <div>
               <div className="text-sm font-semibold text-textPrimary">Sin ramos marcados como cursando</div>
               <div className="text-xs text-textSecondary mt-0.5">
@@ -591,7 +591,7 @@ export default function HorarioModal({ isOpen, onClose, cursosCursandoData = [] 
           </div>
         ) : (
           <div className="rounded-xl border border-borderColor bg-bgSurface p-4">
-            <p className="text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-3">
+            <p className="text-[12px] font-semibold text-textSecondary mb-3">
               Ramos cursando · arrastra a la planilla
             </p>
             <div className="flex flex-wrap gap-2">
@@ -662,7 +662,7 @@ function FormFields({ draft, setDraft, cursosOptions }) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Ramo</label>
+        <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">Ramo</label>
         <select
           value={draft.courseId}
           onChange={(e) => setDraft((d) => ({ ...d, courseId: e.target.value }))}
@@ -674,7 +674,7 @@ function FormFields({ draft, setDraft, cursosOptions }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Sala</label>
+          <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">Sala</label>
           <input
             value={draft.sala}
             onChange={(e) => setDraft((d) => ({ ...d, sala: e.target.value }))}
@@ -683,7 +683,7 @@ function FormFields({ draft, setDraft, cursosOptions }) {
           />
         </div>
         <div>
-          <label className="block text-[11px] font-semibold text-textSecondary uppercase tracking-wide mb-1.5">Duración</label>
+          <label className="block text-[12px] font-semibold text-textSecondary mb-1.5">Duración</label>
           <select
             value={draft.blocks}
             onChange={(e) => setDraft((d) => ({ ...d, blocks: Number(e.target.value) }))}
@@ -720,8 +720,8 @@ function MobileDayBar({ days, selectedDay, todayDayId, countByDay, onSelect }) {
                     : "text-textSecondary hover:bg-borderColor/30"
               }`}
             >
-              <span className="text-[11px] font-bold uppercase tracking-wide">{d.label.slice(0, 2)}</span>
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              <span className="text-[12px] font-bold ">{d.label.slice(0, 2)}</span>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-semibold ${
                 isSelected
                   ? "bg-white/20 text-white"
                   : count > 0
@@ -834,7 +834,7 @@ function WeekGrid({ slots, slotsByStart, schedule, updateItem, todayDayId, editi
       <div style={{ gridColumn: 1, gridRow: 1 }} />
       {DAYS.map((d, ci) => (
         <div key={d.id} style={{ gridColumn: ci + 2, gridRow: 1 }}
-          className={`flex items-center justify-center text-[11px] font-bold uppercase tracking-widest pb-1 ${
+          className={`flex items-center justify-center text-[12px] font-bold pb-1 ${
             d.id === todayDayId ? "text-primary" : "text-textSecondary/60"
           }`}>
           {d.label.slice(0, 3)}
@@ -844,7 +844,7 @@ function WeekGrid({ slots, slotsByStart, schedule, updateItem, todayDayId, editi
         <div key={`h-${slot.startTime}`} style={{ gridColumn: 1, gridRow: i + 2 }}
           className="pr-2 flex items-start pt-1 justify-end">
           {!interiorSlotIndices.has(slot.index) && (
-            <span className="text-[10px] font-medium text-textSecondary/50">{slot.startTime}</span>
+            <span className="text-[12px] font-medium text-textSecondary/50">{slot.startTime}</span>
           )}
         </div>
       ))}
@@ -884,9 +884,9 @@ function WeekGrid({ slots, slotsByStart, schedule, updateItem, todayDayId, editi
             }`}>
               <div className="w-[3px] flex-shrink-0" style={{ background: "var(--primary)" }} />
               <div className="flex flex-col justify-center px-1.5 py-1 min-w-0 flex-1 overflow-hidden gap-0.5">
-                <div className="text-[10px] font-bold text-textPrimary leading-tight truncate">{it.title || "Sin nombre"}</div>
-                {it.sala && <div className="text-[9px] text-textSecondary leading-tight truncate">📍 {it.sala}</div>}
-                {end && <div className="text-[9px] text-textSecondary/70 leading-tight">{it.startTime}–{end}</div>}
+                <div className="text-[12px] font-bold text-textPrimary leading-tight truncate">{it.title || "Sin nombre"}</div>
+                {it.sala && <div className="text-[12px] text-textSecondary leading-tight truncate">📍 {it.sala}</div>}
+                {end && <div className="text-[12px] text-textSecondary/70 leading-tight">{it.startTime}–{end}</div>}
               </div>
             </div>
           </div>

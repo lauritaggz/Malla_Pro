@@ -43,7 +43,7 @@ export default function TomaDeRamosStepper({ currentStep = 1 }) {
               )}
 
               <div
-                className={`relative z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold border transition-all duration-300
+                className={`relative z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[12px] sm:text-xs font-bold border transition-all duration-300
                   ${
                     isCompleted
                       ? "bg-primary border-primary text-white"
@@ -61,7 +61,7 @@ export default function TomaDeRamosStepper({ currentStep = 1 }) {
               </div>
 
               <span
-                className={`mt-1.5 sm:mt-2 text-[9px] sm:text-[11px] text-center leading-tight px-0.5 max-w-full
+                className={`mt-1.5 sm:mt-2 text-[12px] sm:text-[12px] text-center leading-tight px-0.5 max-w-full
                   ${
                     isActive
                       ? "text-primary font-extrabold"

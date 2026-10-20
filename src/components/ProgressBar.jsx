@@ -10,7 +10,7 @@ export default function ProgressBar({ totalCursos, cursosAprobados }) {
           style={{ width: `${progreso}%` }}
         ></div>
       </div>
-      <p className="text-center text-sm max-sm:text-[10px] max-sm:mt-1 mt-2 text-textSecondary">
+      <p className="text-center text-sm max-sm:text-[12px] max-sm:mt-1 mt-2 text-textSecondary">
         {Math.round(progreso)}% completado ({cursosAprobados}/{totalCursos}{" "}
         cursos)
       </p>

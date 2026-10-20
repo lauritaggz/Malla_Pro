@@ -164,7 +164,7 @@ export default function ProgrammingToolbar({ filters, options, onChange }) {
               >
                 Más filtros
                 {extraCount > 0 && (
-                  <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-white text-[10px] px-1">
+                  <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary text-white text-[12px] px-1">
                     {extraCount}
                   </span>
                 )}
@@ -199,7 +199,7 @@ export default function ProgrammingToolbar({ filters, options, onChange }) {
                 ]}
               />
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-medium text-textSecondary">
+                <span className="mb-1.5 block text-[12px] font-medium text-textSecondary">
                   Profesor
                 </span>
                 <input
@@ -241,7 +241,7 @@ export default function ProgrammingToolbar({ filters, options, onChange }) {
 
           {chips.length > 0 && (
             <div className="pt-1 border-t border-borderColor/60">
-              <p className="text-[11px] font-medium text-textSecondary mb-2">
+              <p className="text-[12px] font-medium text-textSecondary mb-2">
                 Filtros activos
               </p>
               <ActiveFilterChips
@@ -260,7 +260,7 @@ export default function ProgrammingToolbar({ filters, options, onChange }) {
 function CompactSelect({ id, label, value, onChange, options }) {
   return (
     <label htmlFor={id} className="block min-w-0">
-      <span className="mb-1.5 block text-[11px] font-medium text-textSecondary">
+      <span className="mb-1.5 block text-[12px] font-medium text-textSecondary">
         {label}
       </span>
       <select

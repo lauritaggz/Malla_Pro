@@ -1,7 +1,7 @@
-import { FolderOpen } from "lucide-react";
+import { AlertTriangle, FolderOpen } from "lucide-react";
 
 /**
- * Barra compacta de fuentes (Programación + Mi horario).
+ * Fuentes cargadas como chips compactos (Programación + Mi horario).
  */
 export default function SourcesBar({
   programmingLoaded = false,
@@ -10,76 +10,69 @@ export default function SourcesBar({
   studentScheduleLoaded = false,
   studentScheduleDetail = null,
   studentScheduleError = null,
+  warningCount = 0,
   onManage,
 }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4 rounded-xl border border-borderColor bg-bgSecondary px-3 py-2.5 sm:px-4">
-      <p className="text-[10px] font-extrabold uppercase tracking-widest text-textSecondary shrink-0">
-        Fuentes
-      </p>
-      <div className="min-w-0 flex-1 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-center gap-2 sm:gap-4">
-        <SourceChip
-          label="Programación académica"
-          loaded={programmingLoaded}
-          detail={programmingDetail}
-          error={programmingError}
-          emptyLabel="Sin cargar"
-        />
-        <SourceChip
-          label="Mi horario"
-          loaded={studentScheduleLoaded}
-          detail={studentScheduleDetail}
-          error={studentScheduleError}
-          emptyLabel="Sin cargar"
-        />
-      </div>
+    <div className="flex flex-wrap items-center gap-2">
+      <SourceChip
+        label="Programación"
+        loaded={programmingLoaded}
+        detail={programmingDetail}
+        error={programmingError}
+        onClick={onManage}
+      />
+      <SourceChip
+        label="Mi horario"
+        loaded={studentScheduleLoaded}
+        detail={studentScheduleDetail}
+        error={studentScheduleError}
+        onClick={onManage}
+      />
+      {warningCount > 0 && (
+        <button
+          type="button"
+          onClick={onManage}
+          className="inline-flex items-center gap-1.5 rounded-full border border-exception/40 bg-exception/10 px-3 py-1.5 text-[12px] font-semibold text-exception transition-colors hover:bg-exception/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+        >
+          <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+          {warningCount} {warningCount === 1 ? "aviso" : "avisos"} de lectura
+        </button>
+      )}
       <button
         type="button"
         onClick={onManage}
-        className="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-lg border border-borderColor bg-bgPrimary px-3 py-1.5 text-[11px] sm:text-xs font-bold text-textPrimary hover:border-primary/40 hover:text-primary transition-colors btn-interactive"
+        className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-textSecondary transition-colors hover:text-textPrimary hover:bg-borderColor/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
       >
-        <FolderOpen className="h-3.5 w-3.5" />
+        <FolderOpen className="h-3.5 w-3.5" aria-hidden />
         Gestionar archivos
       </button>
     </div>
   );
 }
 
-function SourceChip({ label, loaded, detail, error, emptyLabel }) {
+function SourceChip({ label, loaded, detail, error, onClick }) {
   const tone = error ? "error" : loaded ? "ok" : "idle";
   const dot =
-    tone === "ok"
-      ? "bg-emerald-500"
-      : tone === "error"
-        ? "bg-red-500"
-        : "bg-textSecondary/40";
-  const text =
-    tone === "error"
-      ? "No se pudo leer"
-      : loaded
-        ? detail || "Cargada"
-        : emptyLabel;
+    tone === "ok" ? "bg-approved" : tone === "error" ? "bg-danger" : "bg-textSecondary/40";
+  const text = tone === "error" ? "No se pudo leer" : loaded ? detail || "Cargada" : "Sin cargar";
 
   return (
-    <div className="min-w-0 flex items-start sm:items-center gap-2">
+    <button
+      type="button"
+      onClick={onClick}
+      title={loaded ? "Cambiar o revisar el archivo" : "Cargar el archivo"}
+      className="inline-flex min-w-0 items-center gap-2 rounded-full border border-borderColor bg-bgSecondary px-3 py-1.5 text-[12px] transition-colors hover:border-textSecondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+    >
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} aria-hidden />
+      <span className="font-semibold text-textPrimary">{label}</span>
       <span
-        className={`mt-1 sm:mt-0 h-2 w-2 rounded-full shrink-0 ${dot}`}
-        aria-hidden
-      />
-      <div className="min-w-0 leading-tight">
-        <p className="text-[11px] font-bold text-textPrimary truncate">{label}</p>
-        <p
-          className={`text-[10px] font-medium truncate ${
-            tone === "error"
-              ? "text-red-500"
-              : loaded
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-textSecondary"
-          }`}
-        >
-          {text}
-        </p>
-      </div>
-    </div>
+        className={`truncate font-medium ${
+          tone === "error" ? "text-danger" : loaded ? "text-textSecondary" : "text-textSecondary/80"
+        }`}
+      >
+        {text}
+      </span>
+    </button>
   );
 }

@@ -33,7 +33,7 @@ export default function MeetingSchedule({
               <span
                 className={`
                   inline-flex min-w-[1.6rem] justify-center rounded px-1 py-px
-                  text-[10px] font-bold mr-1.5 align-middle
+                  text-[12px] font-bold mr-1.5 align-middle
                   ${highlighted
                     ? "bg-primary text-white"
                     : "bg-bgPrimary border border-borderColor text-textSecondary"}
@@ -41,7 +41,7 @@ export default function MeetingSchedule({
               >
                 {m.dayCode}
               </span>
-              <span className="font-semibold tabular-nums text-textPrimary">
+              <span className="num text-textPrimary">
                 {m.startTime}–{m.endTime}
               </span>
               <span className="text-textSecondary"> · </span>
@@ -58,7 +58,7 @@ export default function MeetingSchedule({
             <span
               className={`
                 shrink-0 mt-0.5 inline-flex min-w-[1.75rem] justify-center
-                rounded px-1 py-0.5 text-[10px] font-bold tracking-wide
+                rounded px-1 py-0.5 text-[12px] font-bold tracking-wide
                 ${highlighted
                   ? "bg-primary text-white"
                   : "bg-bgPrimary border border-borderColor text-textSecondary"}
@@ -67,7 +67,7 @@ export default function MeetingSchedule({
               {m.dayCode}
             </span>
             <div className="min-w-0 leading-snug">
-              <p className="font-semibold tabular-nums text-textPrimary">
+              <p className="num text-textPrimary">
                 {m.startTime}–{m.endTime}
               </p>
               <p className="text-xs text-textSecondary truncate">{room}</p>

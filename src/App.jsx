@@ -7,6 +7,8 @@ import ResumenProgreso from "./components/ResumenProgreso";
 import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
 import MobileBottomNav from "./components/MobileBottomNav";
+import SideRail from "./components/SideRail";
+import MallaSelector from "./components/MallaSelector";
 import TutorModule from "./components/tutors/TutorModule";
 import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
@@ -17,7 +19,6 @@ import { MALLA_PROGRESS_EVENT } from "./utils/curriculumProgress";
 import { safeStorage } from "./utils/safeStorage";
 import { LEGACY_KEYS } from "./utils/storageKeys";
 import { AnimatePresence } from "framer-motion";
-import { GraduationCap } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import AcademicProgrammingPage from "./features/academicProgramming/components/AcademicProgrammingPage";
 import PeriodoActualView from "./components/PeriodoActualView";
@@ -45,9 +46,6 @@ export default function App() {
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
   );
 
-  const [theme, setTheme] = useState(
-    localStorage.getItem("malla-theme") || "aurora"
-  );
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("malla-darkmode");
     return saved ? saved === "true" : true;
@@ -169,12 +167,9 @@ export default function App() {
 
   // ---------------- THEME & DARKMODE ----------------
   useEffect(() => {
-    document.documentElement.className = `${theme} ${
-      darkMode ? "dark" : "light"
-    }`;
-    localStorage.setItem("malla-theme", theme);
+    document.documentElement.className = darkMode ? "dark" : "light";
     localStorage.setItem("malla-darkmode", darkMode);
-  }, [theme, darkMode]);
+  }, [darkMode]);
 
   useEffect(() => {
     listarMallas().then(setMallasDisponibles);
@@ -259,8 +254,6 @@ export default function App() {
       {/* NAVBAR */}
       {mallaSeleccionada && (
         <Navbar
-          theme={theme}
-          setTheme={setTheme}
           darkMode={darkMode}
           setDarkMode={setDarkMode}
           modoExcepcional={modoExcepcional}
@@ -284,6 +277,27 @@ export default function App() {
       )}
 
       {mallaSeleccionada && (
+        <SideRail
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          modoExcepcional={modoExcepcional}
+          setModoExcepcional={setModoExcepcional}
+          excepcionesActivas={excepcionesActivas}
+          mallaSeleccionada={mallaSeleccionada}
+          onVerProgreso={() => setMostrarResumen(true)}
+          onShowTour={() => setMostrarTour(true)}
+          onShowContacto={() => setMostrarContacto(true)}
+          onChangeMalla={() => {
+            if (!confirmLeaveExceptionMode()) return;
+            handleCambiarMalla();
+          }}
+          vistaPrincipal={vistaPrincipal}
+          setVistaPrincipal={setVistaPrincipal}
+          onGuardLeave={confirmLeaveExceptionMode}
+        />
+      )}
+
+      {mallaSeleccionada && (
         <MobileBottomNav
           vistaPrincipal={vistaPrincipal}
           setVistaPrincipal={setVistaPrincipal}
@@ -297,7 +311,8 @@ export default function App() {
           mallaSeleccionada ? "mobile-main-content sm:pb-0 sm:flex-none" : ""
         }`}
         style={{
-          paddingTop: mallaSeleccionada && !isMobileLayout ? navbarHeight + 8 : undefined,
+          paddingTop: mallaSeleccionada && isMobileLayout ? undefined : mallaSeleccionada ? 8 : undefined,
+          paddingLeft: mallaSeleccionada && !isMobileLayout ? 76 : undefined,
         }}
       >
         {mallaSeleccionada && vistaPrincipal === "malla" && (
@@ -305,63 +320,13 @@ export default function App() {
         )}
 
         {!mallaSeleccionada ? (
-          <div className="flex items-center justify-center min-h-[80vh] py-10">
-            <div className="bg-bgSecondary p-6 sm:p-10 rounded-2xl shadow-xl max-w-2xl w-full mx-4 border border-borderColor/50">
-              <h2 className="text-xl font-semibold mb-2 text-center">
-                <GraduationCap className="inline-block w-6 h-6 mr-2" />
-                Selecciona una malla para comenzar
-              </h2>
-              <p className="text-center text-sm text-textSecondary mb-5 leading-relaxed max-w-md mx-auto">
-                Actualmente disponibles para{" "}
-                <span className="font-semibold text-textPrimary">Pregrado Diurno</span>
-                {" "}de las carreras e instituciones incorporadas.
-              </p>
-
-              {mallasDisponibles.length === 0 ? (
-                <p className="text-textSecondary text-center">
-                  Cargando mallas...
-                </p>
-              ) : (
-                mallasDisponibles.map((uni) => (
-                  <div key={uni.universidad} className="mb-6">
-                    <h3 className="font-semibold text-primary mb-2">
-                      {uni.universidad}
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {uni.mallas.map((m) => (
-                        <button
-                          key={m.nombre}
-                          onClick={() => seleccionarMalla(m, uni.universidad)}
-                          className="p-4 rounded-xl border border-borderColor bg-bgPrimary hover:bg-primary hover:text-white transition-all text-sm font-medium shadow-sm hover:shadow-md active:scale-[0.98] text-left sm:text-center leading-snug"
-                        >
-                          {m.nombre}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
-              
-              {/* Enlace de contacto Destacado */}
-              <div className="mt-10 overflow-hidden relative rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-6 text-center shadow-lg transition-all duration-300 hover:shadow-primary/10 hover:-translate-y-1">
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <h3 className="font-semibold text-textPrimary text-lg mb-2 flex items-center justify-center gap-2 relative z-10">
-                  <span className="text-xl">🤔</span> ¿No encuentras tu malla?
-                </h3>
-                <p className="text-sm text-textSecondary mb-5 relative z-10">
-                  ¡Escríbenos y la agregamos rápidamente para que puedas usar la app!
-                </p>
-                <button
-                  onClick={() => setMostrarContacto(true)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white bg-primary hover:brightness-110 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all transform hover:scale-105 relative z-10 w-full sm:w-auto"
-                >
-                  ¡Envíanos tu malla!
-                </button>
-              </div>
-            </div>
-          </div>
+          <MallaSelector
+            universidades={mallasDisponibles}
+            onSelect={seleccionarMalla}
+            onContacto={() => setMostrarContacto(true)}
+            darkMode={darkMode}
+            setDarkMode={setDarkMode}
+          />
         ) : vistaPrincipal === "toma-de-ramos" ? (
           <main className="flex flex-col flex-1 min-h-0 sm:max-w-7xl sm:mx-auto sm:w-full">
             <AcademicProgrammingPage isEmbedded={true} />
@@ -399,8 +364,13 @@ export default function App() {
             <TutorModule onVolver={() => setVistaPrincipal("malla")} />
           </main>
         ) : (
-          <main className="flex flex-col flex-1 min-h-0 max-sm:px-0 sm:max-w-7xl sm:mx-auto sm:w-full">
+          <main className="flex flex-col flex-1 min-h-0 max-sm:px-0 sm:max-w-[1680px] sm:mx-auto sm:w-full">
             <MallaViewer
+              onChangeMalla={() => {
+                if (!confirmLeaveExceptionMode()) return;
+                handleCambiarMalla();
+              }}
+              onVerResumen={() => setMostrarResumen(true)}
               mallaSeleccionada={mallaSeleccionada}
               modoExcepcional={modoExcepcional}
               setModoExcepcional={setModoExcepcional}
@@ -417,16 +387,6 @@ export default function App() {
               ocultarCompletados={ocultarCompletados}
               setOcultarCompletados={setOcultarCompletados}
             />
-            
-            {/* BOTÓN CAMBIAR MALLA — solo desktop (móvil: opciones inferiores) */}
-            <div className="hidden sm:flex justify-center pb-8 mt-2">
-              <button
-                onClick={handleCambiarMalla}
-                className="text-xs text-textSecondary/60 hover:text-primary transition-colors px-4 py-2 rounded-full hover:bg-primary/10"
-              >
-                ¿Esta no es tu carrera? Cambiar malla
-              </button>
-            </div>
           </main>
         )}
       </div>

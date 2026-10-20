@@ -44,12 +44,11 @@ function usePageMeta({ title, description, path }) {
 function useThemeFromStorage() {
   useEffect(() => {
     try {
-      const theme = localStorage.getItem("malla-theme") || "aurora";
       const saved = localStorage.getItem("malla-darkmode");
       const darkMode = saved === null ? true : saved === "true";
-      document.documentElement.className = `${theme} ${darkMode ? "dark" : "light"}`;
+      document.documentElement.className = darkMode ? "dark" : "light";
     } catch {
-      document.documentElement.className = "aurora dark";
+      document.documentElement.className = "dark";
     }
   }, []);
 }

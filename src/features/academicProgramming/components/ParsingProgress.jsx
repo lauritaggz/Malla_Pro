@@ -29,17 +29,17 @@ export default function ParsingProgress({
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-xs sm:text-sm text-textSecondary">
         <div>
-          <span className="block text-[11px] uppercase tracking-wide opacity-70">Página</span>
+          <span className="block text-[12px] opacity-70">Página</span>
           <span className="font-medium text-textPrimary">
             {page || "—"} / {totalPages || "—"}
           </span>
         </div>
         <div>
-          <span className="block text-[11px] uppercase tracking-wide opacity-70">Progreso</span>
+          <span className="block text-[12px] opacity-70">Progreso</span>
           <span className="font-medium text-textPrimary">{safePercent}%</span>
         </div>
         <div className="col-span-2">
-          <span className="block text-[11px] uppercase tracking-wide opacity-70">
+          <span className="block text-[12px] opacity-70">
             Secciones detectadas
           </span>
           <span className="font-medium text-textPrimary">{sectionsDetected}</span>

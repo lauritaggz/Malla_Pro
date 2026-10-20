@@ -65,6 +65,16 @@ export default function PeriodoActualView({
   mallaData,
 }) {
   const [activeTab, setActiveTab] = useState("cursos");
+  // En pantallas anchas, asignaturas y evaluaciones conviven lado a lado
+  const [isWide, setIsWide] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = (e) => setIsWide(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
   const [notas, setNotas] = useState({});
   const [proposal, setProposal] = useState(null);
   const [copiedNrc, setCopiedNrc] = useState(null);
@@ -233,11 +243,11 @@ export default function PeriodoActualView({
     <div className="flex flex-col flex-1 min-h-0 w-full">
       <div
         className="flex flex-col flex-1 min-h-0 w-full mx-auto pb-8"
-        style={{ maxWidth: 960, paddingInline: 24 }}
+        style={{ maxWidth: isWide ? 1240 : 960, paddingInline: 24 }}
       >
         {/* Title Header */}
         <div className="flex flex-col gap-1 py-5 mb-1 select-none shrink-0">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-textPrimary leading-none m-0">
+          <h1 className="t-page text-textPrimary m-0">
             Periodo actual
           </h1>
           <p className="text-xs text-textSecondary font-medium m-0 mt-1.5">
@@ -248,7 +258,7 @@ export default function PeriodoActualView({
 
         {/* Tabs */}
         <div
-          className="flex bg-bgSecondary/60 p-0.5 rounded-xl border border-borderColor/40 mb-6 select-none shrink-0"
+          className="flex lg:hidden bg-bgSecondary/60 p-0.5 rounded-xl border border-borderColor/40 mb-6 select-none shrink-0"
           style={{ maxWidth: 280 }}
           role="tablist"
           aria-label="Secciones del periodo"
@@ -285,9 +295,11 @@ export default function PeriodoActualView({
               </p>
             </div>
           ) : (
-            <>
+            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-6 lg:items-start flex flex-col flex-1 min-h-0">
               {/* ── Tab: Asignaturas ── */}
-              {activeTab === "cursos" && (
+              {(activeTab === "cursos" || isWide) && (
+                <div className="flex flex-col gap-3 min-w-0">
+                <h2 className="hidden lg:block t-section text-textPrimary m-0">Asignaturas</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {cursandoDetails.map(({ course, average, evalsCount, gradedCount, section }) => {
                     const sectionLabel = formatSectionLabel(section);
@@ -321,7 +333,7 @@ export default function PeriodoActualView({
                             <h2 className="font-bold text-textPrimary text-sm leading-snug m-0 line-clamp-2">
                               {course.nombre}
                             </h2>
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-textSecondary font-medium">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-textSecondary font-medium">
                               <span className="uppercase tracking-wide">{course.codigo}</span>
                               {credits && (
                                 <>
@@ -333,11 +345,11 @@ export default function PeriodoActualView({
                           </div>
 
                           <div className="shrink-0 flex flex-col items-end leading-none" aria-label="Promedio">
-                            <span className="text-[9px] font-bold text-textSecondary uppercase tracking-wider">
+                            <span className="text-[12px] font-bold text-textSecondary ">
                               Promedio
                             </span>
                             <span
-                              className={`text-lg font-extrabold mt-1 tabular-nums ${
+                              className={`num text-xl mt-1 ${
                                 average !== null ? "text-primary" : "text-textSecondary/45"
                               }`}
                             >
@@ -361,9 +373,9 @@ export default function PeriodoActualView({
                                       copyToClipboard(section.nrc, course.id);
                                     }}
                                     aria-label={`Copiar NRC ${section.nrc}`}
-                                    className={`ml-auto shrink-0 px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all flex items-center gap-1 cursor-pointer
+                                    className={`ml-auto shrink-0 px-1.5 py-0.5 rounded text-[12px] font-mono border transition-all flex items-center gap-1 cursor-pointer
                                       ${copiedNrc === course.id
-                                        ? "bg-emerald-500/10 border-emerald-500/35 text-emerald-600 dark:text-emerald-400"
+                                        ? "bg-approved/10 border-approved/35 text-approved "
                                         : "bg-bgPrimary/60 border-borderColor text-textSecondary hover:text-textPrimary"}`}
                                   >
                                     <span>NRC {section.nrc}</span>
@@ -394,7 +406,7 @@ export default function PeriodoActualView({
                               </div>
                             </>
                           ) : (
-                            <div className="text-[11.5px] text-textSecondary/80 py-0.5 flex items-center gap-2">
+                            <div className="text-[12px] text-textSecondary/80 py-0.5 flex items-center gap-2">
                               <HelpCircle className="w-3.5 h-3.5 text-textSecondary/50 shrink-0" aria-hidden="true" />
                               <span>Sin sección asignada. Defínela en Toma de Ramos.</span>
                             </div>
@@ -403,7 +415,7 @@ export default function PeriodoActualView({
 
                         {/* Footer */}
                         <div className="flex items-center justify-between gap-3 mt-auto">
-                          <span className="text-[10px] font-semibold text-textSecondary">
+                          <span className="text-[12px] font-semibold text-textSecondary">
                             {gradedCount > 0
                               ? `${gradedCount} de ${evalsCount} notas`
                               : evalsCount > 0
@@ -416,7 +428,7 @@ export default function PeriodoActualView({
                               e.stopPropagation();
                               onAbrirNotas?.(course);
                             }}
-                            className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[11px] font-bold transition-all flex items-center gap-1.5 shadow-sm border-0 cursor-pointer"
+                            className="px-3.5 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-[12px] font-bold transition-all flex items-center gap-1.5 shadow-sm border-0 cursor-pointer"
                           >
                             <NotebookPen className="w-3.5 h-3.5" aria-hidden="true" />
                             <span>Notas</span>
@@ -426,10 +438,13 @@ export default function PeriodoActualView({
                     );
                   })}
                 </div>
+                </div>
               )}
 
               {/* ── Tab: Evaluaciones ── */}
-              {activeTab === "evals" && (
+              {(activeTab === "evals" || isWide) && (
+                <div className="flex flex-col gap-3 min-w-0 flex-1 min-h-0 lg:flex-none lg:sticky lg:top-4">
+                <h2 className="hidden lg:block t-section text-textPrimary m-0">Evaluaciones</h2>
                 <div className="flex flex-col flex-1 min-h-0 bg-bgSecondary/30 border border-borderColor/60 rounded-2xl overflow-hidden p-3.5 sm:p-5 select-none">
                   {evaluationsList.length === 0 ? (
                     <div className="text-center py-12 text-textSecondary text-xs">
@@ -437,20 +452,20 @@ export default function PeriodoActualView({
                     </div>
                   ) : (
                     <div className="flex-1 overflow-y-auto">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3.5">
                         {cursandoDetails.filter(cd => (notas[cd.course.id] || []).length > 0).map(({ course }) => {
                           const evals = notas[course.id] || [];
                           return (
                             <div key={course.id} className="p-4 bg-bgSecondary border border-borderColor/60 rounded-xl flex flex-col gap-3">
                               <div className="flex flex-col leading-tight border-b border-borderColor/55 pb-2">
                                 <span className="font-bold text-xs text-textPrimary">{course.nombre}</span>
-                                <span className="text-[9px] font-bold text-textSecondary uppercase mt-1 tracking-wider">{course.codigo}</span>
+                                <span className="text-[12px] font-bold text-textSecondary mt-1 ">{course.codigo}</span>
                               </div>
                               <div className="flex flex-col gap-1.5">
                                 {evals.map((ev) => (
                                   <div key={ev.id} className="flex items-center justify-between text-xs py-1 px-1 rounded-lg hover:bg-bgPrimary/30 transition-colors">
                                     <span className="text-textPrimary font-semibold">{ev.nombre || "Evaluación"} ({ev.peso || 0}%)</span>
-                                    <div className={`font-mono font-extrabold ${ev.nota != null ? "text-primary" : "text-textSecondary/50 font-normal italic"}`}>
+                                    <div className={ev.nota != null ? "num text-primary" : "text-textSecondary/50 italic"}>
                                       {ev.nota != null ? ev.nota.toFixed(1) : "Pendiente"}
                                     </div>
                                   </div>
@@ -459,7 +474,7 @@ export default function PeriodoActualView({
                               <button
                                 type="button"
                                 onClick={() => onAbrirNotas?.(course)}
-                                className="mt-1 self-start text-[11px] font-bold text-primary hover:underline bg-transparent border-0 cursor-pointer px-0"
+                                className="mt-1 self-start text-[12px] font-bold text-primary hover:underline bg-transparent border-0 cursor-pointer px-0"
                               >
                                 Abrir notas
                               </button>
@@ -470,8 +485,9 @@ export default function PeriodoActualView({
                     </div>
                   )}
                 </div>
+                </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

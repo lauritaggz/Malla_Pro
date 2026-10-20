@@ -1,8 +1,11 @@
-import { useState, useId } from "react";
+import { createContext, useContext, useEffect, useState, useId } from "react";
 import { ChevronDown, AlertTriangle, CheckCircle, Info, Filter } from "lucide-react";
 import { getConflictsForSection } from "../services/scheduleService";
 import { filterAndSortCourses, MODALITY_LABELS } from "../services/filterCourses";
 import { toDisplayCourse } from "../services/academicProgressIntegration";
+
+// Permite que cada tarjeta de sección avise a la grilla qué sección se está mirando.
+const PreviewContext = createContext(null);
 
 /**
  * Panel izquierdo del selector de horarios ("Tus asignaturas").
@@ -21,6 +24,8 @@ export default function CurricularScheduleSelector({
   enrolledNrcs = [],
   hasProgrammingSource = false,
   onOpenSources,
+  onPreviewSection = null,
+  focusRequest = null,
 }) {
   const [openGroups, setOpenGroups] = useState({
     recommended: true,
@@ -62,6 +67,18 @@ export default function CurricularScheduleSelector({
     : [];
   const filteredPrevious = filterAndSortCourses(previous, filters);
 
+  useEffect(() => {
+    if (!focusRequest?.code) return undefined;
+    const inHorario = horarioCourses.some((c) => c.courseCode === focusRequest.code);
+    setSidebarTab(inHorario ? "horario" : "disponibles");
+    const t = setTimeout(() => {
+      const el = document.querySelector(`[data-course-code="${focusRequest.code}"]`);
+      el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 120);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusRequest]);
+
   const availableFallback =
     hasProgrammingSource &&
     (!integration || (recommended.length === 0 && previous.length === 0))
@@ -69,18 +86,19 @@ export default function CurricularScheduleSelector({
       : [];
 
   return (
+    <PreviewContext.Provider value={onPreviewSection}>
     <aside className="w-full flex flex-col h-full min-h-0 bg-bgSecondary overflow-hidden select-none">
       <div className="p-3 sm:p-3.5 border-b border-borderColor space-y-2.5 shrink-0 bg-bgSecondary relative z-20">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="text-sm font-black text-textPrimary tracking-tight">
+            <h2 className="t-section text-textPrimary m-0">
               Tus ramos
             </h2>
-            <p className="text-[11px] text-textSecondary font-medium leading-snug mt-0.5">
+            <p className="text-[12px] text-textSecondary font-medium leading-snug mt-0.5">
               Inscritos y secciones que quieras probar.
             </p>
           </div>
-          <div className="px-2 py-1 rounded bg-bgPrimary border border-borderColor text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 shrink-0">
+          <div className="px-2 py-1 rounded bg-bgPrimary border border-borderColor text-[12px] font-extrabold text-approved shrink-0">
             {enrolledCount} inscrito{enrolledCount === 1 ? "" : "s"}
           </div>
         </div>
@@ -89,7 +107,7 @@ export default function CurricularScheduleSelector({
           <button
             type="button"
             onClick={() => setSidebarTab("horario")}
-            className={`flex-1 py-1.5 text-[10px] font-extrabold uppercase tracking-wide ${
+            className={`flex-1 py-1.5 text-[12px] font-extrabold ${
               sidebarTab === "horario"
                 ? "bg-primary text-white"
                 : "bg-bgPrimary text-textSecondary hover:text-textPrimary"
@@ -100,7 +118,7 @@ export default function CurricularScheduleSelector({
           <button
             type="button"
             onClick={() => setSidebarTab("disponibles")}
-            className={`flex-1 py-1.5 text-[10px] font-extrabold uppercase tracking-wide border-l border-borderColor ${
+            className={`flex-1 py-1.5 text-[12px] font-extrabold border-l border-borderColor ${
               sidebarTab === "disponibles"
                 ? "bg-primary text-white"
                 : "bg-bgPrimary text-textSecondary hover:text-textPrimary"
@@ -138,7 +156,7 @@ export default function CurricularScheduleSelector({
           {showFilters && (
             <div className="absolute top-full left-4 right-4 z-30 bg-bgSecondary border border-borderColor rounded-xl p-4 shadow-xl mt-1 text-textPrimary space-y-4 font-semibold text-xs popover-animate">
               <div className="space-y-1.5">
-                <span className="font-bold text-textSecondary uppercase text-[9px] tracking-wider">Modalidad</span>
+                <span className="font-bold text-textSecondary text-[12px] ">Modalidad</span>
                 <div className="flex flex-wrap gap-1.5">
                   {Object.entries(MODALITY_LABELS).map(([key, label]) => {
                     const isActive = filters.modalities?.includes(key);
@@ -152,7 +170,7 @@ export default function CurricularScheduleSelector({
                             : [...(filters.modalities || []), key];
                           setFilters(prev => ({ ...prev, modalities: next }));
                         }}
-                        className={`px-2 py-1 rounded border text-[10px] font-bold transition-all btn-interactive ${
+                        className={`px-2 py-1 rounded border text-[12px] font-bold transition-all btn-interactive ${
                           isActive
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-borderColor bg-bgPrimary text-textSecondary hover:border-borderColor/60"
@@ -166,7 +184,7 @@ export default function CurricularScheduleSelector({
               </div>
 
               <div className="space-y-1.5">
-                <span className="font-bold text-textSecondary uppercase text-[9px] tracking-wider">Días</span>
+                <span className="font-bold text-textSecondary text-[12px] ">Días</span>
                 <div className="flex flex-wrap gap-1.5">
                   {["LU", "MA", "MI", "JU", "VI", "SA"].map((day) => {
                     const isActive = filters.days?.includes(day);
@@ -180,7 +198,7 @@ export default function CurricularScheduleSelector({
                             : [...(filters.days || []), day];
                           setFilters(prev => ({ ...prev, days: next }));
                         }}
-                        className={`h-7 w-7 rounded border text-[10px] font-bold flex items-center justify-center transition-all btn-interactive ${
+                        className={`h-7 w-7 rounded border text-[12px] font-bold flex items-center justify-center transition-all btn-interactive ${
                           isActive
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-borderColor bg-bgPrimary text-textSecondary hover:border-borderColor/60"
@@ -205,7 +223,7 @@ export default function CurricularScheduleSelector({
                   professorQuery: "",
                   onlyWithCapacity: false,
                 }))}
-                className="w-full text-center py-1.5 bg-bgPrimary hover:bg-bgPrimary/60 border border-borderColor rounded-lg text-[10px] font-bold text-textSecondary hover:text-textPrimary btn-interactive"
+                className="w-full text-center py-1.5 bg-bgPrimary hover:bg-bgPrimary/60 border border-borderColor rounded-lg text-[12px] font-bold text-textSecondary hover:text-textPrimary btn-interactive"
               >
                 Restablecer filtros
               </button>
@@ -224,14 +242,14 @@ export default function CurricularScheduleSelector({
                     <p className="text-xs font-bold text-textPrimary">
                       Selecciona las secciones que quieras probar.
                     </p>
-                    <p className="text-[11px] text-textSecondary leading-relaxed">
+                    <p className="text-[12px] text-textSecondary leading-relaxed">
                       También puedes subir tu horario para detectar automáticamente lo que ya tienes inscrito.
                     </p>
                     {onOpenSources && (
                       <button
                         type="button"
                         onClick={onOpenSources}
-                        className="mt-1 inline-flex items-center rounded-lg border border-borderColor bg-bgPrimary px-3 py-1.5 text-[11px] font-bold text-textPrimary hover:border-primary/40 hover:text-primary btn-interactive"
+                        className="mt-1 inline-flex items-center rounded-lg border border-borderColor bg-bgPrimary px-3 py-1.5 text-[12px] font-bold text-textPrimary hover:border-primary/40 hover:text-primary btn-interactive"
                       >
                         Cargar mi horario
                       </button>
@@ -276,14 +294,14 @@ export default function CurricularScheduleSelector({
             <p className="text-xs font-bold text-textPrimary">
               Carga la Programación Académica para explorar otras secciones.
             </p>
-            <p className="text-[11px] text-textSecondary">
+            <p className="text-[12px] text-textSecondary">
               Así puedes probar NRC distintos sin perder lo que ya tienes inscrito.
             </p>
             {onOpenSources && (
               <button
                 type="button"
                 onClick={onOpenSources}
-                className="mt-1 inline-flex items-center rounded-lg bg-primary px-3 py-1.5 text-[11px] font-bold text-white hover:brightness-110 btn-interactive"
+                className="mt-1 inline-flex items-center rounded-lg bg-primary px-3 py-1.5 text-[12px] font-bold text-white hover:brightness-110 btn-interactive"
               >
                 Cargar programación
               </button>
@@ -295,7 +313,7 @@ export default function CurricularScheduleSelector({
           <>
             {filteredRecommended.length > 0 && (
               <GroupSection
-                title={`${integration.primarySemester}.º SEMESTRE · ${recommended.length} RAMOS`}
+                title={`${integration.primarySemester}.º semestre · ${recommended.length} ramos`}
                 isOpen={openGroups.recommended}
                 onToggle={() =>
                   setOpenGroups((g) => ({ ...g, recommended: !g.recommended }))
@@ -329,7 +347,7 @@ export default function CurricularScheduleSelector({
 
             {filteredPrevious.length > 0 && (
               <GroupSection
-                title={`PENDIENTES ANTERIORES · ${previous.length} RAMOS`}
+                title={`Pendientes anteriores · ${previous.length} ramos`}
                 description="Ramos de semestres anteriores que aún puedes cursar."
                 isOpen={openGroups.previous}
                 onToggle={() =>
@@ -401,6 +419,7 @@ export default function CurricularScheduleSelector({
         )}
       </div>
     </aside>
+    </PreviewContext.Provider>
   );
 }
 
@@ -410,7 +429,7 @@ function GroupSection({ title, description, isOpen, onToggle, children }) {
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between text-left text-[10px] font-extrabold tracking-wider text-textSecondary uppercase hover:text-textPrimary select-none btn-interactive"
+        className="w-full flex items-center justify-between text-left text-[12px] font-extrabold text-textSecondary hover:text-textPrimary select-none btn-interactive"
       >
         <span>{title}</span>
         <ChevronDown
@@ -419,7 +438,7 @@ function GroupSection({ title, description, isOpen, onToggle, children }) {
         />
       </button>
       {description && (
-        <p className="text-[10px] text-textSecondary leading-tight pl-0.5 font-medium">
+        <p className="text-[12px] text-textSecondary leading-tight pl-0.5 font-medium">
           {description}
         </p>
       )}
@@ -483,10 +502,11 @@ function SelectableCourseAccordion({
 
   return (
     <div
+      data-course-code={courseCode}
       className={`rounded-xl border transition-colors overflow-hidden ${
         selectedSection
           ? hasConflict
-            ? "border-red-500/30 bg-red-500/5"
+            ? "border-danger/30 bg-danger/5"
             : "border-primary bg-primary/2"
           : "border-borderColor bg-bgSecondary hover:border-borderColor/80"
       }`}
@@ -501,11 +521,11 @@ function SelectableCourseAccordion({
           className="w-full flex items-start justify-between gap-2 text-left p-3 sm:p-3.5 focus-visible:outline-none focus:ring-1 focus:ring-primary/30 btn-interactive"
         >
           <div className="min-w-0 flex-1 overflow-hidden">
-            <div className="text-[13px] sm:text-sm font-black text-textPrimary leading-snug break-words hyphens-auto pr-1">
+            <div className="text-[13px] sm:text-sm font-semibold text-textPrimary leading-snug break-words hyphens-auto pr-1">
               {courseTitle}
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1">
-              <span className="text-[10px] font-bold text-textSecondary uppercase tracking-wider shrink-0">
+              <span className="text-[12px] font-bold text-textSecondary shrink-0">
                 {courseCode}
               </span>
               {sections.some(
@@ -513,17 +533,17 @@ function SelectableCourseAccordion({
                   Boolean(s.enrolled) ||
                   enrolledNrcSet.has(String(s.nrc || "").replace(/\D/g, ""))
               ) && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-approved/15 text-approved px-1.5 py-0.5 text-[12px] font-bold ">
                   <CheckCircle className="h-2.5 w-2.5" strokeWidth={2.5} />
                   Inscrito
                 </span>
               )}
-              <span className="text-textSecondary/40 text-[9px]">•</span>
+              <span className="text-textSecondary/40 text-[12px]">•</span>
               <span
-                className={`text-[10px] font-bold inline-flex items-center gap-1 min-w-0 ${
+                className={`text-[12px] font-bold inline-flex items-center gap-1 min-w-0 ${
                   selectedSection
                     ? hasConflict
-                      ? "text-red-600 dark:text-red-400"
+                      ? "text-danger "
                       : "text-primary"
                     : "text-textSecondary"
                 }`}
@@ -608,14 +628,17 @@ function SelectableSectionCard({
   onSelect,
 }) {
   const [showDetails, setShowDetails] = useState(false);
+  const onPreview = useContext(PreviewContext);
 
   return (
     <div
+      onMouseEnter={() => onPreview?.(section)}
+      onMouseLeave={() => onPreview?.(null)}
       className={`w-full text-left p-3 rounded-lg border transition-all flex flex-col gap-1.5 cursor-pointer focus-visible:outline-none focus:ring-1 focus:ring-primary/40 ${
         isSelected
           ? "border-primary bg-primary/5 ring-1 ring-primary/40"
           : hasConflict
-          ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60"
+          ? "border-exception/40 bg-exception/5 hover:border-exception/60"
           : "border-borderColor bg-bgPrimary hover:border-borderColor/80"
       }`}
       onClick={onSelect}
@@ -635,7 +658,7 @@ function SelectableSectionCard({
               : `NRC ${section.nrc}`}
           </span>
           {enrolled && (
-            <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
+            <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-approved/15 text-approved px-1.5 py-0.5 text-[12px] font-bold ">
               <CheckCircle className="h-2.5 w-2.5" strokeWidth={2.5} />
               Inscrito
             </span>
@@ -644,7 +667,7 @@ function SelectableSectionCard({
         {section.modality &&
           section.modality !== "UNKNOWN" &&
           MODALITY_LABELS[section.modality] && (
-          <span className="text-[10px] font-semibold text-textSecondary uppercase tracking-wide bg-bgSecondary px-1.5 py-0.5 rounded border border-borderColor shrink-0">
+          <span className="text-[12px] font-semibold text-textSecondary bg-bgSecondary px-1.5 py-0.5 rounded border border-borderColor shrink-0">
             {MODALITY_LABELS[section.modality]}
           </span>
         )}
@@ -652,14 +675,14 @@ function SelectableSectionCard({
 
       {section.sources?.horarioAlumno &&
         section.sources?.programacionAcademica === false && (
-          <p className="pl-4.5 text-[10px] text-textSecondary italic">
+          <p className="pl-4.5 text-[12px] text-textSecondary italic">
             Importado desde tu horario
           </p>
         )}
 
       <div className="space-y-1 text-xs text-textPrimary pl-4.5 font-semibold">
         {(section.meetings || []).length === 0 ? (
-          <p className="text-[10px] text-textSecondary italic flex items-center gap-1">
+          <p className="text-[12px] text-textSecondary italic flex items-center gap-1">
             <Info className="h-3 w-3" /> Horario no informado
           </p>
         ) : (
@@ -675,7 +698,7 @@ function SelectableSectionCard({
         )}
       </div>
 
-      <div className="pl-4.5 text-[11px] text-textSecondary">
+      <div className="pl-4.5 text-[12px] text-textSecondary">
         <p className="font-semibold text-textPrimary/80 truncate">
           {section.professors?.join(" / ") || "Por definir"}
         </p>
@@ -688,7 +711,7 @@ function SelectableSectionCard({
           e.stopPropagation();
           setShowDetails(prev => !prev);
         }}
-        className="text-[10px] font-extrabold text-primary hover:underline pl-4.5 self-start select-none flex items-center gap-1 btn-interactive"
+        className="text-[12px] font-extrabold text-primary hover:underline pl-4.5 self-start select-none flex items-center gap-1 btn-interactive"
       >
         <span>{showDetails ? "Ocultar detalles" : "Ver detalles"}</span>
         <ChevronDown
@@ -699,7 +722,7 @@ function SelectableSectionCard({
 
       <div className="w-full accordion-grid" data-open={showDetails ? "true" : "false"}>
         <div className="accordion-content">
-          <div className="pl-4.5 text-[10px] text-textSecondary space-y-1 mt-1 border-t border-borderColor/40 pt-2 w-full font-medium">
+          <div className="pl-4.5 text-[12px] text-textSecondary space-y-1 mt-1 border-t border-borderColor/40 pt-2 w-full font-medium">
             <p>NRC: {section.nrc}</p>
             <p>Modalidad: {MODALITY_LABELS[section.modality] || section.modality}</p>
             {section.capacity && <p>Vacantes informadas: {section.capacity}</p>}
@@ -719,7 +742,7 @@ function SelectableSectionCard({
                   </p>
                 )}
                 {unresolvedNrcs.length > 0 && (
-                  <p className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                  <p className="text-exception font-bold flex items-center gap-1">
                     <AlertTriangle className="h-3 w-3 shrink-0" />
                     No encontramos el detalle de uno de los NRC ligados. Revisa esta sección antes de inscribirla.
                   </p>
@@ -732,8 +755,8 @@ function SelectableSectionCard({
 
       {/* Alertas de conflicto en la lista */}
       {hasConflict && !isSelected && (
-        <div className="pl-4.5 text-[10px] text-amber-700 dark:text-amber-400 font-bold space-y-0.5 mt-1 border-t border-amber-500/10 pt-1.5 w-full">
-          <p className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-extrabold">
+        <div className="pl-4.5 text-[12px] text-exception font-bold space-y-0.5 mt-1 border-t border-exception/10 pt-1.5 w-full">
+          <p className="flex items-center gap-1 text-[12px] text-exception font-extrabold">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
             Tope de horario con:
           </p>
@@ -746,7 +769,7 @@ function SelectableSectionCard({
       )}
 
       {isSelected && hasConflict && (
-        <p className="pl-4.5 text-[10px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1 mt-1 border-t border-red-500/10 pt-1.5">
+        <p className="pl-4.5 text-[12px] text-danger font-bold flex items-center gap-1 mt-1 border-t border-danger/10 pt-1.5">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           Esta sección genera conflictos en tu horario.
         </p>

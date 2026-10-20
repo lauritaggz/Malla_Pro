@@ -175,7 +175,7 @@ export default function LegalLayout({
               </div>
 
               <div className="hidden lg:block legal-toc-sticky">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-textSecondary mb-3">
+                <p className="text-[12px] font-bold text-textSecondary mb-3">
                   Índice
                 </p>
                 <TocList toc={toc} activeId={activeId} onSelect={scrollToId} />

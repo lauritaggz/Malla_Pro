@@ -1,67 +1,51 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { MessageCircle, Sparkles, X, PlayCircle } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import TutorModuleDemo from "./TutorModuleDemo";
 
+const IDEAS = [
+  "Busca tutores por asignatura.",
+  "Contáctalos directo por WhatsApp.",
+  "Evalúa la tutoría y ayuda a que otros elijan mejor.",
+];
+
 export default function TutorModule({ onVolver }) {
+  const reduceMotion = useReducedMotion();
   const [showDemo, setShowDemo] = useState(false);
 
   if (showDemo) {
-    return (
-      <TutorModuleDemo
-        onVolver={onVolver}
-        onSalirDemo={() => setShowDemo(false)}
-      />
-    );
+    return <TutorModuleDemo onVolver={onVolver} onSalirDemo={() => setShowDemo(false)} />;
   }
 
   return (
-    <div className="relative flex items-center justify-center min-h-[60vh] sm:min-h-[65vh] px-4 pb-28 sm:pb-12 pt-4">
-      <button
-        type="button"
-        onClick={onVolver}
-        className="absolute top-3 right-3 sm:top-4 sm:right-6 flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/25 bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-600 shadow-sm backdrop-blur-sm transition-colors z-10"
-        aria-label="Volver a la malla"
-      >
-        <X className="w-4 h-4" />
-      </button>
-
+    <div className="mx-auto w-full max-w-2xl px-5 pb-28 pt-8 sm:px-8 sm:pb-12 sm:pt-14">
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="w-full max-w-md text-center rounded-2xl border border-borderColor bg-bgSecondary/80 p-8 sm:p-10 shadow-lg"
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       >
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <MessageCircle className="h-7 w-7" strokeWidth={1.75} />
-        </div>
-
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary mb-4">
-          <Sparkles className="h-3.5 w-3.5" />
-          Próximamente
-        </span>
-
-        <h1 className="text-xl sm:text-2xl font-bold text-textPrimary tracking-tight">
-          Tutorías Connect
-        </h1>
-
-        <p className="mt-3 text-sm text-textSecondary leading-relaxed">
-          Estamos preparando un espacio para conectar con tutores por asignatura, contactar por WhatsApp y compartir experiencias.
+        <p className="m-0 text-[13px] font-semibold text-textSecondary">Próximamente</p>
+        <h1 className="t-page m-0 mt-1 text-textPrimary">Tutorías</h1>
+        <p className="mt-3 max-w-md text-[15px] leading-relaxed text-textSecondary">
+          Estamos armando un lugar para encontrar tutores por asignatura. Todavía no está disponible.
         </p>
 
-        <p className="mt-4 text-xs text-textSecondary/70">
-          Esta función aún no está disponible. Vuelve pronto.
-        </p>
+        <ul className="m-0 mt-6 list-none divide-y divide-borderColor/60 overflow-hidden rounded-xl border border-borderColor bg-bgSecondary p-0">
+          {IDEAS.map((idea) => (
+            <li key={idea} className="px-4 py-3 text-[14px] text-textPrimary">
+              {idea}
+            </li>
+          ))}
+        </ul>
 
-        <motion.button
+        <button
           type="button"
-          whileTap={{ scale: 0.98 }}
           onClick={() => setShowDemo(true)}
-          className="mt-6 inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold shadow-sm hover:brightness-110 transition-all"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-[14px] font-semibold text-[color:var(--on-ink)] transition-[filter,transform] hover:brightness-110 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bgPrimary"
         >
-          <PlayCircle className="w-4 h-4" />
-          Ver demo
-        </motion.button>
+          Ver la demo con datos de ejemplo
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </button>
       </motion.div>
     </div>
   );
