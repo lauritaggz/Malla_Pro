@@ -82,6 +82,8 @@ const MallaViewer = ({
   const [contextMenu, setContextMenu] = useState(null);
   const [paths, setPaths] = useState([]);
   const [allPaths, setAllPaths] = useState([]);
+  const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [semActivo, setSemActivo] = useState(1);
   const [hoverId, setHoverId] = useState(null);
   const [shakeCursoId, setShakeCursoId] = useState(null);
   const shakeTimerRef = useRef(null);
@@ -999,6 +1001,24 @@ const MallaViewer = ({
     setCourseDrawerOpen(false);
   }, []);
 
+  // Semestre activo del mapa de semestres según el scroll horizontal (escritorio)
+  useEffect(() => {
+    if (isMobileView || !malla) return undefined;
+    const cont = scrollRef.current;
+    if (!cont) return undefined;
+    const onScrollSem = () => {
+      const base = cont.getBoundingClientRect().left;
+      const cards = [...cont.querySelectorAll("[data-semestre]")];
+      const first = cards.find((el) => el.getBoundingClientRect().right - base > 60);
+      if (first) setSemActivo((prev) => {
+        const n = Number(first.dataset.semestre);
+        return prev === n ? prev : n;
+      });
+    };
+    cont.addEventListener("scroll", onScrollSem, { passive: true });
+    return () => cont.removeEventListener("scroll", onScrollSem);
+  }, [isMobileView, malla, ocultarCompletados]);
+
   // Desktop: rueda vertical → scroll horizontal animado
   useEffect(() => {
     if (isMobileView) return;
@@ -1052,8 +1072,21 @@ const MallaViewer = ({
   }, [isMobileView, malla]);
 
   // Path highlight status
+  const cursoCoincideFiltro = (c) => {
+    if (filtroEstado === "aprobado") return aprobados.includes(c.id);
+    if (filtroEstado === "cursando") return cursando.includes(c.id);
+    if (filtroEstado === "disponible") {
+      return !aprobados.includes(c.id) && !cursando.includes(c.id) && cumplePrereqs(c);
+    }
+    return true;
+  };
+
   const getHighlightStatus = (cursoId) => {
-    if (!selectedCurso) return "normal";
+    if (!selectedCurso) {
+      if (isMobileView || filtroEstado === "todos") return "normal";
+      const c = getCursoById(cursoId);
+      return c && !cursoCoincideFiltro(c) ? "dim" : "normal";
+    }
     // En móvil el panel PR reemplaza las flechas: no atenuamos ni bloqueamos ramos.
     if (isMobileView) return "normal";
     const liveSelected = getCursoById(selectedCurso.id) || selectedCurso;
@@ -1074,6 +1107,15 @@ const MallaViewer = ({
     if (isImmediateUnlock) return "unlock";
 
     return "fade";
+  };
+
+  const irASemestre = (numero) => {
+    const cont = scrollRef.current;
+    const el = cont?.querySelector(`[data-semestre="${numero}"]`);
+    if (!cont || !el) return;
+    const left = el.getBoundingClientRect().left - cont.getBoundingClientRect().left + cont.scrollLeft - 24;
+    cont.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+    setSemActivo(numero);
   };
 
   const getStats = () => {
@@ -1175,6 +1217,7 @@ const MallaViewer = ({
     return (
       <motion.div
         key={`sem-${semNumero}`}
+        data-semestre={semNumero}
         className="flex flex-col gap-2.5 w-[80vw] sm:w-[228px] md:w-[236px] shrink-0 snap-center sm:snap-align-none py-1 px-0.5"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1331,6 +1374,33 @@ const MallaViewer = ({
               pct={stats.pct}
             />
 
+            <div
+              role="group"
+              aria-label="Filtrar ramos por estado"
+              className="hidden sm:flex items-center gap-0.5 p-0.5 rounded-lg border border-borderColor bg-bgPrimary/60"
+            >
+              {[
+                ["todos", "Todos"],
+                ["disponible", "Disponibles"],
+                ["cursando", "Cursando"],
+                ["aprobado", "Aprobados"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={filtroEstado === key}
+                  onClick={() => setFiltroEstado(key)}
+                  className={`px-2.5 py-1 rounded-md text-[12px] font-semibold transition-colors duration-150 ${
+                    filtroEstado === key
+                      ? "bg-primary text-[color:var(--on-ink)]"
+                      : "text-textSecondary hover:text-textPrimary"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             {/* Actions: Marcar Hasta, Ocultar Completados, Pantalla Completa */}
             <div className="flex items-center gap-1.5 sm:ml-1 sm:pl-2.5 sm:border-l border-borderColor/60 shrink-0">
               {malla?.totalSemestres > 0 && (
@@ -1479,7 +1549,7 @@ const MallaViewer = ({
             ].map(([key, cls]) => (
               <span
                 key={key}
-                className={`${cls} h-full transition-[width] duration-500 ease-out`}
+                className={`${cls} h-full`}
                 style={{ width: `${((stats[key] || 0) / Math.max(1, stats.aprobados + stats.cursando + stats.pendientes)) * 100}%` }}
               />
             ))}
@@ -1708,11 +1778,9 @@ const MallaViewer = ({
                         transition={{ duration: 0.22, ease: "easeOut" }}
                         layout
                       >
-                        <div className="text-center mb-4 select-none">
-                          <span className="text-[12px] font-bold text-textSecondary/80">Año</span>
-                          <div className="text-lg sm:text-xl font-extrabold text-primary">
-                            {year}
-                          </div>
+                        <div className="flex items-center gap-3 mb-3 px-0.5 select-none">
+                          <span className="t-section text-textPrimary">Año {year}</span>
+                          <span className="h-px flex-1 bg-borderColor/60" aria-hidden />
                         </div>
 
                         <div className="flex gap-4 sm:gap-5 md:gap-6">
@@ -1731,6 +1799,42 @@ const MallaViewer = ({
               </AnimatePresence>
             </div>
           </div>
+
+          {!fullscreenMalla && (
+            <nav
+              aria-label="Ir a un semestre"
+              className="shrink-0 flex items-center gap-1.5 overflow-x-auto px-6 sm:px-10 pt-2"
+            >
+              <span className="text-[12px] font-semibold text-textSecondary mr-1 shrink-0">Semestres</span>
+              {visibleSemesters.map(({ numero, info }) => {
+                const lista =
+                  info.tipo === "comun" ? info.data?.cursos || [] : info.opciones?.[mencionActiva]?.cursos || [];
+                const hechos = lista.filter((c) => aprobados.includes(c.id)).length;
+                const pct = lista.length ? Math.round((hechos / lista.length) * 100) : 0;
+                const activo = semActivo === numero;
+                return (
+                  <button
+                    key={numero}
+                    type="button"
+                    aria-current={activo ? "true" : undefined}
+                    title={`Semestre ${numero}: ${hechos} de ${lista.length} aprobados`}
+                    onClick={() => irASemestre(numero)}
+                    className={`relative shrink-0 min-w-[34px] px-2 py-1 rounded-lg border text-[12px] font-semibold num transition-colors duration-150 overflow-hidden
+                      ${activo
+                        ? "border-primary bg-primary text-[color:var(--on-ink)]"
+                        : "border-borderColor bg-bgSecondary text-textSecondary hover:text-textPrimary hover:border-textSecondary/50"}`}
+                  >
+                    {numero}
+                    <span
+                      aria-hidden
+                      className={`absolute left-0 bottom-0 h-[3px] ${activo ? "bg-[color:var(--on-ink)]/60" : "bg-approved"}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </button>
+                );
+              })}
+            </nav>
+          )}
         </div>
       )}
 

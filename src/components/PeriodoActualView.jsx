@@ -65,6 +65,16 @@ export default function PeriodoActualView({
   mallaData,
 }) {
   const [activeTab, setActiveTab] = useState("cursos");
+  // En pantallas anchas, asignaturas y evaluaciones conviven lado a lado
+  const [isWide, setIsWide] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const onChange = (e) => setIsWide(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
   const [notas, setNotas] = useState({});
   const [proposal, setProposal] = useState(null);
   const [copiedNrc, setCopiedNrc] = useState(null);
@@ -233,7 +243,7 @@ export default function PeriodoActualView({
     <div className="flex flex-col flex-1 min-h-0 w-full">
       <div
         className="flex flex-col flex-1 min-h-0 w-full mx-auto pb-8"
-        style={{ maxWidth: 960, paddingInline: 24 }}
+        style={{ maxWidth: isWide ? 1240 : 960, paddingInline: 24 }}
       >
         {/* Title Header */}
         <div className="flex flex-col gap-1 py-5 mb-1 select-none shrink-0">
@@ -248,7 +258,7 @@ export default function PeriodoActualView({
 
         {/* Tabs */}
         <div
-          className="flex bg-bgSecondary/60 p-0.5 rounded-xl border border-borderColor/40 mb-6 select-none shrink-0"
+          className="flex lg:hidden bg-bgSecondary/60 p-0.5 rounded-xl border border-borderColor/40 mb-6 select-none shrink-0"
           style={{ maxWidth: 280 }}
           role="tablist"
           aria-label="Secciones del periodo"
@@ -285,9 +295,11 @@ export default function PeriodoActualView({
               </p>
             </div>
           ) : (
-            <>
+            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-6 lg:items-start flex flex-col flex-1 min-h-0">
               {/* ── Tab: Asignaturas ── */}
-              {activeTab === "cursos" && (
+              {(activeTab === "cursos" || isWide) && (
+                <div className="flex flex-col gap-3 min-w-0">
+                <h2 className="hidden lg:block t-section text-textPrimary m-0">Asignaturas</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {cursandoDetails.map(({ course, average, evalsCount, gradedCount, section }) => {
                     const sectionLabel = formatSectionLabel(section);
@@ -426,10 +438,13 @@ export default function PeriodoActualView({
                     );
                   })}
                 </div>
+                </div>
               )}
 
               {/* ── Tab: Evaluaciones ── */}
-              {activeTab === "evals" && (
+              {(activeTab === "evals" || isWide) && (
+                <div className="flex flex-col gap-3 min-w-0 flex-1 min-h-0 lg:flex-none lg:sticky lg:top-4">
+                <h2 className="hidden lg:block t-section text-textPrimary m-0">Evaluaciones</h2>
                 <div className="flex flex-col flex-1 min-h-0 bg-bgSecondary/30 border border-borderColor/60 rounded-2xl overflow-hidden p-3.5 sm:p-5 select-none">
                   {evaluationsList.length === 0 ? (
                     <div className="text-center py-12 text-textSecondary text-xs">
@@ -437,7 +452,7 @@ export default function PeriodoActualView({
                     </div>
                   ) : (
                     <div className="flex-1 overflow-y-auto">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3.5">
                         {cursandoDetails.filter(cd => (notas[cd.course.id] || []).length > 0).map(({ course }) => {
                           const evals = notas[course.id] || [];
                           return (
@@ -470,8 +485,9 @@ export default function PeriodoActualView({
                     </div>
                   )}
                 </div>
+                </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

@@ -116,6 +116,9 @@ const Curso = ({
     // Solo desktop (cuando MallaViewer envía "fade"): atenúa y bloquea interacción.
     highlightStyles =
       "opacity-30 scale-[0.98] blur-[0.2px] saturate-50 pointer-events-none";
+  } else if (highlightStatus === "dim") {
+    // Filtro de estado activo: los ramos que no coinciden se apagan pero siguen usables.
+    highlightStyles = "opacity-35 saturate-50";
   } else if (highlightStatus === "selected") {
     highlightStyles =
       "ring-2 ring-primary ring-offset-2 ring-offset-bgPrimary scale-[1.02] shadow-md z-30";
