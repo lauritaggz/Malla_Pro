@@ -7,6 +7,7 @@ import ResumenProgreso from "./components/ResumenProgreso";
 import NotasModal from "./components/NotasModal";
 import OnboardingTour from "./components/OnboardingTour";
 import MobileBottomNav from "./components/MobileBottomNav";
+import SideRail from "./components/SideRail";
 import TutorModule from "./components/tutors/TutorModule";
 import HorarioModal from "./components/HorarioModal";
 import ContactoNuevaMalla from "./components/ContactoNuevaMalla";
@@ -276,6 +277,27 @@ export default function App() {
       )}
 
       {mallaSeleccionada && (
+        <SideRail
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          modoExcepcional={modoExcepcional}
+          setModoExcepcional={setModoExcepcional}
+          excepcionesActivas={excepcionesActivas}
+          mallaSeleccionada={mallaSeleccionada}
+          onVerProgreso={() => setMostrarResumen(true)}
+          onShowTour={() => setMostrarTour(true)}
+          onShowContacto={() => setMostrarContacto(true)}
+          onChangeMalla={() => {
+            if (!confirmLeaveExceptionMode()) return;
+            handleCambiarMalla();
+          }}
+          vistaPrincipal={vistaPrincipal}
+          setVistaPrincipal={setVistaPrincipal}
+          onGuardLeave={confirmLeaveExceptionMode}
+        />
+      )}
+
+      {mallaSeleccionada && (
         <MobileBottomNav
           vistaPrincipal={vistaPrincipal}
           setVistaPrincipal={setVistaPrincipal}
@@ -289,7 +311,8 @@ export default function App() {
           mallaSeleccionada ? "mobile-main-content sm:pb-0 sm:flex-none" : ""
         }`}
         style={{
-          paddingTop: mallaSeleccionada && !isMobileLayout ? navbarHeight + 8 : undefined,
+          paddingTop: mallaSeleccionada && isMobileLayout ? undefined : mallaSeleccionada ? 8 : undefined,
+          paddingLeft: mallaSeleccionada && !isMobileLayout ? 76 : undefined,
         }}
       >
         {mallaSeleccionada && vistaPrincipal === "malla" && (
@@ -390,8 +413,13 @@ export default function App() {
             <TutorModule onVolver={() => setVistaPrincipal("malla")} />
           </main>
         ) : (
-          <main className="flex flex-col flex-1 min-h-0 max-sm:px-0 sm:max-w-7xl sm:mx-auto sm:w-full">
+          <main className="flex flex-col flex-1 min-h-0 max-sm:px-0 sm:max-w-[1680px] sm:mx-auto sm:w-full">
             <MallaViewer
+              onChangeMalla={() => {
+                if (!confirmLeaveExceptionMode()) return;
+                handleCambiarMalla();
+              }}
+              onVerResumen={() => setMostrarResumen(true)}
               mallaSeleccionada={mallaSeleccionada}
               modoExcepcional={modoExcepcional}
               setModoExcepcional={setModoExcepcional}
@@ -408,16 +436,6 @@ export default function App() {
               ocultarCompletados={ocultarCompletados}
               setOcultarCompletados={setOcultarCompletados}
             />
-            
-            {/* BOTÓN CAMBIAR MALLA — solo desktop (móvil: opciones inferiores) */}
-            <div className="hidden sm:flex justify-center pb-8 mt-2">
-              <button
-                onClick={handleCambiarMalla}
-                className="text-xs text-textSecondary/60 hover:text-primary transition-colors px-4 py-2 rounded-full hover:bg-primary/10"
-              >
-                ¿Esta no es tu carrera? Cambiar malla
-              </button>
-            </div>
           </main>
         )}
       </div>

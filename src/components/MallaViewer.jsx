@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDrag } from "@use-gesture/react";
 import {
   Eye, EyeOff, BookMarked, ChevronDown, Maximize2, X, AlertTriangle,
-  Clock, Circle, CheckCircle2, NotebookPen, ListChecks
+  Clock, Circle, CheckCircle2, NotebookPen, ListChecks, GraduationCap, FileText, RefreshCw
 } from "lucide-react";
 import Curso from "./Curso";
 import CourseDrawer from "./CourseDrawer";
@@ -46,7 +46,9 @@ const MallaViewer = ({
   onCursandoArrayChange,
   onAbrirNotas,
   ocultarCompletados,
-  setOcultarCompletados
+  setOcultarCompletados,
+  onChangeMalla,
+  onVerResumen,
 }) => {
   const [malla, setMalla] = useState(null);
   const [loadStatus, setLoadStatus] = useState("loading"); // loading | success | error
@@ -496,6 +498,15 @@ const MallaViewer = ({
     },
     [modoExcepcional, aprobados, excepciones]
   );
+
+  useEffect(() => {
+    if (isMobileView || !selectedCurso || modoExcepcional) return undefined;
+    const onKey = (event) => {
+      if (event.key === "Escape") setSelectedCurso(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMobileView, selectedCurso, modoExcepcional]);
 
   useEffect(() => {
     if (!modoExcepcional) return undefined;
@@ -1256,6 +1267,7 @@ const MallaViewer = ({
     return <p className="text-center text-textSecondary py-4">Cargando malla...</p>;
   }
 
+  const inspectorOpen = !isMobileView && !!selectedCurso && !fullscreenMalla;
   const visibleSemesters = getVisibleSemesters();
   const uni = mallaSeleccionada?.url?.includes("uch") ? "Universidad de Chile" : "UNAB";
 
@@ -1267,7 +1279,7 @@ const MallaViewer = ({
           ? "malla-fullscreen-shell fixed inset-0 z-[9999] flex flex-col bg-bgPrimary text-textPrimary h-[100dvh] w-full"
           : `mobile-malla-shell malla-exception-focus relative px-0 sm:px-4 md:px-8 pb-0 sm:pb-8 flex flex-col flex-1 min-h-0 ${
               modoExcepcional && isMobileView ? "pb-[8.5rem]" : ""
-            }`
+            } ${inspectorOpen ? "sm:pr-[356px] md:pr-[356px]" : ""} transition-[padding] duration-200 ease-out`
       }
     >
       {fullscreenMalla ? (
@@ -1287,12 +1299,28 @@ const MallaViewer = ({
       
       {/* ── Compact Statistics & Title Header ── */}
       {!fullscreenMalla && (
-        <div className="malla-toolbar overflow-visible flex flex-col gap-3 py-3 px-3.5 mb-3 border border-borderColor bg-bgSecondary rounded-xl select-none shrink-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4">
+        <div className="malla-toolbar overflow-visible flex flex-col sm:flex-wrap gap-3 py-3 px-3.5 mb-3 border border-borderColor bg-bgSecondary rounded-xl select-none shrink-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4">
           <div className="flex flex-col min-w-0 sm:shrink-0">
-            <h1 className="t-page text-textPrimary m-0">Mi malla curricular</h1>
-            <p className="text-[12px] text-textSecondary font-medium mt-1 truncate">
-              {/\([A-Za-z\s.]+\)$/.test(malla.nombre) ? malla.nombre : `${malla.nombre} (${uni})`}
-            </p>
+            <h1 className="t-page text-textPrimary m-0 sm:hidden">Mi malla curricular</h1>
+            <h1 className="t-page text-textPrimary m-0 hidden sm:block truncate">
+              {malla.nombre.replace(/\s*\([A-Za-z\s.]+\)$/, "")}
+            </h1>
+            <div className="flex items-center gap-2 mt-1 min-w-0">
+              <p className="text-[12px] text-textSecondary font-medium truncate sm:hidden">
+                {/\([A-Za-z\s.]+\)$/.test(malla.nombre) ? malla.nombre : `${malla.nombre} (${uni})`}
+              </p>
+              <p className="hidden sm:block text-[12px] text-textSecondary font-medium truncate">{uni}</p>
+              {onChangeMalla && (
+                <button
+                  type="button"
+                  onClick={onChangeMalla}
+                  className="hidden sm:inline-flex items-center gap-1 text-[12px] font-semibold text-textSecondary hover:text-textPrimary underline-offset-2 hover:underline transition-colors"
+                >
+                  <RefreshCw className="w-3 h-3" aria-hidden />
+                  Cambiar malla
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 text-xs text-textSecondary font-semibold sm:justify-end min-w-0">
@@ -1389,6 +1417,33 @@ const MallaViewer = ({
               )}
 
               <button
+                type="button"
+                onClick={() => setModoExcepcional?.(!modoExcepcional)}
+                aria-pressed={modoExcepcional}
+                className={`hidden sm:flex btn-interactive items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold border transition-all duration-200 cursor-pointer
+                  ${modoExcepcional
+                    ? "bg-exception/15 text-exception border-exception/45"
+                    : "bg-bgPrimary/60 text-textSecondary border-borderColor hover:text-exception hover:border-exception/40"}
+                `}
+                title="Aprobar ramos sin cumplir prerrequisitos"
+              >
+                <GraduationCap className="w-3.5 h-3.5" aria-hidden />
+                <span className="hidden md:inline">Modo excepcional</span>
+              </button>
+
+              {onVerResumen && (
+                <button
+                  type="button"
+                  onClick={onVerResumen}
+                  className="hidden sm:flex btn-interactive items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold border border-borderColor bg-bgPrimary/60 text-textSecondary hover:text-primary hover:border-primary/40 transition-all cursor-pointer"
+                  title="Ver resumen de progreso"
+                >
+                  <FileText className="w-3.5 h-3.5" aria-hidden />
+                  <span className="hidden md:inline">Resumen</span>
+                </button>
+              )}
+
+              <button
                 onClick={() => setOcultarCompletados(!ocultarCompletados)}
                 className={`btn-interactive flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold border transition-all duration-200 cursor-pointer
                   ${ocultarCompletados
@@ -1411,6 +1466,23 @@ const MallaViewer = ({
                 <span className="hidden md:inline">Pantalla completa</span>
               </button>
             </div>
+          </div>
+
+          <div
+            className="hidden sm:flex basis-full w-full h-1.5 rounded-full overflow-hidden bg-ink/10"
+            role="img"
+            aria-label={`${stats.aprobados} aprobados, ${stats.cursando} cursando, ${stats.pendientes} pendientes`}
+          >
+            {[
+              ["aprobados", "bg-approved"],
+              ["cursando", "bg-cursando"],
+            ].map(([key, cls]) => (
+              <span
+                key={key}
+                className={`${cls} h-full transition-[width] duration-500 ease-out`}
+                style={{ width: `${((stats[key] || 0) / Math.max(1, stats.aprobados + stats.cursando + stats.pendientes)) * 100}%` }}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -1752,6 +1824,32 @@ const MallaViewer = ({
         </div>,
         document.body
       )}
+
+      <AnimatePresence>
+        {!isMobileView && selectedCurso && !fullscreenMalla && (
+          <CourseDrawer
+            key="inspector"
+            docked
+            isOpen
+            onClose={() => setSelectedCurso(null)}
+            curso={getCursoById(selectedCurso.id) || selectedCurso}
+            aprobado={aprobados.includes(selectedCurso.id)}
+            excepcional={excepciones.includes(selectedCurso.id)}
+            disponible={cumplePrereqs(selectedCurso)}
+            modoExcepcional={false}
+            enCurso={cursando.includes(selectedCurso.id)}
+            aprobar={() => aprobar(selectedCurso.id)}
+            marcarExcepcional={() => marcarExcepcional(selectedCurso.id)}
+            toggleCursando={() => toggleCursando(selectedCurso.id)}
+            onBlockedAttempt={() => triggerBlockedShake(selectedCurso.id)}
+            onAbrirNotas={(c) => onAbrirNotas?.(c, cursando.includes(c.id), aprobados.includes(c.id))}
+            getCursoById={getCursoById}
+            aprobados={aprobados}
+            excepciones={excepciones}
+            allCursos={getAllCursos()}
+          />
+        )}
+      </AnimatePresence>
 
       <CourseDrawer
         isOpen={courseDrawerOpen && !!selectedCurso}

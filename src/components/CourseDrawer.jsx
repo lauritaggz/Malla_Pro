@@ -1,5 +1,6 @@
 import React from "react";
-import { CheckCircle2, Circle, Clock, HelpCircle, Lock, BookOpen, ChevronRight, NotebookPen, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Lock, BookOpen, ChevronRight, NotebookPen, AlertTriangle, X } from "lucide-react";
+import { motion } from "framer-motion";
 import DrawerPanel from "./DrawerPanel";
 
 export default function CourseDrawer({
@@ -20,6 +21,7 @@ export default function CourseDrawer({
   aprobados = [],
   excepciones = [],
   allCursos = [],
+  docked = false,
 }) {
   if (!curso) return null;
 
@@ -88,148 +90,183 @@ export default function CourseDrawer({
       codigo: c.codigo,
     }));
 
+  const subtitle = `${curso.codigo} · ${curso.sct || 0} SCT${curso.semestre ? ` · Semestre ${curso.semestre}` : ""}`;
+
+  const body = (
+    <div className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-6 text-sm">
+      <p className={`text-[12px] text-textSecondary leading-relaxed -mt-2 sm:hidden ${docked ? "hidden" : ""}`}>
+        En móvil, el botón <span className="font-bold text-textPrimary">PR</span> abre este panel
+        con prerrequisitos y ramos que desbloquea. Toca la tarjeta para marcar aprobado;
+        mantén pulsado para cursando.
+      </p>
+      
+      {/* State selection */}
+      <div className="flex flex-col gap-2">
+        <label htmlFor="course-status-select" className="text-[12px] font-bold text-textSecondary ">
+          Estado de la asignatura
+        </label>
+        <div className="relative">
+          <select
+            id="course-status-select"
+            value={currentStatus}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-borderColor bg-bgPrimary text-textPrimary text-xs font-semibold outline-none cursor-pointer appearance-none hover:border-primary/45 transition-colors focus:ring-2 focus:ring-primary/25"
+          >
+            <option value="pendiente">Pendiente</option>
+            {isLocked && !enCurso ? (
+              <option value="cursando" disabled>
+                Cursando (Bloqueado por prerrequisitos)
+              </option>
+            ) : (
+              <option value="cursando">Cursando actualmente</option>
+            )}
+            {(isLocked && !aprobado) ? (
+              <option value="aprobado" disabled>
+                Aprobada (Bloqueado por prerrequisitos)
+              </option>
+            ) : (
+              <option value="aprobado">Aprobada</option>
+            )}
+          </select>
+          <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-textSecondary">
+            <ChevronRight className="w-4 h-4 rotate-90" />
+          </div>
+        </div>
+
+        {/* Locked Warnings & Exceptional mode option */}
+        {!disponible && currentStatus === "pendiente" && (
+          <div className="mt-1.5 p-3 rounded-xl bg-exception/10 border border-exception/20 text-exception text-xs flex gap-2.5 items-start">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="flex flex-col gap-1.5 leading-snug">
+              <span>Esta asignatura está bloqueada por prerrequisitos.</span>
+              {modoExcepcional && (
+                <button
+                  onClick={marcarExcepcional}
+                  className={`text-[12px] font-bold px-2 py-1 rounded bg-exception text-bgPrimary hover:brightness-110 active:scale-95 transition-all self-start ${excepcional ? "bg-exception shadow-sm" : ""}`}
+                >
+                  {excepcional ? "Desmarcar Aprobación Excepcional" : "Forzar Aprobación Excepcional"}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Action: Open notes/grades */}
+      {(enCurso || aprobado || excepcional) && (
+        <button
+          onClick={() => onAbrirNotas?.(curso)}
+          className="w-full py-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/30 transition-all font-semibold flex items-center justify-center gap-2"
+        >
+          <NotebookPen className="w-4 h-4" />
+          <span>Gestionar notas y calificaciones</span>
+        </button>
+      )}
+
+      {/* Prerequisites Section */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[12px] font-bold text-textSecondary ">
+            Prerrequisitos
+          </span>
+          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-exception ">
+            <span className="w-2 h-2 rounded-full bg-exception" />
+            Requeridos
+          </span>
+        </div>
+        {prereqCursos.length === 0 ? (
+          <p className="text-xs text-textSecondary italic py-1 px-0.5">Esta asignatura no tiene prerrequisitos.</p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {prereqCursos.map((pre) => (
+              <div
+                key={pre.id}
+                className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors
+                  ${pre.cumplido
+                    ? "bg-approved/5 border-approved/15 text-approved font-semibold"
+                    : "bg-exception/5 border-exception/20 text-exception "}`}
+              >
+                <span className="truncate pr-4">{pre.nombre} ({pre.codigo})</span>
+                {pre.cumplido ? (
+                  <CheckCircle2 className="w-4 h-4 text-approved flex-shrink-0" />
+                ) : (
+                  <Lock className="w-3.5 h-3.5 text-exception flex-shrink-0" />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Unlocks Section */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[12px] font-bold text-textSecondary ">
+            Asignaturas que desbloquea
+          </span>
+          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-approved ">
+            <span className="w-2 h-2 rounded-full bg-approved" />
+            Desbloquea
+          </span>
+        </div>
+        {desbloqueaCursos.length === 0 ? (
+          <p className="text-xs text-textSecondary italic py-1 px-0.5">No desbloquea asignaturas posteriores.</p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {desbloqueaCursos.map((des) => (
+              <div
+                key={des.id}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl border border-approved/20 bg-approved/5 text-xs text-textPrimary"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-approved " />
+                <span className="truncate">{des.nombre} ({des.codigo})</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
+  );
+
+  if (docked) {
+    return (
+      <motion.aside
+        initial={{ opacity: 0, x: 28 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 28 }}
+        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+        aria-label={`Detalle de ${curso.nombre}`}
+        className="hidden sm:flex fixed top-0 right-0 bottom-0 z-[70] w-[340px] flex-col border-l border-borderColor/60 bg-bgSecondary"
+      >
+        <header className="flex items-start justify-between gap-3 border-b border-borderColor/60 px-5 py-4">
+          <div className="min-w-0">
+            <h2 className="t-section text-textPrimary m-0 leading-snug">{curso.nombre}</h2>
+            <p className="mt-1 text-[12px] text-textSecondary num">{subtitle}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar detalle"
+            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-textSecondary hover:text-textPrimary hover:bg-borderColor/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          >
+            <X className="w-4 h-4" aria-hidden />
+          </button>
+        </header>
+        {body}
+      </motion.aside>
+    );
+  }
+
   return (
     <DrawerPanel
       isOpen={isOpen}
       onClose={onClose}
       title={curso.nombre}
-      subtitle={`${curso.codigo} · ${curso.sct || 0} SCT · Semestre ${curso.semestre || "S/N"}`}
+      subtitle={subtitle}
       width="max-w-md"
     >
-      <div className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-6 text-sm">
-        <p className="text-[12px] text-textSecondary leading-relaxed -mt-2 sm:hidden">
-          En móvil, el botón <span className="font-bold text-textPrimary">PR</span> abre este panel
-          con prerrequisitos y ramos que desbloquea. Toca la tarjeta para marcar aprobado;
-          mantén pulsado para cursando.
-        </p>
-        
-        {/* State selection */}
-        <div className="flex flex-col gap-2">
-          <label htmlFor="course-status-select" className="text-[12px] font-bold text-textSecondary ">
-            Estado de la asignatura
-          </label>
-          <div className="relative">
-            <select
-              id="course-status-select"
-              value={currentStatus}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-borderColor bg-bgPrimary text-textPrimary text-xs font-semibold outline-none cursor-pointer appearance-none hover:border-primary/45 transition-colors focus:ring-2 focus:ring-primary/25"
-            >
-              <option value="pendiente">Pendiente</option>
-              {isLocked && !enCurso ? (
-                <option value="cursando" disabled>
-                  Cursando (Bloqueado por prerrequisitos)
-                </option>
-              ) : (
-                <option value="cursando">Cursando actualmente</option>
-              )}
-              {(isLocked && !aprobado) ? (
-                <option value="aprobado" disabled>
-                  Aprobada (Bloqueado por prerrequisitos)
-                </option>
-              ) : (
-                <option value="aprobado">Aprobada</option>
-              )}
-            </select>
-            <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-textSecondary">
-              <ChevronRight className="w-4 h-4 rotate-90" />
-            </div>
-          </div>
-
-          {/* Locked Warnings & Exceptional mode option */}
-          {!disponible && currentStatus === "pendiente" && (
-            <div className="mt-1.5 p-3 rounded-xl bg-exception/10 border border-exception/20 text-exception text-xs flex gap-2.5 items-start">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-              <div className="flex flex-col gap-1.5 leading-snug">
-                <span>Esta asignatura está bloqueada por prerrequisitos.</span>
-                {modoExcepcional && (
-                  <button
-                    onClick={marcarExcepcional}
-                    className={`text-[12px] font-bold px-2 py-1 rounded bg-exception text-bgPrimary hover:brightness-110 active:scale-95 transition-all self-start ${excepcional ? "bg-exception shadow-sm" : ""}`}
-                  >
-                    {excepcional ? "Desmarcar Aprobación Excepcional" : "Forzar Aprobación Excepcional"}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Action: Open notes/grades */}
-        {(enCurso || aprobado || excepcional) && (
-          <button
-            onClick={() => onAbrirNotas?.(curso)}
-            className="w-full py-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/30 transition-all font-semibold flex items-center justify-center gap-2"
-          >
-            <NotebookPen className="w-4 h-4" />
-            <span>Gestionar notas y calificaciones</span>
-          </button>
-        )}
-
-        {/* Prerequisites Section */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[12px] font-bold text-textSecondary ">
-              Prerrequisitos
-            </span>
-            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-exception ">
-              <span className="w-2 h-2 rounded-full bg-exception" />
-              Requeridos
-            </span>
-          </div>
-          {prereqCursos.length === 0 ? (
-            <p className="text-xs text-textSecondary italic py-1 px-0.5">Esta asignatura no tiene prerrequisitos.</p>
-          ) : (
-            <div className="flex flex-col gap-1.5">
-              {prereqCursos.map((pre) => (
-                <div
-                  key={pre.id}
-                  className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors
-                    ${pre.cumplido
-                      ? "bg-approved/5 border-approved/15 text-approved font-semibold"
-                      : "bg-exception/5 border-exception/20 text-exception "}`}
-                >
-                  <span className="truncate pr-4">{pre.nombre} ({pre.codigo})</span>
-                  {pre.cumplido ? (
-                    <CheckCircle2 className="w-4 h-4 text-approved flex-shrink-0" />
-                  ) : (
-                    <Lock className="w-3.5 h-3.5 text-exception flex-shrink-0" />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Unlocks Section */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[12px] font-bold text-textSecondary ">
-              Asignaturas que desbloquea
-            </span>
-            <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-approved ">
-              <span className="w-2 h-2 rounded-full bg-approved" />
-              Desbloquea
-            </span>
-          </div>
-          {desbloqueaCursos.length === 0 ? (
-            <p className="text-xs text-textSecondary italic py-1 px-0.5">No desbloquea asignaturas posteriores.</p>
-          ) : (
-            <div className="flex flex-col gap-1.5">
-              {desbloqueaCursos.map((des) => (
-                <div
-                  key={des.id}
-                  className="flex items-center gap-2.5 p-2.5 rounded-xl border border-approved/20 bg-approved/5 text-xs text-textPrimary"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-approved " />
-                  <span className="truncate">{des.nombre} ({des.codigo})</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-      </div>
+      {body}
     </DrawerPanel>
   );
 }

@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  GraduationCap, Moon, Sun, FileText, HelpCircle,
-  CalendarDays, ChevronDown, BookMarked, Heart, MessageCircle, CalendarRange,
-  ChevronUp, Settings, ArrowLeft, Shield, Scale, Instagram
+  GraduationCap, CalendarDays, ChevronDown, BookMarked, MessageCircle, CalendarRange,
+  ChevronUp, Settings, ArrowLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import GooeyNav from "./GooeyNav";
+import AppSettingsPanel from "./AppSettingsPanel";
 
 function NavBtn({ onClick, label, active, children, amber }) {
   return (
@@ -150,7 +150,7 @@ export default function Navbar({
         ref={navRef}
         id="app-navbar"
         className={`
-          navbar-shell
+          navbar-shell sm:hidden
           fixed top-0 left-0 right-0 z-[80]
           pt-[env(safe-area-inset-top,0px)]
           bg-bgSecondary/90 backdrop-blur-xl
@@ -253,115 +253,18 @@ export default function Navbar({
                     transition={{ duration: 0.12 }}
                     className="absolute right-0 top-full mt-2 w-72 bg-bgSecondary border border-borderColor rounded-2xl shadow-xl z-50 p-4"
                   >
-                    <div className="flex flex-col gap-3.5">
-                      {/* Sub-Header */}
-                      <div className="pb-2.5 border-b border-borderColor/60 select-none">
-                        <p className="text-xs font-bold text-textPrimary leading-snug truncate">
-                          {mallaSeleccionada?.nombre || "Malla Pro"}
-                        </p>
-                        <p className="text-[12px] font-bold text-textSecondary/80 mt-0.5 leading-none">
-                          {uni}
-                        </p>
-                      </div>
-
-                      {/* Main Actions */}
-                      <div className="flex flex-col gap-1">
-                        <button
-                          onClick={() => {
-                            if (onGuardLeave && !onGuardLeave()) return;
-                            onVerProgreso?.();
-                            setSettingsOpen(false);
-                          }}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-textSecondary" />
-                          <span>Resumen de progreso</span>
-                        </button>
-                      </div>
-
-                      {/* Appearance settings */}
-                      <div className="pt-2.5 border-t border-borderColor/60">
-                        <p className="text-[12px] font-bold text-textSecondary/90 px-2 mb-2 select-none">Apariencia</p>
-                        
-                        {/* DarkMode Toggle Switch */}
-                        <button
-                          onClick={() => setDarkMode(!darkMode)}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center justify-between"
-                        >
-                          <span className="flex items-center gap-2">
-                            {darkMode ? <Moon className="w-3.5 h-3.5 text-textSecondary" /> : <Sun className="w-3.5 h-3.5 text-textSecondary" />}
-                            <span>Modo oscuro</span>
-                          </span>
-                          <div className={`w-7.5 h-4 rounded-full p-0.5 transition-colors duration-200 flex items-center ${darkMode ? "bg-primary" : "bg-borderColor"}`}>
-                            <div className={`w-3 h-3 rounded-full shadow-sm transition-transform duration-200 ${darkMode ? "bg-bgPrimary translate-x-3.5" : "bg-bgSecondary translate-x-0"}`} />
-                          </div>
-                        </button>
-                      </div>
-
-                      {/* Configurations */}
-                      <div className="pt-2.5 border-t border-borderColor/60 flex flex-col gap-1">
-                        <p className="text-[12px] font-bold text-textSecondary/90 px-2 mb-2 select-none">Configuración</p>
-
-                        <button
-                          onClick={() => { onShowTour?.(); setSettingsOpen(false); }}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2"
-                        >
-                          <HelpCircle className="w-3.5 h-3.5 text-textSecondary" />
-                          <span>Ver guía interactiva</span>
-                        </button>
-
-                        <button
-                          onClick={() => { onShowContacto?.(); setSettingsOpen(false); }}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2"
-                        >
-                          <Heart className="w-3.5 h-3.5 text-textSecondary" />
-                          <span>Sugerir carrera</span>
-                        </button>
-
-                        {onChangeMalla && (
-                          <button
-                            onClick={() => { onChangeMalla(); setSettingsOpen(false); }}
-                            className="w-full text-left px-2.5 py-1.5 text-xs font-bold text-danger hover:bg-danger/10 rounded-xl transition-colors flex items-center gap-2 mt-1.5 border border-danger/10"
-                          >
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            <span>Cambiar de malla</span>
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Información legal / institucional */}
-                      <div className="pt-2.5 border-t border-borderColor/60 flex flex-col gap-0.5">
-                        <p className="text-[12px] font-bold text-textSecondary/90 px-2 mb-1.5 select-none">
-                          Información
-                        </p>
-                        <Link
-                          to="/privacidad"
-                          onClick={() => setSettingsOpen(false)}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                        >
-                          <Shield className="w-3.5 h-3.5 opacity-70" aria-hidden />
-                          <span>Privacidad</span>
-                        </Link>
-                        <Link
-                          to="/terminos"
-                          onClick={() => setSettingsOpen(false)}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                        >
-                          <Scale className="w-3.5 h-3.5 opacity-70" aria-hidden />
-                          <span>Términos de uso</span>
-                        </Link>
-                        <a
-                          href="https://www.instagram.com/mallapro.cl_/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => setSettingsOpen(false)}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-medium text-textSecondary hover:text-textPrimary hover:bg-bgPrimary/60 rounded-xl transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                        >
-                          <Instagram className="w-3.5 h-3.5 opacity-70" aria-hidden />
-                          <span>@mallapro.cl_</span>
-                        </a>
-                      </div>
-                    </div>
+                    <AppSettingsPanel
+                      mallaSeleccionada={mallaSeleccionada}
+                      uni={uni}
+                      darkMode={darkMode}
+                      setDarkMode={setDarkMode}
+                      onGuardLeave={onGuardLeave}
+                      onVerProgreso={onVerProgreso}
+                      onShowTour={onShowTour}
+                      onShowContacto={onShowContacto}
+                      onChangeMalla={onChangeMalla}
+                      onClose={() => setSettingsOpen(false)}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -384,19 +287,12 @@ export default function Navbar({
         <button
           type="button"
           onClick={handleToggleMinimize}
-          className="fixed top-2.5 left-1/2 -translate-x-1/2 z-[85] bg-primary text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-[0_4px_16px_rgba(0,0,0,0.18)] flex items-center gap-1.5 hover:brightness-110 active:scale-95 transition-[transform,filter]"
+          className="sm:hidden fixed top-2.5 left-1/2 -translate-x-1/2 z-[85] bg-primary text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-[0_4px_16px_rgba(0,0,0,0.18)] flex items-center gap-1.5 hover:brightness-110 active:scale-95 transition-[transform,filter]"
         >
           <ChevronDown className="w-3.5 h-3.5" />
           <span>Expandir Menú</span>
         </button>
       )}
     </>
-  );
-}
-
-// Simple placeholder icon refresh
-function RefreshCw({ className }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 3h5v5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
   );
 }
