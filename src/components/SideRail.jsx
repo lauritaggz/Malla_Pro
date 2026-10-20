@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, BookMarked, CalendarDays, CalendarRange, GraduationCap, Settings } from "lucide-react";
+import { ArrowLeft, BookMarked, CalendarDays, CalendarRange, GraduationCap, MessageCircle, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppSettingsPanel from "./AppSettingsPanel";
 
@@ -98,6 +98,11 @@ export default function SideRail({
         <RailButton label="Horario" active={vistaPrincipal === "toma-de-ramos"} onClick={() => go("toma-de-ramos", "/programacion-academica")}>
           <CalendarRange className="w-5 h-5" aria-hidden />
         </RailButton>
+        {vistaPrincipal === "tutorias" && (
+          <RailButton label="Tutorías" active onClick={() => {}}>
+            <MessageCircle className="w-5 h-5" aria-hidden />
+          </RailButton>
+        )}
       </nav>
 
       <div className="mt-auto flex flex-col items-center gap-1">

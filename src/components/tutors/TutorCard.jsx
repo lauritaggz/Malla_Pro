@@ -2,111 +2,91 @@ import { motion } from "framer-motion";
 import { MessageCircle, Star } from "lucide-react";
 import { averageRating, waLink } from "../../data/tutorsStorage";
 
-function StarsRow({ value, max = 5 }) {
-  const full = Math.round(value);
-  return (
-    <div className="flex items-center gap-0.5" aria-label={`${value.toFixed(1)} de 5 estrellas`}>
-      {Array.from({ length: max }).map((_, i) => (
-        <Star
-          key={i}
-          className={`w-3.5 h-3.5 ${i < full ? "text-exception fill-exception" : "text-textSecondary/40"}`}
-        />
-      ))}
-      <span className="text-[12px] text-textSecondary ml-1.5 font-bold">
-        {value > 0 ? value.toFixed(1) : "—"}
-      </span>
-    </div>
-  );
+function formatAvg(value) {
+  return value > 0 ? value.toFixed(1).replace(".", ",") : "—";
 }
 
-export default function TutorCard({ tutor, filterSubject, onSimulateComplete }) {
+/**
+ * Fila de tutor. En la demo el contacto queda desactivado: los teléfonos son de ejemplo.
+ */
+export default function TutorCard({ tutor, filterSubject, onSimulateComplete, demo = true }) {
   const avg = averageRating(tutor.ratings || []);
+  const ratingCount = (tutor.ratings || []).length;
+  const subjects = tutor.asignaturas || [];
   const primarySubject =
-    tutor.asignaturas?.find((a) =>
-      a.toLowerCase().includes((filterSubject || "").toLowerCase())
-    ) || tutor.asignaturas?.[0] || "Asignatura";
+    subjects.find((a) => a.toLowerCase().includes((filterSubject || "").toLowerCase())) ||
+    subjects[0] ||
+    "Asignatura";
+  const shown = subjects.slice(0, 2);
+  const extra = subjects.length - shown.length;
 
-  const wa = tutor.disponible
-    ? waLink(tutor.telefono, primarySubject)
-    : null;
+  const wa = !demo && tutor.disponible ? waLink(tutor.telefono, primarySubject) : null;
+  const price =
+    tutor.precioPorSesion != null && tutor.precioPorSesion > 0
+      ? `$${Number(tutor.precioPorSesion).toLocaleString("es-CL")} por sesión`
+      : "Precio a convenir";
 
   return (
     <motion.article
       layout
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="rounded-2xl border border-borderColor bg-bgSecondary p-5 flex flex-col gap-4 text-left hover:border-primary/35 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+      className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col">
-          <h3 className="font-bold text-textPrimary text-sm leading-snug">{tutor.nombre}</h3>
-          <span className="text-[12px] text-textSecondary mt-1 font-semibold">
-            {tutor.disponible ? "Disponible" : "No disponible"}
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <h3 className="m-0 text-[15px] font-semibold leading-snug text-textPrimary">{tutor.nombre}</h3>
+          <span className="inline-flex items-center gap-1.5 text-[12px] text-textSecondary">
+            <span
+              className={`h-2 w-2 rounded-full ${tutor.disponible ? "bg-approved" : "bg-textSecondary/40"}`}
+              aria-hidden
+            />
+            {tutor.disponible ? "Disponible" : "Pausado"}
           </span>
         </div>
-        {!tutor.disponible && (
-          <span className="text-[12px] font-extrabold px-2 py-0.5 rounded-md bg-textSecondary/15 text-textSecondary select-none">
-            Pausado
-          </span>
-        )}
+        <p className="mt-1 text-[13px] leading-snug text-textSecondary">
+          {shown.join(", ")}
+          {extra > 0 && <span className="num"> +{extra}</span>}
+        </p>
+        <p className="mt-1.5 text-[13px] text-textSecondary">
+          <span className="num text-textPrimary">{formatAvg(avg)}</span>
+          {ratingCount > 0 && <span className="num"> ({ratingCount})</span>}
+          <span className="mx-1.5 text-borderColor">·</span>
+          {price}
+        </p>
       </div>
 
-      {/* Asignaturas */}
-      <div className="flex flex-wrap gap-1.5 py-1">
-        {(tutor.asignaturas || []).map((a) => (
-          <span
-            key={a}
-            className="text-[12px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20"
-          >
-            {a}
-          </span>
-        ))}
-      </div>
-
-      {/* Ratings & Price */}
-      <div className="flex items-center justify-between gap-2 select-none border-t border-borderColor/40 pt-3">
-        <StarsRow value={avg} />
-        {tutor.precioPorSesion != null && tutor.precioPorSesion > 0 ? (
-          <span className="text-xs font-bold text-textPrimary">
-            ${Number(tutor.precioPorSesion).toLocaleString("es-CL")} / sesión
-          </span>
-        ) : (
-          <span className="text-xs text-textSecondary italic">Precio a convenir</span>
-        )}
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex flex-col gap-2 mt-2 w-full">
+      <div className="flex shrink-0 items-center gap-2">
         {wa ? (
           <a
             href={wa}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-approved hover:bg-approved text-bgPrimary text-xs font-semibold shadow-sm transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-[color:var(--on-ink)] transition-[filter,transform] hover:brightness-110 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>Solicitar tutoría</span>
+            <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+            Solicitar tutoría
           </a>
         ) : (
           <button
             type="button"
             disabled
-            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-textSecondary/20 text-textSecondary text-xs font-semibold cursor-not-allowed"
+            title={demo ? "En la demo no se abre WhatsApp" : "Este tutor no está disponible"}
+            className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-dashed border-borderColor px-3 py-2 text-[13px] font-medium text-textSecondary"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>No disponible</span>
+            <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+            {demo ? "Contactar (demo)" : "No disponible"}
           </button>
         )}
         <button
           type="button"
           onClick={() => onSimulateComplete(tutor)}
-          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl border border-borderColor bg-bgPrimary/30 hover:bg-primary/10 text-textSecondary hover:text-primary text-xs font-bold transition-all"
+          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-medium text-textSecondary transition-colors hover:bg-borderColor/40 hover:text-textPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
         >
-          <Star className="w-3.5 h-3.5" />
-          <span>Evaluar tutor</span>
+          <Star className="h-3.5 w-3.5" aria-hidden />
+          Evaluar
         </button>
       </div>
     </motion.article>

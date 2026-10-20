@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { UserPlus } from "lucide-react";
 import DrawerPanel from "../DrawerPanel";
 import { registerTutor } from "../../data/tutorsStorage";
 
@@ -91,37 +89,29 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
         className="flex flex-col flex-1 min-h-0"
       >
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-2 text-primary"
-          >
-            <UserPlus className="w-5 h-5 flex-shrink-0" />
-            <p className="text-xs text-textSecondary leading-snug">
-              Aparecerás en la búsqueda cuando coincida una asignatura que dominas.
-            </p>
-          </motion.div>
+          <p className="m-0 text-[13px] leading-snug text-textSecondary">
+            Aparecerás en la búsqueda cuando coincida una asignatura que dominas. En la demo, nadie más verá tu registro.
+          </p>
 
           <div>
-            <label className="block text-xs font-semibold text-textSecondary mb-1">Nombre completo *</label>
+            <label className="block text-[13px] font-medium text-textPrimary mb-1.5">Nombre completo</label>
             <input
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               className="w-full rounded-xl border border-borderColor bg-bgPrimary px-3 py-2.5 text-sm text-textPrimary outline-none focus:ring-2 focus:ring-primary/40"
-              placeholder="Ej. Ana Pérez"
+              placeholder="Ana Pérez" aria-required="true"
               autoComplete="name"
             />
             {errors.nombre && <p className="text-[12px] text-danger mt-1">{errors.nombre}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-textSecondary mb-1">WhatsApp (teléfono) *</label>
+            <label className="block text-[13px] font-medium text-textPrimary mb-1.5">WhatsApp (teléfono)</label>
             <input
               value={telefono}
               onChange={(e) => setTelefono(e.target.value)}
               className="w-full rounded-xl border border-borderColor bg-bgPrimary px-3 py-2.5 text-sm text-textPrimary outline-none focus:ring-2 focus:ring-primary/40"
-              placeholder="+56 9 1234 5678"
+              placeholder="+56 9 1234 5678" aria-required="true"
               inputMode="tel"
               autoComplete="tel"
             />
@@ -129,19 +119,19 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-textSecondary mb-1">Asignaturas que dominas *</label>
+            <label className="block text-[13px] font-medium text-textPrimary mb-1.5">Asignaturas que dominas</label>
             <textarea
               value={asignaturasText}
               onChange={(e) => setAsignaturasText(e.target.value)}
               rows={4}
               className="w-full rounded-xl border border-borderColor bg-bgPrimary px-3 py-2.5 text-sm text-textPrimary outline-none focus:ring-2 focus:ring-primary/40 resize-none"
-              placeholder="Ej. Cálculo I, Física general, Programación"
+              placeholder="Cálculo I, Física general, Programación" aria-required="true"
             />
             {errors.asignaturas && <p className="text-[12px] text-danger mt-1">{errors.asignaturas}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-textSecondary mb-1">Precio por sesión (opcional)</label>
+            <label className="block text-[13px] font-medium text-textPrimary mb-1.5">Precio por sesión (opcional)</label>
             <input
               value={precio}
               onChange={(e) => setPrecio(e.target.value)}
@@ -169,8 +159,8 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
               }`}
             >
               <span
-                className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                  disponible ? "translate-x-5" : "translate-x-0"
+                className={`absolute top-1 left-1 w-5 h-5 rounded-full shadow transition-transform ${
+                  disponible ? "translate-x-5 bg-[color:var(--on-ink)]" : "translate-x-0 bg-textSecondary"
                 }`}
               />
             </button>
@@ -187,7 +177,7 @@ export default function TutorForm({ isOpen, onClose, onSaved }) {
           </button>
           <button
             type="submit"
-            className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:brightness-110 transition-all"
+            className="flex-1 py-2.5 rounded-xl bg-primary text-[color:var(--on-ink)] text-sm font-semibold hover:brightness-110 transition-[filter,transform] active:scale-[0.98]"
           >
             Guardar
           </button>
