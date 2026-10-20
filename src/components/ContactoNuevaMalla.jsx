@@ -1,241 +1,150 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  X, Heart, Send, Mail, Users, CheckCircle2, ArrowRight,
-  LogIn, FileDown, MousePointerClick, Paperclip, PartyPopper,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { X, Mail, Check, Copy } from "lucide-react";
 
 const MAIL = "mallaprocl@gmail.com";
 
 const STEPS = [
   {
-    num: 1,
-    icon: <LogIn className="w-5 h-5" />,
     title: "Ingresa a Toma de Ramos UNAB",
     desc: "Inicia sesión con tus credenciales institucionales.",
   },
   {
-    num: 2,
-    icon: <MousePointerClick className="w-5 h-5" />,
     title: "Abre tu malla curricular",
     desc: 'Haz clic en "Ver Malla Curricular" dentro del portal.',
   },
   {
-    num: 3,
-    icon: <FileDown className="w-5 h-5" />,
-    title: "Guarda como PDF",
-    desc: 'Con tu malla visible, haz clic derecho y selecciona "Guardar como PDF" o "Descargar como PDF". Guarda el archivo con el nombre de tu carrera.',
+    title: "Guarda tu malla como PDF",
+    desc: 'Con la malla visible, haz clic derecho y elige "Guardar como PDF" o "Descargar como PDF". Nombra el archivo con tu carrera.',
   },
   {
-    num: 4,
-    icon: <Paperclip className="w-5 h-5" />,
     title: "Envíanos el PDF",
-    desc: "Manda ese archivo al correo mallaprocl@gmail.com. El botón de abajo te abre el correo con el asunto prellenado, solo adjunta el PDF y envía.",
-  },
-  {
-    num: 5,
-    icon: <PartyPopper className="w-5 h-5" />,
-    title: "¡Listo!",
-    desc: "Una vez recibido, en algunos días tu malla estará disponible en Malla Pro para que todos la puedan usar.",
+    desc: "El botón de abajo abre tu correo con el asunto listo. Adjunta el archivo y envía.",
   },
 ];
 
+const MAILTO_HREF = `mailto:${MAIL}?subject=${encodeURIComponent("Nueva malla: [Carrera] — UNAB")}&body=${encodeURIComponent(
+  "Hola Malla Pro,\n\nQuiero enviar la malla de mi carrera.\n\nCarrera: \n\nAdjunto el PDF de mi malla curricular.\n\nGracias."
+)}`;
+
 export default function ContactoNuevaMalla({ isOpen, onClose }) {
+  const reduceMotion = useReducedMotion();
   const [copied, setCopied] = useState(false);
 
-  const copyMail = () => {
-    navigator.clipboard.writeText(MAIL).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2200);
-    });
-  };
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
-  const mailtoHref = `mailto:${MAIL}?subject=Nueva%20malla%3A%20%5BCarrera%5D%20%E2%80%94%20UNAB&body=Hola%20Malla%20Pro%2C%0A%0AQuiero%20enviar%20la%20malla%20de%20mi%20carrera.%0A%0ACarrera%3A%20%0A%0AAdjunto%20el%20PDF%20de%20mi%20malla%20curricular.%0A%0A%C2%A1Gracias!`;
+  const copyMail = async () => {
+    try {
+      await navigator.clipboard.writeText(MAIL);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Sin permiso de portapapeles: el correo queda visible para copiarlo a mano
+    }
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
+        <div
+          className="fixed inset-0 z-[96] flex items-end justify-center sm:items-center sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="contacto-malla-title"
+        >
+          <motion.button
+            type="button"
             key="backdrop"
+            aria-label="Cerrar"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
+            transition={{ duration: 0.18 }}
             onClick={onClose}
-            style={{
-              position: "fixed", inset: 0, zIndex: 95,
-              background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
-            }}
+            className="absolute inset-0 bg-black/55 cursor-default"
           />
 
-          {/* Contenedor centrador (no animado) */}
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 96,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "16px",
-              pointerEvents: "none",
-            }}
-          >
-          {/* Panel animado — dentro del flex-center para que transform no rompa el centrado */}
           <motion.div
             key="panel"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", damping: 26, stiffness: 280 }}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "min(94vw, 600px)",
-              maxHeight: "92dvh",
-              borderRadius: 20,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              boxShadow: "0 28px 72px rgba(0,0,0,0.30)",
-              pointerEvents: "auto",
-            }}
-            className="border border-primary/20 bg-bgSecondary"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            className="relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-borderColor bg-bgSecondary shadow-xl sm:max-w-[520px] sm:rounded-2xl"
           >
-            {/* ── Fondo estilo landing ── */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ zIndex: 0 }}
-            >
-              <div className="absolute -top-14 -right-14 w-52 h-52 bg-primary/20 rounded-full blur-3xl" />
-            </div>
-
-            {/* ── Header ── */}
-            <div
-              className="flex-shrink-0 px-6 pt-6 pb-5 border-b border-borderColor/60 relative"
-              style={{ zIndex: 1 }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center">
-                      <Heart className="w-4.5 h-4.5 text-primary" style={{ width: 18, height: 18 }} />
-                    </div>
-                    <h2 className="t-section text-textPrimary">Envía tu malla</h2>
-                  </div>
-                  <p className="text-sm text-textSecondary leading-snug max-w-sm">
-                    Ayuda a más estudiantes de tu carrera. Entre todos construimos la base de mallas.
-                  </p>
-                </div>
-                <button
-                  onClick={onClose}
-                  aria-label="Cerrar"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-textSecondary hover:text-textPrimary hover:bg-borderColor/40 transition-colors flex-shrink-0 mt-0.5"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* ── Contenido scrollable ── */}
-            <div style={{ overflowY: "auto", flex: 1, padding: "20px 24px 28px", position: "relative", zIndex: 1 }}>
-
-              {/* Banner colaborativo */}
-              <div className="rounded-2xl p-4 mb-6 border border-primary/25 bg-primary/8 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-textPrimary">¿Tu carrera aún no está en Malla Pro?</p>
-                  <p className="text-xs text-textSecondary mt-0.5">
-                    Solo toma 5 minutos y beneficia a todos tus compañeros.
-                  </p>
-                </div>
-              </div>
-
-              {/* Pasos */}
-              <p className="text-[12px] font-bold text-textSecondary mb-3">Paso a paso</p>
-              <div className="space-y-2.5 mb-6">
-                {STEPS.map((step) => (
-                  <div
-                    key={step.num}
-                    className="flex items-start gap-3.5 rounded-xl border border-borderColor/60 bg-bgSurface/70 px-4 py-3.5"
-                    style={{ backdropFilter: "blur(4px)" }}
-                  >
-                    {/* Número + icono */}
-                    <div className="flex-shrink-0 flex flex-col items-center gap-1 pt-0.5">
-                      <div className="w-8 h-8 rounded-xl bg-primaryMuted flex items-center justify-center text-primary">
-                        {step.icon}
-                      </div>
-                    </div>
-
-                    {/* Texto */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[12px] font-bold text-textSecondary/45 ">
-                          Paso {step.num}
-                        </span>
-                        {step.num === 5 && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-approved" />
-                        )}
-                      </div>
-                      <p className="text-sm font-semibold text-textPrimary leading-snug">{step.title}</p>
-                      <p className="text-xs text-textSecondary mt-0.5 leading-relaxed">{step.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Sección de contacto */}
-              <div
-                className="rounded-2xl border border-borderColor/60 bg-bgSurface/70 p-4"
-                style={{ backdropFilter: "blur(4px)" }}
-              >
-                <p className="text-[12px] font-bold text-textSecondary mb-3">Correo de contacto</p>
-
-                {/* Mail row */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-primaryMuted flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] text-textSecondary">Escríbenos a</p>
-                    <p className="text-sm font-bold text-textPrimary font-mono tracking-tight">{MAIL}</p>
-                  </div>
-                  <button
-                    onClick={copyMail}
-                    className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                      copied
-                        ? "bg-approved/12 border-approved/35 text-approved"
-                        : "border-borderColor bg-bgPrimary text-textSecondary hover:border-primary/40 hover:text-primary"
-                    }`}
-                  >
-                    {copied ? "¡Copiado!" : "Copiar"}
-                  </button>
-                </div>
-
-                {/* CTA principal */}
-                <a
-                  href={mailtoHref}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
-                  style={{ background: "var(--primary)", boxShadow: "0 4px 20px var(--shadowPrimary, rgba(0,0,0,0.2))" }}
-                >
-                  <Send className="w-4 h-4" />
-                  Abrir correo y adjuntar PDF
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-
-                <p className="text-[12px] text-textSecondary/55 text-center mt-2.5 leading-relaxed">
-                  Se abre tu aplicación de correo con el asunto prellenado.
-                  Solo adjunta el PDF de tu malla y envía.
+            <header className="flex items-start justify-between gap-4 border-b border-borderColor/60 px-5 pb-4 pt-5 sm:px-6">
+              <div className="min-w-0">
+                <h2 id="contacto-malla-title" className="t-section m-0 text-textPrimary">
+                  Envía tu malla
+                </h2>
+                <p className="mt-1.5 max-w-sm text-[14px] leading-snug text-textSecondary">
+                  Si tu carrera no está, mándanos el PDF de tu malla y la agregamos para todos tus compañeros.
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Cerrar"
+                className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-textSecondary transition-colors hover:bg-borderColor/40 hover:text-textPrimary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              >
+                <X className="h-4 w-4" aria-hidden />
+              </button>
+            </header>
+
+            <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+              <ol className="m-0 list-none divide-y divide-borderColor/60 overflow-hidden rounded-xl border border-borderColor p-0">
+                {STEPS.map((step, i) => (
+                  <li key={step.title} className="flex items-start gap-3.5 px-4 py-3.5">
+                    <span className="num mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-borderColor text-[12px] text-textSecondary">
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="m-0 text-[14px] font-semibold leading-snug text-textPrimary">{step.title}</p>
+                      <p className="mt-0.5 text-[13px] leading-relaxed text-textSecondary">{step.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <p className="mt-3 flex items-start gap-2 text-[13px] leading-relaxed text-textSecondary">
+                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-approved" aria-hidden />
+                Cuando la recibamos, en algunos días tu malla estará disponible en Malla Pro para todos.
+              </p>
             </div>
+
+            <footer className="border-t border-borderColor/60 bg-bgPrimary/40 px-5 py-4 sm:px-6">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <Mail className="h-4 w-4 shrink-0 text-textSecondary" aria-hidden />
+                  <span className="num select-all truncate text-[13px] text-textPrimary">{MAIL}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyMail}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
+                    copied ? "text-approved" : "text-textSecondary hover:bg-borderColor/40 hover:text-textPrimary"
+                  }`}
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+              </div>
+              <a
+                href={MAILTO_HREF}
+                className="flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-[14px] font-semibold text-[color:var(--on-ink)] transition-[filter,transform] hover:brightness-110 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bgSecondary"
+              >
+                Abrir correo con el asunto listo
+              </a>
+            </footer>
           </motion.div>
-          </div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
