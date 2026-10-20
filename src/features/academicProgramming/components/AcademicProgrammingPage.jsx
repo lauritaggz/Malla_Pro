@@ -7,6 +7,7 @@ import ScheduleBuilder from "./ScheduleBuilder";
 import MallaProgressHint from "./MallaProgressHint";
 import SourcesBar from "./SourcesBar";
 import SourcesManager from "./SourcesManager";
+import DocumentSourcesPanel from "./DocumentSourcesPanel";
 import ErrorBoundary from "../../../components/ErrorBoundary";
 
 import {
@@ -727,15 +728,18 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                 </div>
               </div>
 
-              <SourcesBar
-                programmingLoaded={programmingLoaded}
-                programmingDetail={programmingDetail}
-                programmingError={sourceErrors ? programmingError : null}
-                studentScheduleLoaded={studentScheduleLoaded}
-                studentScheduleDetail={studentScheduleDetail}
-                studentScheduleError={sourceErrors ? studentScheduleError : null}
-                onManage={() => setSourcesOpen(true)}
-              />
+              {(programmingLoaded || studentScheduleLoaded || sourceErrors) && (
+                <SourcesBar
+                  programmingLoaded={programmingLoaded}
+                  programmingDetail={programmingDetail}
+                  programmingError={sourceErrors ? programmingError : null}
+                  studentScheduleLoaded={studentScheduleLoaded}
+                  studentScheduleDetail={studentScheduleDetail}
+                  studentScheduleError={sourceErrors ? studentScheduleError : null}
+                  warningCount={warningCount}
+                  onManage={() => setSourcesOpen(true)}
+                />
+              )}
 
               {!hasMallaProgress && <MallaProgressHint />}
 
@@ -785,20 +789,20 @@ export default function AcademicProgrammingPage({ isEmbedded = false }) {
                   }}
                 />
               ) : (
-                <div className="rounded-2xl border border-borderColor bg-bgSecondary px-4 py-8 sm:py-12 text-center space-y-3">
-                  <p className="text-sm font-bold text-textPrimary">
-                    Empieza cargando tu horario o la Programación Académica.
-                  </p>
-                  <p className="text-xs text-textSecondary max-w-md mx-auto">
-                    Puedes usar cualquiera de los dos. Con tu horario vemos lo inscrito; con la programación puedes probar otras secciones.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setSourcesOpen(true)}
-                    className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:brightness-110 btn-interactive"
-                  >
-                    Cargar archivos
-                  </button>
+                <div className="space-y-4">
+                  <DocumentSourcesPanel
+                    firstRun
+                    programmingLoaded={programmingLoaded}
+                    programmingDetail={programmingDetail}
+                    studentScheduleLoaded={studentScheduleLoaded}
+                    studentScheduleDetail={studentScheduleDetail}
+                    mergeSummary={mergeSummary}
+                    onProgrammingFile={handleProgrammingFile}
+                    onStudentScheduleFile={handleStudentScheduleFile}
+                    disabled={isBusy}
+                    programmingError={sourceErrors ? programmingError : null}
+                    studentScheduleError={sourceErrors ? studentScheduleError : null}
+                  />
                   {hasAnySource && status === "idle" && (
                     <button
                       type="button"

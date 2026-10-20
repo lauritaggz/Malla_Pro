@@ -112,7 +112,9 @@ export default function WeeklyScheduleGrid({
   conflicts,
   selectedMobileDay,
   setSelectedMobileDay,
-  integration
+  integration,
+  previewSection = null,
+  previewConflicts = [],
 }) {
   const isDark = useIsDarkMode();
   const [activePopover, setActivePopover] = useState(null);
@@ -182,12 +184,15 @@ export default function WeeklyScheduleGrid({
 
   // Límites de la grilla (Modo Ajustado o Día Completo)
   const bounds = useMemo(() => {
-    const flat = selectedSectionsList.flatMap((s) => s.meetings || []);
+    const flat = [
+      ...selectedSectionsList.flatMap((s) => s.meetings || []),
+      ...(previewSection?.meetings || []),
+    ];
     if (!showFullDay) {
       return getAdjustedBounds(flat);
     }
     return getScheduleBounds(flat, true);
-  }, [selectedSectionsList, showFullDay]);
+  }, [selectedSectionsList, previewSection, showFullDay]);
 
   const scheduleStartMinutes = bounds.start;
   const scheduleEndMinutes = bounds.end;
@@ -237,6 +242,22 @@ export default function WeeklyScheduleGrid({
 
     return byDay;
   }, [gridMeetings, scheduleStartMinutes]);
+
+  const previewByDay = useMemo(() => {
+    const byDay = {};
+    if (!previewSection) return byDay;
+    for (const group of groupConsecutiveUnabMeetings(previewSection.meetings || [])) {
+      if (!group.dayCode || !group.startTime || !group.endTime) continue;
+      const startMins = timeToMinutes(group.startTime);
+      const endMins = timeToMinutes(group.endTime);
+      (byDay[group.dayCode] ||= []).push({
+        ...group,
+        top: (startMins - scheduleStartMinutes) * PIXELS_PER_MINUTE,
+        height: (endMins - startMins) * PIXELS_PER_MINUTE,
+      });
+    }
+    return byDay;
+  }, [previewSection, scheduleStartMinutes]);
 
   useLayoutEffect(() => {
     if (!earliestMeeting) {
@@ -307,7 +328,7 @@ export default function WeeklyScheduleGrid({
       )}
 
       {/* Grilla Semanal */}
-      {selectedSectionsList.length === 0 ? (
+      {selectedSectionsList.length === 0 && !previewSection ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-bgPrimary/20 relative min-h-[350px]">
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden">
             <div className="grid grid-cols-6 h-full w-full border divide-x border-borderColor">
@@ -353,7 +374,7 @@ export default function WeeklyScheduleGrid({
                     <span>{day.code}</span>
                     {count > 0 && (
                       <span className="text-[12px] font-normal text-textSecondary mt-0.5">
-                        {count} class{count === 1 ? "" : "es"}
+                        {count} {count === 1 ? "clase" : "clases"}
                       </span>
                     )}
                   </button>
@@ -486,10 +507,10 @@ export default function WeeklyScheduleGrid({
                           {popoverOpen && (
                             <div className="absolute top-full left-0 right-0 md:left-1/2 md:-translate-x-1/2 mt-1.5 z-30 bg-bgSecondary border border-borderColor rounded-xl p-4 shadow-xl space-y-3 min-w-[260px] max-w-[300px] text-textPrimary font-semibold text-xs select-none popover-animate">
                               <div>
-                                <h4 className="text-[12px] font-black text-textSecondary ">
+                                <h4 className="text-[12px] font-semibold text-textSecondary ">
                                   {m.courseCode} · Sec. {m.section.sectionNumber}
                                 </h4>
-                                <h3 className="text-sm font-black text-textPrimary mt-0.5 leading-snug">
+                                <h3 className="text-sm font-semibold text-textPrimary mt-0.5 leading-snug">
                                   {m.courseTitle}
                                 </h3>
                               </div>
@@ -543,6 +564,33 @@ export default function WeeklyScheduleGrid({
                         </div>
                       );
                     })}
+
+                    {(previewByDay[day.code] || []).map((g) => {
+                      const clash = previewConflicts.length > 0;
+                      return (
+                        <div
+                          key={`ghost-${day.code}-${g.startTime}`}
+                          aria-hidden
+                          className={`absolute z-[15] pointer-events-none rounded-lg border-2 border-dashed p-2 flex flex-col justify-between overflow-hidden ${
+                            clash ? "border-danger text-danger" : "border-primary text-textPrimary"
+                          }`}
+                          style={{
+                            top: g.top + 2,
+                            height: g.height - 4,
+                            left: "2%",
+                            width: "96%",
+                            backgroundColor: clash ? "rgba(239, 68, 68, 0.14)" : "color-mix(in srgb, var(--primary) 12%, transparent)",
+                          }}
+                        >
+                          <p className="text-[12px] font-semibold leading-tight truncate">
+                            {clash ? "Tope" : "Vista previa"} · Sec. {previewSection.sectionNumber}
+                          </p>
+                          <p className="text-[12px] leading-tight num truncate">
+                            {g.startTime}–{g.endTime}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
@@ -573,7 +621,7 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
             {isConflicting && <AlertTriangle className="h-3 w-3 shrink-0" />}
             <span className="truncate">{isConflicting ? "Tope" : m.courseCode}</span>
           </div>
-          <p className="text-[12px] font-black leading-snug line-clamp-2">
+          <p className="text-[12px] font-semibold leading-snug line-clamp-2">
             {m.courseTitle}
           </p>
         </div>
@@ -581,7 +629,7 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
         <div className="space-y-0.5 text-[12px] opacity-90 font-bold">
           <p className="font-semibold opacity-85">Sec. {m.section.sectionNumber} {numSlots > 1 && `· ${numSlots} mód.`}</p>
           <p className="font-semibold opacity-85">Hora: {m.startTime}–{m.endTime}</p>
-          <p className="truncate font-black opacity-90">Sala: {m.locations.join(" / ") || "no inf."}</p>
+          <p className="truncate font-semibold opacity-90">Sala: {m.locations.join(" / ") || "no inf."}</p>
         </div>
       </div>
     );
@@ -595,7 +643,7 @@ function ScheduleMeetingBlock({ m, height, isConflicting }) {
             {isConflicting && <AlertTriangle className="h-2.5 w-2.5 shrink-0" />}
             <span className="truncate">{isConflicting ? "Tope" : m.courseCode}</span>
           </div>
-          <p className="text-[12px] font-black leading-tight truncate">
+          <p className="text-[12px] font-semibold leading-tight truncate">
             {m.courseTitle}
           </p>
         </div>

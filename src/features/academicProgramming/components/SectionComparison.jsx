@@ -149,7 +149,7 @@ export default function SectionComparison({
         {groups.map((group) => (
           <div key={group.key} className="space-y-2">
             {group.label && (
-              <p className="text-xs font-bold uppercase tracking-wide text-textSecondary pt-1">
+              <p className="text-xs font-semibold text-textSecondary pt-1">
                 {group.label}
               </p>
             )}

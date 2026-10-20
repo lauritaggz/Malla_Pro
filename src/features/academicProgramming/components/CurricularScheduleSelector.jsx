@@ -1,8 +1,11 @@
-import { useState, useId } from "react";
+import { createContext, useContext, useEffect, useState, useId } from "react";
 import { ChevronDown, AlertTriangle, CheckCircle, Info, Filter } from "lucide-react";
 import { getConflictsForSection } from "../services/scheduleService";
 import { filterAndSortCourses, MODALITY_LABELS } from "../services/filterCourses";
 import { toDisplayCourse } from "../services/academicProgressIntegration";
+
+// Permite que cada tarjeta de sección avise a la grilla qué sección se está mirando.
+const PreviewContext = createContext(null);
 
 /**
  * Panel izquierdo del selector de horarios ("Tus asignaturas").
@@ -21,6 +24,8 @@ export default function CurricularScheduleSelector({
   enrolledNrcs = [],
   hasProgrammingSource = false,
   onOpenSources,
+  onPreviewSection = null,
+  focusRequest = null,
 }) {
   const [openGroups, setOpenGroups] = useState({
     recommended: true,
@@ -62,6 +67,18 @@ export default function CurricularScheduleSelector({
     : [];
   const filteredPrevious = filterAndSortCourses(previous, filters);
 
+  useEffect(() => {
+    if (!focusRequest?.code) return undefined;
+    const inHorario = horarioCourses.some((c) => c.courseCode === focusRequest.code);
+    setSidebarTab(inHorario ? "horario" : "disponibles");
+    const t = setTimeout(() => {
+      const el = document.querySelector(`[data-course-code="${focusRequest.code}"]`);
+      el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 120);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusRequest]);
+
   const availableFallback =
     hasProgrammingSource &&
     (!integration || (recommended.length === 0 && previous.length === 0))
@@ -69,11 +86,12 @@ export default function CurricularScheduleSelector({
       : [];
 
   return (
+    <PreviewContext.Provider value={onPreviewSection}>
     <aside className="w-full flex flex-col h-full min-h-0 bg-bgSecondary overflow-hidden select-none">
       <div className="p-3 sm:p-3.5 border-b border-borderColor space-y-2.5 shrink-0 bg-bgSecondary relative z-20">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="text-sm font-black text-textPrimary tracking-tight">
+            <h2 className="t-section text-textPrimary m-0">
               Tus ramos
             </h2>
             <p className="text-[12px] text-textSecondary font-medium leading-snug mt-0.5">
@@ -295,7 +313,7 @@ export default function CurricularScheduleSelector({
           <>
             {filteredRecommended.length > 0 && (
               <GroupSection
-                title={`${integration.primarySemester}.º SEMESTRE · ${recommended.length} RAMOS`}
+                title={`${integration.primarySemester}.º semestre · ${recommended.length} ramos`}
                 isOpen={openGroups.recommended}
                 onToggle={() =>
                   setOpenGroups((g) => ({ ...g, recommended: !g.recommended }))
@@ -329,7 +347,7 @@ export default function CurricularScheduleSelector({
 
             {filteredPrevious.length > 0 && (
               <GroupSection
-                title={`PENDIENTES ANTERIORES · ${previous.length} RAMOS`}
+                title={`Pendientes anteriores · ${previous.length} ramos`}
                 description="Ramos de semestres anteriores que aún puedes cursar."
                 isOpen={openGroups.previous}
                 onToggle={() =>
@@ -401,6 +419,7 @@ export default function CurricularScheduleSelector({
         )}
       </div>
     </aside>
+    </PreviewContext.Provider>
   );
 }
 
@@ -483,6 +502,7 @@ function SelectableCourseAccordion({
 
   return (
     <div
+      data-course-code={courseCode}
       className={`rounded-xl border transition-colors overflow-hidden ${
         selectedSection
           ? hasConflict
@@ -501,7 +521,7 @@ function SelectableCourseAccordion({
           className="w-full flex items-start justify-between gap-2 text-left p-3 sm:p-3.5 focus-visible:outline-none focus:ring-1 focus:ring-primary/30 btn-interactive"
         >
           <div className="min-w-0 flex-1 overflow-hidden">
-            <div className="text-[13px] sm:text-sm font-black text-textPrimary leading-snug break-words hyphens-auto pr-1">
+            <div className="text-[13px] sm:text-sm font-semibold text-textPrimary leading-snug break-words hyphens-auto pr-1">
               {courseTitle}
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1">
@@ -608,9 +628,12 @@ function SelectableSectionCard({
   onSelect,
 }) {
   const [showDetails, setShowDetails] = useState(false);
+  const onPreview = useContext(PreviewContext);
 
   return (
     <div
+      onMouseEnter={() => onPreview?.(section)}
+      onMouseLeave={() => onPreview?.(null)}
       className={`w-full text-left p-3 rounded-lg border transition-all flex flex-col gap-1.5 cursor-pointer focus-visible:outline-none focus:ring-1 focus:ring-primary/40 ${
         isSelected
           ? "border-primary bg-primary/5 ring-1 ring-primary/40"

@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Check, Trash2, Save, ChevronDown, MoreHorizontal, Eye, Download, AlertTriangle } from "lucide-react";
 import CurricularScheduleSelector from "./CurricularScheduleSelector";
 import WeeklyScheduleGrid from "./WeeklyScheduleGrid";
@@ -6,7 +7,7 @@ import LoadedProgrammingBlock from "./LoadedProgrammingBlock";
 import CurricularProgressSummary from "./CurricularProgressSummary";
 import ParserWarningsPanel from "./ParserWarningsPanel";
 import CourseAccordionList from "./CourseAccordionList";
-import { getSelectionConflicts } from "../services/scheduleService";
+import { getSelectionConflicts, getConflictsForSection } from "../services/scheduleService";
 import { toDisplayCourse } from "../services/academicProgressIntegration";
 import { generateSchedulePdf } from "../utils/generateSchedulePdf";
 import {
@@ -79,6 +80,15 @@ export default function ScheduleBuilder({
 
   const [expandedSecondaryCodes, setExpandedSecondaryCodes] = useState(new Set());
   const [moreOpen, setMoreOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const [previewSection, setPreviewSection] = useState(null);
+  const [focusRequest, setFocusRequest] = useState(null);
+
+  // Vista previa solo con puntero fino (en táctil, pasar el dedo no es "mirar")
+  const handlePreviewSection = useCallback((section) => {
+    if (section && typeof window !== "undefined" && !window.matchMedia("(hover: hover)").matches) return;
+    setPreviewSection(section);
+  }, []);
 
   const toggleSecondaryCourse = (code) => {
     setExpandedSecondaryCodes((prev) => {
@@ -191,6 +201,21 @@ export default function ScheduleBuilder({
     return getSelectionConflicts(selectedSectionsList);
   }, [selectedSectionsList]);
 
+  // Un renglón por par de ramos y día, para que el aviso diga qué choca con qué
+  const conflictRows = useMemo(() => {
+    const seen = new Set();
+    const rows = [];
+    for (const c of conflicts) {
+      const a = c.meetingA;
+      const b = c.meetingB;
+      const key = [a.courseCode, b.courseCode].sort().join("|") + `|${a.meeting.dayCode}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push({ key, a, b });
+    }
+    return rows;
+  }, [conflicts]);
+
   // Mapa de códigos a créditos desde integración
   const courseCodeToCurriculumMap = useMemo(() => {
     const map = new Map();
@@ -263,6 +288,12 @@ export default function ScheduleBuilder({
       },
     }));
   }, [integration]);
+
+  const previewConflicts = useMemo(() => {
+    if (!previewSection) return [];
+    if (selectedSectionsMap[previewSection.courseCode] === previewSection.id) return [];
+    return getConflictsForSection(previewSection, selectedSectionsList);
+  }, [previewSection, selectedSectionsMap, selectedSectionsList]);
 
   const handleSelectSection = (section) => {
     const code = section.courseCode;
@@ -472,7 +503,7 @@ export default function ScheduleBuilder({
       <div
         className="border border-borderColor bg-bgSecondary rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-[minmax(280px,330px)_minmax(0,1fr)] divide-y md:divide-y-0 md:divide-x divide-borderColor
           max-md:h-[min(68dvh,560px)] max-md:min-h-[280px]
-          md:h-[min(72vh,820px)] md:min-h-[520px]"
+          md:h-[max(520px,calc(100dvh-13rem))]"
       >
         {/* Columna Izquierda: Tus Asignaturas */}
         <div
@@ -495,6 +526,8 @@ export default function ScheduleBuilder({
             enrolledNrcs={enrolledNrcs}
             hasProgrammingSource={hasProgrammingSource}
             onOpenSources={onOpenSources}
+            onPreviewSection={handlePreviewSection}
+            focusRequest={focusRequest}
           />
         </div>
 
@@ -504,101 +537,134 @@ export default function ScheduleBuilder({
             activeMobileTab !== "SCHEDULE" ? "max-md:hidden" : ""
           }`}
         >
-          {/* Header del horario sticky unificado */}
-          <div className="relative z-30 bg-bgSecondary border-b border-borderColor px-3 py-2.5 sm:px-4 sm:py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3 shrink-0 select-none">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-sm font-black text-textPrimary uppercase tracking-wider">
-                  Tu horario
-                </h2>
-                {conflicts.length > 0 && (
-                  <span className="inline-flex items-center gap-1 bg-danger/10 border border-danger/20 text-danger px-2 py-0.5 rounded text-[12px] font-extrabold animate-pulse">
-                    <AlertTriangle className="h-3 w-3 shrink-0" />
-                    {conflicts.length} {conflicts.length === 1 ? "tope" : "topes"} por resolver
-                  </span>
-                )}
-              </div>
-              <p className="text-[12px] font-semibold text-textSecondary leading-snug">
+          {/* Cabecera del horario: resumen a la izquierda, una acción principal a la derecha */}
+          <div className="relative z-30 bg-bgSecondary border-b border-borderColor px-3 py-2.5 sm:px-4 sm:py-3 flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3 shrink-0 select-none">
+            <div className="min-w-0">
+              <h2 className="t-section text-textPrimary m-0">Tu horario</h2>
+              <p className="mt-0.5 text-[12px] font-medium text-textSecondary leading-snug num">
                 {selectedSectionsList.length} {selectedSectionsList.length === 1 ? "ramo" : "ramos"}
                 <span className="text-borderColor mx-1">·</span>
                 {totalCredits} créditos
                 <span className="text-borderColor mx-1">·</span>
                 {busyDays.size} {busyDays.size === 1 ? "día" : "días"}
-                <span className="hidden sm:inline">
-                  <span className="text-borderColor mx-1">·</span>
-                  {conflicts.length === 0 ? "Sin conflictos" : `${conflicts.length} conflicto(s)`}
-                </span>
+                <span className="text-borderColor mx-1">·</span>
+                {conflictRows.length === 0 ? (
+                  <span className="text-approved font-semibold">Sin topes</span>
+                ) : (
+                  <span className="text-danger font-semibold">
+                    {conflictRows.length} {conflictRows.length === 1 ? "tope" : "topes"}
+                  </span>
+                )}
               </p>
             </div>
 
-            <div className="flex items-center justify-between md:justify-end gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                {selectedSectionsList.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleClearSchedule}
-                    className="px-2.5 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[12px] font-bold text-textSecondary hover:text-textPrimary bg-bgSecondary btn-interactive"
-                  >
-                    Limpiar prueba
-                  </button>
-                )}
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1 text-[12px] font-medium ${
+                  proposalSaved ? "text-approved" : "text-textSecondary"
+                }`}
+              >
+                {proposalSaved ? <Check className="h-3 w-3" /> : <Save className="h-3 w-3 opacity-50" />}
+                {proposalSaved ? "Guardado" : "Autoguardado"}
+              </span>
+              <button
+                type="button"
+                disabled={selectedSectionsList.length === 0 || isExportingPdf}
+                onClick={handleExportPdf}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-[12px] font-semibold text-[color:var(--on-ink)] disabled:opacity-50 disabled:pointer-events-none transition-[filter,transform] hover:brightness-110 active:scale-[0.97]"
+              >
+                <Download className="h-3.5 w-3.5" />
+                {isExportingPdf ? "Exportando..." : "Exportar PDF"}
+              </button>
+              <div className="relative">
                 <button
                   type="button"
-                  disabled={selectedSectionsList.length === 0 || isExportingPdf}
-                  onClick={handleExportPdf}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-borderColor hover:bg-bgPrimary text-[12px] font-bold text-textSecondary disabled:opacity-50 disabled:pointer-events-none transition-all btn-interactive bg-bgSecondary"
+                  onClick={() => setMoreOpen((v) => !v)}
+                  className="p-1.5 rounded-lg border border-borderColor text-textSecondary hover:text-textPrimary bg-bgSecondary btn-interactive"
+                  aria-label="Más opciones"
+                  aria-expanded={moreOpen}
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  {isExportingPdf ? "Exportando..." : "Exportar PDF"}
+                  <MoreHorizontal className="h-3.5 w-3.5" />
                 </button>
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-1.5 text-[12px] font-bold ${
-                    proposalSaved ? "text-approved " : "text-textSecondary"
-                  }`}
-                >
-                  {proposalSaved ? <Check className="h-3 w-3" /> : <Save className="h-3 w-3 opacity-50" />}
-                  {proposalSaved ? "Guardado" : "Autoguardado"}
-                </span>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setMoreOpen((v) => !v)}
-                    className="p-1.5 rounded-lg border border-borderColor text-textSecondary hover:text-textPrimary bg-bgSecondary btn-interactive"
-                    aria-label="Más opciones"
-                    aria-expanded={moreOpen}
-                  >
-                    <MoreHorizontal className="h-3.5 w-3.5" />
-                  </button>
-                  {moreOpen && (
-                    <div className="absolute right-0 top-full mt-1 z-40 min-w-[220px] rounded-xl border border-borderColor bg-bgSecondary shadow-lg py-1">
+                {moreOpen && (
+                  <div className="absolute right-0 top-full mt-1 z-40 min-w-[220px] rounded-xl border border-borderColor bg-bgSecondary shadow-lg py-1">
+                    {selectedSectionsList.length > 0 && (
                       <button
                         type="button"
                         onClick={() => {
                           setMoreOpen(false);
-                          handleSaveProposal();
+                          handleClearSchedule();
                         }}
-                        className="w-full text-left px-3 py-2 text-[12px] font-bold text-textPrimary hover:bg-bgPrimary flex items-center gap-2"
-                      >
-                        <Save className="h-3.5 w-3.5" />
-                        Guardar ahora
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMoreOpen(false);
-                          handleClearSavedPlanning();
-                        }}
-                        className="w-full text-left px-3 py-2 text-[12px] font-bold text-danger hover:bg-danger/10 flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-[12px] font-semibold text-textPrimary hover:bg-bgPrimary flex items-center gap-2"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                        Eliminar planificación guardada
+                        Limpiar prueba
                       </button>
-                    </div>
-                  )}
-                </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        handleSaveProposal();
+                      }}
+                      className="w-full text-left px-3 py-2 text-[12px] font-semibold text-textPrimary hover:bg-bgPrimary flex items-center gap-2"
+                    >
+                      <Save className="h-3.5 w-3.5" />
+                      Guardar ahora
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        handleClearSavedPlanning();
+                      }}
+                      className="w-full text-left px-3 py-2 text-[12px] font-semibold text-danger hover:bg-danger/10 flex items-center gap-2"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Eliminar planificación guardada
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
+
+          {conflictRows.length > 0 && (
+            <motion.div
+              key={conflictRows.map((r) => r.key).join(",")}
+              role="alert"
+              initial={false}
+              animate={reduceMotion ? undefined : { x: [0, -6, 6, -4, 4, 0] }}
+              transition={{ duration: 0.45 }}
+              className="shrink-0 border-b border-danger/30 bg-danger/5 px-3 py-2 sm:px-4 space-y-1.5"
+            >
+              {conflictRows.map(({ key, a, b }) => (
+                <div key={key} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[12px]">
+                  <p className="flex items-center gap-1.5 min-w-0 text-textPrimary">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-danger" aria-hidden />
+                    <span className="min-w-0">
+                      <span className="font-semibold">{a.courseTitle}</span> (Sec. {a.section.sectionNumber}) y{" "}
+                      <span className="font-semibold">{b.courseTitle}</span> (Sec. {b.section.sectionNumber}) chocan el{" "}
+                      <span className="num">
+                        {a.meeting.dayCode} {a.meeting.startTime}–{a.meeting.endTime}
+                      </span>
+                    </span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpandedCourseCode(b.courseCode);
+                      setFocusRequest({ code: b.courseCode, n: Date.now() });
+                      setActiveMobileTab("SECTIONS");
+                    }}
+                    className="shrink-0 font-semibold text-danger underline underline-offset-2 hover:no-underline"
+                  >
+                    Cambiar sección de {b.courseCode}
+                  </button>
+                </div>
+              ))}
+            </motion.div>
+          )}
 
           <div className="flex-1 min-h-0 overflow-hidden">
             <WeeklyScheduleGrid
@@ -609,6 +675,8 @@ export default function ScheduleBuilder({
               selectedMobileDay={selectedMobileDay}
               setSelectedMobileDay={setSelectedMobileDay}
               integration={integration}
+              previewSection={previewSection}
+              previewConflicts={previewConflicts}
             />
           </div>
         </div>
@@ -745,7 +813,7 @@ function SecondaryAccordion({ title, isOpen, onToggle, children }) {
         onClick={onToggle}
         className="w-full flex items-center justify-between text-left px-4 py-3 hover:bg-bgPrimary transition-colors focus-visible:outline-none focus:ring-1 focus:ring-primary/30 select-none btn-interactive"
       >
-        <span className="text-xs font-bold text-textPrimary uppercase tracking-wider">{title}</span>
+        <span className="text-sm font-semibold text-textPrimary">{title}</span>
         <ChevronDown
           className="h-4 w-4 text-textSecondary accordion-chevron"
           style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}

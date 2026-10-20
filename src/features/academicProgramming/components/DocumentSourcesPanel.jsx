@@ -22,6 +22,7 @@ function SourceCard({
   onFileSelected,
   disabled = false,
   error = null,
+  dropHint = false,
 }) {
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -107,15 +108,28 @@ function SourceCard({
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => inputRef.current?.click()}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:brightness-110 transition-all disabled:opacity-50"
+        <div
+          className={
+            dropHint
+              ? `mt-4 flex flex-col items-center gap-3 rounded-xl border-2 border-dashed px-4 py-7 text-center transition-colors ${
+                  dragging ? "border-primary bg-primary/10" : "border-borderColor"
+                }`
+              : "mt-4"
+          }
         >
-          <FileUp className="h-4 w-4" />
-          Subir PDF
-        </button>
+          {dropHint && (
+            <p className="text-xs text-textSecondary">Arrastra el PDF aquí o selecciónalo</p>
+          )}
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => inputRef.current?.click()}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-xs sm:text-sm font-semibold text-[color:var(--on-ink)] shadow-sm hover:brightness-110 transition-all disabled:opacity-50"
+          >
+            <FileUp className="h-4 w-4" />
+            Subir PDF
+          </button>
+        </div>
       )}
 
       <input
@@ -151,7 +165,41 @@ export default function DocumentSourcesPanel({
   programmingError = null,
   studentScheduleError = null,
   compact = false,
+  firstRun = false,
 }) {
+  const programmingCard = (
+    <SourceCard
+      title={firstRun ? "Quiero probar otras secciones" : "Programación Académica"}
+      description={
+        firstRun
+          ? "Sube la Programación Académica para ver todas las secciones, NRC, profesores y cupos."
+          : "Oferta de ramos, NRC, profesores y cupos."
+      }
+      loadedLabel={programmingLoaded ? "Cargada" : null}
+      detail={programmingDetail}
+      onFileSelected={onProgrammingFile}
+      disabled={disabled}
+      error={programmingError}
+      dropHint={firstRun}
+    />
+  );
+  const scheduleCard = (
+    <SourceCard
+      title={firstRun ? "Ya tengo mi horario inscrito" : "Mi horario"}
+      description={
+        firstRun
+          ? "Sube tu horario y detectamos los ramos que ya tienes inscritos."
+          : "Detecta automáticamente los ramos que ya tienes inscritos."
+      }
+      loadedLabel={studentScheduleLoaded ? "Cargado" : null}
+      detail={studentScheduleDetail}
+      onFileSelected={onStudentScheduleFile}
+      disabled={disabled}
+      error={studentScheduleError}
+      dropHint={firstRun}
+    />
+  );
+
   return (
     <div className={`w-full ${compact ? "space-y-3" : "space-y-5"}`}>
       {!compact && (
@@ -166,24 +214,17 @@ export default function DocumentSourcesPanel({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-        <SourceCard
-          title="Programación Académica"
-          description="Oferta de ramos, NRC, profesores y cupos."
-          loadedLabel={programmingLoaded ? "Cargada" : null}
-          detail={programmingDetail}
-          onFileSelected={onProgrammingFile}
-          disabled={disabled}
-          error={programmingError}
-        />
-        <SourceCard
-          title="Mi horario"
-          description="Detecta automáticamente los ramos que ya tienes inscritos."
-          loadedLabel={studentScheduleLoaded ? "Cargado" : null}
-          detail={studentScheduleDetail}
-          onFileSelected={onStudentScheduleFile}
-          disabled={disabled}
-          error={studentScheduleError}
-        />
+        {firstRun ? (
+          <>
+            {scheduleCard}
+            {programmingCard}
+          </>
+        ) : (
+          <>
+            {programmingCard}
+            {scheduleCard}
+          </>
+        )}
       </div>
 
       {mergeSummary && (
